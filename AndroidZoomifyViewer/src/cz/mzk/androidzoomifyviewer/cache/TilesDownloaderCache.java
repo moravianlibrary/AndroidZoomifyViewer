@@ -22,7 +22,8 @@ public class TilesDownloaderCache {
 				return 1;
 			}
 		};
-		Log.d(TAG, "PageTileDownloader cache allocated for max " + MAX_DOWNLOADERS_IN_CACHE + " objects");
+		Log.d(TAG, TilesDownloaderCache.class.getSimpleName() + " allocated for max " + MAX_DOWNLOADERS_IN_CACHE
+				+ " objects");
 	}
 
 	public TilesDownloader get(String baseUrl) {

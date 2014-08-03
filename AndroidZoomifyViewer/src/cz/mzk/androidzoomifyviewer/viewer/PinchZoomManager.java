@@ -15,13 +15,13 @@ public class PinchZoomManager {
 	private static final double MIN_STARTING_FINGER_DISTANCE = 10.0;
 
 	// TODO: still needed?
-	private TiledImageView pageviewer;
+	private TiledImageView imageView;
 
 	private State state = State.IDLE;
 
 	// general zooming state varibales
 	private double startingFingerDistance;
-	private PointD startingZoomCenterInPageCoords;
+	private PointD startingZoomCenterInImageCoords;
 	private PointD currentZoomCenterInCanvasCoords;// TODO: just temporary
 
 	// zoom shift
@@ -36,8 +36,8 @@ public class PinchZoomManager {
 	// test stuff
 	int testCounter = 0;
 
-	public PinchZoomManager(TiledImageView pageViewer, double zoomLevel) {
-		this.pageviewer = pageViewer;
+	public PinchZoomManager(TiledImageView imageView, double zoomLevel) {
+		this.imageView = imageView;
 		this.accumulatedZoomLevel = zoomLevel;
 	}
 
@@ -69,7 +69,7 @@ public class PinchZoomManager {
 		currentZoomCenterInCanvasCoords = computeTwoFingersCenter(event);
 		// initialZoomCenter = zoomCenter;
 		// PointD currentCenter = computeTwoFingersTouchEventCenter(event);
-		startingZoomCenterInPageCoords = Utils.toPageCoords(currentZoomCenterInCanvasCoords.x,
+		startingZoomCenterInImageCoords = Utils.toImageCoords(currentZoomCenterInCanvasCoords.x,
 				currentZoomCenterInCanvasCoords.y, resizeFactor, shift);
 		Log.d("Motion", "POINTER_DOWN, center: x=" + currentZoomCenterInCanvasCoords.x + ", y="
 				+ currentZoomCenterInCanvasCoords.y);
@@ -82,7 +82,7 @@ public class PinchZoomManager {
 
 	public void notifyCanceled() {
 		// TODO: clean variables
-		startingZoomCenterInPageCoords = null;
+		startingZoomCenterInImageCoords = null;
 		state = State.IDLE;
 		// Log.d(TAG, "state: " + state.name());
 		Log.d(TAG_STATES, "zoom: " + state.name());
@@ -93,10 +93,7 @@ public class PinchZoomManager {
 	 * @param event
 	 * @return whether there's need to refresh view
 	 */
-	// public boolean notifyZoomingContinues(MotionEvent event, PointD
-	// visiblePageCenter, double resizeFactor,
-	// VectorD shift) {
-	public boolean notifyPinchingContinues(MotionEvent event, PointD visiblePageCenter, double resizeFactor,
+	public boolean notifyPinchingContinues(MotionEvent event, PointD visibleImageCenter, double resizeFactor,
 			VectorD shift) {
 		currentZoomCenterInCanvasCoords = computeTwoFingersCenter(event);
 		double currentFingerDistance = computeTwoFingersDistance(event);
@@ -128,7 +125,7 @@ public class PinchZoomManager {
 													// predchoziho
 													// notifyPinchingContinues
 													// pres
-													// pageViewer.getTotalShift()
+													// imageView.getTotalShift()
 			// activeZoomShift = newShift;
 			VectorD newShift = computeActiveZoomShift(currentZoomCenterInCanvasCoords, resizeFactor, shift);
 			// accumalatedZoomShift = VectorD.sum(accumalatedZoomShift,
@@ -155,10 +152,9 @@ public class PinchZoomManager {
 		activeZoomShift = VectorD.ZERO_VECTOR;
 
 		startingFingerDistance = 0.0;
-		startingZoomCenterInPageCoords = null;
+		startingZoomCenterInImageCoords = null;
 		// zoomingNow = false;
 		// currentZoomCenterInCanvasCoords = null;
-		// startingZoomCenterInPageCoords = null;
 		// finishedZoomingOneFingerStillDown = true;
 
 		state = State.IDLE;
@@ -180,16 +176,16 @@ public class PinchZoomManager {
 		return new PointD(0.5 * x, 0.5 * y);
 	}
 
-	// private VectorD computeActiveZoomShift(float scale, double resizeFactor,
-	// VectorD pageShift) {
 	private VectorD computeActiveZoomShift(PointD currentZoomCenterInCanvasCoords, double resizeFactor, VectorD shift) {
 
 		VectorD shift2 = new VectorD(shift.x * activeZoomLevel, shift.y * activeZoomLevel);
-		Log.d("z00m", String.format("activeZoomLevel: %.4f", activeZoomLevel) + String.format(" accumulatedZoomLevel: %.2f", accumulatedZoomLevel));
-		PointD initialZoomCenter = Utils.toCanvasCoords(startingZoomCenterInPageCoords,
-				pageviewer.getTotalResizeFactor(), pageviewer.getTotalShift());
+		Log.d("z00m",
+				String.format("activeZoomLevel: %.4f", activeZoomLevel)
+						+ String.format(" accumulatedZoomLevel: %.2f", accumulatedZoomLevel));
+		PointD initialZoomCenter = Utils.toCanvasCoords(startingZoomCenterInImageCoords,
+				imageView.getTotalResizeFactor(), imageView.getTotalShift());
 		// PointD initialZoomCenter =
-		// Utils.toCanvasCoords(startingZoomCenterInPageCoords,
+		// Utils.toCanvasCoords(startingZoomCenterInImageCoords,
 		// resizeFactor, shift);
 
 		VectorD diff = new VectorD(currentZoomCenterInCanvasCoords.x - initialZoomCenter.x,
@@ -202,11 +198,11 @@ public class PinchZoomManager {
 		Log.d("z00m",
 				"zoomMngr: init: " + initialZoomCenter.toString() + " now: "
 						+ currentZoomCenterInCanvasCoords.toString() + " diff: " + diff.toString()
-						+ String.format(" r:%.4f", pageviewer.getTotalResizeFactor()) + " s: "
-						+ pageviewer.getTotalShift().toString() + " c: " + testCounter);
+						+ String.format(" r:%.4f", imageView.getTotalResizeFactor()) + " s: "
+						+ imageView.getTotalShift().toString() + " c: " + testCounter);
 
-		PointD testInitialZoomCenter = Utils.toCanvasCoords(startingZoomCenterInPageCoords,
-				pageviewer.getTotalResizeFactor(), pageviewer.getTotalShift());
+		PointD testInitialZoomCenter = Utils.toCanvasCoords(startingZoomCenterInImageCoords,
+				imageView.getTotalResizeFactor(), imageView.getTotalShift());
 		VectorD testDiff = new VectorD(currentZoomCenterInCanvasCoords.x - initialZoomCenter.x,
 				currentZoomCenterInCanvasCoords.y - initialZoomCenter.y);
 		// Log.d("z00m", "zoomMngr: test: " + testInitialZoomCenter.toString() +
@@ -224,13 +220,13 @@ public class PinchZoomManager {
 		// Log.d("zoom", "canvas: zoomCenter now : " +
 		// currentZoomCenterInCanvasCoords.toString());
 
-		// Log.d(TAG, "initialZoomCenter(page): " +
-		// Utils.toString(initialZoomCenterInPageCoords));
+		// Log.d(TAG, "initialZoomCenter(image): " +
+		// Utils.toString(initialZoomCenterInImageCoords));
 		// float[] vector = new float[] { initialZoomCenter.x -
 		// zoomCenterInCanvas.x,
 		// initialZoomCenter.y - zoomCenterInCanvas.y };
 
-		// pageviewer.getDevTools().drawZoomCenters(canv,
+		// imageview.getDevTools().drawZoomCenters(canv,
 		// zoomCenterNowInCanvas, initialZoomCenterInCanvas);
 		// float[] vector = new float[] { zoomCenterNow.x * scale -
 		// initialZoomCenter.x,
@@ -245,17 +241,17 @@ public class PinchZoomManager {
 		// zoomCenterNow.y - initialZoomCenter.y);
 
 		// float[] vector = new float[] { zoomCenter.x -
-		// visiblePageCenter.x, zoomCenter.y - visiblePageCenter.y };
+		// visibleImageCenter.x, zoomCenter.y - visibleImageCenter.y };
 
 		// double distance = Math.sqrt(Math.pow(vector[0], 2) +
 		// Math.pow(vector[1], 2));
 
-		// double resizeFactor = pageviewer.getActualResizeFactor();
+		// double resizeFactor = imageView.getActualResizeFactor();
 		// float factor = (float) (0.01f * distance * resizeFactor);// TODO
 		// float factor = (float) (0.01f * resizeFactor * scale);// TODO
-		// float[] result = new float[] { visiblePageCenter.x + factor *
+		// float[] result = new float[] { visibleImageCenter.x + factor *
 		// vector[0],
-		// visiblePageCenter.y + factor * vector[1] };
+		// visibleImageCenter.y + factor * vector[1] };
 		// float[] result = new float[] { factor * vector[0], factor *
 		// vector[1] };
 		// float[] result = new float[] { vector[0] * activeZoomLevel,
@@ -265,8 +261,8 @@ public class PinchZoomManager {
 		// Vector result = new Vector(vector[0], vector[1]);
 	}
 
-	public PointD getInitialZoomCenterInPageCoords() {
-		return startingZoomCenterInPageCoords;
+	public PointD getInitialZoomCenterInImageCoords() {
+		return startingZoomCenterInImageCoords;
 	}
 
 	// TODO: disable
@@ -294,8 +290,8 @@ public class PinchZoomManager {
 	// currentZoomCenterInCanvasCoords =
 	// computeTwoFingersTouchEventCenter(event);
 	// // initialZoomCenter = zoomCenter;
-	// startingZoomCenterInPageCoords =
-	// Utils.toPageCoords(currentZoomCenterInCanvasCoords.x,
+	// startingZoomCenterInImageCoords =
+	// Utils.toImageCoords(currentZoomCenterInCanvasCoords.x,
 	// currentZoomCenterInCanvasCoords.y, resizeFactor, shift);
 	// Log.d("Motion", "POINTER_DOWN, center: x=" +
 	// currentZoomCenterInCanvasCoords.x + ", y="
@@ -317,7 +313,7 @@ public class PinchZoomManager {
 	// startingFingerDistance = 0.0;
 	// zoomingNow = false;
 	// // currentZoomCenterInCanvasCoords = null;
-	// // startingZoomCenterInPageCoords = null;
+	// // startingZoomCenterInImageCoords = null;
 	// // finishedZoomingOneFingerStillDown = true;
 	// }
 }

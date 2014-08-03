@@ -61,14 +61,14 @@ public class TiledImageViewInitializationErrorStatesExamplesActivity extends Act
 				@Override
 				public void onClick(View v) {
 					String url = itemsArrayList.get(position).getUrl();
-					startFullscreenSinglePageViewerActivity(url);
+					startFullscreenSingleImageActivity(url);
 				}
 			});
 			return rowView;
 		}
 	}
 
-	private void startFullscreenSinglePageViewerActivity(String zoomifyBaseUrl) {
+	private void startFullscreenSingleImageActivity(String zoomifyBaseUrl) {
 		Log.d(TAG, "opening '" + zoomifyBaseUrl + "'");
 		Intent intent = new Intent(this, FullscreenSingleImageActivity.class);
 		intent.putExtra(FullscreenSingleImageActivity.EXTRA_BASE_URL, zoomifyBaseUrl);

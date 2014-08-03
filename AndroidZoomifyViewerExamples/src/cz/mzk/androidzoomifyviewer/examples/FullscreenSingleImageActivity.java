@@ -47,9 +47,9 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mErrorResourceUrl = (TextView) findViewById(R.id.errorResourceUrl);
 		mErrorDescription = (TextView) findViewById(R.id.errorDescription);
 
-		mImageView = (TiledImageView) findViewById(R.id.pageView);
+		mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
 		mImageView.setLoadingHandler(this);
-		showPage();
+		showImage();
 	}
 
 	private void restoreData(Bundle savedInstanceState) {
@@ -64,10 +64,10 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		}
 	}
 
-	private void showPage() {
+	private void showImage() {
 		mImageView.setVisibility(View.INVISIBLE);
 		mProgressView.setVisibility(View.VISIBLE);
-		mImageView.loadPage(mBaseUrl);
+		mImageView.loadImage(mBaseUrl);
 
 	}
 

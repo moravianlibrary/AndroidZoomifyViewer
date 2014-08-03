@@ -19,8 +19,8 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 /**
- * This object encapsulates page metadata from ImageProperties.xml and provides
- * method for downloading tiles (bitmaps) for given page.
+ * This class encapsulates image metadata from ImageProperties.xml and provides
+ * method for downloading tiles (bitmaps) for given image.
  * 
  * @author Martin Řehánek
  * 
@@ -355,7 +355,13 @@ public class TilesDownloader {
 		return layers.size() - 1;
 	}
 
-	public int getTileBasicSizeInPage(int layerId) {
+	/**
+	 * 
+	 * @param layerId
+	 * @return size (width and height) of all tiles except the last one in each
+	 *         row or column since these are not allways squares.
+	 */
+	public int getTilesSizeInImageCoords(int layerId) {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
@@ -363,7 +369,7 @@ public class TilesDownloader {
 	}
 
 	// TODO: sjednotit slovnik, tomuhle obcas rikam 'step'
-	public int getTileWidthInPage(int layerId, int tileHorizontalIndex) {
+	public int getTileWidthInImage(int layerId, int tileHorizontalIndex) {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
@@ -377,7 +383,7 @@ public class TilesDownloader {
 		}
 	}
 
-	public int getTileHeightInPage(int layerId, int tileVerticalIndex) {
+	public int getTileHeightInImage(int layerId, int tileVerticalIndex) {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}

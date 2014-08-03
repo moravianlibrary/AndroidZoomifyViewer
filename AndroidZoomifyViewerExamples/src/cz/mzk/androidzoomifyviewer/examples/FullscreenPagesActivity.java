@@ -36,7 +36,7 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 
 	private TiledImageView mImageView;
 
-	// Views to reflect PageViewer state
+	// Views to reflect ImageViewer state
 	private View mProgressView;
 	private View mDownloadErrorView;
 	private View mNoAccessRightsView;
@@ -101,7 +101,7 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 			}
 		});
 
-		mImageView = (TiledImageView) findViewById(R.id.pageView);
+		mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
 		mImageView.setLoadingHandler(this);
 		// showActivePage();
 		// loadPagePids();
@@ -115,7 +115,7 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 		mImageView.setVisibility(View.INVISIBLE);
 		mProgressView.setVisibility(View.VISIBLE);
 		PageDataSource pageDataSource = new PageDataSource(mProtocol, mDomain, mPagePids.get(mPageId));
-		mImageView.loadPage(pageDataSource.toZoomifyBaseUrl());
+		mImageView.loadImage(pageDataSource.toZoomifyBaseUrl());
 	}
 
 	@Override
@@ -208,31 +208,31 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 	@Override
 	public void onImagePropertiesProcessed(String imagePropertiesUrl) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onImagePropertiesInvalidStateError(String imagePropertiesUrl, int responseCode) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

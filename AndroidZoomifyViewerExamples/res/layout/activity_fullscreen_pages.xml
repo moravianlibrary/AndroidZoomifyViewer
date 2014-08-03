@@ -79,7 +79,7 @@
         </RelativeLayout>
 
         <cz.mzk.androidzoomifyviewer.viewer.TiledImageView
-            android:id="@+id/pageView"
+            android:id="@+id/tiledImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
@@ -132,19 +132,6 @@
                 android:checked="true"
                 android:text="fit to screen" />
         </LinearLayout>
-
-        <!-- <cz.rzeh4n.kramerius_android.PageView -->
-        <!-- android:layout_width="wrap_content" -->
-        <!-- android:layout_height="wrap_content" -->
-        <!-- android:layout_gravity="center" /> -->
-
-
-        <!-- <View -->
-        <!-- android:id="@+id/container" -->
-        <!-- android:layout_width="match_parent" -->
-        <!-- android:layout_height="match_parent" > -->
-        <!-- </View> -->
-
     </FrameLayout>
 
 </LinearLayout>

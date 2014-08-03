@@ -39,29 +39,29 @@ public class Utils {
 		return "[" + point.x + ";" + point.y + "]";
 	}
 
-	public static PointD toPageCoords(double canvasX, double canvasY, double pageToCanvasResizeFactor,
-			VectorD pageShiftInCanvas) {
-		double pageX = (canvasX - pageShiftInCanvas.x) / pageToCanvasResizeFactor;
-		double pageY = (canvasY - pageShiftInCanvas.y) / pageToCanvasResizeFactor;
-		return new PointD(pageX, pageY);
+	public static PointD toImageCoords(double canvasX, double canvasY, double imageToCanvasResizeFactor,
+			VectorD imageShiftInCanvas) {
+		double imageX = (canvasX - imageShiftInCanvas.x) / imageToCanvasResizeFactor;
+		double imageY = (canvasY - imageShiftInCanvas.y) / imageToCanvasResizeFactor;
+		return new PointD(imageX, imageY);
 	}
 
-	public static double toPageX(double canvasX, double pageToCanvasResizeFactor, double pageShiftInCanvasX) {
-		return (canvasX - pageShiftInCanvasX) / pageToCanvasResizeFactor;
+	public static double toImageX(double canvasX, double imageToCanvasResizeFactor, double imageShiftInCanvasX) {
+		return (canvasX - imageShiftInCanvasX) / imageToCanvasResizeFactor;
 	}
 
-	public static double toPageY(double canvasY, double pageToCanvasResizeFactor, double pageShiftInCanvasY) {
-		return (canvasY - pageShiftInCanvasY) / pageToCanvasResizeFactor;
+	public static double toImageY(double canvasY, double imageToCanvasResizeFactor, double imageShiftInCanvasY) {
+		return (canvasY - imageShiftInCanvasY) / imageToCanvasResizeFactor;
 	}
 
-	public static PointD toCanvasCoords(PointD inPageCoords, double pageToCanvasResizeFactor, VectorD pageShiftInCanvas) {
-		double canvasX = ((inPageCoords.x * pageToCanvasResizeFactor) + pageShiftInCanvas.x);
-		double canvasY = ((inPageCoords.y * pageToCanvasResizeFactor) + pageShiftInCanvas.y);
+	public static PointD toCanvasCoords(PointD inImageCoords, double imageToCanvasResizeFactor, VectorD imageShiftInCanvas) {
+		double canvasX = ((inImageCoords.x * imageToCanvasResizeFactor) + imageShiftInCanvas.x);
+		double canvasY = ((inImageCoords.y * imageToCanvasResizeFactor) + imageShiftInCanvas.y);
 		PointD result = new PointD(canvasX, canvasY);
 		Log.d("z00m",
-				"utils: " + inPageCoords.toString() + "->" + result.toString()
-						+ String.format(" resize: %.4f", pageToCanvasResizeFactor) + " shift: "
-						+ pageShiftInCanvas.toString());
+				"utils: " + inImageCoords.toString() + "->" + result.toString()
+						+ String.format(" resize: %.4f", imageToCanvasResizeFactor) + " shift: "
+						+ imageShiftInCanvas.toString());
 		return result;
 
 	}

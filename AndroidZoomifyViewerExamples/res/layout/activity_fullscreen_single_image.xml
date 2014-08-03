@@ -51,56 +51,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/grey_light"
                 android:textSize="15sp" />
-
-            <!-- android:text="Only temporary until Kramerius API is fixed so that it can be differnciated among tiles state" -->
         </LinearLayout>
 
-        <!-- <RelativeLayout -->
-        <!-- android:id="@+id/downloadErrorView" -->
-        <!-- android:layout_width="match_parent" -->
-        <!-- android:layout_height="match_parent" -->
-        <!-- android:gravity="center" -->
-        <!-- android:visibility="invisible" > -->
-
-
-        <!-- <TextView -->
-        <!-- android:layout_width="wrap_content" -->
-        <!-- android:layout_height="wrap_content" -->
-        <!-- android:text="Error downloading data" /> -->
-        <!-- </RelativeLayout> -->
-
-
-        <!-- <RelativeLayout -->
-        <!-- android:id="@+id/noAccessRightsView" -->
-        <!-- android:layout_width="match_parent" -->
-        <!-- android:layout_height="match_parent" -->
-        <!-- android:gravity="center" -->
-        <!-- android:visibility="invisible" > -->
-
-
-        <!-- <TextView -->
-        <!-- android:layout_width="wrap_content" -->
-        <!-- android:layout_height="wrap_content" -->
-        <!-- android:text="No access rights" /> -->
-        <!-- </RelativeLayout> -->
-
-
-        <!-- <RelativeLayout -->
-        <!-- android:id="@+id/doesntExistView" -->
-        <!-- android:layout_width="match_parent" -->
-        <!-- android:layout_height="match_parent" -->
-        <!-- android:gravity="center" -->
-        <!-- android:visibility="invisible" > -->
-
-
-        <!-- <TextView -->
-        <!-- android:layout_width="wrap_content" -->
-        <!-- android:layout_height="wrap_content" -->
-        <!-- android:text="No tiles for this page" /> -->
-        <!-- </RelativeLayout> -->
-
         <cz.mzk.androidzoomifyviewer.viewer.TiledImageView
-            android:id="@+id/pageView"
+            android:id="@+id/tiledImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="invisible" />

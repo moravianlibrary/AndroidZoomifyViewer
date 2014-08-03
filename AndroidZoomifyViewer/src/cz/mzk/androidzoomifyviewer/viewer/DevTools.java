@@ -51,52 +51,34 @@ public class DevTools {
 		canv.drawRect(wholeCanvas, mPaintBlue);
 	}
 
-	public void drawWholePageRed(Canvas canv, Rect pageWhole) {
-		canv.drawRect(pageWhole, mPaintRed);
+	public void drawWholeImageRed(Canvas canv, Rect wholeImage) {
+		canv.drawRect(wholeImage, mPaintRed);
 	}
 
-	public void drawPageVisiblePartGreen(Canvas canv, Rect pageVisiblePart) {
-		canv.drawRect(pageVisiblePart, mPaintGreen);
+	public void drawImageVisiblePartGreen(Canvas canv, Rect imageVisiblePart) {
+		canv.drawRect(imageVisiblePart, mPaintGreen);
 	}
 
-	public void drawPageVisiblePartCenterRed(Canvas canv, int visiblePageCenterX, int visiblePageCenterY) {
-		canv.drawCircle(visiblePageCenterX, visiblePageCenterY, 10.0f, mPaintRed);
+	public void drawVisibleImageCenterRed(Canvas canv, int visibleImageCenterX, int visibleImageCenterY) {
+		canv.drawCircle(visibleImageCenterX, visibleImageCenterY, 10.0f, mPaintRed);
 	}
 
-	// public void drawPageVisiblePartCenterAndZoomCenter(Canvas canv, PointD
-	// visiblePageCenter, PointD zoomCenter,
-	// Point initialZoomCenterInCanvas) {
-	// // canv.drawCircle(visiblePageCenter.x, visiblePageCenter.y, 10.0f,
-	// // mPaintRed);
-	// if (zoomCenter != null) {
-	// canv.drawCircle((float) zoomCenter.x, (float) zoomCenter.y, 10.0f,
-	// mPaintRed);
-	// canv.drawLine((float) initialZoomCenterInCanvas.x, (float)
-	// initialZoomCenterInCanvas.y,
-	// (float) zoomCenter.x, (float) zoomCenter.y, mPaintRed);
-	// }
-	// if (initialZoomCenterInCanvas != null) {
-	// canv.drawCircle(initialZoomCenterInCanvas.x, initialZoomCenterInCanvas.y,
-	// 10.0f, mPaintGreen);
-	// }
-	// }
-
-	public void drawPageCoordPoints(Canvas canv, PageCoordsPoints testPoints, double resizeFactor,
-			VectorD pageShiftInCanvas) {
-		drawPageCoordPoint(canv, testPoints.getCenter(), resizeFactor, pageShiftInCanvas, mPaintYellow);
+	public void drawImageCoordPoints(Canvas canv, ImageCoordsPoints testPoints, double resizeFactor,
+			VectorD imageShiftInCanvas) {
+		drawImageCoordPoint(canv, testPoints.getCenter(), resizeFactor, imageShiftInCanvas, mPaintYellow);
 		for (Point corner : testPoints.getCorners()) {
-			drawPageCoordPoint(canv, corner, resizeFactor, pageShiftInCanvas, mPaintYellow);
+			drawImageCoordPoint(canv, corner, resizeFactor, imageShiftInCanvas, mPaintYellow);
 		}
 		// for (Point clickedPoint : testPoints.getClickedPoints()) {
-		// drawPageCoordPoint(canv, clickedPoint, resizeFactor, totalShift,
+		// drawImageCoordPoint(canv, clickedPoint, resizeFactor, totalShift,
 		// mPaintWhite);
 		// }
 	}
 
-	private void drawPageCoordPoint(Canvas canv, Point point, double resizeFactor, VectorD pageShiftInCanvas,
+	private void drawImageCoordPoint(Canvas canv, Point point, double resizeFactor, VectorD imageShiftInCanvas,
 			Paint paint) {
-		int resizedAndShiftedX = (int) (point.x * resizeFactor + pageShiftInCanvas.x);
-		int resizedAndShiftedY = (int) (point.y * resizeFactor + pageShiftInCanvas.y);
+		int resizedAndShiftedX = (int) (point.x * resizeFactor + imageShiftInCanvas.x);
+		int resizedAndShiftedY = (int) (point.y * resizeFactor + imageShiftInCanvas.y);
 		canv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 15f, paint);
 	}
 

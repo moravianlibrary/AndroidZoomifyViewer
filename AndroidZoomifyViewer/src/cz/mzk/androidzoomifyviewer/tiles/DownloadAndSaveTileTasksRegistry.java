@@ -8,10 +8,11 @@ import java.util.Set;
 import android.util.Log;
 
 /**
- * Registers running AsynctTasks in which tiles for single page are downloaded
- * and saved to cache. Purpose of this class is to prevent executing multiple
- * tasks to download same tile. Methods of this class are allways accessed from
- * UI thread, so there's no need for synchronization of the map.
+ * This class registers running AsynctTasks in which tiles for single image are
+ * downloaded and saved to cache. Purpose of this class is to prevent executing
+ * multiple tasks to download same tile. Methods of this class are allways
+ * accessed from UI thread, so there's no need for synchronization of internal
+ * data (tiles map).
  * 
  * @author Martin Řehánek
  * 

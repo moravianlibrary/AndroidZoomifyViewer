@@ -16,6 +16,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 public class TilesDownloaderTest extends TestCase {
 
 	private static final String TAG = TilesDownloaderTest.class.getSimpleName();
+
 	private TilesDownloader testDownloader = null;
 
 	@Override
@@ -132,14 +133,9 @@ public class TilesDownloaderTest extends TestCase {
 	}
 
 	private void testDetectPic(int layerId, int pixelX, int pixelY) {
-		// TilesDownloader downloader = mPageView.getTestDownloader();
-		// if (mTestDownloader != null) {
 		int[] pic = testDownloader.getTileCoords(layerId, pixelX, pixelY);
 		Log.d(TAG, "layer=" + layerId + ", pixel: " + pixelX + "," + pixelY);
 		Log.d(TAG, "pic: " + pic[0] + "," + pic[1]);
-		// } else {
-		// initTestDownloader();
-		// }
 	}
 
 }

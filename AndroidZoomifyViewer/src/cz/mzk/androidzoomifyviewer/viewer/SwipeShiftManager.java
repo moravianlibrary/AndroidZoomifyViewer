@@ -47,7 +47,7 @@ public class SwipeShiftManager {
 			int maxShiftRight) {
 		float diffX = newX - mLastX;
 		float diffY = newY - mLastY;
-		// drag but not over the page borders
+		// drag but not over the image borders
 
 		// horizontal
 		float currentDragX = 0;

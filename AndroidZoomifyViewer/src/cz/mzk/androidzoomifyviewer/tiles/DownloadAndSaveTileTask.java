@@ -18,15 +18,15 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Voi
 	private final TileId tileId;
 	private Exception error;
 	private TilesCache tilesCache;
-	private TiledImageView pageView;
+	private TiledImageView imageView;
 
 	public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TileId tileId,
-			TilesCache tilesCache, TiledImageView pageView) {
+			TilesCache tilesCache, TiledImageView imageView) {
 		this.downloader = downloader;
 		this.zoomifyBaseUrl = zoomifyBaseUrl;
 		this.tileId = tileId;
 		this.tilesCache = tilesCache;
-		this.pageView = pageView;
+		this.imageView = imageView;
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Voi
 			error.printStackTrace();
 		} else {
 			Log.d(TAG, "tile downloaded", error);
-			pageView.invalidate();
+			imageView.invalidate();
 		}
 	}
 

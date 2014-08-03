@@ -71,14 +71,14 @@ public class MainActivity extends Activity implements OnClickListener {
 				@Override
 				public void onClick(View v) {
 					String url = itemsArrayList.get(position).getUrl();
-					startPageActivity(url);
+					startFullscreenPagesActivity(url);
 				}
 			});
 			return rowView;
 		}
 	}
 
-	void startPageActivity(String urlStr) {
+	void startFullscreenPagesActivity(String urlStr) {
 		try {
 			Intent intent = new Intent(this, FullscreenPagesActivity.class);
 			KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);

@@ -34,7 +34,7 @@ public class TiledImageView extends View {
 
 	private static final boolean DEV_MODE = false;
 	private DevTools devTools = null;
-	private PageCoordsPoints testPoints = null;
+	private ImageCoordsPoints testPoints = null;
 
 	private Double mInitialResizeFactor = null;
 
@@ -54,11 +54,7 @@ public class TiledImageView extends View {
 	private int maxShiftDown;
 	private int maxShiftLeft;
 	private int maxShiftRight;
-	// next/previous page when finished
-	// private boolean moveToPreviousPageWhenMoveFinished = false;
-	// private boolean moveToNextPageWhenMoveFinished = false;
-
-	// private String mPagePid;
+	// next/previous image when finished
 
 	private boolean mDrawLayerWithWorseResolution = true;
 
@@ -68,21 +64,17 @@ public class TiledImageView extends View {
 	// test stuff
 
 	private TilesCache mTilesCache;
-	private TilesDownloader mActivePageDownloader;
+	private TilesDownloader mActiveImageDownloader;
 
 	// za hranice canvas cela oblast s obrazkem
-	private Rect mPageInCanvas = null;
+	private Rect mImageInCanvas = null;
 	// jen viditelna cast stranky
-	private Rect mPageInCanvasVisible = null;
+	private Rect mVisibleImageInCanvas = null;
 
 	private PinchZoomManager mPinchZoomManager;
 	private SwipeShiftManager mSwipeShiftManager;
 
-	private PointD visiblePageCenter;
-	// int visiblePageCenterX;
-	// int visiblePageCenterY;
-
-	// pageCanvas(visible)
+	private PointD visibleImageCenter;
 
 	private LoadingHandler loadingHandler;
 
@@ -117,10 +109,10 @@ public class TiledImageView extends View {
 		this.mViewMode = viewMode;
 	}
 
-	public void loadPage(final String zoomifyBaseUrl) {
-		Log.d(TAG, "loading new page");
-		if (mActivePageDownloader != null) {
-			for (DownloadAndSaveTileTask task : mActivePageDownloader.getTaskRegistry().getAllTasks()) {
+	public void loadImage(final String zoomifyBaseUrl) {
+		Log.d(TAG, "loading new image");
+		if (mActiveImageDownloader != null) {
+			for (DownloadAndSaveTileTask task : mActiveImageDownloader.getTaskRegistry().getAllTasks()) {
 				if (task != null) {
 					task.cancel(false);
 				}
@@ -135,9 +127,9 @@ public class TiledImageView extends View {
 		mZoomifyBaseUrl = zoomifyBaseUrl;
 
 		final TilesDownloaderCache downloaderCache = CacheManager.getDownloaderCache();
-		mActivePageDownloader = downloaderCache.get(zoomifyBaseUrl);
+		mActiveImageDownloader = downloaderCache.get(zoomifyBaseUrl);
 
-		if (mActivePageDownloader == null) {
+		if (mActiveImageDownloader == null) {
 			new InitTilesDownloaderTask(mZoomifyBaseUrl,
 					new InitTilesDownloaderTask.TilesDownloaderInitializationHandler() {
 
@@ -145,10 +137,10 @@ public class TiledImageView extends View {
 						public void onInitialized(String zoomifyBaseUrl, TilesDownloader downloader) {
 							Log.d(TAG, "downloader initialized");
 							downloaderCache.put(zoomifyBaseUrl, downloader);
-							mActivePageDownloader = downloader;
+							mActiveImageDownloader = downloader;
 							if (DEV_MODE) {
 								ImageProperties imageProperties = downloader.getImageProperties();
-								testPoints = new PageCoordsPoints(imageProperties.getWidth(),
+								testPoints = new ImageCoordsPoints(imageProperties.getWidth(),
 										imageProperties.getHeight());
 							}
 							if (loadingHandler != null) {
@@ -205,16 +197,16 @@ public class TiledImageView extends View {
 		// Log.d(TAG, "canvas(dp): width=" + canvWidthDp + ", height=" +
 		// canvHeightDp);
 
-		if (mActivePageDownloader != null) {
+		if (mActiveImageDownloader != null) {
 			if (DEV_MODE) {
 				devTools.drawCanvasBlue(canv);
 			}
 			if (mInitialResizeFactor == null) {
 				double resizingFactorFitToScreen = computeResizingFactorFitToScreen(canv.getWidth(), canv.getHeight(),
-						mActivePageDownloader.getImageProperties().getWidth(), mActivePageDownloader
+						mActiveImageDownloader.getImageProperties().getWidth(), mActiveImageDownloader
 								.getImageProperties().getHeight());
 				double resizingFactorNoFreeSpace = computeResizingFactorNoFreeSpace(canv.getWidth(), canv.getHeight(),
-						mActivePageDownloader.getImageProperties().getWidth(), mActivePageDownloader
+						mActiveImageDownloader.getImageProperties().getWidth(), mActiveImageDownloader
 								.getImageProperties().getHeight());
 				switch (mViewMode) {
 				case FIT_TO_SCREEN:
@@ -231,56 +223,55 @@ public class TiledImageView extends View {
 			}
 
 			// za hranice canvas cela oblast s obrazkem
-			mPageInCanvas = computePageInCanvasCordsPossibly(canv, mActivePageDownloader);
+			mImageInCanvas = computeImageInCanvasCordsPossibly(canv, mActiveImageDownloader);
 			// cast obrazku jen v canvas
 			if (DEV_MODE) {
-				devTools.drawWholePageRed(canv, mPageInCanvas);
+				devTools.drawWholeImageRed(canv, mImageInCanvas);
 			}
-			// Bitmap topLevelTile = mTilesCache.getTile(mPagePid, 0, 0, 0);
 
-			// Rect pageInCanvasDp = new Rect(pxToDp(pageInCanvas));
-			// Log.d(TAG, "(dp) img dest: " + toString(pageInCanvasDp, "dp"));
+			// Rect imageInCanvasDp = new Rect(pxToDp(imageInCanvas));
+			// Log.d(TAG, "(dp) img dest: " + toString(imagesInCanvasDp, "dp"));
 
 			// px
-			int bestLayerId = mActivePageDownloader.getBestLayerId(mPageInCanvas.width(), mPageInCanvas.height());
+			int bestLayerId = mActiveImageDownloader.getBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
 			// Log.d(TAG, "best layer id: " + bestLayerId);
 
-			mPageInCanvasVisible = computeVisibleInCanvas(canv);
+			mVisibleImageInCanvas = computeVisibleInCanvas(canv);
 			if (DEV_MODE) {
-				devTools.drawPageVisiblePartGreen(canv, mPageInCanvasVisible);
+				devTools.drawImageVisiblePartGreen(canv, mVisibleImageInCanvas);
 			}
 
-			// Log.d("canv", "   page: " + toString(mPageInCanvas));
-			// Log.d("canv", "   page: " + Utils.toString(mPageInCanvas));
+			// Log.d("canv", "   image: " + toString(mImageInCanvas));
+			// Log.d("canv", "   image: " + Utils.toString(mImageInCanvas));
 			// Log.d("canv", "visible: " +
-			// Utils.toString(mPageInCanvasVisible));
-			maxShiftUp = mPageInCanvas.top >= 0 ? 0 : -mPageInCanvas.top;
-			maxShiftDown = mPageInCanvas.bottom <= canv.getHeight() ? 0 : mPageInCanvas.bottom - canv.getHeight();
-			maxShiftLeft = mPageInCanvas.left >= 0 ? 0 : -mPageInCanvas.left;
-			maxShiftRight = mPageInCanvas.right <= canv.getWidth() ? 0 : mPageInCanvas.right - canv.getWidth();
+			// Utils.toString(mImageInCanvasVisible));
+			maxShiftUp = mImageInCanvas.top >= 0 ? 0 : -mImageInCanvas.top;
+			maxShiftDown = mImageInCanvas.bottom <= canv.getHeight() ? 0 : mImageInCanvas.bottom - canv.getHeight();
+			maxShiftLeft = mImageInCanvas.left >= 0 ? 0 : -mImageInCanvas.left;
+			maxShiftRight = mImageInCanvas.right <= canv.getWidth() ? 0 : mImageInCanvas.right - canv.getWidth();
 
-			// Log.d(TAG, "PAGE canv:     " + Utils.toString(mPageInCanvas));
-			// Log.d(TAG, "PAGE canv vis: " +
-			// Utils.toString(mPageInCanvasVisible));
+			// Log.d(TAG, "IMAGE canv:     " + Utils.toString(mImageInCanvas));
+			// Log.d(TAG, "IMAGE canv vis: " +
+			// Utils.toString(mImageInCanvasVisible));
 
 			// TODO: pokud je mid ve viditelne strance, posunout canvas tim
 			// smerem
 
-			visiblePageCenter = computeVisiblePageCenter();
+			visibleImageCenter = computeVisibleImageCenter();
 
-			// visiblePageCenterX = (int) (mPageInCanvasVisible.width() / 2 +
-			// mPageInCanvasVisible.left);
-			// visiblePageCenterY = (int) (mPageInCanvasVisible.height() / 2 +
-			// mPageInCanvasVisible.top);
-			// if (zoomCenter != null && isInVisiblePage(pageInCanvasVisible,
+			// visibleImageCenterX = (int) (mImageInCanvasVisible.width() / 2 +
+			// mImageInCanvasVisible.left);
+			// visibleImageCenterY = (int) (mImageInCanvasVisible.height() / 2 +
+			// mImageInCanvasVisible.top);
+			// if (zoomCenter != null && isInVisibleImage(imageInCanvasVisible,
 			// zoomCenter)) {
 
-			// Rect pageInImageCoordsVisible =
-			// toVisibleImageAreaInImageCoords(pageInCanvasVisible,
-			// pageInCanvasVisible);
-			// Log.d(TAG, "visible page coords: " +
-			// toString(pageInImageCoordsVisible));
-			drawLayers(canv, mActivePageDownloader, bestLayerId);
+			// Rect imageInImageCoordsVisible =
+			// toVisibleImageAreaInImageCoords(imageInCanvasVisible,
+			// imageInCanvasVisible);
+			// Log.d(TAG, "visible image coords: " +
+			// toString(imageInImageCoordsVisible));
+			drawLayers(canv, mActiveImageDownloader, bestLayerId);
 			PinchZoomManager.State zoomState = mPinchZoomManager.getState();
 			SwipeShiftManager.State shiftState = mSwipeShiftManager.getState();
 
@@ -289,9 +280,9 @@ public class TiledImageView extends View {
 				// zoomState == ZoomManager.State.PINCHING || shiftState ==
 				// SwipeShiftManager.State.IDLE)) {
 				PointD currentZoomCenter = mPinchZoomManager.getCurrentZoomCenter();
-				PointD initialZoomCenterInPageCoords = mPinchZoomManager.getInitialZoomCenterInPageCoords();
-				if (initialZoomCenterInPageCoords != null && currentZoomCenter != null) {
-					PointD initialZoomCenterCanvas = Utils.toCanvasCoords(initialZoomCenterInPageCoords,
+				PointD initialZoomCenterInImageCoords = mPinchZoomManager.getInitialZoomCenterInImageCoords();
+				if (initialZoomCenterInImageCoords != null && currentZoomCenter != null) {
+					PointD initialZoomCenterCanvas = Utils.toCanvasCoords(initialZoomCenterInImageCoords,
 							getTotalResizeFactor(), getTotalShift());
 					devTools.drawZoomCenters(canv, currentZoomCenter, initialZoomCenterCanvas, getTotalResizeFactor(),
 							getTotalShift());
@@ -301,7 +292,7 @@ public class TiledImageView extends View {
 			// Log.d("timing", "onDraw: " + (end - start) + " ms");
 			if (DEV_MODE && devTools != null && testPoints != null) {
 				double resizeFactor = getTotalResizeFactor();
-				devTools.drawPageCoordPoints(canv, testPoints, resizeFactor, getTotalShift());
+				devTools.drawImageCoordPoints(canv, testPoints, resizeFactor, getTotalShift());
 			}
 		}
 	}
@@ -310,13 +301,13 @@ public class TiledImageView extends View {
 		return devTools;
 	}
 
-	private PointD computeVisiblePageCenter() {
-		// visiblePageCenterX = (int) (mPageInCanvasVisible.width() / 2 +
-		// mPageInCanvasVisible.left);
-		// visiblePageCenterY = (int) (mPageInCanvasVisible.height() / 2 +
-		// mPageInCanvasVisible.top);
-		float x = (mPageInCanvasVisible.width() / 2 + mPageInCanvasVisible.left);
-		float y = (mPageInCanvasVisible.height() / 2 + mPageInCanvasVisible.top);
+	private PointD computeVisibleImageCenter() {
+		// visibleImageCenterX = (int) (mImageInCanvasVisible.width() / 2 +
+		// mImageInCanvasVisible.left);
+		// visibleImageCenterY = (int) (mImageInCanvasVisible.height() / 2 +
+		// mImageInCanvasVisible.top);
+		float x = (mVisibleImageInCanvas.width() / 2 + mVisibleImageInCanvas.left);
+		float y = (mVisibleImageInCanvas.height() / 2 + mVisibleImageInCanvas.top);
 		return new PointD(x, y);
 	}
 
@@ -324,7 +315,7 @@ public class TiledImageView extends View {
 		return mPinchZoomManager.getCurrentZoomLevel() * mInitialResizeFactor;
 	}
 
-	private boolean isInVisiblePage(Rect pageInCanvasVisible, Point point) {
+	private boolean isInVisibleImage(Rect imageInCanvasVisible, Point point) {
 		return true; // TODO
 	}
 
@@ -345,16 +336,6 @@ public class TiledImageView extends View {
 		return VectorD.sum(mInitialShift, swipeShift, zoomShift);
 	}
 
-	/**
-	 * Page pid se musi predavat, protoze behem provadeni drawLayers muze byt
-	 * member zmenen pomoci loadPage()
-	 * 
-	 * @param canv
-	 * @param pagePid
-	 * @param layerId
-	 * @param pageInCanvas
-	 * @param pageInCanvasVisible
-	 */
 	private void drawLayers(Canvas canv, TilesDownloader downloader, int layerId) {
 		// long start = System.currentTimeMillis();
 		int[][] corners = getCornerVisibleTilesCoords(downloader, layerId);
@@ -419,16 +400,16 @@ public class TiledImageView extends View {
 		VectorD totalShift = getTotalShift();
 		// TODO
 		// int topLeftVisibleX = collapseToInterval((int)
-		// ((mPageInCanvasVisible.left - totalShift.x) / resizeFactor), 0,
+		// ((mImageInCanvasVisible.left - totalShift.x) / resizeFactor), 0,
 		// imageWidthMinusOne);
 		int topLeftVisibleX = collapseToInterval(
-				(int) Utils.toPageX(mPageInCanvasVisible.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
-		int topLeftVisibleY = collapseToInterval((int) ((mPageInCanvasVisible.top - totalShift.y) / resizeFactor), 0,
+				(int) Utils.toImageX(mVisibleImageInCanvas.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
+		int topLeftVisibleY = collapseToInterval((int) ((mVisibleImageInCanvas.top - totalShift.y) / resizeFactor), 0,
 				imageHeightMinusOne);
 		int bottomRightVisibleX = collapseToInterval(
-				(int) ((mPageInCanvasVisible.right - totalShift.x) / resizeFactor), 0, imageWidthMinusOne);
+				(int) ((mVisibleImageInCanvas.right - totalShift.x) / resizeFactor), 0, imageWidthMinusOne);
 		int bottomRightVisibleY = collapseToInterval(
-				(int) ((mPageInCanvasVisible.bottom - totalShift.y) / resizeFactor), 0, imageHeightMinusOne);
+				(int) ((mVisibleImageInCanvas.bottom - totalShift.y) / resizeFactor), 0, imageHeightMinusOne);
 
 		int[] topLeftVisibleTileCoords = downloader.getTileCoords(layerId, topLeftVisibleX, topLeftVisibleY);
 		int[] bottomRightVisibleTileCoords = downloader
@@ -482,13 +463,13 @@ public class TiledImageView extends View {
 		// mInitialResizeFactor;
 		double resizeFactor = getTotalResizeFactor();
 
-		int tileBasicSize = (int) ((double) downloader.getTileBasicSizeInPage(layerId) * resizeFactor);
-		int tileWidth = (int) ((double) downloader.getTileWidthInPage(layerId, pic[0]) * resizeFactor);
-		int tileHeight = (int) ((double) downloader.getTileHeightInPage(layerId, pic[1]) * resizeFactor);
+		int tileBasicSize = (int) ((double) downloader.getTilesSizeInImageCoords(layerId) * resizeFactor);
+		int tileWidth = (int) ((double) downloader.getTileWidthInImage(layerId, pic[0]) * resizeFactor);
+		int tileHeight = (int) ((double) downloader.getTileHeightInImage(layerId, pic[1]) * resizeFactor);
 
-		int left = pic[0] * tileBasicSize + mPageInCanvas.left;
+		int left = pic[0] * tileBasicSize + mImageInCanvas.left;
 		int right = left + tileWidth;
-		int top = pic[1] * tileBasicSize + mPageInCanvas.top;
+		int top = pic[1] * tileBasicSize + mImageInCanvas.top;
 		int bottom = top + tileHeight;
 		Rect result = new Rect(left, top, right, bottom);
 		return result;
@@ -535,7 +516,7 @@ public class TiledImageView extends View {
 		}
 	}
 
-	private Rect computePageInCanvasCordsPossibly(Canvas canv, TilesDownloader downloader) {
+	private Rect computeImageInCanvasCordsPossibly(Canvas canv, TilesDownloader downloader) {
 		double canvasWidth = canv.getWidth();
 		double canvasHeight = canv.getHeight();
 		double imageOriginalWidth = downloader.getImageProperties().getWidth();
@@ -590,10 +571,10 @@ public class TiledImageView extends View {
 	}
 
 	private Rect computeVisibleInCanvas(Canvas canv) {
-		int left = mapNumberToInterval(mPageInCanvas.left, 0, canv.getWidth());
-		int right = mapNumberToInterval(mPageInCanvas.right, 0, canv.getWidth());
-		int top = mapNumberToInterval(mPageInCanvas.top, 0, canv.getHeight());
-		int bottom = mapNumberToInterval(mPageInCanvas.bottom, 0, canv.getHeight());
+		int left = mapNumberToInterval(mImageInCanvas.left, 0, canv.getWidth());
+		int right = mapNumberToInterval(mImageInCanvas.right, 0, canv.getWidth());
+		int top = mapNumberToInterval(mImageInCanvas.top, 0, canv.getHeight());
+		int bottom = mapNumberToInterval(mImageInCanvas.bottom, 0, canv.getHeight());
 		return new Rect(left, top, right, bottom);
 	}
 
@@ -689,7 +670,7 @@ public class TiledImageView extends View {
 				} else {
 					int fingers = event.getPointerCount();
 					if (fingers == 2) {
-						boolean refresh = mPinchZoomManager.notifyPinchingContinues(event, visiblePageCenter,
+						boolean refresh = mPinchZoomManager.notifyPinchingContinues(event, visibleImageCenter,
 								getTotalResizeFactor(), getTotalShift());
 						if (refresh) {
 							invalidate();
@@ -714,7 +695,7 @@ public class TiledImageView extends View {
 		}
 	}
 
-	// private int[] toPageCoords(float x, float y) {
+	// private int[] toimageCoords(float x, float y) {
 	// double resizeFactor = getActualResizeFactor();
 	// int totalShift[] = getTotalShift();
 	// int newX = (int) ((x - totalShift[0]) / resizeFactor);
