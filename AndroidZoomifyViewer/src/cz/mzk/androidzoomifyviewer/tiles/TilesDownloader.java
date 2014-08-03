@@ -54,8 +54,9 @@ public class TilesDownloader {
 			throw new IllegalStateException("already initialized (" + baseUrl + ")");
 			// Log.w(TAG, "already initialized (" + baseUrl + ")");
 		} else {
-			Log.d(TAG, "initializing (" + baseUrl + ")");
+			Log.d(TAG, "initializing: " + baseUrl);
 		}
+		HttpURLConnection.setFollowRedirects(false);
 		String propertiesUrl = baseUrl + "ImageProperties.xml";
 		String propertiesXml = downloadPropertiesXml(propertiesUrl, MAX_REDIRECTIONS);
 		imageProperties = loadFromXml(propertiesXml, propertiesUrl);
@@ -70,7 +71,8 @@ public class TilesDownloader {
 			throw new TooManyRedirectionsException(urlString, MAX_REDIRECTIONS);
 		}
 		HttpURLConnection urlConnection = null;
-		Log.d(TAG, urlString);
+		// Log.d(TAG, urlString + " remaining redirections: " +
+		// remainingRedirections);
 		URL url = new URL(urlString);
 		try {
 			urlConnection = (HttpURLConnection) url.openConnection();
@@ -222,7 +224,8 @@ public class TilesDownloader {
 		if (remainingRedirections == 0) {
 			throw new TooManyRedirectionsException(tileUrl, MAX_REDIRECTIONS);
 		}
-		Log.d(TAG, tileUrl);
+		// Log.d(TAG, tileUrl + " remaining redirections: " +
+		// remainingRedirections);
 		HttpURLConnection urlConnection = null;
 		URL url = new URL(tileUrl);
 		try {

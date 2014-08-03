@@ -21,17 +21,17 @@ import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples.Example;
  * @author Martin Řehánek
  * 
  */
-public class TiledImageViewInitializationErrorStatesExamplesActivity extends Activity {
-	private static final String TAG = TiledImageViewInitializationErrorStatesExamplesActivity.class.getSimpleName();
+public class ImagePropertiesServerErrorsActivity extends Activity {
+	private static final String TAG = ImagePropertiesServerErrorsActivity.class.getSimpleName();
 
 	private ListView mListViewWithExamples;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_initialization_error_states_examples);
+		setContentView(R.layout.activity_image_properties_server_errors);
 		mListViewWithExamples = (ListView) findViewById(R.id.listErrorExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getExamples()));
+		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getErrorsExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<Example> {
@@ -40,7 +40,6 @@ public class TiledImageViewInitializationErrorStatesExamplesActivity extends Act
 		private final List<Example> itemsArrayList;
 
 		public MyAdapter(Context context, List<Example> list) {
-			// TODO: layout zaznamu
 			super(context, R.layout.error_list_item, list);
 			this.context = context;
 			this.itemsArrayList = list;

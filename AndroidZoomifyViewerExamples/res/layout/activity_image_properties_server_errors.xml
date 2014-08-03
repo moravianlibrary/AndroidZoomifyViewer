@@ -14,7 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Testing backend error states"
+            android:text="ImageProperties.xml HTTP server errors"
             android:textSize="35dp" />
     </LinearLayout>
 

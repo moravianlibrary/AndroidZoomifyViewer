@@ -35,7 +35,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private Button mQrScanBtn;
 	private ListView mListViewWithExamples;
-	private Button mBtnErrorStatesExamples;
+	private Button mBtnImagePropertiesHttpResponseCodes;
+	private Button mBtnImagePropertiesServerErrors;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +46,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		mQrScanBtn.setOnClickListener(this);
 		mListViewWithExamples = (ListView) findViewById(R.id.buttonList);
 		mListViewWithExamples.setAdapter(new MyAdapter(this, TestData.getTestTopLevelUrls()));
-		mBtnErrorStatesExamples = (Button) findViewById(R.id.btnErrorStatesExamples);
-		mBtnErrorStatesExamples.setOnClickListener(this);
+		mBtnImagePropertiesHttpResponseCodes = (Button) findViewById(R.id.btnImagePropertiesHttpResponseCodes);
+		mBtnImagePropertiesHttpResponseCodes.setOnClickListener(this);
+		mBtnImagePropertiesServerErrors = (Button) findViewById(R.id.btnImagePropertiesServerErrors);
+		mBtnImagePropertiesServerErrors.setOnClickListener(this);
 	}
 
 	class MyAdapter extends ArrayAdapter<MonographExample> {
@@ -104,8 +107,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			} catch (Exception e) {
 				Log.d(TAG, "error starting qr intent", e);
 			}
-		} else if (v == mBtnErrorStatesExamples) {
-			startActivity(new Intent(this, TiledImageViewInitializationErrorStatesExamplesActivity.class));
+		} else if (v == mBtnImagePropertiesHttpResponseCodes) {
+			startActivity(new Intent(this, ImagePropertiesHttpResponseCodesActivity.class));
+		} else if (v == mBtnImagePropertiesServerErrors) {
+			startActivity(new Intent(this, ImagePropertiesServerErrorsActivity.class));
 		}
 	}
 

@@ -35,7 +35,22 @@ public class ErrorUrlsExamples {
 
 	}
 
-	public static List<Example> getExamples() {
+	public static List<Example> getErrorsExamples() {
+		List<Example> result = new ArrayList<Example>();
+		result.add(new Example(300, "Multiple chocies (loop)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/redirection_loop_300/"));
+		result.add(new Example(301, "Moved permanently (loop)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/redirection_loop_301/"));
+		result.add(new Example(302, "Found (loop)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/redirection_loop_302/"));
+		result.add(new Example(303, "See other (loop)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/redirection_loop_303/"));
+		result.add(new Example(307, "Not modified (loop)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/redirection_loop_307/"));
+		return result;
+	}
+
+	public static List<Example> getResponseExamples() {
 		List<Example> result = new ArrayList<Example>();
 		// 20x
 		result.add(new Example(200, "Ok",

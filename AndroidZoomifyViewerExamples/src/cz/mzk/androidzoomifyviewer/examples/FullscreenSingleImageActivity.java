@@ -92,7 +92,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mTmpGeneralErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Redirection loop");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
-		mErrorDescription.setText("To many redirections");
+		mErrorDescription.setText("Too many redirections: " + redirections);
 	}
 
 	@Override

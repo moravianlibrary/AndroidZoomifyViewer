@@ -107,21 +107,35 @@ public class AndroidZoomifyViewerExamplesBackendServlet extends HttpServlet {
 			resp.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT);
 		} else if ("http_version_not_supported".equals(imageId)) {// 505
 			resp.sendError(HttpServletResponse.SC_HTTP_VERSION_NOT_SUPPORTED);
-		} else {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 
-		// TODO: smycku presmerovani
-		// TODO: nevalidni ImageProperties.xml
-		// TODO: dlazdice neni jpeg, nebo je nejak rozbity
+		// redirection loop
 
-		// resp.setContentType("text/plain");
-		// resp.getWriter().println("path info: <b>" + pathInfo + "</b>");
-		//
-		// // resp.getWriter().println("imageId: '" + imageId + "'");
-		// for (String pathToken : pathTokens) {
-		// resp.getWriter().println("|" + pathToken + "|");
-		// }
+		if ("redirection_loop_300".equals(imageId)) {
+			String first = buildUrl(req, servletUrlTokens);
+			PrintWriter writer = resp.getWriter();
+			writer.println(first);
+			writer.println(first);
+			writer.println(first);
+			resp.setHeader("Location", first);
+			resp.sendError(300);
+		} else if ("redirection_loop_301".equals(imageId)) {
+			resp.setHeader("Location", buildUrl(req, servletUrlTokens));
+			resp.sendError(301);
+		} else if ("redirection_loop_302".equals(imageId)) {
+			resp.setHeader("Location", buildUrl(req, servletUrlTokens));
+			resp.sendError(302);
+		} else if ("redirection_loop_303".equals(imageId)) {
+			resp.setHeader("Location", buildUrl(req, servletUrlTokens));
+			resp.sendError(303);
+		} else if ("redirection_loop_307".equals(imageId)) {
+			resp.setHeader("Location", buildUrl(req, servletUrlTokens));
+			resp.sendError(307);
+		}
+		// otherwise
+		else {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
 	}
 
 	private String[] extractUrlTokens(HttpServletRequest req) {

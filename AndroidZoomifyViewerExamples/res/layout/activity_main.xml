@@ -11,10 +11,16 @@
         android:text="scan" />
 
     <Button
-        android:id="@+id/btnErrorStatesExamples"
+        android:id="@+id/btnImagePropertiesHttpResponseCodes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TiledImageView initialization error examples" />
+        android:text="ImageProperties.xml HTTP response codes" />
+    
+    <Button
+        android:id="@+id/btnImagePropertiesServerErrors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ImageProperties.xml server errors" />
 
     <ListView
         android:id="@+id/buttonList"
