@@ -31,7 +31,7 @@ public class ImagePropertiesHttpResponseCodesActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_image_properties_http_response_codes);
 		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getResponseExamples()));
+		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getImagePropertiesResponseExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<Example> {

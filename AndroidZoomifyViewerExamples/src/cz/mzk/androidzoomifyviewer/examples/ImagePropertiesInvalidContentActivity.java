@@ -31,7 +31,7 @@ public class ImagePropertiesInvalidContentActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_image_properties_invalid_content);
 		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getInvalidContentExamples()));
+		mListExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getImagePropertiesInvalidContentExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<Example> {

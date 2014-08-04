@@ -31,7 +31,7 @@ public class ImagePropertiesOtherErrorsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_image_properties_other_errors);
 		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getOtherErrorsExamples()));
+		mListExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getImagePropertiesOtherErrorsExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<Example> {

@@ -78,7 +78,7 @@ public class TilesDownloader {
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setReadTimeout(IMAGE_PROPERTIES_TIMEOUT);
 			int responseCode = urlConnection.getResponseCode();
-			Log.d(TAG, "http code: " + responseCode);
+			// Log.d(TAG, "http code: " + responseCode);
 			String location = urlConnection.getHeaderField("Location");
 			switch (responseCode) {
 			case 200:
@@ -222,7 +222,7 @@ public class TilesDownloader {
 
 	private List<Layer> initLayers() {
 		int numberOfLayers = computeNumberOfLayers();
-		Log.d(TAG, "layers: " + numberOfLayers);
+		// Log.d(TAG, "layers: " + numberOfLayers);
 		List<Layer> result = new ArrayList<Layer>(numberOfLayers);
 		double width = imageProperties.getWidth();
 		double height = imageProperties.getHeight();
@@ -231,7 +231,8 @@ public class TilesDownloader {
 			int sizeHorizontal = (int) Math
 					.ceil(Math.floor(width / Math.pow(2, numberOfLayers - layer - 1)) / tileSize);
 			int sizeVertical = (int) Math.ceil(Math.floor(height / Math.pow(2, numberOfLayers - layer - 1)) / tileSize);
-			Log.d(TAG, "layer=" + layer + ": horizontal=" + sizeHorizontal + ", vertical=" + sizeVertical);
+			// Log.d(TAG, "layer=" + layer + ": horizontal=" + sizeHorizontal +
+			// ", vertical=" + sizeVertical);
 			result.add(new Layer(sizeVertical, sizeHorizontal));
 		}
 		return result;
@@ -263,6 +264,7 @@ public class TilesDownloader {
 		}
 		int tileGroup = computeTileGroup(tileId);
 		String tileUrl = buildTileUrl(tileGroup, tileId);
+		Log.d(TAG, "TILE URL: " + tileUrl);
 		return downloadTile(tileUrl, MAX_REDIRECTIONS);
 	}
 
@@ -316,23 +318,30 @@ public class TilesDownloader {
 		}
 	}
 
+	/**
+	 * @see http://www.staremapy.cz/zoomify-analyza/
+	 */
 	private int computeTileGroup(TileId tileId) {
-		int layer = tileId.getLayer();
 		int x = tileId.getX();
 		int y = tileId.getY();
-		// TODO: probably cache this
 		double tileSize = imageProperties.getTileSize();
 		double width = imageProperties.getWidth();
-		// double height = imageProperties.getHeight();
+		double height = imageProperties.getHeight();
 		double layersNum = layers.size();
-		double first = Math.ceil(Math.floor(width / Math.pow(2, layersNum - layer - 1) / tileSize));
+		int level = imageProperties.getLevel();
+		// Log.d(TAG, "x: " + x + ", y: " + y + ", d: " + layersNum + ", l: " +
+		// level);
+		// Log.d(TAG, "width: " + width + ", height: " + height + ", tileSize: "
+		// + tileSize);
+		double first = Math.ceil(Math.floor(width / Math.pow(2, layersNum - level - 1)) / tileSize);
 		double index = x + y * first;
-		for (int i = 0; i < layer; i++) {
-			index += layers.get(i).getTilesHorizontal() + layers.get(i).getTilesVertical();
+		for (int i = 1; i <= level; i++) {
+			index += Math.ceil(Math.floor(width / Math.pow(2, layersNum - i)) / tileSize)
+					* Math.ceil(Math.floor(height / Math.pow(2, layersNum - i)) / tileSize);
 		}
-		Log.d(TAG, "index: " + index);
+		// Log.d(TAG, "index: " + index);
 		int result = (int) (index % tileSize);
-		Log.d(TAG, "tile group: " + result);
+		// Log.d(TAG, "tile group: " + result);
 		return result;
 	}
 
@@ -450,7 +459,7 @@ public class TilesDownloader {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
 		double result = (double) imageProperties.getWidth() / Math.pow(2, layers.size() - layerId - 1);
-		Log.d(TAG, "layer " + layerId + ", width=" + result + " px");
+		// Log.d(TAG, "layer " + layerId + ", width=" + result + " px");
 		return result;
 	}
 
@@ -490,7 +499,7 @@ public class TilesDownloader {
 			super();
 			this.urlString = urlString;
 			this.errorCode = errorCode;
-			Log.d(TAG, "http error: " + errorCode + ", url: " + urlString);
+			// Log.d(TAG, "http error: " + errorCode + ", url: " + urlString);
 		}
 
 		public int getErrorCode() {

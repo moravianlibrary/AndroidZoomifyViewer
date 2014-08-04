@@ -50,7 +50,7 @@ public class ErrorUrlsExamples {
 		return result;
 	}
 
-	public static List<Example> getResponseExamples() {
+	public static List<Example> getImagePropertiesResponseExamples() {
 		List<Example> result = new ArrayList<Example>();
 		// 20x
 		result.add(new Example(200, "Ok",
@@ -103,7 +103,7 @@ public class ErrorUrlsExamples {
 		return result;
 	}
 
-	public static List<Example> getInvalidContentExamples() {
+	public static List<Example> getImagePropertiesInvalidContentExamples() {
 		List<Example> result = new ArrayList<Example>();
 		result.add(new Example(
 				200,
@@ -208,7 +208,7 @@ public class ErrorUrlsExamples {
 		return result;
 	}
 
-	public static List<Example> getOtherErrorsExamples() {
+	public static List<Example> getImagePropertiesOtherErrorsExamples() {
 		List<Example> result = new ArrayList<Example>();
 		result.add(new Example(
 				200,
