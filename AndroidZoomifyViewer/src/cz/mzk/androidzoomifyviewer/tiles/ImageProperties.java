@@ -9,17 +9,13 @@ public class ImageProperties {
 	private final int width;
 	private final int height;
 	private final int numtiles; // pro kontrolu
-	private final int numimages; // na nic
-	private final String version; // na nic (vzdy 1.8)
 	private final int tileSize;
 
-	public ImageProperties(int width, int height, int numtiles, int numimages, String version, int tileSize) {
+	public ImageProperties(int width, int height, int numtiles, int tilesize) {
 		this.width = width;
 		this.height = height;
 		this.numtiles = numtiles;
-		this.numimages = numimages;
-		this.version = version;
-		this.tileSize = tileSize;
+		this.tileSize = tilesize;
 	}
 
 	public int getWidth() {
@@ -32,14 +28,6 @@ public class ImageProperties {
 
 	public int getNumtiles() {
 		return numtiles;
-	}
-
-	public int getNumimages() {
-		return numimages;
-	}
-
-	public String getVersion() {
-		return version;
 	}
 
 	public int getTileSize() {
@@ -56,12 +44,8 @@ public class ImageProperties {
 
 	@Override
 	public String toString() {
-		return "ImageProperties [width=" + width + ", height=" + height + ", numtiles=" + numtiles + ", numimages="
-				+ numimages + ", version=" + version + ", tileSize=" + tileSize + "]";
+		return "ImageProperties [width=" + width + ", height=" + height + ", numtiles=" + numtiles + ", tileSize="
+				+ tileSize + "]";
 	}
-	
-	
-	
-	
 
 }

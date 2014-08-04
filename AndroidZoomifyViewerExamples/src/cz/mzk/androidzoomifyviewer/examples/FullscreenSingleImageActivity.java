@@ -22,7 +22,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 
 	// Views to reflect TiledImageView state
 	private View mProgressView;
-	private View mTmpGeneralErrorView;
+	private View mErrorView;
 	private TextView mErrorTitle;
 	private TextView mErrorDescription;
 	private TextView mErrorResourceUrl;
@@ -39,14 +39,10 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 			restoreData(getIntent().getExtras());
 		}
 		mProgressView = findViewById(R.id.progressView);
-		// mDownloadErrorView = findViewById(R.id.downloadErrorView);
-		// mNoAccessRightsView = findViewById(R.id.noAccessRightsView);
-		// mDoesntExistView = findViewById(R.id.doesntExistView);
-		mTmpGeneralErrorView = findViewById(R.id.tmpGeneralErrorView);
+		mErrorView = findViewById(R.id.errorView);
 		mErrorTitle = (TextView) findViewById(R.id.errorTitle);
 		mErrorResourceUrl = (TextView) findViewById(R.id.errorResourceUrl);
 		mErrorDescription = (TextView) findViewById(R.id.errorDescription);
-
 		mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
 		mImageView.setLoadingHandler(this);
 		showImage();
@@ -80,7 +76,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 	@Override
 	public void onImagePropertiesInvalidStateError(String imagePropertiesUrl, int responseCode) {
 		mProgressView.setVisibility(View.INVISIBLE);
-		mTmpGeneralErrorView.setVisibility(View.VISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Cannot process server resource");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
 		mErrorDescription.setText("HTTP code: " + responseCode);
@@ -89,7 +85,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 	@Override
 	public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
 		mProgressView.setVisibility(View.INVISIBLE);
-		mTmpGeneralErrorView.setVisibility(View.VISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Redirection loop");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
 		mErrorDescription.setText("Too many redirections: " + redirections);
@@ -98,7 +94,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 	@Override
 	public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
 		mProgressView.setVisibility(View.INVISIBLE);
-		mTmpGeneralErrorView.setVisibility(View.VISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Data transfer error");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
 		mErrorDescription.setText(errorMessage);
@@ -107,7 +103,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 	@Override
 	public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
 		mProgressView.setVisibility(View.INVISIBLE);
-		mTmpGeneralErrorView.setVisibility(View.VISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Invalid content in ImageProperties.xml");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
 		mErrorDescription.setText(errorMessage);

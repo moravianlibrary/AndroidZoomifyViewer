@@ -32,7 +32,9 @@
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.FullscreenPagesActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.FullscreenSingleImageActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesHttpResponseCodesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesServerErrorsActivity" />
+        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesRedirectonLoopActivity" />
+        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesInvalidContentActivity" />
+        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesOtherErrorsActivity" />
         
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
     </application>

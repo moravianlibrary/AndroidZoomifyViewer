@@ -2,11 +2,10 @@ package cz.mzk.androidzoomifyviewer.tiles;
 
 import java.io.IOException;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.ImageServerResponseException;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.InvalidXmlException;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsException;
 
 /**
@@ -21,7 +20,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 	private IOException ioException;
 	private TooManyRedirectionsException tooManyRedirectionsException;
 	private ImageServerResponseException imageServerResponseException;
-	private XmlPullParserException xmlPullParserException;
+	private InvalidXmlException invalidXmlException;
 
 	public InitTilesDownloaderTask(String zoomifyBaseUrl, TilesDownloaderInitializationHandler handler) {
 		this.zoomifyBaseUrl = zoomifyBaseUrl;
@@ -41,8 +40,8 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 			tooManyRedirectionsException = e;
 		} catch (ImageServerResponseException e) {
 			imageServerResponseException = e;
-		} catch (XmlPullParserException e) {
-			xmlPullParserException = e;
+		} catch (InvalidXmlException e) {
+			invalidXmlException = e;
 		}
 		return null;
 	}
@@ -55,8 +54,8 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 			handler.onRedirectionLoop(zoomifyBaseUrl, tooManyRedirectionsException.getRedirections());
 		} else if (imageServerResponseException != null) {
 			handler.onInvalidImagePropertiesState(zoomifyBaseUrl, imageServerResponseException.getErrorCode());
-		} else if (xmlPullParserException != null) {
-			handler.onInvalidImagePropertiesData(zoomifyBaseUrl, xmlPullParserException.getMessage());
+		} else if (invalidXmlException != null) {
+			handler.onInvalidImagePropertiesData(zoomifyBaseUrl, invalidXmlException.getMessage());
 		} else {
 			handler.onInitialized(zoomifyBaseUrl, downloader);
 		}

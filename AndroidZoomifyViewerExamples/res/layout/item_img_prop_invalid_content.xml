@@ -7,21 +7,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#fff2aa"
-        android:orientation="vertical" >
+        android:layout_gravity="center"
+        android:layout_margin="5dp" >
 
         <TextView
+            android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="ImageProperties.xml HTTP response codes"
-            android:textSize="35dp" />
+            android:textSize="25dp" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/listExamples"
+    <TextView
+        android:id="@+id/url"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#d4c46a" />
+        android:textSize="15dp" />
 
 </LinearLayout>

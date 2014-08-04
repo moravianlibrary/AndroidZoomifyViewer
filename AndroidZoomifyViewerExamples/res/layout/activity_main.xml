@@ -15,12 +15,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ImageProperties.xml HTTP response codes" />
-    
+
     <Button
-        android:id="@+id/btnImagePropertiesServerErrors"
+        android:id="@+id/btnImagePropertiesRedirectionLoops"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ImageProperties.xml server errors" />
+        android:text="IImageProperties.xml redirection loops" />
+
+    <Button
+        android:id="@+id/btnImagePropertiesInvalidContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IImageProperties.xml invalid content" />
+
+    <Button
+        android:id="@+id/btnImagePropertiesOtherErrors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IImageProperties.xml other errors" />
 
     <ListView
         android:id="@+id/buttonList"

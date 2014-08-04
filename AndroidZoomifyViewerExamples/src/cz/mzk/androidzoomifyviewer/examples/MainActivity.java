@@ -36,7 +36,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Button mQrScanBtn;
 	private ListView mListViewWithExamples;
 	private Button mBtnImagePropertiesHttpResponseCodes;
-	private Button mBtnImagePropertiesServerErrors;
+	private Button mBtnImagePropertiesRedirectionLoops;
+	private Button mBtnImagePropertiesInvalidContent;
+	private Button mBtnImagePropertiesOtherErrors;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +50,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		mListViewWithExamples.setAdapter(new MyAdapter(this, TestData.getTestTopLevelUrls()));
 		mBtnImagePropertiesHttpResponseCodes = (Button) findViewById(R.id.btnImagePropertiesHttpResponseCodes);
 		mBtnImagePropertiesHttpResponseCodes.setOnClickListener(this);
-		mBtnImagePropertiesServerErrors = (Button) findViewById(R.id.btnImagePropertiesServerErrors);
-		mBtnImagePropertiesServerErrors.setOnClickListener(this);
+		mBtnImagePropertiesRedirectionLoops = (Button) findViewById(R.id.btnImagePropertiesRedirectionLoops);
+		mBtnImagePropertiesRedirectionLoops.setOnClickListener(this);
+		mBtnImagePropertiesInvalidContent = (Button) findViewById(R.id.btnImagePropertiesInvalidContent);
+		mBtnImagePropertiesInvalidContent.setOnClickListener(this);
+		mBtnImagePropertiesOtherErrors = (Button) findViewById(R.id.btnImagePropertiesOtherErrors);
+		mBtnImagePropertiesOtherErrors.setOnClickListener(this);
 	}
 
 	class MyAdapter extends ArrayAdapter<MonographExample> {
@@ -109,8 +115,12 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 		} else if (v == mBtnImagePropertiesHttpResponseCodes) {
 			startActivity(new Intent(this, ImagePropertiesHttpResponseCodesActivity.class));
-		} else if (v == mBtnImagePropertiesServerErrors) {
-			startActivity(new Intent(this, ImagePropertiesServerErrorsActivity.class));
+		} else if (v == mBtnImagePropertiesRedirectionLoops) {
+			startActivity(new Intent(this, ImagePropertiesRedirectonLoopActivity.class));
+		} else if (v == mBtnImagePropertiesInvalidContent) {
+			startActivity(new Intent(this, ImagePropertiesInvalidContentActivity.class));
+		} else if (v == mBtnImagePropertiesOtherErrors) {
+			startActivity(new Intent(this, ImagePropertiesOtherErrorsActivity.class));
 		}
 	}
 

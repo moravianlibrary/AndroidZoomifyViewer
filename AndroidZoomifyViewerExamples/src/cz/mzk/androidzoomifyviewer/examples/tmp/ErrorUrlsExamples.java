@@ -102,4 +102,126 @@ public class ErrorUrlsExamples {
 				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/http_version_not_supported/"));
 		return result;
 	}
+
+	public static List<Example> getInvalidContentExamples() {
+		List<Example> result = new ArrayList<Example>();
+		result.add(new Example(
+				200,
+				"Empty file",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_file/"));
+		result.add(new Example(
+				200,
+				"Empty document",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_document/"));
+		result.add(new Example(
+				200,
+				"Not well formed 1",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/not_well_formed1/"));
+		result.add(new Example(
+				200,
+				"Not well formed 2",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/not_well_formed2/"));
+		result.add(new Example(
+				200,
+				"Invalid root element",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/invalid_root_element/"));
+		result.add(new Example(
+				200,
+				"Missing width",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_width/"));
+		result.add(new Example(
+				200,
+				"Missing height",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_height/"));
+		result.add(new Example(
+				200,
+				"Missing numtiles",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_numtiles/"));
+		result.add(new Example(
+				200,
+				"Missing numimages",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_numimages/"));
+		result.add(new Example(
+				200,
+				"Missing version",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_version/"));
+		result.add(new Example(
+				200,
+				"Missing tilesize",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_tilesize/"));
+		result.add(new Example(
+				200,
+				"Empty width",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_width/"));
+		result.add(new Example(
+				200,
+				"Empty height",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_height/"));
+		result.add(new Example(
+				200,
+				"Empty numtiles",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_numtiles/"));
+		result.add(new Example(
+				200,
+				"Empty numimages",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_numimages/"));
+		result.add(new Example(
+				200,
+				"Empty version",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_version/"));
+		result.add(new Example(
+				200,
+				"Empty tilesize",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_tilesize/"));
+		result.add(new Example(
+				200,
+				"NaN width",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_width/"));
+		result.add(new Example(
+				200,
+				"NaN height",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_height/"));
+		result.add(new Example(
+				200,
+				"NaN numtiles",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_numtiles/"));
+		result.add(new Example(
+				200,
+				"NaN numimages",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_numimages/"));
+		result.add(new Example(
+				200,
+				"NaN version",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_version/"));
+		result.add(new Example(
+				200,
+				"NaN tilesize",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_tilesize/"));
+		result.add(new Example(
+				200,
+				"Unsupported version",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/unsupported_version/"));
+		result.add(new Example(
+				200,
+				"Unsupported numimages",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/incorrect_image_properties/unsupported_numimages/"));
+		return result;
+	}
+
+	public static List<Example> getOtherErrorsExamples() {
+		List<Example> result = new ArrayList<Example>();
+		result.add(new Example(
+				200,
+				"Server not responding (5 s)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_5_s/"));
+		result.add(new Example(
+				200,
+				"Server not responding (10 s)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_10_s/"));
+		result.add(new Example(
+				200,
+				"Server not responding (15 s)",
+				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_15_s/"));
+		return result;
+	}
 }

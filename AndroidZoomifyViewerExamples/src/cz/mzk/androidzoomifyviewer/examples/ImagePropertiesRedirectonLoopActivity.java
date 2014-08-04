@@ -21,17 +21,17 @@ import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples.Example;
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesHttpResponseCodesActivity extends Activity {
-	private static final String TAG = ImagePropertiesHttpResponseCodesActivity.class.getSimpleName();
+public class ImagePropertiesRedirectonLoopActivity extends Activity {
+	private static final String TAG = ImagePropertiesRedirectonLoopActivity.class.getSimpleName();
 
-	private ListView mListViewWithExamples;
+	private ListView mListViewExamples;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_image_properties_http_response_codes);
-		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getResponseExamples()));
+		setContentView(R.layout.activity_image_properties_redirection_loop);
+		mListViewExamples = (ListView) findViewById(R.id.listExamples);
+		mListViewExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getErrorsExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<Example> {

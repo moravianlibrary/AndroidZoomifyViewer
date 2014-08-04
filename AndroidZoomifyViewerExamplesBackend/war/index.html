@@ -15,8 +15,9 @@
 <body>
 	<h1>Mock Zoomify tiles image server for testing
 		AndroidZoomifyViewer</h1>
+	<h2>HTTP Response code examples</h2>
 
-	<h2>20x</h2>
+	<h3>20x</h3>
 	<a href="androidzoomifyviewerexamplesbackend/ok">200 OK</a> (not
 	implemented yet)
 	<br>
@@ -28,12 +29,12 @@
 	<br>
 	<br>
 
-	<h2>30x</h2>
+	<h3>30x</h3>
 	<a href="androidzoomifyviewerexamplesbackend/multiple_choices">300
 		MULTIPLE CHOICES</a>
-	<br>
 	<a href="androidzoomifyviewerexamplesbackend/moved_permanently">301
-		MOVED PERMANENTLY</a>
+		<br> MOVED PERMANENTLY
+	</a>
 	<br>
 	<a href="androidzoomifyviewerexamplesbackend/found">302 FOUND</a>
 	<br>
@@ -49,7 +50,7 @@
 	<a href="androidzoomifyviewerexamplesbackend/temporary_redirect">307
 		TEMPORARY REDIRECT</a>
 	<br>
-	<h3>Redirection loops</h3>
+	<h4>Redirection loops</h4>
 	<a href="androidzoomifyviewerexamplesbackend/redirection_loop_300">300</a>
 	<br>
 	<a href="androidzoomifyviewerexamplesbackend/redirection_loop_301">301</a>
@@ -62,7 +63,7 @@
 	<br>
 	<br>
 
-	<h2>4xx</h2>
+	<h3>4xx</h3>
 	<a href="androidzoomifyviewerexamplesbackend/bad_request">400 BAD
 		REQUEST</a>
 	<br>
@@ -86,7 +87,7 @@
 	<br>
 	<br>
 
-	<h2>50x</h2>
+	<h3>50x</h3>
 	<a href="androidzoomifyviewerexamplesbackend/internal_server_error">500
 		INTERNAL SERVER ERROR</a>
 	<br>
@@ -106,5 +107,145 @@
 		href="androidzoomifyviewerexamplesbackend/http_version_not_supported">505
 		HTTP VERSION NOT SUPPORTED</a>
 	<br>
+
+	<h2>Incorrect ImageProperties.xml examples</h2>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_file/ImageProperties.xml">Empty
+		file</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_document/ImageProperties.xml">Empty
+		document</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/not_well_formed1/ImageProperties.xml">Not
+		well formed 1</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/not_well_formed2/ImageProperties.xml">Not
+		well formed 2</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/invalid_root_element/ImageProperties.xml">Invalid
+		root element</a>
+	<br>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_width/ImageProperties.xml">Missing
+		<i>width</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_height/ImageProperties.xml">Missing
+		<i>height</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_numtiles/ImageProperties.xml">Missing
+		<i>numtiles</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_numimages/ImageProperties.xml">Missing
+		<i>numimages</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_version/ImageProperties.xml">Missing
+		<i>version</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/missing_tilesize/ImageProperties.xml">Missing
+		<i>tilesize</i>
+	</a>
+	<br>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_width/ImageProperties.xml">Empty
+		<i>width</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_height/ImageProperties.xml">Empty
+		<i>height</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_numtiles/ImageProperties.xml">Empty
+		<i>numtiles</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_numimages/ImageProperties.xml">Empty
+		<i>numimages</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_version/ImageProperties.xml">Empty
+		<i>version</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/empty_tilesize/ImageProperties.xml">Empty
+		<i>tilesize</i>
+	</a>
+	<br>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_width/ImageProperties.xml">NAN
+		<i>width</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_height/ImageProperties.xml">NAN
+		<i>height</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_numtiles/ImageProperties.xml">NAN
+		<i>numtiles</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_numimages/ImageProperties.xml">NAN
+		<i>numimages</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_version/ImageProperties.xml">NAN
+		<i>version</i>
+	</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/nan_tilesize/ImageProperties.xml">NAN
+		<i>tilesize</i>
+	</a>
+	<br>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/unsupported_version/ImageProperties.xml">Unsupported
+		version </a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/incorrect_image_properties/unsupported_numimages/ImageProperties.xml">Unsupported
+		numimages </a>
+	<br>
+
+	<h2>Other ImageProperties.xml errors</h2>
+	<a
+		href="androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_5_s/ImageProperties.xml">Server
+		not responding 5 s</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_10_s/ImageProperties.xml">Server
+		not responding 10 s</a>
+	<br>
+	<a
+		href="androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_15_s/ImageProperties.xml">Server
+		not responding 15 s</a>
+	<br>
+
+
 </body>
 </html>

@@ -72,7 +72,7 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 		mDownloadErrorView = findViewById(R.id.downloadErrorView);
 		mNoAccessRightsView = findViewById(R.id.noAccessRightsView);
 		mDoesntExistView = findViewById(R.id.doesntExistView);
-		mTmpGeneralErrorView = findViewById(R.id.tmpGeneralErrorView);
+		mTmpGeneralErrorView = findViewById(R.id.errorView);
 
 		mZoomInBtn = (Button) findViewById(R.id.zoomIn);
 		mZoomInBtn.setOnClickListener(this);

@@ -21,17 +21,17 @@ import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples.Example;
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesHttpResponseCodesActivity extends Activity {
-	private static final String TAG = ImagePropertiesHttpResponseCodesActivity.class.getSimpleName();
+public class ImagePropertiesOtherErrorsActivity extends Activity {
+	private static final String TAG = ImagePropertiesOtherErrorsActivity.class.getSimpleName();
 
-	private ListView mListViewWithExamples;
+	private ListView mListExamples;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_image_properties_http_response_codes);
-		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getResponseExamples()));
+		setContentView(R.layout.activity_image_properties_other_errors);
+		mListExamples = (ListView) findViewById(R.id.listExamples);
+		mListExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getOtherErrorsExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<Example> {
@@ -48,11 +48,9 @@ public class ImagePropertiesHttpResponseCodesActivity extends Activity {
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View rowView = inflater.inflate(R.layout.error_list_item, parent, false);
-
-			((TextView) rowView.findViewById(R.id.errorCode)).setText(String.valueOf(itemsArrayList.get(position)
-					.getErrorCode()));
-			((TextView) rowView.findViewById(R.id.errorName)).setText(itemsArrayList.get(position).getErrorName());
+			View rowView = inflater.inflate(R.layout.item_img_prop_invalid_content, parent, false);
+			((TextView) rowView.findViewById(R.id.description)).setText(String.valueOf(itemsArrayList.get(position)
+					.getErrorName()));
 			((TextView) rowView.findViewById(R.id.url)).setText(itemsArrayList.get(position).getUrl());
 
 			rowView.setOnClickListener(new OnClickListener() {

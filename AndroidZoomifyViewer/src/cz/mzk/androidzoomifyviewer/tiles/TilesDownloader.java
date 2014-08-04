@@ -49,7 +49,7 @@ public class TilesDownloader {
 	}
 
 	public void init() throws IOException, TooManyRedirectionsException, ImageServerResponseException,
-			XmlPullParserException {
+			InvalidXmlException {
 		if (initialized) {
 			throw new IllegalStateException("already initialized (" + baseUrl + ")");
 			// Log.w(TAG, "already initialized (" + baseUrl + ")");
@@ -76,7 +76,7 @@ public class TilesDownloader {
 		URL url = new URL(urlString);
 		try {
 			urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setConnectTimeout(IMAGE_PROPERTIES_TIMEOUT);
+			urlConnection.setReadTimeout(IMAGE_PROPERTIES_TIMEOUT);
 			int responseCode = urlConnection.getResponseCode();
 			Log.d(TAG, "http code: " + responseCode);
 			String location = urlConnection.getHeaderField("Location");
@@ -134,43 +134,90 @@ public class TilesDownloader {
 		}
 	}
 
-	private ImageProperties loadFromXml(String propertiesXml, String propertiesUrl) throws XmlPullParserException,
+	private ImageProperties loadFromXml(String propertiesXml, String propertiesUrl) throws InvalidXmlException,
 			IOException {
-		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-		factory.setNamespaceAware(false);
-		XmlPullParser xpp = factory.newPullParser();
-		xpp.setInput(new StringReader(propertiesXml));
-		int width = -1;
-		int height = -1;
-		int numtiles = -1; // pro kontrolu
-		int numimages = -1; // na nic
-		String version = null; // na nic (vzdy 1.8)
-		int tileSize = -1;
-		int eventType = xpp.getEventType();
-		while (eventType != XmlPullParser.END_DOCUMENT) {
-			if (eventType == XmlPullParser.START_TAG) {
-				if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
-					throw new IllegalStateException("invalid xml at " + propertiesUrl);
-				} else {
-					try {
-						width = Integer.valueOf(xpp.getAttributeValue(null, "WIDTH"));
-						height = Integer.valueOf(xpp.getAttributeValue(null, "HEIGHT"));
-						numtiles = Integer.valueOf(xpp.getAttributeValue(null, "NUMTILES"));
-						numimages = Integer.valueOf(xpp.getAttributeValue(null, "NUMIMAGES"));
-						tileSize = Integer.valueOf(xpp.getAttributeValue(null, "TILESIZE"));
-						version = xpp.getAttributeValue(null, "VERSION");
-					} catch (Throwable e) {
-						throw new IllegalStateException("invalid xml at " + propertiesUrl);
+		try {
+			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+			factory.setNamespaceAware(false);
+			XmlPullParser xpp = factory.newPullParser();
+			xpp.setInput(new StringReader(propertiesXml));
+			boolean elementImagePropertiesStarted = false;
+			boolean elementImagePropertiesEnded = false;
+			int width = -1;
+			int height = -1;
+			int numtiles = -1; // pro kontrolu
+			int numimages = -1;
+			double version = 0.0;
+			int tileSize = -1;
+			int eventType = xpp.getEventType();
+			while (eventType != XmlPullParser.END_DOCUMENT) {
+				if (eventType == XmlPullParser.START_TAG) {
+					if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
+						throw new InvalidXmlException("Unexpected element " + xpp.getName());
+					} else {
+						elementImagePropertiesStarted = true;
+						width = getAttributeIntegerValue(xpp, "WIDTH");
+						height = getAttributeIntegerValue(xpp, "HEIGHT");
+						numtiles = getAttributeIntegerValue(xpp, "NUMTILES");
+						numimages = getAttributeIntegerValue(xpp, "NUMIMAGES");
+						tileSize = getAttributeIntegerValue(xpp, "TILESIZE");
+						version = getAttributeDoubleValue(xpp, "VERSION");
+					}
+				} else if (eventType == XmlPullParser.END_TAG) {
+					if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
+						throw new InvalidXmlException("Unexpected element " + xpp.getName());
+					} else {
+						elementImagePropertiesEnded = true;
 					}
 				}
-			} else if (eventType == XmlPullParser.END_TAG) {
-				if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
-					throw new IllegalStateException("invalid xml at " + propertiesUrl);
-				}
+				eventType = xpp.next();
 			}
-			eventType = xpp.next();
+			if (!elementImagePropertiesStarted) {
+				throw new InvalidXmlException("Element IMAGE_PROPERTIES not found");
+			}
+			if (!elementImagePropertiesEnded) {
+				throw new InvalidXmlException("Element IMAGE_PROPERTIES not closed");
+			}
+			if (version != 1.8) {
+				throw new InvalidXmlException("Unsupported tiles version: " + version);
+			}
+			if (numimages != 1) {
+				throw new InvalidXmlException("Unsupported number of images: " + numimages);
+			}
+			// TODO: check numTiles
+			return new ImageProperties(width, height, numtiles, tileSize);
+		} catch (XmlPullParserException e1) {
+			throw new InvalidXmlException(e1.getMessage());
 		}
-		return new ImageProperties(width, height, numtiles, numimages, version, tileSize);
+	}
+
+	private Double getAttributeDoubleValue(XmlPullParser xpp, String attrName) throws InvalidXmlException {
+		String attrValue = getAttributeStringValue(xpp, attrName);
+		try {
+			return Double.valueOf(attrValue);
+		} catch (NumberFormatException e) {
+			throw new InvalidXmlException("invalid content of attribute " + attrName + ": '" + attrValue + "'");
+		}
+	}
+
+	private int getAttributeIntegerValue(XmlPullParser xpp, String attrName) throws InvalidXmlException {
+		String attrValue = getAttributeStringValue(xpp, attrName);
+		try {
+			return Integer.valueOf(attrValue);
+		} catch (NumberFormatException e) {
+			throw new InvalidXmlException("invalid content of attribute " + attrName + ": '" + attrValue + "'");
+		}
+	}
+
+	private String getAttributeStringValue(XmlPullParser xpp, String attrName) throws InvalidXmlException {
+		String attrValue = xpp.getAttributeValue(null, attrName);
+		if (attrValue == null) {
+			throw new InvalidXmlException("missing attribute " + attrName);
+		}
+		if (attrValue.isEmpty()) {
+			throw new InvalidXmlException("empty attribute " + attrName);
+		}
+		return attrValue;
 	}
 
 	private List<Layer> initLayers() {
@@ -230,7 +277,7 @@ public class TilesDownloader {
 		URL url = new URL(tileUrl);
 		try {
 			urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.setConnectTimeout(TILES_TIMEOUT);
+			urlConnection.setReadTimeout(TILES_TIMEOUT);
 			int responseCode = urlConnection.getResponseCode();
 			switch (responseCode) {
 			case 200:
@@ -452,6 +499,15 @@ public class TilesDownloader {
 
 		public String getUrlString() {
 			return urlString;
+		}
+	}
+
+	public class InvalidXmlException extends Exception {
+
+		private static final long serialVersionUID = -6344968475737321154L;
+
+		public InvalidXmlException(String message) {
+			super(message);
 		}
 	}
 

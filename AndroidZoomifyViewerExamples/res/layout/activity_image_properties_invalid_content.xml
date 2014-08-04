@@ -14,7 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="ImageProperties.xml HTTP response codes"
+            android:text="ImageProperties.xml invalid content examples"
             android:textSize="35dp" />
     </LinearLayout>
 
