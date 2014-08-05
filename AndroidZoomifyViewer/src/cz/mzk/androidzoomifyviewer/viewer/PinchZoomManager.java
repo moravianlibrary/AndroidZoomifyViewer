@@ -15,7 +15,7 @@ public class PinchZoomManager {
 	private static final double MIN_STARTING_FINGER_DISTANCE = 10.0;
 
 	// TODO: still needed?
-	private TiledImageView imageView;
+	private final TiledImageView imageView;
 
 	private State state = State.IDLE;
 
@@ -77,7 +77,7 @@ public class PinchZoomManager {
 		// }
 		state = State.READY_TO_PINCH;
 		// Log.d(TAG, "state: " + state.name());
-		Log.d(TAG_STATES, "zoom: " + state.name());
+		Log.d(TAG_STATES, "zoom (pinch): " + state.name());
 	}
 
 	public void notifyCanceled() {
@@ -85,7 +85,7 @@ public class PinchZoomManager {
 		startingZoomCenterInImageCoords = null;
 		state = State.IDLE;
 		// Log.d(TAG, "state: " + state.name());
-		Log.d(TAG_STATES, "zoom: " + state.name());
+		Log.d(TAG_STATES, "zoom (pinch): " + state.name());
 	}
 
 	/**
@@ -95,19 +95,20 @@ public class PinchZoomManager {
 	 */
 	public boolean notifyPinchingContinues(MotionEvent event, PointD visibleImageCenter, double resizeFactor,
 			VectorD shift) {
+		state = State.PINCHING;
+		Log.d(TAG_STATES, "zoom: " + state.name());
 		currentZoomCenterInCanvasCoords = computeTwoFingersCenter(event);
 		double currentFingerDistance = computeTwoFingersDistance(event);
-		state = State.PINCHING;
-		// Log.d(TAG, "state: " + state.name());
-		Log.d(TAG_STATES, "zoom: " + state.name());
+		// double newZoomLevel =currentFingerDistance / startingFingerDistance;
+		// double previousActiveZoomLevel = activeZoomLevel;
 		activeZoomLevel = currentFingerDistance / startingFingerDistance;
-		Log.d(TAG, "scale: " + activeZoomLevel);
+		Log.d(TAG, "scale (pinch): " + activeZoomLevel);
 
 		// TODO: jeste maxZoomLevel - tam, kde uz neni vetsi detail, nema smysl
 		// zoomovat (priblizne, treba jeste vynasobit faktorem 2)
 		if (getCurrentZoomLevel() < minZoomLevel) {// zavisi na activeZoomLevel
 			activeZoomLevel = 1.0f;
-			accumulatedZoomLevel = minZoomLevel;// ???
+			accumulatedZoomLevel = minZoomLevel;
 			// TODO: a jak shift?
 			Log.d("Motion", "MOVE finished");
 			return false;
@@ -159,7 +160,7 @@ public class PinchZoomManager {
 
 		state = State.IDLE;
 		// Log.d(TAG, "state: " + state.name());
-		Log.d(TAG_STATES, "zoom: " + state.name());
+		Log.d(TAG_STATES, "zoom (pinch): " + state.name());
 	}
 
 	private double computeTwoFingersDistance(MotionEvent event) {

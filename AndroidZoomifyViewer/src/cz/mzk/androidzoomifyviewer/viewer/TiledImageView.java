@@ -9,9 +9,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Build;
-import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import cz.mzk.androidzoomifyviewer.CacheManager;
@@ -28,7 +30,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
  * @author Martin Řehánek
  * 
  */
-public class TiledImageView extends View {
+public class TiledImageView extends View implements OnGestureListener, OnDoubleTapListener {
 
 	private static final String TAG = TiledImageView.class.getSimpleName();
 
@@ -36,9 +38,13 @@ public class TiledImageView extends View {
 	private DevTools devTools = null;
 	private ImageCoordsPoints testPoints = null;
 
-	private Double mInitialResizeFactor = null;
+	private boolean resizeFactorsInitialized = false;
+	private double mInitialResizingFactor = 0.0;
+	private double mMinResizingFactor = 0.0;
 
 	private String mZoomifyBaseUrl;
+
+	private SingleTapListener mSingleTapListener;
 
 	// SHIFTS
 	private VectorD mInitialShift = VectorD.ZERO_VECTOR;
@@ -72,7 +78,9 @@ public class TiledImageView extends View {
 	private Rect mVisibleImageInCanvas = null;
 
 	private PinchZoomManager mPinchZoomManager;
+	private DoubleTapZoomManager mDoubleTapZoomManager;
 	private SwipeShiftManager mSwipeShiftManager;
+	private GestureDetector mGestureDetector;
 
 	private PointD visibleImageCenter;
 
@@ -84,6 +92,8 @@ public class TiledImageView extends View {
 			devTools = new DevTools(context);
 		}
 		mTilesCache = CacheManager.getTilesCache();
+		mGestureDetector = new GestureDetector(context, this);
+		mGestureDetector.setOnDoubleTapListener(this);
 	}
 
 	public TiledImageView(Context context) {
@@ -125,8 +135,8 @@ public class TiledImageView extends View {
 		// mZoomLevel = 1.0f;
 		mPinchZoomManager = new PinchZoomManager(this, 1.0f);// DEFAULT ZOOM
 																// LEVEL
-		mInitialResizeFactor = null;
-		// mUserShift = VectorD.ZERO_VECTOR;
+		mDoubleTapZoomManager = new DoubleTapZoomManager(this);
+		resizeFactorsInitialized = false;
 		mSwipeShiftManager = new SwipeShiftManager();
 		mZoomifyBaseUrl = zoomifyBaseUrl;
 
@@ -147,9 +157,11 @@ public class TiledImageView extends View {
 								testPoints = new ImageCoordsPoints(imageProperties.getWidth(),
 										imageProperties.getHeight());
 							}
+
 							if (loadingHandler != null) {
 								loadingHandler.onImagePropertiesProcessed(zoomifyBaseUrl);
 							}
+
 							invalidate();
 						}
 
@@ -205,25 +217,16 @@ public class TiledImageView extends View {
 			if (DEV_MODE) {
 				devTools.drawCanvasBlue(canv);
 			}
-			if (mInitialResizeFactor == null) {
-				double resizingFactorFitToScreen = computeResizingFactorFitToScreen(canv.getWidth(), canv.getHeight(),
-						mActiveImageDownloader.getImageProperties().getWidth(), mActiveImageDownloader
-								.getImageProperties().getHeight());
-				double resizingFactorNoFreeSpace = computeResizingFactorNoFreeSpace(canv.getWidth(), canv.getHeight(),
-						mActiveImageDownloader.getImageProperties().getWidth(), mActiveImageDownloader
-								.getImageProperties().getHeight());
-				switch (mViewMode) {
-				case FIT_TO_SCREEN:
-					mInitialResizeFactor = resizingFactorFitToScreen;
-					break;
-				case NO_FREE_SPACE_ALIGN_CENTER:
-				case NO_FREE_SPACE_ALIGN_TOP_LEFT:
-					mInitialResizeFactor = resizingFactorNoFreeSpace;
-					break;
-				}
-				// Log.d(TAG, "fit to screen factor: " + mInitialResizeFactor);
-				double minResizingFactor = Math.min(resizingFactorFitToScreen, resizingFactorNoFreeSpace);
-				mPinchZoomManager.setMinZoomLevel(minResizingFactor / mInitialResizeFactor);
+			if (!resizeFactorsInitialized) {
+				initResizeFactors(canv);
+				resizeFactorsInitialized = true;
+			}
+			if (mPinchZoomManager.getState() == PinchZoomManager.State.READY_TO_PINCH
+					|| mPinchZoomManager.getState() == PinchZoomManager.State.PINCHING) {
+				double minZoomLevel = mMinResizingFactor / mInitialResizingFactor
+						/ mDoubleTapZoomManager.getCurrentZoomLevel();
+				Log.d(TAG_STATES, "minZoomLevel: " + minZoomLevel);
+				mPinchZoomManager.setMinZoomLevel(minZoomLevel);
 			}
 
 			// za hranice canvas cela oblast s obrazkem
@@ -283,8 +286,15 @@ public class TiledImageView extends View {
 				// && (zoomState == ZoomManager.State.READY_TO_PINCH ||
 				// zoomState == ZoomManager.State.PINCHING || shiftState ==
 				// SwipeShiftManager.State.IDLE)) {
-				PointD currentZoomCenter = mPinchZoomManager.getCurrentZoomCenter();
-				PointD initialZoomCenterInImageCoords = mPinchZoomManager.getInitialZoomCenterInImageCoords();
+				PointD initialZoomCenterInImageCoords = null;
+				PointD currentZoomCenter = null;
+				if (mDoubleTapZoomManager.getState() == DoubleTapZoomManager.State.ZOOMING) {
+					initialZoomCenterInImageCoords = mDoubleTapZoomManager.getInitialZoomCenterInImageCoords();
+					currentZoomCenter = mDoubleTapZoomManager.getCurrentZoomCenter();
+				} else {
+					initialZoomCenterInImageCoords = mPinchZoomManager.getInitialZoomCenterInImageCoords();
+					currentZoomCenter = mPinchZoomManager.getCurrentZoomCenter();
+				}
 				if (initialZoomCenterInImageCoords != null && currentZoomCenter != null) {
 					PointD initialZoomCenterCanvas = Utils.toCanvasCoords(initialZoomCenterInImageCoords,
 							getTotalResizeFactor(), getTotalShift());
@@ -299,6 +309,26 @@ public class TiledImageView extends View {
 				devTools.drawImageCoordPoints(canv, testPoints, resizeFactor, getTotalShift());
 			}
 		}
+	}
+
+	private void initResizeFactors(Canvas canv) {
+		ImageProperties imageProperties = mActiveImageDownloader.getImageProperties();
+		double resizingFactorFitToScreen = computeResizingFactorFitToScreen(canv.getWidth(), canv.getHeight(),
+				imageProperties.getWidth(), imageProperties.getHeight());
+		double resizingFactorNoFreeSpace = computeResizingFactorNoFreeSpace(canv.getWidth(), canv.getHeight(),
+				imageProperties.getWidth(), imageProperties.getHeight());
+		switch (mViewMode) {
+		case FIT_TO_SCREEN:
+			mInitialResizingFactor = resizingFactorFitToScreen;
+			break;
+		case NO_FREE_SPACE_ALIGN_CENTER:
+		case NO_FREE_SPACE_ALIGN_TOP_LEFT:
+			mInitialResizingFactor = resizingFactorNoFreeSpace;
+			break;
+
+		}
+		// Log.d(TAG, "fit to screen factor: " + mInitialResizeFactor);
+		mMinResizingFactor = Math.min(resizingFactorFitToScreen, resizingFactorNoFreeSpace);
 	}
 
 	public DevTools getDevTools() {
@@ -316,7 +346,8 @@ public class TiledImageView extends View {
 	}
 
 	public double getTotalResizeFactor() {
-		return mPinchZoomManager.getCurrentZoomLevel() * mInitialResizeFactor;
+		return mInitialResizingFactor * mPinchZoomManager.getCurrentZoomLevel()
+				* mDoubleTapZoomManager.getCurrentZoomLevel();
 	}
 
 	private boolean isInVisibleImage(Rect imageInCanvasVisible, Point point) {
@@ -334,10 +365,11 @@ public class TiledImageView extends View {
 	// }
 
 	public VectorD getTotalShift() {
-		VectorD zoomShift = mPinchZoomManager.getCurrentZoomShift();
 		VectorD swipeShift = mSwipeShiftManager.getSwipeShift();
+		VectorD pinchZoomShift = mPinchZoomManager.getCurrentZoomShift();
+		VectorD doubleTapZoomShift = mDoubleTapZoomManager.getCurrentZoomShift();
 		// return VectorD.sum(mUserShift, mInitialShift, zoomShift);
-		return VectorD.sum(mInitialShift, swipeShift, zoomShift);
+		return VectorD.sum(mInitialShift, swipeShift, pinchZoomShift, doubleTapZoomShift);
 	}
 
 	private void drawLayers(Canvas canv, TilesDownloader downloader, int layerId) {
@@ -595,106 +627,117 @@ public class TiledImageView extends View {
 	@Override
 	@SuppressLint("NewApi")
 	public boolean onTouchEvent(MotionEvent event) {
-		int action = MotionEventCompat.getActionMasked(event);
+		int action = event.getActionMasked();
 		if (Build.VERSION.SDK_INT >= 19) {
-			// Log.d("Motion", MotionEvent.actionToString(action));
 		}
-		// Log.d("Motion", "zooming: " + mZoomManager.isZoomingNow() +
-		// ", panning: " + mPanningNow);
-		if (mSwipeShiftManager != null && mPinchZoomManager != null) {
+		if (mSwipeShiftManager != null && mPinchZoomManager != null && mDoubleTapZoomManager != null) {
 			SwipeShiftManager.State swipeShiftManagerState = mSwipeShiftManager.getState();
 			PinchZoomManager.State zoomManagerState = mPinchZoomManager.getState();
-			int actionIndex = event.getActionIndex();
-			switch (action) {
-			case (MotionEvent.ACTION_MASK):
-				// TODO: proc tohle?
-				return true;
-			case (MotionEvent.ACTION_DOWN):
-				mSwipeShiftManager.notifyReadyToDrag(event.getX(), event.getY());
-				return true;
-			case (MotionEvent.ACTION_POINTER_DOWN):
-				if (actionIndex == 1) {
-					if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG) {
-						mSwipeShiftManager.notifyCanceled();
-					} else if (swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
-						mSwipeShiftManager.notifyDraggingFinished(false);
-					}
-					if (zoomManagerState == PinchZoomManager.State.IDLE) {
-						mPinchZoomManager.notifyReadyToPinch(event, getTotalResizeFactor(), getTotalShift());
-						return true;
-					} else {
-						Log.w(TAG, "unexpected ACTION_POINTER_DOWN");
-						return true;
-					}
-				} else {
-					// ignore third and following fingers
+			DoubleTapZoomManager.State doubleTapZoomManagerState = mDoubleTapZoomManager.getState();
+			if (doubleTapZoomManagerState == DoubleTapZoomManager.State.IDLE) {
+				int actionIndex = event.getActionIndex();
+				switch (action) {
+				case (MotionEvent.ACTION_DOWN):
+					mSwipeShiftManager.notifyReadyToDrag(event.getX(), event.getY());
+					mGestureDetector.onTouchEvent(event);
 					return true;
-				}
-			case (MotionEvent.ACTION_UP):
-				if (swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
-					mSwipeShiftManager.notifyDraggingFinished(true);
-					return true;
-				} else if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG) {
-					mSwipeShiftManager.notifyCanceled();
-					return true;
-				}
-			case (MotionEvent.ACTION_POINTER_UP):
-				if (actionIndex == 0 || actionIndex == 1) {
-					if (zoomManagerState == PinchZoomManager.State.PINCHING) {
-						mPinchZoomManager.notifyPinchingFinished();
-					}
-					if (zoomManagerState == PinchZoomManager.State.READY_TO_PINCH) {
-						mPinchZoomManager.notifyCanceled();
-					} else {
-						Log.w(TAG, "unexpected ACTION_POINTER_UP");
-					}
-					if (swipeShiftManagerState == SwipeShiftManager.State.IDLE) {
-						// TODO: enable
-						// mSwipeShiftManager.notifyReadyToDrag(event);
-
-						int remainingFingerIndex = actionIndex == 0 ? 1 : 0;
-						mSwipeShiftManager.notifyReadyToDrag(event.getX(remainingFingerIndex),
-								event.getY(remainingFingerIndex));
-					} else {
-						Log.w(TAG, "unexpected " + SwipeShiftManager.class.getSimpleName() + " state: "
-								+ swipeShiftManagerState.name());
-					}
-					return true;
-				} else {
-					// ignore third and following fingers
-					return true;
-				}
-			case (MotionEvent.ACTION_MOVE):
-				if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG
-						|| swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
-					mSwipeShiftManager.notifyDragging(event.getX(), event.getY(), maxShiftUp, maxShiftDown,
-							maxShiftLeft, maxShiftRight);
-					invalidate();
-					return true;
-				} else {
-					int fingers = event.getPointerCount();
-					if (fingers == 2) {
-						boolean refresh = mPinchZoomManager.notifyPinchingContinues(event, visibleImageCenter,
-								getTotalResizeFactor(), getTotalShift());
-						if (refresh) {
-							invalidate();
+				case (MotionEvent.ACTION_POINTER_DOWN):
+					if (actionIndex == 1) {
+						// just so that click is not recognized by
+						// GestureDetector
+						mGestureDetector.onTouchEvent(event);
+						if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG) {
+							mSwipeShiftManager.notifyCanceled();
+						} else if (swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
+							mSwipeShiftManager.notifyDraggingFinished(false);
+						}
+						if (zoomManagerState == PinchZoomManager.State.IDLE) {
+							mPinchZoomManager.notifyReadyToPinch(event, getTotalResizeFactor(), getTotalShift());
+							return true;
+						} else {
+							Log.w(TAG, "unexpected ACTION_POINTER_DOWN");
+							return true;
 						}
 					} else {
-						// should not ever happen
-						Log.w(TAG, "unexpected ACTION_MOVE");
+						// ignore third and following fingers
 						return true;
 					}
+				case (MotionEvent.ACTION_UP):
+					if (swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
+						mSwipeShiftManager.notifyDraggingFinished(true);
+						return true;
+					} else if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG) {
+						mSwipeShiftManager.notifyCanceled();
+						mGestureDetector.onTouchEvent(event);
+						return true;
+					} else {
+						mGestureDetector.onTouchEvent(event);
+						return true;
+					}
+				case (MotionEvent.ACTION_POINTER_UP):
+					if (actionIndex == 0 || actionIndex == 1) {
+						// just so that click is not recognized by
+						// GestureDetector
+						mGestureDetector.onTouchEvent(event);
+						if (zoomManagerState == PinchZoomManager.State.PINCHING) {
+							mPinchZoomManager.notifyPinchingFinished();
+						}
+						if (zoomManagerState == PinchZoomManager.State.READY_TO_PINCH) {
+							mPinchZoomManager.notifyCanceled();
+						} else {
+							Log.w(TAG, "unexpected ACTION_POINTER_UP");
+						}
+						if (swipeShiftManagerState == SwipeShiftManager.State.IDLE) {
+							// TODO: enable
+							// mSwipeShiftManager.notifyReadyToDrag(event);
+
+							int remainingFingerIndex = actionIndex == 0 ? 1 : 0;
+							mSwipeShiftManager.notifyReadyToDrag(event.getX(remainingFingerIndex),
+									event.getY(remainingFingerIndex));
+						} else {
+							Log.w(TAG, "unexpected " + SwipeShiftManager.class.getSimpleName() + " state: "
+									+ swipeShiftManagerState.name());
+						}
+						return true;
+					} else {
+						// ignore third and following fingers
+						return true;
+					}
+				case (MotionEvent.ACTION_MOVE):
+					if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG
+							|| swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
+						mSwipeShiftManager.notifyDragging(event.getX(), event.getY(), maxShiftUp, maxShiftDown,
+								maxShiftLeft, maxShiftRight);
+						invalidate();
+						return true;
+					} else {
+						int fingers = event.getPointerCount();
+						if (fingers == 2) {
+							boolean refresh = mPinchZoomManager.notifyPinchingContinues(event, visibleImageCenter,
+									getTotalResizeFactor(), getTotalShift());
+							if (refresh) {
+								invalidate();
+							}
+						} else {
+							// should not ever happen
+							Log.w(TAG, "unexpected ACTION_MOVE");
+							return true;
+						}
+					}
+				default:
+					if (Build.VERSION.SDK_INT >= 19) {
+						Log.w(TAG, "unexpected event: " + MotionEvent.actionToString(action));
+					} else {
+						Log.w(TAG, "unexpected event");
+					}
+					return super.onTouchEvent(event);
 				}
-			default:
-				if (Build.VERSION.SDK_INT >= 19) {
-					Log.w(TAG, "unexpected event: " + MotionEvent.actionToString(action));
-				} else {
-					Log.w(TAG, "unexpected event");
-				}
-				return super.onTouchEvent(event);
+			} else {
+				Log.w(TAG, "not initialized");
+				return false;
 			}
 		} else {
-			Log.w(TAG, "not initialized");
+			Log.w(TAG_STATES, "ignoring event while double tap zooming animation in progress");
 			return false;
 		}
 	}
@@ -719,17 +762,154 @@ public class TiledImageView extends View {
 		FIT_TO_SCREEN, NO_FREE_SPACE_ALIGN_TOP_LEFT, NO_FREE_SPACE_ALIGN_CENTER
 	}
 
+	/**
+	 * Exactly one of these methods is called eventually. Either
+	 * onImagePropertiesProcessed if ImageProperties.xml is found, downloaded
+	 * and processed or one of the other methods in case of some error.
+	 * 
+	 * @author martin
+	 * 
+	 */
 	public interface LoadingHandler {
 
+		/**
+		 * Initialized properly.
+		 * 
+		 * @param imagePropertiesUrl
+		 */
 		public void onImagePropertiesProcessed(String imagePropertiesUrl);
 
+		/**
+		 * Response to HTTP request for ImageProperties.xml returned code that
+		 * cannot be handled here. That means almost everything except some 2xx
+		 * codes and some 3xx codes for which redirection is applied.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param responseCode
+		 */
 		public void onImagePropertiesInvalidStateError(String imagePropertiesUrl, int responseCode);
 
+		/**
+		 * Too many redirections to ImageProperties.xml, probably loop.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param redirections
+		 */
 		public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections);
 
+		/**
+		 * Other errors in transfering ImageProperties.xml - timeouts etc.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param errorMessage
+		 */
 		public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage);
 
+		/**
+		 * Invalid content in ImageProperties.xml. Particulary erroneous xml.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param errorMessage
+		 */
 		public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage);
+	}
+
+	private static final String TAG_STATES = "state";
+
+	@Override
+	@SuppressLint("NewApi")
+	public boolean onSingleTapConfirmed(MotionEvent e) {
+		PointD point = new PointD(e.getX(), e.getY());
+		if (Build.VERSION.SDK_INT >= 19) {
+			Log.d(TAG_STATES, "imgView: onSingleTapConfirmed: " + MotionEvent.actionToString(e.getAction()) + ": "
+					+ point.toString());
+		} else {
+			Log.d(TAG_STATES, "imgView: onSingleTapConfirmed: " + point.toString());
+		}
+		if (mSingleTapListener != null) {
+			mSingleTapListener.onSingleTap(e.getX(), e.getY());
+		}
+		return true;
+	}
+
+	@Override
+	@SuppressLint("NewApi")
+	public boolean onDoubleTap(MotionEvent e) {
+		PointD point = new PointD(e.getX(), e.getY());
+		if (Build.VERSION.SDK_INT >= 19) {
+			Log.d(TAG_STATES,
+					"imgView: onDoubleTap: " + MotionEvent.actionToString(e.getAction()) + ": " + point.toString());
+		} else {
+			Log.d(TAG_STATES, "imgView: onDoubleTap: " + point.toString());
+		}
+		mDoubleTapZoomManager.startZoomingAnimation(point);
+
+		return true;
+	}
+
+	@Override
+	@SuppressLint("NewApi")
+	public boolean onDoubleTapEvent(MotionEvent e) {
+		// if (Build.VERSION.SDK_INT >= 19) {
+		// Log.d(TAG_STATES, "imgView: onDoubleTapEvent: " +
+		// MotionEvent.actionToString(e.getAction()));
+		// } else {
+		// Log.d(TAG_STATES, "imgView: onDoubleTapEvent");
+		// }
+		// return true;
+		return false;
+	}
+
+	@Override
+	public boolean onDown(MotionEvent e) {
+		// Log.d(TAG_STATES, "imgView: onDown");
+		return false;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent e) {
+		// Log.d(TAG_STATES, "imgView: onShowPress");
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent e) {
+		// Log.d(TAG_STATES, "imgView: onSingleTapUp");
+		return false;
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		// Log.d(TAG_STATES, "imgView: onScroll");
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		// Log.d(TAG_STATES, "imgView: onLongPress");
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		// Log.d(TAG_STATES, "imgView: onFling");
+		return false;
+	}
+
+	public void setSingleTapListener(SingleTapListener singleTapListener) {
+		this.mSingleTapListener = singleTapListener;
+	}
+
+	public interface SingleTapListener {
+		/**
+		 * This method is called after single tap, that is confirmed not to be
+		 * double tap and also has not been used internally by this view. I.e.
+		 * for zooming, swiping etc.
+		 * 
+		 * @param x
+		 *            x coordinate of the tap
+		 * @param y
+		 *            y coordinate of the tap
+		 */
+		public void onSingleTap(float x, float y);
 	}
 
 }

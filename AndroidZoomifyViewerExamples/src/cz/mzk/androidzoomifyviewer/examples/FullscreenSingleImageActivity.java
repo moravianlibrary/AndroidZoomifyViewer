@@ -5,14 +5,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.LoadingHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class FullscreenSingleImageActivity extends Activity implements LoadingHandler {
+public class FullscreenSingleImageActivity extends Activity implements LoadingHandler, SingleTapListener {
 
 	private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
 
@@ -45,6 +48,7 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mErrorDescription = (TextView) findViewById(R.id.errorDescription);
 		mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
 		mImageView.setLoadingHandler(this);
+		mImageView.setSingleTapListener(this);
 		showImage();
 	}
 
@@ -113,6 +117,12 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mErrorTitle.setText("Invalid content in ImageProperties.xml");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
 		mErrorDescription.setText(errorMessage);
+	}
+
+	@Override
+	public void onSingleTap(float x, float y) {
+		PointD point = new PointD(x, y);
+		Toast.makeText(this, "Single tap at " + point.toString(), Toast.LENGTH_SHORT).show();
 	}
 
 }
