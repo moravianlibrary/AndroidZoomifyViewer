@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExampleWithHttpResponseCode;
+import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExampleWithHttpResponseCode;
 
 /**
  * @author Martin Řehánek
@@ -33,7 +33,7 @@ public class ImagePropertiesRedirectionLoopExamplesActivity extends Activity {
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText("ImageProperties.xml redirection loop examples");
 		mListViewExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getErrorsExamples()));
+		mListViewExamples.setAdapter(new MyAdapter(this, SingleImageExamplesFactory.getErrorsExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {

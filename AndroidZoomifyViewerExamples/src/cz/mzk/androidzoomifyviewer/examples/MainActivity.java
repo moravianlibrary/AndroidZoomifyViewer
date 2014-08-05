@@ -100,7 +100,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		if (v == mBtnSingleImageWorkingExamples) {
-			startActivity(new Intent(this, SinglePageWorkingExamplesActivity.class));
+			startActivity(new Intent(this, SingleImageWorkingExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesHttpResponseCodes) {
 			startActivity(new Intent(this, ImagePropertiesHttpResponseCodeExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesRedirectionLoops) {

@@ -14,14 +14,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExample;
+import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExample;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class SinglePageWorkingExamplesActivity extends Activity {
-	private static final String TAG = SinglePageWorkingExamplesActivity.class.getSimpleName();
+public class SingleImageWorkingExamplesActivity extends Activity {
+	private static final String TAG = SingleImageWorkingExamplesActivity.class.getSimpleName();
 
 	private ListView mListExamples;
 	private TextView mTitle;
@@ -33,7 +33,7 @@ public class SinglePageWorkingExamplesActivity extends Activity {
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText("Single page examples");
 		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getWorkingExamples()));
+		mListExamples.setAdapter(new MyAdapter(this, SingleImageExamplesFactory.getWorkingExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<ImageExample> {

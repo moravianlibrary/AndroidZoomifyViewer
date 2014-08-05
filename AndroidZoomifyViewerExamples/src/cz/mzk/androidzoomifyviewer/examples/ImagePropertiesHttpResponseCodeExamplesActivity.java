@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExampleWithHttpResponseCode;
+import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExampleWithHttpResponseCode;
 
 /**
  * @author Martin Řehánek
@@ -33,7 +33,7 @@ public class ImagePropertiesHttpResponseCodeExamplesActivity extends Activity {
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText("ImageProperties.xml HTTP response codes");
 		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory
+		mListViewWithExamples.setAdapter(new MyAdapter(this, SingleImageExamplesFactory
 				.getImagePropertiesResponseExamples()));
 	}
 

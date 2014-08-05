@@ -7,7 +7,7 @@ import java.util.List;
  * @author Martin Řehánek
  * 
  */
-public class SinglePageExamplesFactory {
+public class SingleImageExamplesFactory {
 
 	public static class ImageExample {
 		private final String description;

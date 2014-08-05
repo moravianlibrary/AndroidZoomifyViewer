@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExample;
+import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExample;
 
 /**
  * @author Martin Řehánek
@@ -33,7 +33,7 @@ public class ImagePropertiesInvalidContentExamplesActivity extends Activity {
 		mTitle = (TextView) findViewById(R.id.title);
 		mTitle.setText("ImageProperties.xml invalid content examples");
 		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getImagePropertiesInvalidContentExamples()));
+		mListExamples.setAdapter(new MyAdapter(this, SingleImageExamplesFactory.getImagePropertiesInvalidContentExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<ImageExample> {
