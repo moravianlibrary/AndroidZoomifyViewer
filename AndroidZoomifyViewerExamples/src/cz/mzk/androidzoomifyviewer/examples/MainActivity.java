@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,16 +14,12 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-
+import cz.mzk.androidzoomifyviewer.examples.kramerius.FullscreenPagesActivity;
+import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusExamplesFactory.MonographExample;
+import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusObjectPersistentUrl;
-import cz.mzk.androidzoomifyviewer.examples.tmp.TestData;
-import cz.mzk.androidzoomifyviewer.examples.tmp.TestData.MonographExample;
 
 /**
  * @author Martin Řehánek
@@ -33,23 +28,17 @@ import cz.mzk.androidzoomifyviewer.examples.tmp.TestData.MonographExample;
 public class MainActivity extends Activity implements OnClickListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 
-	private Button mQrScanBtn;
-	private ListView mListViewWithExamples;
 	private Button mBtnSingleImageWorkingExamples;
 	private Button mBtnImagePropertiesHttpResponseCodes;
 	private Button mBtnImagePropertiesRedirectionLoops;
 	private Button mBtnImagePropertiesInvalidContent;
 	private Button mBtnImagePropertiesOtherErrors;
+	private Button mBtnKrameriusMultiplePageExamples;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mQrScanBtn = (Button) findViewById(R.id.qrScannerBtn);
-		mQrScanBtn.setOnClickListener(this);
-		mListViewWithExamples = (ListView) findViewById(R.id.buttonList);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, TestData.getTestTopLevelUrls()));
-
 		mBtnSingleImageWorkingExamples = (Button) findViewById(R.id.btnSingleImageWorkingExamples);
 		mBtnSingleImageWorkingExamples.setOnClickListener(this);
 		mBtnImagePropertiesHttpResponseCodes = (Button) findViewById(R.id.btnImagePropertiesHttpResponseCodes);
@@ -60,6 +49,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		mBtnImagePropertiesInvalidContent.setOnClickListener(this);
 		mBtnImagePropertiesOtherErrors = (Button) findViewById(R.id.btnImagePropertiesOtherErrors);
 		mBtnImagePropertiesOtherErrors.setOnClickListener(this);
+		mBtnKrameriusMultiplePageExamples = (Button) findViewById(R.id.btnKrameriusMultiplePageExamples);
+		mBtnKrameriusMultiplePageExamples.setOnClickListener(this);
 	}
 
 	class MyAdapter extends ArrayAdapter<MonographExample> {
@@ -108,46 +99,19 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if (v == mQrScanBtn) {
-			// String url =
-			// "http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22";
-			try {
-				IntentIntegrator integrator = new IntentIntegrator(this);
-				integrator.initiateScan();
-			} catch (Exception e) {
-				Log.d(TAG, "error starting qr intent", e);
-			}
-		} else if (v == mBtnSingleImageWorkingExamples) {
-			startActivity(new Intent(this, SinglePageExamplesActivity.class));
+		if (v == mBtnSingleImageWorkingExamples) {
+			startActivity(new Intent(this, SinglePageWorkingExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesHttpResponseCodes) {
-			startActivity(new Intent(this, ImagePropertiesHttpResponseCodesActivity.class));
+			startActivity(new Intent(this, ImagePropertiesHttpResponseCodeExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesRedirectionLoops) {
-			startActivity(new Intent(this, ImagePropertiesRedirectonLoopActivity.class));
+			startActivity(new Intent(this, ImagePropertiesRedirectionLoopExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesInvalidContent) {
-			startActivity(new Intent(this, ImagePropertiesInvalidContentActivity.class));
+			startActivity(new Intent(this, ImagePropertiesInvalidContentExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesOtherErrors) {
-			startActivity(new Intent(this, ImagePropertiesOtherErrorsActivity.class));
+			startActivity(new Intent(this, ImagePropertiesOtherErrorsExamplesActivity.class));
+		} else if (v == mBtnKrameriusMultiplePageExamples) {
+			startActivity(new Intent(this, KrameriusMultiplePageExamplesActivity.class));
 		}
 	}
 
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (requestCode == IntentIntegrator.REQUEST_CODE) {
-			IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-			if (scanResult != null) {
-				Log.d(TAG, "QR content: " + scanResult.getContents());
-				try {
-					KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(scanResult.getContents());
-					// String url = "http://www.example.com";
-					Intent i = new Intent(Intent.ACTION_VIEW);
-					i.setData(Uri.parse(url.toString()));
-					startActivity(i);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else {
-				Log.d(TAG, "no qr scanning result");
-			}
-		}
-	}
 }

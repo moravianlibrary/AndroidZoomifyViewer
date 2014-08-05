@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples.tmp;
+package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +8,7 @@ import java.util.List;
  * @author Martin Řehánek
  * 
  */
-public class TestData {
+public class KrameriusExamplesFactory {
 
 	public static class MonographExample {
 		private static final int MAX_TITLE_LENGTH = 30;

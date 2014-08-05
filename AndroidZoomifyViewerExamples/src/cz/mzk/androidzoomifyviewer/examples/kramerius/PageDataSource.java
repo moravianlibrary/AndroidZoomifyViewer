@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples;
+package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 /**
  * @author Martin Řehánek

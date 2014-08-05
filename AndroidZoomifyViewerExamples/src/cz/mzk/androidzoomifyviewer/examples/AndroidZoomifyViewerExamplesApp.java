@@ -8,7 +8,7 @@ import cz.mzk.androidzoomifyviewer.CacheManager;
  * @author Martin Řehánek
  * 
  */
-public class ExamplesApp extends Application {
+public class AndroidZoomifyViewerExamplesApp extends Application {
 
 	@Override
 	public void onCreate() {

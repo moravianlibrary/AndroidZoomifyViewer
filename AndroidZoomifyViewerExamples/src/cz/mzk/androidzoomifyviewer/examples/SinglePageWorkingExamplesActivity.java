@@ -20,8 +20,8 @@ import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExamp
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesInvalidContentActivity extends Activity {
-	private static final String TAG = ImagePropertiesInvalidContentExamplesActivity.class.getSimpleName();
+public class SinglePageWorkingExamplesActivity extends Activity {
+	private static final String TAG = SinglePageWorkingExamplesActivity.class.getSimpleName();
 
 	private ListView mListExamples;
 	private TextView mTitle;
@@ -31,9 +31,9 @@ public class ImagePropertiesInvalidContentActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_examples);
 		mTitle = (TextView) findViewById(R.id.title);
-		mTitle.setText("ImageProperties.xml invalid content examples");
+		mTitle.setText("Single page examples");
 		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getImagePropertiesInvalidContentExamples()));
+		mListExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getWorkingExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<ImageExample> {

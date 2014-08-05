@@ -14,32 +14,35 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples;
-import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples.Example;
+import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExampleWithHttpResponseCode;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesRedirectonLoopActivity extends Activity {
-	private static final String TAG = ImagePropertiesRedirectonLoopActivity.class.getSimpleName();
+public class ImagePropertiesHttpResponseCodeExamplesActivity extends Activity {
+	private static final String TAG = ImagePropertiesHttpResponseCodeExamplesActivity.class.getSimpleName();
 
-	private ListView mListViewExamples;
+	private ListView mListViewWithExamples;
+	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_image_properties_redirection_loop);
-		mListViewExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getErrorsExamples()));
+		setContentView(R.layout.activity_examples);
+		mTitle = (TextView) findViewById(R.id.title);
+		mTitle.setText("ImageProperties.xml HTTP response codes");
+		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
+		mListViewWithExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory
+				.getImagePropertiesResponseExamples()));
 	}
 
-	class MyAdapter extends ArrayAdapter<Example> {
+	class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
 
 		private final Context context;
-		private final List<Example> itemsArrayList;
+		private final List<ImageExampleWithHttpResponseCode> itemsArrayList;
 
-		public MyAdapter(Context context, List<Example> list) {
+		public MyAdapter(Context context, List<ImageExampleWithHttpResponseCode> list) {
 			super(context, R.layout.item_image_with_error_code, list);
 			this.context = context;
 			this.itemsArrayList = list;

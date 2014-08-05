@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples;
+package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask;
+import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask.PagePidListUtilizer;
 import cz.mzk.androidzoomifyviewer.viewer.PinchZoomManager;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;

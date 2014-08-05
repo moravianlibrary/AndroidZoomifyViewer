@@ -14,35 +14,37 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples;
-import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples.Example;
+import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExampleWithHttpResponseCode;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesHttpResponseCodesActivity extends Activity {
-	private static final String TAG = ImagePropertiesHttpResponseCodesActivity.class.getSimpleName();
+public class ImagePropertiesRedirectionLoopExamplesActivity extends Activity {
+	private static final String TAG = ImagePropertiesRedirectionLoopExamplesActivity.class.getSimpleName();
 
-	private ListView mListViewWithExamples;
+	private ListView mListViewExamples;
+	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_image_properties_http_response_codes);
-		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getImagePropertiesResponseExamples()));
+		setContentView(R.layout.activity_examples);
+		mTitle = (TextView) findViewById(R.id.title);
+		mTitle.setText("ImageProperties.xml redirection loop examples");
+		mListViewExamples = (ListView) findViewById(R.id.listExamples);
+		mListViewExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getErrorsExamples()));
 	}
 
-	class MyAdapter extends ArrayAdapter<Example> {
+	class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
 
 		private final Context context;
-		private final List<Example> itemsArrayList;
+		private final List<ImageExampleWithHttpResponseCode> items;
 
-		public MyAdapter(Context context, List<Example> list) {
-			super(context, R.layout.item_image_with_error_code, list);
+		public MyAdapter(Context context, List<ImageExampleWithHttpResponseCode> items) {
+			super(context, R.layout.item_image_with_error_code, items);
 			this.context = context;
-			this.itemsArrayList = list;
+			this.items = items;
 		}
 
 		@Override
@@ -50,16 +52,16 @@ public class ImagePropertiesHttpResponseCodesActivity extends Activity {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View rowView = inflater.inflate(R.layout.item_image_with_error_code, parent, false);
 
-			((TextView) rowView.findViewById(R.id.errorCode)).setText(String.valueOf(itemsArrayList.get(position)
+			((TextView) rowView.findViewById(R.id.errorCode)).setText(String.valueOf(items.get(position)
 					.getErrorCode()));
-			((TextView) rowView.findViewById(R.id.errorName)).setText(itemsArrayList.get(position).getErrorName());
-			((TextView) rowView.findViewById(R.id.url)).setText(itemsArrayList.get(position).getUrl());
+			((TextView) rowView.findViewById(R.id.errorName)).setText(items.get(position).getErrorName());
+			((TextView) rowView.findViewById(R.id.url)).setText(items.get(position).getUrl());
 
 			rowView.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
-					String url = itemsArrayList.get(position).getUrl();
+					String url = items.get(position).getUrl();
 					startFullscreenSingleImageActivity(url);
 				}
 			});

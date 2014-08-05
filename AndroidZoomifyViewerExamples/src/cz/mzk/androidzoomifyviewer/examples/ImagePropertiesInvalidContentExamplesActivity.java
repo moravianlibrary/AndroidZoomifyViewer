@@ -14,32 +14,34 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples;
-import cz.mzk.androidzoomifyviewer.examples.tmp.ErrorUrlsExamples.Example;
+import cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesFactory.ImageExample;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesOtherErrorsActivity extends Activity {
-	private static final String TAG = ImagePropertiesOtherErrorsActivity.class.getSimpleName();
+public class ImagePropertiesInvalidContentExamplesActivity extends Activity {
+	private static final String TAG = ImagePropertiesInvalidContentExamplesActivity.class.getSimpleName();
 
 	private ListView mListExamples;
+	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_image_properties_other_errors);
+		setContentView(R.layout.activity_examples);
+		mTitle = (TextView) findViewById(R.id.title);
+		mTitle.setText("ImageProperties.xml invalid content examples");
 		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, ErrorUrlsExamples.getImagePropertiesOtherErrorsExamples()));
+		mListExamples.setAdapter(new MyAdapter(this, SinglePageExamplesFactory.getImagePropertiesInvalidContentExamples()));
 	}
 
-	class MyAdapter extends ArrayAdapter<Example> {
+	class MyAdapter extends ArrayAdapter<ImageExample> {
 
 		private final Context context;
-		private final List<Example> itemsArrayList;
+		private final List<ImageExample> itemsArrayList;
 
-		public MyAdapter(Context context, List<Example> list) {
+		public MyAdapter(Context context, List<ImageExample> list) {
 			super(context, R.layout.item_image_with_error_code, list);
 			this.context = context;
 			this.itemsArrayList = list;
@@ -49,6 +51,7 @@ public class ImagePropertiesOtherErrorsActivity extends Activity {
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View rowView = inflater.inflate(R.layout.item_image, parent, false);
+
 			((TextView) rowView.findViewById(R.id.description)).setText(String.valueOf(itemsArrayList.get(position)
 					.getErrorName()));
 			((TextView) rowView.findViewById(R.id.url)).setText(itemsArrayList.get(position).getUrl());
