@@ -53,9 +53,6 @@ public class ErrorUrlsExamples {
 	public static List<Example> getImagePropertiesResponseExamples() {
 		List<Example> result = new ArrayList<Example>();
 		// 20x
-		result.add(new Example(200, "Ok",
-				"http://kramerius.mzk.cz/search/zoomify/uuid:afdd8ea1-ad6f-474c-9611-152cfd3a14b3/"));
-		result.add(new Example(200, "Ok", "http://www.britishpanoramics.com/ZoomifyImage02/"));
 		result.add(new Example(200, "Ok", "http://mapy.mzk.cz/AA22/0103/"));
 		// 30x
 		result.add(new Example(300, "Multiple chocies",
@@ -222,6 +219,35 @@ public class ErrorUrlsExamples {
 				200,
 				"Server not responding (15 s)",
 				"http://rzeh4n-test-androidzoomify.appspot.com/androidzoomifyviewerexamplesbackend/image_properties_other_errors/server_not_responding_15_s/"));
+		return result;
+	}
+
+	public static List<Example> getWorkingExamples() {
+		List<Example> result = new ArrayList<Example>();
+		result.add(new Example(200, "mapy.mzk.cz 1", "http://mapy.mzk.cz/AA22/0103/"));
+		result.add(new Example(200, "mapy.mzk.cz 2", "http://mapy.mzk.cz/AA22/0104/"));
+		result.add(new Example(200, "mapy.mzk.cz 3", "http://mapy.mzk.cz/AA22/0105/"));
+		result.add(new Example(200, "britishpanoramics.com", "http://www.britishpanoramics.com/ZoomifyImage02/"));
+		result.add(new Example(200, "tricedesigns.com 1", "http://www.tricedesigns.com/panoramas/Pemberton-Park-3/"));
+		// erroneous hopefully in data
+		result.add(new Example(200, "tricedesigns.com 2",
+				"http://www.tricedesigns.com/panoramas/Pemberton-Park-4/Pemberton-Park-4/"));
+		result.add(new Example(200, "tricedesigns.com 3",
+				"http://www.tricedesigns.com/panoramas/office-outside/office-outside/"));
+		result.add(new Example(200, "kramerius.mzk.cz",
+				"http://kramerius.mzk.cz/search/zoomify/uuid:afdd8ea1-ad6f-474c-9611-152cfd3a14b3/"));
+		// http://www.fookes.com/ezimager/zoomify/classic/
+		result.add(new Example(200, "Gruyère Panorama", "http://www.fookes.com/ezimager/zoomify/104_0486/"));
+		result.add(new Example(200, "La Chaudalla, Charmey", "http://www.fookes.com/ezimager/zoomify/109_0977/"));
+		result.add(new Example(200, "Panorama from Vounetz", "http://www.fookes.com/ezimager/zoomify/105_0532/"));
+		result.add(new Example(200, "Medieval Town of Gruyères", "http://www.fookes.com/ezimager/zoomify/122_2259/"));
+		result.add(new Example(200, "Stained Glass Window", "http://www.fookes.com/ezimager/zoomify/122_2209/"));
+		result.add(new Example(200, "Gruyères Castle and Church", "http://www.fookes.com/ezimager/zoomify/122_2264/"));
+		// result.add(new Example(200, "", ""));
+		// result.add(new Example(200, "", ""));
+		// result.add(new Example(200, "", ""));
+		// result.add(new Example(200, "", ""));
+		// result.add(new Example(200, "", ""));
 		return result;
 	}
 }

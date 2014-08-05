@@ -109,8 +109,7 @@ public class TiledImageView extends View {
 		this.mViewMode = viewMode;
 	}
 
-	public void loadImage(final String zoomifyBaseUrl) {
-		Log.d(TAG, "loading new image");
+	public void cancelUnnecessaryTasks() {
 		if (mActiveImageDownloader != null) {
 			for (DownloadAndSaveTileTask task : mActiveImageDownloader.getTaskRegistry().getAllTasks()) {
 				if (task != null) {
@@ -118,6 +117,11 @@ public class TiledImageView extends View {
 				}
 			}
 		}
+	}
+
+	public void loadImage(final String zoomifyBaseUrl) {
+		Log.d(TAG, "loading new image");
+		cancelUnnecessaryTasks();
 		// mZoomLevel = 1.0f;
 		mPinchZoomManager = new PinchZoomManager(this, 1.0f);// DEFAULT ZOOM
 																// LEVEL

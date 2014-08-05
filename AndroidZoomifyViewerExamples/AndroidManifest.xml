@@ -35,6 +35,7 @@
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesRedirectonLoopActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesInvalidContentActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesOtherErrorsActivity" />
+        <activity android:name="cz.mzk.androidzoomifyviewer.examples.SinglePageExamplesActivity" />
         
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
     </application>

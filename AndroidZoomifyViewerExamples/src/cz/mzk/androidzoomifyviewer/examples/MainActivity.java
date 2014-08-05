@@ -35,6 +35,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private Button mQrScanBtn;
 	private ListView mListViewWithExamples;
+	private Button mBtnSingleImageWorkingExamples;
 	private Button mBtnImagePropertiesHttpResponseCodes;
 	private Button mBtnImagePropertiesRedirectionLoops;
 	private Button mBtnImagePropertiesInvalidContent;
@@ -48,6 +49,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		mQrScanBtn.setOnClickListener(this);
 		mListViewWithExamples = (ListView) findViewById(R.id.buttonList);
 		mListViewWithExamples.setAdapter(new MyAdapter(this, TestData.getTestTopLevelUrls()));
+
+		mBtnSingleImageWorkingExamples = (Button) findViewById(R.id.btnSingleImageWorkingExamples);
+		mBtnSingleImageWorkingExamples.setOnClickListener(this);
 		mBtnImagePropertiesHttpResponseCodes = (Button) findViewById(R.id.btnImagePropertiesHttpResponseCodes);
 		mBtnImagePropertiesHttpResponseCodes.setOnClickListener(this);
 		mBtnImagePropertiesRedirectionLoops = (Button) findViewById(R.id.btnImagePropertiesRedirectionLoops);
@@ -113,6 +117,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			} catch (Exception e) {
 				Log.d(TAG, "error starting qr intent", e);
 			}
+		} else if (v == mBtnSingleImageWorkingExamples) {
+			startActivity(new Intent(this, SinglePageExamplesActivity.class));
 		} else if (v == mBtnImagePropertiesHttpResponseCodes) {
 			startActivity(new Intent(this, ImagePropertiesHttpResponseCodesActivity.class));
 		} else if (v == mBtnImagePropertiesRedirectionLoops) {

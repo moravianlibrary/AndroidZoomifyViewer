@@ -48,6 +48,12 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		showImage();
 	}
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mImageView.cancelUnnecessaryTasks();
+	}
+
 	private void restoreData(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
 			Log.d(TAG, "restoring");

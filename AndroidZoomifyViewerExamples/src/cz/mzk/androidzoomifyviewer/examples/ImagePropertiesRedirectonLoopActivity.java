@@ -40,7 +40,7 @@ public class ImagePropertiesRedirectonLoopActivity extends Activity {
 		private final List<Example> itemsArrayList;
 
 		public MyAdapter(Context context, List<Example> list) {
-			super(context, R.layout.error_list_item, list);
+			super(context, R.layout.item_image_with_error_code, list);
 			this.context = context;
 			this.itemsArrayList = list;
 		}
@@ -48,7 +48,7 @@ public class ImagePropertiesRedirectonLoopActivity extends Activity {
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View rowView = inflater.inflate(R.layout.error_list_item, parent, false);
+			View rowView = inflater.inflate(R.layout.item_image_with_error_code, parent, false);
 
 			((TextView) rowView.findViewById(R.id.errorCode)).setText(String.valueOf(itemsArrayList.get(position)
 					.getErrorCode()));

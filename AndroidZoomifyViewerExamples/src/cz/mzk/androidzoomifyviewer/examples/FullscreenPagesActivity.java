@@ -235,4 +235,10 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 
 	}
 
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mImageView.cancelUnnecessaryTasks();
+	}
+
 }
