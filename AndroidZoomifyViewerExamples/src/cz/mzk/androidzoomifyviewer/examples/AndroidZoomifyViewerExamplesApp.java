@@ -9,6 +9,8 @@ import cz.mzk.androidzoomifyviewer.CacheManager;
  * 
  */
 public class AndroidZoomifyViewerExamplesApp extends Application {
+	
+	public static final boolean DEV_MODE = false;
 
 	@Override
 	public void onCreate() {

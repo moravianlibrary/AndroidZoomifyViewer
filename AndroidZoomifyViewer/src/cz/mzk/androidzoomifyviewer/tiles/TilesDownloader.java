@@ -14,6 +14,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import cz.mzk.androidzoomifyviewer.CacheManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -31,7 +32,7 @@ public class TilesDownloader {
 	private static final int MAX_REDIRECTIONS = 5;
 	private static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
 	private static final int TILES_TIMEOUT = 5000;
-	private final DownloadAndSaveTileTasksRegistry takRegistry = new DownloadAndSaveTileTasksRegistry();
+	private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry();
 	private String baseUrl;
 	private boolean initialized = false;
 	private ImageProperties imageProperties;
@@ -52,17 +53,28 @@ public class TilesDownloader {
 			InvalidXmlException {
 		if (initialized) {
 			throw new IllegalStateException("already initialized (" + baseUrl + ")");
-			// Log.w(TAG, "already initialized (" + baseUrl + ")");
 		} else {
 			Log.d(TAG, "initializing: " + baseUrl);
 		}
 		HttpURLConnection.setFollowRedirects(false);
-		String propertiesUrl = baseUrl + "ImageProperties.xml";
-		String propertiesXml = downloadPropertiesXml(propertiesUrl, MAX_REDIRECTIONS);
-		imageProperties = loadFromXml(propertiesXml, propertiesUrl);
+		String imagePropertiesUrl = baseUrl + "ImageProperties.xml";
+		String propertiesXml = getPropertiesXml(baseUrl, imagePropertiesUrl);
+		imageProperties = loadFromXml(propertiesXml, imagePropertiesUrl);
 		Log.d(TAG, imageProperties.toString());
 		layers = initLayers();
 		initialized = true;
+	}
+
+	private String getPropertiesXml(String baseUrl, String propertiesUrl) throws IOException,
+			TooManyRedirectionsException, ImageServerResponseException {
+		String fromCache = CacheManager.getImagePropertiesCache().getXml(baseUrl);
+		if (fromCache != null) {
+			return fromCache;
+		} else {
+			String downloaded = downloadPropertiesXml(propertiesUrl, MAX_REDIRECTIONS);
+			CacheManager.getImagePropertiesCache().storeXml(downloaded, baseUrl);
+			return downloaded;
+		}
 	}
 
 	private String downloadPropertiesXml(String urlString, int remainingRedirections) throws IOException,
@@ -254,7 +266,7 @@ public class TilesDownloader {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
-		return takRegistry;
+		return taskRegistry;
 	}
 
 	public Bitmap downloadTile(TileId tileId) throws IOException, TooManyRedirectionsException,

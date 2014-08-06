@@ -2,6 +2,7 @@ package cz.mzk.androidzoomifyviewer.examples;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -34,6 +35,14 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "onCreate");
+		if (AndroidZoomifyViewerExamplesApp.DEV_MODE) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectDiskWrites().detectNetwork()
+					.penaltyLog()
+					// .detectAll()
+					.build());
+		}
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_fullscreen_single_image);
 		if (savedInstanceState != null) {
@@ -50,6 +59,12 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mImageView.setLoadingHandler(this);
 		mImageView.setSingleTapListener(this);
 		showImage();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString(EXTRA_BASE_URL, mBaseUrl);
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -71,10 +86,10 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 	}
 
 	private void showImage() {
+		Log.d(TAG, "showing image");
 		mImageView.setVisibility(View.INVISIBLE);
 		mProgressView.setVisibility(View.VISIBLE);
 		mImageView.loadImage(mBaseUrl);
-
 	}
 
 	@Override

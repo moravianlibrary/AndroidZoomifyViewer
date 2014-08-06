@@ -4,13 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
-
 /**
  * @author Martin Řehánek
  * 
  */
-public abstract class AbstractTileCache {
+public abstract class AbstractImagePropertiesCache {
 
 	private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
 
@@ -18,12 +16,9 @@ public abstract class AbstractTileCache {
 	private static final char ESCAPE_CHAR = '-';
 
 	// TODO: exception if file name to long (probably over 127 chars)
-	String buildKey(String zoomifyBaseUrl, TileId tileId) {
+	String buildKey(String zoomifyBaseUrl) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(escapeSpecialChars(zoomifyBaseUrl)).append(SEPARATOR);
-		builder.append(tileId.getLayer()).append(SEPARATOR);
-		builder.append(tileId.getX()).append(SEPARATOR);
-		builder.append(tileId.getY());
 		return builder.toString();
 	}
 
@@ -71,4 +66,5 @@ public abstract class AbstractTileCache {
 		map.put(Character.valueOf('~'), Character.valueOf('v'));
 		return map;
 	}
+
 }

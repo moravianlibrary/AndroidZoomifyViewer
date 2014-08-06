@@ -18,7 +18,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
-import cz.mzk.androidzoomifyviewer.cache.TilesDownloaderCache;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTasksRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.ImageProperties;
@@ -70,6 +69,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	// test stuff
 
 	private TilesCache mTilesCache;
+	// private TilesDownloaderCache mDownloaderCache;
 	private TilesDownloader mActiveImageDownloader;
 
 	// za hranice canvas cela oblast s obrazkem
@@ -88,20 +88,23 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	public TiledImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		if (DEV_MODE) {
-			devTools = new DevTools(context);
-		}
-		mTilesCache = CacheManager.getTilesCache();
-		mGestureDetector = new GestureDetector(context, this);
-		mGestureDetector.setOnDoubleTapListener(this);
+		init(context);
 	}
 
 	public TiledImageView(Context context) {
 		super(context);
+		init(context);
+	}
+
+	private void init(Context context) {
 		if (DEV_MODE) {
 			devTools = new DevTools(context);
 		}
 		mTilesCache = CacheManager.getTilesCache();
+		// mDownloaderCache = CacheManager.getDownloaderCache();
+		mGestureDetector = new GestureDetector(context, this);
+		mGestureDetector.setOnDoubleTapListener(this);
+		// setWillNotDraw(false);
 	}
 
 	public ViewMode getViewMode() {
@@ -127,75 +130,71 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				}
 			}
 		}
+		if (mDoubleTapZoomManager != null) {
+			mDoubleTapZoomManager.cancelZoomingAnimation();
+		}
 	}
 
 	public void loadImage(final String zoomifyBaseUrl) {
-		Log.d(TAG, "loading new image");
+		Log.d(TAG, "loading new image, base url: " + zoomifyBaseUrl);
 		cancelUnnecessaryTasks();
-		// mZoomLevel = 1.0f;
-		mPinchZoomManager = new PinchZoomManager(this, 1.0f);// DEFAULT ZOOM
-																// LEVEL
+		mPinchZoomManager = new PinchZoomManager(this, 1.0f);
 		mDoubleTapZoomManager = new DoubleTapZoomManager(this);
 		resizeFactorsInitialized = false;
 		mSwipeShiftManager = new SwipeShiftManager();
 		mZoomifyBaseUrl = zoomifyBaseUrl;
+		mActiveImageDownloader = null;
+		initTilesDownloaderAsync();
+	}
 
-		final TilesDownloaderCache downloaderCache = CacheManager.getDownloaderCache();
-		mActiveImageDownloader = downloaderCache.get(zoomifyBaseUrl);
+	private void initTilesDownloaderAsync() {
+		new InitTilesDownloaderTask(mZoomifyBaseUrl,
+				new InitTilesDownloaderTask.TilesDownloaderInitializationHandler() {
 
-		if (mActiveImageDownloader == null) {
-			new InitTilesDownloaderTask(mZoomifyBaseUrl,
-					new InitTilesDownloaderTask.TilesDownloaderInitializationHandler() {
-
-						@Override
-						public void onInitialized(String zoomifyBaseUrl, TilesDownloader downloader) {
-							Log.d(TAG, "downloader initialized");
-							downloaderCache.put(zoomifyBaseUrl, downloader);
-							mActiveImageDownloader = downloader;
-							if (DEV_MODE) {
-								ImageProperties imageProperties = downloader.getImageProperties();
-								testPoints = new ImageCoordsPoints(imageProperties.getWidth(),
-										imageProperties.getHeight());
-							}
-
-							if (loadingHandler != null) {
-								loadingHandler.onImagePropertiesProcessed(zoomifyBaseUrl);
-							}
-
-							invalidate();
+					@Override
+					public void onInitialized(String zoomifyBaseUrl, TilesDownloader downloader) {
+						Log.d(TAG, "downloader initialized");
+						// mDownloaderCache.put(zoomifyBaseUrl, downloader);
+						mActiveImageDownloader = downloader;
+						if (DEV_MODE) {
+							ImageProperties imageProperties = downloader.getImageProperties();
+							testPoints = new ImageCoordsPoints(imageProperties.getWidth(), imageProperties.getHeight());
 						}
 
-						@Override
-						public void onInvalidImagePropertiesState(String zoomifyBaseUrl, int responseCode) {
-							if (loadingHandler != null) {
-								loadingHandler.onImagePropertiesInvalidStateError(zoomifyBaseUrl, responseCode);
-							}
+						if (loadingHandler != null) {
+							loadingHandler.onImagePropertiesProcessed(zoomifyBaseUrl);
 						}
+						invalidate();
+					}
 
-						@Override
-						public void onRedirectionLoop(String zoomifyBaseUrl, int redirections) {
-							if (loadingHandler != null) {
-								loadingHandler.onImagePropertiesRedirectionLoopError(zoomifyBaseUrl, redirections);
-							}
+					@Override
+					public void onInvalidImagePropertiesState(String zoomifyBaseUrl, int responseCode) {
+						if (loadingHandler != null) {
+							loadingHandler.onImagePropertiesInvalidStateError(zoomifyBaseUrl, responseCode);
 						}
+					}
 
-						@Override
-						public void onDataTransferError(String zoomifyBaseUrl, String errorMessage) {
-							if (loadingHandler != null) {
-								loadingHandler.onImagePropertiesDataTransferError(zoomifyBaseUrl, errorMessage);
-							}
+					@Override
+					public void onRedirectionLoop(String zoomifyBaseUrl, int redirections) {
+						if (loadingHandler != null) {
+							loadingHandler.onImagePropertiesRedirectionLoopError(zoomifyBaseUrl, redirections);
 						}
+					}
 
-						@Override
-						public void onInvalidImagePropertiesData(String zoomifyBaseUrl, String errorMessage) {
-							if (loadingHandler != null) {
-								loadingHandler.onImagePropertiesInvalidDataError(zoomifyBaseUrl, errorMessage);
-							}
+					@Override
+					public void onDataTransferError(String zoomifyBaseUrl, String errorMessage) {
+						if (loadingHandler != null) {
+							loadingHandler.onImagePropertiesDataTransferError(zoomifyBaseUrl, errorMessage);
 						}
-					}).executeConcurrentIfPossible();
-		} else {
-			invalidate();
-		}
+					}
+
+					@Override
+					public void onInvalidImagePropertiesData(String zoomifyBaseUrl, String errorMessage) {
+						if (loadingHandler != null) {
+							loadingHandler.onImagePropertiesInvalidDataError(zoomifyBaseUrl, errorMessage);
+						}
+					}
+				}).executeConcurrentIfPossible();
 	}
 
 	@Override
@@ -214,6 +213,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// canvHeightDp);
 
 		if (mActiveImageDownloader != null) {
+			Log.d(TAG, "imageDownloader no longer null");
 			if (DEV_MODE) {
 				devTools.drawCanvasBlue(canv);
 			}
@@ -308,6 +308,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				double resizeFactor = getTotalResizeFactor();
 				devTools.drawImageCoordPoints(canv, testPoints, resizeFactor, getTotalShift());
 			}
+		} else {
+			Log.d(TAG, "imageDownloader still null");
 		}
 	}
 

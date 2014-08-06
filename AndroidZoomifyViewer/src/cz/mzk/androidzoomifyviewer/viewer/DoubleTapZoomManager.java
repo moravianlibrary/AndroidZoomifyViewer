@@ -1,8 +1,8 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.util.Log;
+import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 
 /**
  * @author Martin Řehánek
@@ -42,7 +42,7 @@ public class DoubleTapZoomManager {
 		Log.d("Motion", "POINTER_DOWN, center: x=" + currentZoomCenterInCanvasCoords.x + ", y="
 				+ currentZoomCenterInCanvasCoords.y);
 		task = new CountDownTask();
-		task.execute();
+		task.executeConcurrentIfPossible();
 	}
 
 	void notifyZoomingIn(double activeZoomLevel) {
@@ -95,7 +95,7 @@ public class DoubleTapZoomManager {
 	}
 
 	public void cancelZoomingAnimation() {
-		if (task != null && task.getStatus() == Status.PENDING || task.getStatus() == Status.RUNNING) {
+		if (task != null && (task.getStatus() == Status.PENDING || task.getStatus() == Status.RUNNING)) {
 			task.cancel(false);
 		}
 	}
@@ -146,7 +146,7 @@ public class DoubleTapZoomManager {
 		IDLE, ZOOMING
 	}
 
-	private class CountDownTask extends AsyncTask<Void, Double, Void> {
+	private class CountDownTask extends ConcurrentAsyncTask<Void, Double, Void> {
 
 		@Override
 		protected Void doInBackground(Void... params) {

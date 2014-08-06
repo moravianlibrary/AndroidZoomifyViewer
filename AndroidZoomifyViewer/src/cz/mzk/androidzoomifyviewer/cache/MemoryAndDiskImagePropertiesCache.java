@@ -1,59 +1,40 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LruCache;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 /**
- * 
  * @author Martin Řehánek
  * 
  */
-public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesCache {
+public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCache implements ImagePropertiesCache {
 
-	private static final String TAG = MemoryAndDiskTilesCache.class.getSimpleName();
-	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
-	private static final String DISK_CACHE_SUBDIR = "bmpCache";
+	private static final String TAG = MemoryAndDiskImagePropertiesCache.class.getSimpleName();
+	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 1MB
+	private static final int MEMORY_CACHE_ITEM_SIZE = 100;
+	private static final String DISK_CACHE_SUBDIR = "imgPropCache";
 	private final Object mDiskCacheLock = new Object();
 	private DiskLruCache mDiskCache = null;
 	private boolean mDiskCacheDisabled = false;
-	private final LruCache<String, Bitmap> mMemoryCache;
+	private final LruCache<String, String> mMemoryCache;
 
-	public MemoryAndDiskTilesCache(Context context) {
+	public MemoryAndDiskImagePropertiesCache(Context context) {
 		mMemoryCache = initMemoryCache();
 		initDiskCacheAsync(context);
 	}
 
-	private LruCache<String, Bitmap> initMemoryCache() {
-		// Get max available VM memory, exceeding this amount will throw an
-		// OutOfMemory exception. Stored in kilobytes as LruCache takes an
-		// int in its constructor.
-		int maxMemoryKB = (int) (Runtime.getRuntime().maxMemory() / 1024);
-		// Use 1/8th of the available memory for this memory cache.
-		final int cacheSizeKB = maxMemoryKB / 8;
-		LruCache<String, Bitmap> cache = new LruCache<String, Bitmap>(cacheSizeKB) {
-			@Override
-			protected int sizeOf(String key, Bitmap bitmap) {
-				// The cache size will be measured in kilobytes rather than
-				// number of items.
-				return bitmap.getByteCount() / 1024;
-			}
+	private LruCache<String, String> initMemoryCache() {
+		LruCache<String, String> cache = new LruCache<String, String>(MEMORY_CACHE_ITEM_SIZE) {
 		};
-		Log.d(TAG, "in-memory lru cache allocated with " + cacheSizeKB + " kB");
+		Log.d(TAG, "in-memory lru cache allocated for " + MEMORY_CACHE_ITEM_SIZE + " items");
 		return cache;
 	}
 
@@ -100,7 +81,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		@Override
 		protected Void doInBackground(File... params) {
 			synchronized (mDiskCacheLock) {
-				//Log.d(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "assuming mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 				File cacheDir = params[0];
 				try {
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE);
@@ -109,38 +91,41 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					Log.w(TAG, "error opening disk cache, disabling");
 					mDiskCacheDisabled = true;
 				}
-				//Log.d(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "assuming mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 			}
 			return null;
 		}
 	}
 
 	@Override
-	public void storeTile(Bitmap bmp, String zoomifyBaseUrl, TileId tileId) {
-		String key = buildKey(zoomifyBaseUrl, tileId);
-		storeTileToMemoryCache(key, bmp);
-		storeTileToDiskCache(key, bmp);
+	public void storeXml(String xml, String zoomifyBaseUrl) {
+		String key = buildKey(zoomifyBaseUrl);
+		storeXmlToMemoryCache(key, xml);
+		storeXmlToDiskCache(key, xml);
 	}
 
-	private void storeTileToMemoryCache(String key, Bitmap bmp) {
+	private void storeXmlToMemoryCache(String key, String xml) {
 		synchronized (mMemoryCache) {
-			//Log.d(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
+			// Log.d(TAG, "assuming mMemoryCache lock: " +
+			// Thread.currentThread().toString());
 			if (mMemoryCache.get(key) == null) {
 				Log.d(TAG, "storing to memory cache: " + key);
-				mMemoryCache.put(key, bmp);
+				mMemoryCache.put(key, xml);
 			} else {
 				Log.d(TAG, "already in memory cache: " + key);
 			}
-			//Log.d(TAG, "releasing mMemoryCache lock: " + Thread.currentThread().toString());
+			// Log.d(TAG, "releasing mMemoryCache lock: " +
+			// Thread.currentThread().toString());
 		}
 	}
 
-	private void storeTileToDiskCache(String key, Bitmap bmp) {
+	private void storeXmlToDiskCache(String key, String xml) {
 		Editor edit = null;
-		OutputStream out = null;
 		try {
 			synchronized (mDiskCacheLock) {
-				//Log.d(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "assuming mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 				while (mDiskCache == null && !mDiskCacheDisabled) {
 					try {
 						mDiskCacheLock.wait();
@@ -157,10 +142,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 						Log.d(TAG, "storing to disk cache: " + key);
 						edit = mDiskCache.edit(key);
 						if (edit != null) {
-							edit.hashCode();
-							out = edit.newOutputStream(0);
-							byte[] bytes = bitmapToByteArray(bmp);
-							out.write(bytes);
+							edit.set(0, xml);
 							edit.commit();
 						} else {
 							// jine vlakno se pokousi zapisovat
@@ -169,16 +151,14 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 						}
 					}
 				}
-				//Log.d(TAG, "releasing mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "releasing mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 			}
 		} catch (IOException e) {
-			Log.e(TAG, "failed to store tile to disk cache: " + e.getMessage());
+			Log.e(TAG, "failed to store xml to disk cache: " + e.getMessage());
 			try {
 				if (edit != null) {
 					edit.abort();
-				}
-				if (out != null) {
-					out.close();
 				}
 			} catch (IOException e1) {
 				Log.e(TAG, "failed to cleanup", e1);
@@ -186,17 +166,11 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		}
 	}
 
-	private byte[] bitmapToByteArray(Bitmap bitmap) {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		bitmap.compress(CompressFormat.PNG, 100, bos);
-		return bos.toByteArray();
-	}
-
 	@Override
-	public Bitmap getTile(String zoomifyBaseUrl, TileId tileId) {
-		String key = buildKey(zoomifyBaseUrl, tileId);
+	public String getXml(String zoomifyBaseUrl) {
+		String key = buildKey(zoomifyBaseUrl);
 		// long start = System.currentTimeMillis();
-		Bitmap inMemoryCache = mMemoryCache.get(key);
+		String inMemoryCache = mMemoryCache.get(key);
 		// long afterHitOrMiss = System.currentTimeMillis();
 		if (inMemoryCache != null) {
 			// Log.d(TAG, "memory cache hit: " + key);
@@ -207,16 +181,16 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 			// Log.d(TAG, "memory cache miss: " + key);
 			// Log.d(TAG, "memory cache miss, delay: " + (afterHitOrMiss -
 			// start) + " ms");
-			Bitmap fromDiskCache = getTileFromDiskCache(key);
+			String fromDiskCache = getXmlFromDiskCache(key);
 			// store also to memory cache (nonblocking)
 			if (fromDiskCache != null) {
-				new StoreTileToMemoryCacheTask(key).execute(fromDiskCache);
+				new StoreXmlToMemoryCacheTask(key).execute(fromDiskCache);
 			}
 			return fromDiskCache;
 		}
 	}
 
-	private Bitmap getTileFromDiskCache(String key) {
+	private String getXmlFromDiskCache(String key) {
 		// Wait while disk cache is started from background thread
 		while (mDiskCache == null && !mDiskCacheDisabled) {
 			try {
@@ -232,8 +206,9 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 				Snapshot snapshot = mDiskCache.get(key);
 				if (snapshot != null) {
 					// long afterHit = System.currentTimeMillis();
-					InputStream in = snapshot.getInputStream(0);
-					Bitmap stream = BitmapFactory.decodeStream(in);
+					// InputStream in = snapshot.getInputStream(0);
+					// String result = stringFromStream(in, bufferSize);
+					String result = snapshot.getString(0);
 					// long afterDecoding = System.currentTimeMillis();
 					// long retrieval = afterHit - start;
 					// long decoding = afterDecoding - afterHit;
@@ -243,7 +218,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					// Log.d(TAG, "disk cache hit: " + key + ", delay: " +
 					// (retrieval + decoding) + "ms (retrieval: "
 					// + retrieval + ", decoding: " + decoding);
-					return stream;
+					return result;
 				} else {
 					// long afterMiss = System.currentTimeMillis();
 					// Log.d(TAG, "disk cache miss:, delay: " + (afterMiss -
@@ -256,21 +231,21 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 				return null;
 			}
 		} catch (IOException e) {
-			Log.i(TAG, "error loading tile from disk cache: " + key, e);
+			Log.i(TAG, "error loading xml from disk cache: " + key, e);
 			return null;
 		}
 	}
 
-	private class StoreTileToMemoryCacheTask extends AsyncTask<Bitmap, Void, Void> {
+	private class StoreXmlToMemoryCacheTask extends AsyncTask<String, Void, Void> {
 		private final String key;
 
-		public StoreTileToMemoryCacheTask(String key) {
+		public StoreXmlToMemoryCacheTask(String key) {
 			this.key = key;
 		}
 
 		@Override
-		protected Void doInBackground(Bitmap... params) {
-			storeTileToMemoryCache(key, params[0]);
+		protected Void doInBackground(String... params) {
+			storeXmlToMemoryCache(key, params[0]);
 			return null;
 		}
 	}
