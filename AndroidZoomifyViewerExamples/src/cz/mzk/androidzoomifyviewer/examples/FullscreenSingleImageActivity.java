@@ -7,16 +7,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import cz.mzk.androidzoomifyviewer.tiles.TileId;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.LoadingHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadHandler;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class FullscreenSingleImageActivity extends Activity implements LoadingHandler, SingleTapListener {
+public class FullscreenSingleImageActivity extends Activity implements ImageInitializationHandler, TileDownloadHandler,
+		SingleTapListener {
 
 	private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
 
@@ -56,7 +59,8 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mErrorResourceUrl = (TextView) findViewById(R.id.errorResourceUrl);
 		mErrorDescription = (TextView) findViewById(R.id.errorDescription);
 		mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
-		mImageView.setLoadingHandler(this);
+		mImageView.setImageInitializationHandler(this);
+		mImageView.setTileDownloadHandler(this);
 		mImageView.setSingleTapListener(this);
 		showImage();
 	}
@@ -93,13 +97,13 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 	}
 
 	@Override
-	public void onImagePropertiesProcessed(String imagePropertiesUrl) {
+	public void onImagePropertiesProcessed() {
 		mProgressView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.VISIBLE);
 	}
 
 	@Override
-	public void onImagePropertiesInvalidStateError(String imagePropertiesUrl, int responseCode) {
+	public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
 		mProgressView.setVisibility(View.INVISIBLE);
 		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Cannot process server resource");
@@ -132,6 +136,40 @@ public class FullscreenSingleImageActivity extends Activity implements LoadingHa
 		mErrorTitle.setText("Invalid content in ImageProperties.xml");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
 		mErrorDescription.setText(errorMessage);
+	}
+
+	@Override
+	public void onTileProcessed(TileId tileId) {
+		// nothing
+	}
+
+	@Override
+	public void onTileUnhandableResponseError(TileId tileId, String tileUrl, int responseCode) {
+		Toast.makeText(this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': HTTP error " + responseCode,
+				Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onTileRedirectionLoopError(TileId tileId, String tileUrl, int redirections) {
+		Toast.makeText(this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': redirection loop",
+				Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onTileDataTransferError(TileId tileId, String tileUrl, String errorMessage) {
+		Toast.makeText(this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': " + errorMessage,
+				Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onTileInvalidDataError(TileId tileId, String tileUrl, String errorMessage) {
+		Toast.makeText(
+				this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': invalid data: "
+						+ errorMessage, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override

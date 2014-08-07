@@ -5,7 +5,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
-import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask.TilesDownloaderInitializationHandler;
+import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.Layer;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 
@@ -23,16 +23,16 @@ public class TilesDownloaderTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String baseUrl = "http://krameriustest.mzk.cz/search/zoomify/uuid:821b6258-43d0-42c8-ad27-5b83bb6667bc/";
-		new InitTilesDownloaderTask(baseUrl, new TilesDownloaderInitializationHandler() {
+		new InitTilesDownloaderTask(baseUrl, new ImagePropertiesDownloadResultHandler() {
 
 			@Override
-			public void onInitialized(String imagePropertiesUrl, TilesDownloader downloader) {
+			public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
 				// TODO Auto-generated method stub
 
 			}
 
 			@Override
-			public void onInvalidImagePropertiesState(String imagePropertiesUrl, int responseCode) {
+			public void onSuccess(TilesDownloader downloader) {
 				// TODO Auto-generated method stub
 
 			}
@@ -44,13 +44,13 @@ public class TilesDownloaderTest extends TestCase {
 			}
 
 			@Override
-			public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
+			public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
 				// TODO Auto-generated method stub
 
 			}
 
 			@Override
-			public void onInvalidImagePropertiesData(String imagePropertiesUrl, String errorMessage) {
+			public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
 				// TODO Auto-generated method stub
 
 			}

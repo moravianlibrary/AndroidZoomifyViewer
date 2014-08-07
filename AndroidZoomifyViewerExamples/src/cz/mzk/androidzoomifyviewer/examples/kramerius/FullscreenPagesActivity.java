@@ -12,18 +12,25 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
+import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask.PagePidListUtilizer;
+import cz.mzk.androidzoomifyviewer.tiles.TileId;
 import cz.mzk.androidzoomifyviewer.viewer.PinchZoomManager;
+import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.LoadingHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class FullscreenPagesActivity extends Activity implements OnClickListener, LoadingHandler {
+public class FullscreenPagesActivity extends Activity implements OnClickListener, ImageInitializationHandler,
+		TileDownloadHandler, SingleTapListener {
 	// public class FullscreenPagesActivity extends Activity implements
 	// OnClickListener {
 
@@ -38,10 +45,10 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 
 	// Views to reflect ImageViewer state
 	private View mProgressView;
-	private View mDownloadErrorView;
-	private View mNoAccessRightsView;
-	private View mDoesntExistView;
-	private View mTmpGeneralErrorView;
+	private View mErrorView;
+	private TextView mErrorTitle;
+	private TextView mErrorDescription;
+	private TextView mErrorResourceUrl;
 
 	// pages data
 	private String mProtocol;
@@ -69,10 +76,10 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 			restoreData(getIntent().getExtras());
 		}
 		mProgressView = findViewById(R.id.progressView);
-		mDownloadErrorView = findViewById(R.id.downloadErrorView);
-		mNoAccessRightsView = findViewById(R.id.noAccessRightsView);
-		mDoesntExistView = findViewById(R.id.doesntExistView);
-		mTmpGeneralErrorView = findViewById(R.id.errorView);
+		mErrorView = findViewById(R.id.errorView);
+		mErrorTitle = (TextView) findViewById(R.id.errorTitle);
+		mErrorResourceUrl = (TextView) findViewById(R.id.errorResourceUrl);
+		mErrorDescription = (TextView) findViewById(R.id.errorDescription);
 
 		mZoomInBtn = (Button) findViewById(R.id.zoomIn);
 		mZoomInBtn.setOnClickListener(this);
@@ -102,16 +109,13 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 		});
 
 		mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
-		mImageView.setLoadingHandler(this);
+		mImageView.setTileDownloadHandler(this);
+		mImageView.setSingleTapListener(this);
 		// showActivePage();
 		// loadPagePids();
 	}
 
 	private void showActivePage() {
-		mDoesntExistView.setVisibility(View.INVISIBLE);
-		mNoAccessRightsView.setVisibility(View.INVISIBLE);
-		mDownloadErrorView.setVisibility(View.INVISIBLE);
-		mDoesntExistView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.INVISIBLE);
 		mProgressView.setVisibility(View.VISIBLE);
 		PageDataSource pageDataSource = new PageDataSource(mProtocol, mDomain, mPagePids.get(mPageId));
@@ -206,39 +210,91 @@ public class FullscreenPagesActivity extends Activity implements OnClickListener
 	}
 
 	@Override
-	public void onImagePropertiesProcessed(String imagePropertiesUrl) {
-		// TODO Auto-generated method stub
-
+	protected void onStop() {
+		mImageView.cancelUnnecessaryTasks();
+		super.onStop();
 	}
 
 	@Override
-	public void onImagePropertiesInvalidStateError(String imagePropertiesUrl, int responseCode) {
-		// TODO Auto-generated method stub
+	public void onImagePropertiesProcessed() {
+		mProgressView.setVisibility(View.INVISIBLE);
+		mImageView.setVisibility(View.VISIBLE);
+	}
 
+	@Override
+	public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
+		mProgressView.setVisibility(View.INVISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
+		mErrorTitle.setText("Cannot process server resource");
+		mErrorResourceUrl.setText(imagePropertiesUrl);
+		mErrorDescription.setText("HTTP code: " + responseCode);
 	}
 
 	@Override
 	public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
-		// TODO Auto-generated method stub
-
+		mProgressView.setVisibility(View.INVISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
+		mErrorTitle.setText("Redirection loop");
+		mErrorResourceUrl.setText(imagePropertiesUrl);
+		mErrorDescription.setText("Too many redirections: " + redirections);
 	}
 
 	@Override
 	public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
-		// TODO Auto-generated method stub
-
+		mProgressView.setVisibility(View.INVISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
+		mErrorTitle.setText("Data transfer error");
+		mErrorResourceUrl.setText(imagePropertiesUrl);
+		mErrorDescription.setText(errorMessage);
 	}
 
 	@Override
 	public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
-		// TODO Auto-generated method stub
-
+		mProgressView.setVisibility(View.INVISIBLE);
+		mErrorView.setVisibility(View.VISIBLE);
+		mErrorTitle.setText("Invalid content in ImageProperties.xml");
+		mErrorResourceUrl.setText(imagePropertiesUrl);
+		mErrorDescription.setText(errorMessage);
 	}
 
 	@Override
-	protected void onStop() {
-		mImageView.cancelUnnecessaryTasks();
-		super.onStop();
+	public void onTileProcessed(TileId tileId) {
+		// nothing
+	}
+
+	@Override
+	public void onTileUnhandableResponseError(TileId tileId, String tileUrl, int responseCode) {
+		Toast.makeText(this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': HTTP error " + responseCode,
+				Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onTileRedirectionLoopError(TileId tileId, String tileUrl, int redirections) {
+		Toast.makeText(this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': redirection loop",
+				Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onTileDataTransferError(TileId tileId, String tileUrl, String errorMessage) {
+		Toast.makeText(this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': " + errorMessage,
+				Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onTileInvalidDataError(TileId tileId, String tileUrl, String errorMessage) {
+		Toast.makeText(
+				this,
+				"Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': invalid data: "
+						+ errorMessage, Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onSingleTap(float x, float y) {
+		PointD point = new PointD(x, y);
+		Toast.makeText(this, "Single tap at " + point.toString(), Toast.LENGTH_SHORT).show();
 	}
 
 }

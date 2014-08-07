@@ -14,10 +14,11 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import cz.mzk.androidzoomifyviewer.CacheManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import cz.mzk.androidzoomifyviewer.CacheManager;
+import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 
 /**
  * This class encapsulates image metadata from ImageProperties.xml and provides
@@ -34,13 +35,19 @@ public class TilesDownloader {
 	private static final int TILES_TIMEOUT = 5000;
 	private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry();
 	private String baseUrl;
+	private String imagePropertiesUrl;
 	private boolean initialized = false;
 	private ImageProperties imageProperties;
 	private List<Layer> layers;
 
 	public TilesDownloader(String baseUrl) {
 		this.baseUrl = baseUrl;
+		this.imagePropertiesUrl = toImagePropertiesUrl(baseUrl);
 	};
+
+	private String toImagePropertiesUrl(String baseUrl) {
+		return baseUrl + "ImageProperties.xml";
+	}
 
 	public ImageProperties getImageProperties() {
 		if (!initialized) {
@@ -49,44 +56,67 @@ public class TilesDownloader {
 		return imageProperties;
 	}
 
-	public void init() throws IOException, TooManyRedirectionsException, ImageServerResponseException,
-			InvalidXmlException {
+	/**
+	 * Initializes TilesDownloader by downloading and processing
+	 * ImageProperties.xml. Instead of downloading, ImageProperties.xml may be
+	 * loaded from cache. Also ImageProperties.xml is saved to cache after being
+	 * downloaded.
+	 * 
+	 * @throws IllegalStateException
+	 *             If this method had already been called
+	 * @throws TooManyRedirectionsException
+	 *             If max. number of redirections exceeded before downloading
+	 *             ImageProperties.xml. This probably means redirection loop.
+	 * @throws ImageServerResponseException
+	 *             If zoomify server response code for ImageProperties.xml
+	 *             cannot be handled here (everything apart from OK and 3xx
+	 *             redirections).
+	 * @throws InvalidDataException
+	 *             If ImageProperties.xml contains invalid data - empty content,
+	 *             not well formed xml, missing required attributes, etc.
+	 * @throws OtherIOException
+	 *             In case of other error (invalid URL, error transfering data,
+	 *             ...)
+	 */
+	public void init() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
+			InvalidDataException {
 		if (initialized) {
 			throw new IllegalStateException("already initialized (" + baseUrl + ")");
 		} else {
 			Log.d(TAG, "initializing: " + baseUrl);
 		}
 		HttpURLConnection.setFollowRedirects(false);
-		String imagePropertiesUrl = baseUrl + "ImageProperties.xml";
-		String propertiesXml = getPropertiesXml(baseUrl, imagePropertiesUrl);
-		imageProperties = loadFromXml(propertiesXml, imagePropertiesUrl);
+		// String imagePropertiesUrl = baseUrl + "ImageProperties.xml";
+		String propertiesXml = getImagePropertiesXml();
+		imageProperties = loadFromXml(propertiesXml);
 		Log.d(TAG, imageProperties.toString());
 		layers = initLayers();
 		initialized = true;
 	}
 
-	private String getPropertiesXml(String baseUrl, String propertiesUrl) throws IOException,
-			TooManyRedirectionsException, ImageServerResponseException {
-		String fromCache = CacheManager.getImagePropertiesCache().getXml(baseUrl);
+	private String getImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
+			ImageServerResponseException {
+		ImagePropertiesCache cache = CacheManager.getImagePropertiesCache();
+		String fromCache = cache.getXml(baseUrl);
 		if (fromCache != null) {
 			return fromCache;
 		} else {
-			String downloaded = downloadPropertiesXml(propertiesUrl, MAX_REDIRECTIONS);
-			CacheManager.getImagePropertiesCache().storeXml(downloaded, baseUrl);
+			String downloaded = downloadPropertiesXml(imagePropertiesUrl, MAX_REDIRECTIONS);
+			cache.storeXml(downloaded, baseUrl);
 			return downloaded;
 		}
 	}
 
-	private String downloadPropertiesXml(String urlString, int remainingRedirections) throws IOException,
-			TooManyRedirectionsException, ImageServerResponseException {
+	private String downloadPropertiesXml(String urlString, int remainingRedirections)
+			throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
 		if (remainingRedirections == 0) {
 			throw new TooManyRedirectionsException(urlString, MAX_REDIRECTIONS);
 		}
 		HttpURLConnection urlConnection = null;
 		// Log.d(TAG, urlString + " remaining redirections: " +
 		// remainingRedirections);
-		URL url = new URL(urlString);
 		try {
+			URL url = new URL(urlString);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setReadTimeout(IMAGE_PROPERTIES_TIMEOUT);
 			int responseCode = urlConnection.getResponseCode();
@@ -104,7 +134,7 @@ public class TilesDownloader {
 				if (location == null || location.isEmpty()) {
 					throw new ImageServerResponseException(urlString, responseCode);
 				}
-				baseUrl = location;
+				imagePropertiesUrl = toImagePropertiesUrl(location);
 				return downloadPropertiesXml(location, remainingRedirections - 1);
 			case 302:
 			case 303:
@@ -117,6 +147,8 @@ public class TilesDownloader {
 			default:
 				throw new ImageServerResponseException(urlString, responseCode);
 			}
+		} catch (IOException e) {
+			throw new OtherIOException(e.getMessage(), imagePropertiesUrl);
 		} finally {
 			if (urlConnection != null) {
 				urlConnection.disconnect();
@@ -146,8 +178,7 @@ public class TilesDownloader {
 		}
 	}
 
-	private ImageProperties loadFromXml(String propertiesXml, String propertiesUrl) throws InvalidXmlException,
-			IOException {
+	private ImageProperties loadFromXml(String propertiesXml) throws InvalidDataException, OtherIOException {
 		try {
 			XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 			factory.setNamespaceAware(false);
@@ -165,7 +196,7 @@ public class TilesDownloader {
 			while (eventType != XmlPullParser.END_DOCUMENT) {
 				if (eventType == XmlPullParser.START_TAG) {
 					if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
-						throw new InvalidXmlException("Unexpected element " + xpp.getName());
+						throw new InvalidDataException(imagePropertiesUrl, "Unexpected element " + xpp.getName());
 					} else {
 						elementImagePropertiesStarted = true;
 						width = getAttributeIntegerValue(xpp, "WIDTH");
@@ -177,7 +208,7 @@ public class TilesDownloader {
 					}
 				} else if (eventType == XmlPullParser.END_TAG) {
 					if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
-						throw new InvalidXmlException("Unexpected element " + xpp.getName());
+						throw new InvalidDataException(imagePropertiesUrl, "Unexpected element " + xpp.getName());
 					} else {
 						elementImagePropertiesEnded = true;
 					}
@@ -185,49 +216,53 @@ public class TilesDownloader {
 				eventType = xpp.next();
 			}
 			if (!elementImagePropertiesStarted) {
-				throw new InvalidXmlException("Element IMAGE_PROPERTIES not found");
+				throw new InvalidDataException(imagePropertiesUrl, "Element IMAGE_PROPERTIES not found");
 			}
 			if (!elementImagePropertiesEnded) {
-				throw new InvalidXmlException("Element IMAGE_PROPERTIES not closed");
+				throw new InvalidDataException(imagePropertiesUrl, "Element IMAGE_PROPERTIES not closed");
 			}
 			if (version != 1.8) {
-				throw new InvalidXmlException("Unsupported tiles version: " + version);
+				throw new InvalidDataException(imagePropertiesUrl, "Unsupported tiles version: " + version);
 			}
 			if (numimages != 1) {
-				throw new InvalidXmlException("Unsupported number of images: " + numimages);
+				throw new InvalidDataException(imagePropertiesUrl, "Unsupported number of images: " + numimages);
 			}
 			// TODO: check numTiles
 			return new ImageProperties(width, height, numtiles, tileSize);
 		} catch (XmlPullParserException e1) {
-			throw new InvalidXmlException(e1.getMessage());
+			throw new InvalidDataException(imagePropertiesUrl, e1.getMessage());
+		} catch (IOException e) {
+			throw new OtherIOException(e.getMessage(), imagePropertiesUrl);
 		}
 	}
 
-	private Double getAttributeDoubleValue(XmlPullParser xpp, String attrName) throws InvalidXmlException {
+	private Double getAttributeDoubleValue(XmlPullParser xpp, String attrName) throws InvalidDataException {
 		String attrValue = getAttributeStringValue(xpp, attrName);
 		try {
 			return Double.valueOf(attrValue);
 		} catch (NumberFormatException e) {
-			throw new InvalidXmlException("invalid content of attribute " + attrName + ": '" + attrValue + "'");
+			throw new InvalidDataException(imagePropertiesUrl, "invalid content of attribute " + attrName + ": '"
+					+ attrValue + "'");
 		}
 	}
 
-	private int getAttributeIntegerValue(XmlPullParser xpp, String attrName) throws InvalidXmlException {
+	private int getAttributeIntegerValue(XmlPullParser xpp, String attrName) throws InvalidDataException {
 		String attrValue = getAttributeStringValue(xpp, attrName);
 		try {
 			return Integer.valueOf(attrValue);
 		} catch (NumberFormatException e) {
-			throw new InvalidXmlException("invalid content of attribute " + attrName + ": '" + attrValue + "'");
+			throw new InvalidDataException(imagePropertiesUrl, "invalid content of attribute " + attrName + ": '"
+					+ attrValue + "'");
 		}
 	}
 
-	private String getAttributeStringValue(XmlPullParser xpp, String attrName) throws InvalidXmlException {
+	private String getAttributeStringValue(XmlPullParser xpp, String attrName) throws InvalidDataException {
 		String attrValue = xpp.getAttributeValue(null, attrName);
 		if (attrValue == null) {
-			throw new InvalidXmlException("missing attribute " + attrName);
+			throw new InvalidDataException(imagePropertiesUrl, "missing attribute " + attrName);
 		}
 		if (attrValue.isEmpty()) {
-			throw new InvalidXmlException("empty attribute " + attrName);
+			throw new InvalidDataException(imagePropertiesUrl, "empty attribute " + attrName);
 		}
 		return attrValue;
 	}
@@ -269,11 +304,28 @@ public class TilesDownloader {
 		return taskRegistry;
 	}
 
-	public Bitmap downloadTile(TileId tileId) throws IOException, TooManyRedirectionsException,
+	/**
+	 * Downloads tile from zoomify server. TODO: InvalidDataException
+	 * 
+	 * @param tileId
+	 *            Tile id.
+	 * @return
+	 * @throws IllegalStateException
+	 *             If methodi init had not been called yet.
+	 * @throws TooManyRedirectionsException
+	 *             If max. number of redirections exceeded before downloading
+	 *             tile. This probably means redirection loop.
+	 * @throws ImageServerResponseException
+	 *             If zoomify server response code for tile cannot be handled
+	 *             here (everything apart from OK and 3xx redirections).
+	 * @throws InvalidDataException
+	 *             If tile contains invalid data.
+	 * @throws OtherIOException
+	 *             In case of other IO error (invalid URL, error transfering
+	 *             data, ...)
+	 */
+	public Bitmap downloadTile(TileId tileId) throws OtherIOException, TooManyRedirectionsException,
 			ImageServerResponseException {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
 		int tileGroup = computeTileGroup(tileId);
 		String tileUrl = buildTileUrl(tileGroup, tileId);
 		Log.d(TAG, "TILE URL: " + tileUrl);
@@ -281,15 +333,15 @@ public class TilesDownloader {
 	}
 
 	private Bitmap downloadTile(String tileUrl, int remainingRedirections) throws TooManyRedirectionsException,
-			ImageServerResponseException, IOException {
+			ImageServerResponseException, OtherIOException {
 		if (remainingRedirections == 0) {
 			throw new TooManyRedirectionsException(tileUrl, MAX_REDIRECTIONS);
 		}
 		// Log.d(TAG, tileUrl + " remaining redirections: " +
 		// remainingRedirections);
 		HttpURLConnection urlConnection = null;
-		URL url = new URL(tileUrl);
 		try {
+			URL url = new URL(tileUrl);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setReadTimeout(TILES_TIMEOUT);
 			int responseCode = urlConnection.getResponseCode();
@@ -311,6 +363,8 @@ public class TilesDownloader {
 			default:
 				throw new ImageServerResponseException(tileUrl, responseCode);
 			}
+		} catch (IOException e) {
+			throw new OtherIOException(e.getMessage(), tileUrl);
 		} finally {
 			if (urlConnection != null) {
 				urlConnection.disconnect();
@@ -484,17 +538,17 @@ public class TilesDownloader {
 
 	public class TooManyRedirectionsException extends Exception {
 		private static final long serialVersionUID = -6653657291115225081L;
-		private final String urlString;
+		private final String url;
 		private final int redirections;
 
-		public TooManyRedirectionsException(String urlString, int redirections) {
+		public TooManyRedirectionsException(String url, int redirections) {
 			super();
-			this.urlString = urlString;
+			this.url = url;
 			this.redirections = redirections;
 		}
 
-		public String getUrlString() {
-			return urlString;
+		public String getUrl() {
+			return url;
 		}
 
 		public int getRedirections() {
@@ -505,30 +559,52 @@ public class TilesDownloader {
 	public class ImageServerResponseException extends Exception {
 		private static final long serialVersionUID = -9136216127329035507L;
 		private final int errorCode;
-		private final String urlString;
+		private final String url;
 
-		public ImageServerResponseException(String urlString, int errorCode) {
+		public ImageServerResponseException(String url, int errorCode) {
 			super();
-			this.urlString = urlString;
+			this.url = url;
 			this.errorCode = errorCode;
-			// Log.d(TAG, "http error: " + errorCode + ", url: " + urlString);
 		}
 
 		public int getErrorCode() {
 			return errorCode;
 		}
 
-		public String getUrlString() {
-			return urlString;
+		public String getUrl() {
+			return url;
 		}
 	}
 
-	public class InvalidXmlException extends Exception {
-
+	public class InvalidDataException extends Exception {
 		private static final long serialVersionUID = -6344968475737321154L;
+		private final String url;
 
-		public InvalidXmlException(String message) {
+		public InvalidDataException(String url, String message) {
 			super(message);
+			this.url = url;
+		}
+
+		public String getUrl() {
+			return url;
+		}
+	}
+
+	public String getImagePropertiesUrl() {
+		return imagePropertiesUrl;
+	}
+
+	public class OtherIOException extends Exception {
+		private static final long serialVersionUID = 8890317963393224790L;
+		private final String url;
+
+		public OtherIOException(String message, String url) {
+			super(message);
+			this.url = url;
+		}
+
+		public String getUrl() {
+			return url;
 		}
 	}
 

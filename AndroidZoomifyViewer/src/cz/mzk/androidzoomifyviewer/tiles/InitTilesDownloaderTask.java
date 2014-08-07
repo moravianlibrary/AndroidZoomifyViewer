@@ -1,11 +1,10 @@
 package cz.mzk.androidzoomifyviewer.tiles;
 
-import java.io.IOException;
-
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.ImageServerResponseException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.InvalidXmlException;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.InvalidDataException;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsException;
 
 /**
@@ -15,14 +14,21 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsExce
 public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, TilesDownloader> {
 	private static final String TAG = InitTilesDownloaderTask.class.getSimpleName();
 	private final String zoomifyBaseUrl;
-	private final TilesDownloaderInitializationHandler handler;
+	private final ImagePropertiesDownloadResultHandler handler;
 
-	private IOException ioException;
+	private OtherIOException otherIoException;
 	private TooManyRedirectionsException tooManyRedirectionsException;
 	private ImageServerResponseException imageServerResponseException;
-	private InvalidXmlException invalidXmlException;
+	private InvalidDataException invalidXmlException;
 
-	public InitTilesDownloaderTask(String zoomifyBaseUrl, TilesDownloaderInitializationHandler handler) {
+	/**
+	 * 
+	 * @param zoomifyBaseUrl
+	 *            Zoomify base url, not null
+	 * @param handler
+	 *            ImageProperties.xml download result handler, not null
+	 */
+	public InitTilesDownloaderTask(String zoomifyBaseUrl, ImagePropertiesDownloadResultHandler handler) {
 		this.zoomifyBaseUrl = zoomifyBaseUrl;
 		this.handler = handler;
 	}
@@ -32,46 +38,51 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 		try {
 			Log.d(TAG, "downloading metadata from '" + zoomifyBaseUrl + "'");
 			TilesDownloader downloader = new TilesDownloader(zoomifyBaseUrl);
-			downloader.init();
-			return downloader;
-		} catch (IOException e) {
-			ioException = e;
+			if (!isCancelled()) {
+				downloader.init();
+				return downloader;
+			}
 		} catch (TooManyRedirectionsException e) {
 			tooManyRedirectionsException = e;
 		} catch (ImageServerResponseException e) {
 			imageServerResponseException = e;
-		} catch (InvalidXmlException e) {
+		} catch (InvalidDataException e) {
 			invalidXmlException = e;
+		} catch (OtherIOException e) {
+			otherIoException = e;
 		}
 		return null;
 	}
 
 	@Override
 	protected void onPostExecute(TilesDownloader downloader) {
-		if (ioException != null) {
-			handler.onDataTransferError(zoomifyBaseUrl, ioException.getMessage());
-		} else if (tooManyRedirectionsException != null) {
-			handler.onRedirectionLoop(zoomifyBaseUrl, tooManyRedirectionsException.getRedirections());
+		if (tooManyRedirectionsException != null) {
+			handler.onRedirectionLoop(tooManyRedirectionsException.getUrl(),
+					tooManyRedirectionsException.getRedirections());
 		} else if (imageServerResponseException != null) {
-			handler.onInvalidImagePropertiesState(zoomifyBaseUrl, imageServerResponseException.getErrorCode());
+			handler.onUnhandableResponseCode(imageServerResponseException.getUrl(),
+					imageServerResponseException.getErrorCode());
 		} else if (invalidXmlException != null) {
-			handler.onInvalidImagePropertiesData(zoomifyBaseUrl, invalidXmlException.getMessage());
+			handler.onInvalidData(invalidXmlException.getUrl(), invalidXmlException.getMessage());
+		}
+		if (otherIoException != null) {
+			handler.onDataTransferError(otherIoException.getUrl(), otherIoException.getMessage());
 		} else {
-			handler.onInitialized(zoomifyBaseUrl, downloader);
+			handler.onSuccess(downloader);
 		}
 	}
 
-	public interface TilesDownloaderInitializationHandler {
+	public interface ImagePropertiesDownloadResultHandler {
 
-		public void onInitialized(String imagePropertiesUrl, TilesDownloader downloader);
+		public void onSuccess(TilesDownloader downloader);
 
-		public void onInvalidImagePropertiesState(String imagePropertiesUrl, int responseCode);
+		public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
 
 		public void onRedirectionLoop(String imagePropertiesUrl, int redirections);
 
 		public void onDataTransferError(String imagePropertiesUrl, String errorMessage);
 
-		public void onInvalidImagePropertiesData(String imagePropertiesUrl, String errorMessage);
+		public void onInvalidData(String imagePropertiesUrl, String errorMessage);
 
 	}
 

@@ -17,8 +17,6 @@ public abstract class ConcurrentAsyncTask<Params, Progress, Result> extends Asyn
 
 	@SuppressWarnings("unchecked")
 	public final AsyncTask<Params, Progress, Result> executeConcurrentIfPossible(Params... params) {
-		// should never happen though since we're planning to release app with
-		// android:minSdkVersion="14"
 		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.HONEYCOMB_MR1) {
 			return execute(params);
 		} else {

@@ -18,7 +18,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
-import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask;
+import cz.mzk.androidzoomifyviewer.tiles.DownloadAndCacheTileTask;
+import cz.mzk.androidzoomifyviewer.tiles.DownloadAndCacheTileTask.TileDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTasksRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
@@ -69,7 +70,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	// test stuff
 
 	private TilesCache mTilesCache;
-	// private TilesDownloaderCache mDownloaderCache;
 	private TilesDownloader mActiveImageDownloader;
 
 	// za hranice canvas cela oblast s obrazkem
@@ -84,7 +84,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	private PointD visibleImageCenter;
 
-	private LoadingHandler loadingHandler;
+	private ImageInitializationHandler mImageInitializationHandler;
+	private TileDownloadHandler mTileDownloadHandler;
 
 	public TiledImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -101,7 +102,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			devTools = new DevTools(context);
 		}
 		mTilesCache = CacheManager.getTilesCache();
-		// mDownloaderCache = CacheManager.getDownloaderCache();
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
 		// setWillNotDraw(false);
@@ -111,8 +111,12 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		return mViewMode;
 	}
 
-	public void setLoadingHandler(LoadingHandler handler) {
-		this.loadingHandler = handler;
+	public void setImageInitializationHandler(ImageInitializationHandler imageInitializationHandler) {
+		this.mImageInitializationHandler = imageInitializationHandler;
+	}
+
+	public void setTileDownloadHandler(TileDownloadHandler tileDownloadHandler) {
+		this.mTileDownloadHandler = tileDownloadHandler;
 	}
 
 	public void setViewMode(ViewMode viewMode) {
@@ -124,7 +128,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	public void cancelUnnecessaryTasks() {
 		if (mActiveImageDownloader != null) {
-			for (DownloadAndSaveTileTask task : mActiveImageDownloader.getTaskRegistry().getAllTasks()) {
+			for (DownloadAndCacheTileTask task : mActiveImageDownloader.getTaskRegistry().getAllTasks()) {
 				if (task != null) {
 					task.cancel(false);
 				}
@@ -149,10 +153,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	private void initTilesDownloaderAsync() {
 		new InitTilesDownloaderTask(mZoomifyBaseUrl,
-				new InitTilesDownloaderTask.TilesDownloaderInitializationHandler() {
+				new InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler() {
 
 					@Override
-					public void onInitialized(String zoomifyBaseUrl, TilesDownloader downloader) {
+					public void onSuccess(TilesDownloader downloader) {
 						Log.d(TAG, "downloader initialized");
 						// mDownloaderCache.put(zoomifyBaseUrl, downloader);
 						mActiveImageDownloader = downloader;
@@ -161,37 +165,41 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 							testPoints = new ImageCoordsPoints(imageProperties.getWidth(), imageProperties.getHeight());
 						}
 
-						if (loadingHandler != null) {
-							loadingHandler.onImagePropertiesProcessed(zoomifyBaseUrl);
+						if (mImageInitializationHandler != null) {
+							mImageInitializationHandler.onImagePropertiesProcessed();
 						}
 						invalidate();
 					}
 
 					@Override
-					public void onInvalidImagePropertiesState(String zoomifyBaseUrl, int responseCode) {
-						if (loadingHandler != null) {
-							loadingHandler.onImagePropertiesInvalidStateError(zoomifyBaseUrl, responseCode);
+					public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+						if (mImageInitializationHandler != null) {
+							mImageInitializationHandler.onImagePropertiesUnhandableResponseCodeError(
+									imagePropertiesUrl, responseCode);
 						}
 					}
 
 					@Override
-					public void onRedirectionLoop(String zoomifyBaseUrl, int redirections) {
-						if (loadingHandler != null) {
-							loadingHandler.onImagePropertiesRedirectionLoopError(zoomifyBaseUrl, redirections);
+					public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
+						if (mImageInitializationHandler != null) {
+							mImageInitializationHandler.onImagePropertiesRedirectionLoopError(imagePropertiesUrl,
+									redirections);
 						}
 					}
 
 					@Override
-					public void onDataTransferError(String zoomifyBaseUrl, String errorMessage) {
-						if (loadingHandler != null) {
-							loadingHandler.onImagePropertiesDataTransferError(zoomifyBaseUrl, errorMessage);
+					public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
+						if (mImageInitializationHandler != null) {
+							mImageInitializationHandler.onImagePropertiesDataTransferError(imagePropertiesUrl,
+									errorMessage);
 						}
 					}
 
 					@Override
-					public void onInvalidImagePropertiesData(String zoomifyBaseUrl, String errorMessage) {
-						if (loadingHandler != null) {
-							loadingHandler.onImagePropertiesInvalidDataError(zoomifyBaseUrl, errorMessage);
+					public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
+						if (mImageInitializationHandler != null) {
+							mImageInitializationHandler.onImagePropertiesInvalidDataError(imagePropertiesUrl,
+									errorMessage);
 						}
 					}
 				}).executeConcurrentIfPossible();
@@ -213,7 +221,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// canvHeightDp);
 
 		if (mActiveImageDownloader != null) {
-			Log.d(TAG, "imageDownloader no longer null");
 			if (DEV_MODE) {
 				devTools.drawCanvasBlue(canv);
 			}
@@ -308,8 +315,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				double resizeFactor = getTotalResizeFactor();
 				devTools.drawImageCoordPoints(canv, testPoints, resizeFactor, getTotalShift());
 			}
-		} else {
-			Log.d(TAG, "imageDownloader still null");
 		}
 	}
 
@@ -416,14 +421,54 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				canv.drawBitmap(tile, null, tileInCanvas, null);
 			} else {
 				if (!downloader.getTaskRegistry().isRunning(visibleTileId)) {
-					new DownloadAndSaveTileTask(downloader, mZoomifyBaseUrl, visibleTileId, mTilesCache, this)
-							.executeConcurrentIfPossible();
+					new DownloadAndCacheTileTask(downloader, mZoomifyBaseUrl, visibleTileId,
+							new TileDownloadResultHandler() {
+
+								@Override
+								public void onUnhandableResponseCode(TileId tileId, String tileUrl, int responseCode) {
+									if (mTileDownloadHandler != null) {
+										mTileDownloadHandler.onTileUnhandableResponseError(tileId, tileUrl,
+												responseCode);
+									}
+								}
+
+								@Override
+								public void onSuccess(TileId tileId, Bitmap bitmap) {
+									invalidate();
+									if (mTileDownloadHandler != null) {
+										mTileDownloadHandler.onTileProcessed(tileId);
+									}
+								}
+
+								@Override
+								public void onRedirectionLoop(TileId tileId, String tileUrl, int redirections) {
+									if (mTileDownloadHandler != null) {
+										mTileDownloadHandler.onTileRedirectionLoopError(tileId, tileUrl, redirections);
+									}
+								}
+
+								@Override
+								public void onInvalidData(TileId tileId, String tileUrl, String errorMessage) {
+									if (mTileDownloadHandler != null) {
+										mTileDownloadHandler.onTileInvalidDataError(tileId, tileUrl, errorMessage);
+									}
+								}
+
+								@Override
+								public void onDataTransferError(TileId tileId, String tileUrl, String errorMessage) {
+									if (mTileDownloadHandler != null) {
+										mTileDownloadHandler.onTileDataTransferError(tileId, tileUrl, errorMessage);
+									}
+								}
+							}).executeConcurrentIfPossible();
+
 				}
 			}
 		}
 		// long end = System.currentTimeMillis();
 		// Log.d(TAG, "drawLayers (layer=" + layerId + "): " + (end - start) +
 		// " ms");
+
 	}
 
 	private int[][] getCornerVisibleTilesCoords(TilesDownloader downloader, int layerId) {
@@ -471,7 +516,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 						|| runningTileId.getX() > bottomRightVisibleTileCoords[0]
 						|| runningTileId.getY() < topLeftVisibleTileCoords[1]
 						|| runningTileId.getY() > bottomRightVisibleTileCoords[1]) {
-					DownloadAndSaveTileTask task = tileDownloaderTaskRegister.getTask(runningTileId);
+					DownloadAndCacheTileTask task = tileDownloaderTaskRegister.getTask(runningTileId);
 					if (task != null) {
 						task.cancel(false);
 						// canceled++;
@@ -764,58 +809,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		FIT_TO_SCREEN, NO_FREE_SPACE_ALIGN_TOP_LEFT, NO_FREE_SPACE_ALIGN_CENTER
 	}
 
-	/**
-	 * Exactly one of these methods is called eventually. Either
-	 * onImagePropertiesProcessed if ImageProperties.xml is found, downloaded
-	 * and processed or one of the other methods in case of some error.
-	 * 
-	 * @author martin
-	 * 
-	 */
-	public interface LoadingHandler {
-
-		/**
-		 * Initialized properly.
-		 * 
-		 * @param imagePropertiesUrl
-		 */
-		public void onImagePropertiesProcessed(String imagePropertiesUrl);
-
-		/**
-		 * Response to HTTP request for ImageProperties.xml returned code that
-		 * cannot be handled here. That means almost everything except some 2xx
-		 * codes and some 3xx codes for which redirection is applied.
-		 * 
-		 * @param imagePropertiesUrl
-		 * @param responseCode
-		 */
-		public void onImagePropertiesInvalidStateError(String imagePropertiesUrl, int responseCode);
-
-		/**
-		 * Too many redirections to ImageProperties.xml, probably loop.
-		 * 
-		 * @param imagePropertiesUrl
-		 * @param redirections
-		 */
-		public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections);
-
-		/**
-		 * Other errors in transfering ImageProperties.xml - timeouts etc.
-		 * 
-		 * @param imagePropertiesUrl
-		 * @param errorMessage
-		 */
-		public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage);
-
-		/**
-		 * Invalid content in ImageProperties.xml. Particulary erroneous xml.
-		 * 
-		 * @param imagePropertiesUrl
-		 * @param errorMessage
-		 */
-		public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage);
-	}
-
 	private static final String TAG_STATES = "state";
 
 	@Override
@@ -912,6 +905,128 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		 *            y coordinate of the tap
 		 */
 		public void onSingleTap(float x, float y);
+	}
+
+	/**
+	 * Exactly one of these methods is called eventually after loadImage().
+	 * Either onImagePropertiesProcessed() if ImageProperties.xml is found,
+	 * downloaded and processed or one of the other methods in case of some
+	 * error.
+	 * 
+	 * @author martin
+	 * 
+	 */
+	public interface ImageInitializationHandler {
+
+		/**
+		 * ImageProperties.xml downloaded and processed properly.
+		 * 
+		 */
+		public void onImagePropertiesProcessed();
+
+		/**
+		 * Response to HTTP request for ImageProperties.xml returned code that
+		 * cannot be handled here. That means almost everything except for some
+		 * 2xx codes and some 3xx codes for which redirection is applied.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param responseCode
+		 */
+		public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode);
+
+		/**
+		 * Too many redirections to ImageProperties.xml, probably loop.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param redirections
+		 */
+		public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections);
+
+		/**
+		 * Other errors in transfering ImageProperties.xml - timeouts etc.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param errorMessage
+		 */
+		public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage);
+
+		/**
+		 * Invalid content in ImageProperties.xml. Particulary erroneous xml.
+		 * 
+		 * @param imagePropertiesUrl
+		 * @param errorMessage
+		 */
+		public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage);
+	}
+
+	/**
+	 * Exactly one of these methods is called after tile is downloaded and
+	 * stored to cache or something goes wrong in this process.
+	 * 
+	 * @author martin
+	 * 
+	 */
+	public interface TileDownloadHandler {
+
+		/**
+		 * Tile downloaded and processed properly.
+		 * 
+		 * @param tileId
+		 *            Tile id.
+		 */
+		public void onTileProcessed(TileId tileId);
+
+		/**
+		 * 
+		 * Response to HTTP request for tile returned code that cannot be
+		 * handled here. That means almost everything except for some 2xx codes
+		 * and some 3xx codes for which redirection is applied.
+		 * 
+		 * @param tileId
+		 *            Tile id.
+		 * @param tileUrl
+		 *            Tile jpeg url.
+		 * @param errorMessage
+		 *            Error message.
+		 */
+
+		public void onTileUnhandableResponseError(TileId tileId, String tileUrl, int responseCode);
+
+		/**
+		 * Too many redirections for tile, probably loop.
+		 * 
+		 * @param tileId
+		 *            Tile id.
+		 * @param tileUrl
+		 *            Tile jpeg url.
+		 * @param errorMessage
+		 *            Error message.
+		 */
+		public void onTileRedirectionLoopError(TileId tileId, String tileUrl, int redirections);
+
+		/**
+		 * Other errors in transfering tile - timeouts etc.
+		 * 
+		 * @param tileId
+		 *            Tile id.
+		 * @param tileUrl
+		 *            Tile jpeg url.
+		 * @param errorMessage
+		 *            Error message.
+		 */
+		public void onTileDataTransferError(TileId tileId, String tileUrl, String errorMessage);
+
+		/**
+		 * Invalid tile content.
+		 * 
+		 * @param tileId
+		 *            Tile id.
+		 * @param tileUrl
+		 *            Tile jpeg url.
+		 * @param errorMessage
+		 *            Error message.
+		 */
+		public void onTileInvalidDataError(TileId tileId, String tileUrl, String errorMessage);
 	}
 
 }

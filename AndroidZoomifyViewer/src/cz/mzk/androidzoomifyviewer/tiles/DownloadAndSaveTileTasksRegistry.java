@@ -21,9 +21,9 @@ public class DownloadAndSaveTileTasksRegistry {
 
 	private static final String TAG = DownloadAndSaveTileTasksRegistry.class.getSimpleName();
 
-	private final Map<String, DownloadAndSaveTileTask> tilesBeingDownloaded = new HashMap<String, DownloadAndSaveTileTask>();
+	private final Map<String, DownloadAndCacheTileTask> tilesBeingDownloaded = new HashMap<String, DownloadAndCacheTileTask>();
 
-	public void registerTask(DownloadAndSaveTileTask task, TileId tileId) {
+	public void registerTask(DownloadAndCacheTileTask task, TileId tileId) {
 		String key = tileId.toString();
 		tilesBeingDownloaded.put(key, task);
 		Log.d(TAG, "  registered task for " + key + ": (total " + tilesBeingDownloaded.size() + ")");
@@ -35,7 +35,7 @@ public class DownloadAndSaveTileTasksRegistry {
 		Log.d(TAG, "unregistered task for " + key + ": (total " + tilesBeingDownloaded.size() + ")");
 	}
 
-	public DownloadAndSaveTileTask getTask(TileId tileId) {
+	public DownloadAndCacheTileTask getTask(TileId tileId) {
 		String key = tileId.toString();
 		return tilesBeingDownloaded.get(key);
 	}
@@ -49,7 +49,7 @@ public class DownloadAndSaveTileTasksRegistry {
 		return tilesBeingDownloaded.keySet();
 	}
 
-	public Collection<DownloadAndSaveTileTask> getAllTasks() {
+	public Collection<DownloadAndCacheTileTask> getAllTasks() {
 		return tilesBeingDownloaded.values();
 	}
 }
