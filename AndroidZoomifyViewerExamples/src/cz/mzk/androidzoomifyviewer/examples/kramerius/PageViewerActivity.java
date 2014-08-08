@@ -1,5 +1,6 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
@@ -10,7 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask.DownloadPidListResultHandler;
-import cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment.EventListener;
+import cz.mzk.androidzoomifyviewer.examples.kramerius.IPageViewerFragment.EventListener;
 
 /**
  * @author Martin Řehánek
@@ -22,15 +23,14 @@ public class PageViewerActivity extends Activity implements EventListener {
 
 	public static final String EXTRA_DOMAIN = "domain";
 	public static final String EXTRA_TOP_LEVEL_PID = "topLevelPid";
-	public static final String EXTRA_PAGE_ID = "pageId";
+	public static final String EXTRA_PAGE_PIDS = "pagePids";
 
 	private String mDomain;
 	private String mTopLevelPid;
-	private int mPageId = 0;
 	private List<String> mPagePids;
 
 	private View mViewProgressBar;
-	private PageViewerFragment mPageViewerFragment;
+	private IPageViewerFragment mPageViewerFragment;
 	private PageControlsFragment mControlFragment;
 
 	@Override
@@ -38,7 +38,7 @@ public class PageViewerActivity extends Activity implements EventListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_page_viewer);
 		mViewProgressBar = findViewById(R.id.viewProgressBar);
-		mPageViewerFragment = (PageViewerFragment) getFragmentManager().findFragmentById(R.id.fragmentViewer);
+		mPageViewerFragment = (IPageViewerFragment) getFragmentManager().findFragmentById(R.id.fragmentViewer);
 		mPageViewerFragment.setEventListener(this);
 		mControlFragment = (PageControlsFragment) getFragmentManager().findFragmentById(R.id.fragmentControls);
 		if (savedInstanceState != null) {
@@ -51,32 +51,29 @@ public class PageViewerActivity extends Activity implements EventListener {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString(EXTRA_DOMAIN, mDomain);
-		outState.putInt(EXTRA_PAGE_ID, mPageId);
 		outState.putString(EXTRA_TOP_LEVEL_PID, mTopLevelPid);
+		if (mPagePids != null) {
+			String[] pidsArray = new String[mPagePids.size()];
+			outState.putStringArray(EXTRA_PAGE_PIDS, mPagePids.toArray(pidsArray));
+		}
 		super.onSaveInstanceState(outState);
 	}
 
 	private void restoreOrLoadData(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
 			Log.d(TAG, "restoring data");
-			if (savedInstanceState.containsKey(EXTRA_TOP_LEVEL_PID)) {
-				mTopLevelPid = savedInstanceState.getString(EXTRA_TOP_LEVEL_PID);
-			}
-			if (savedInstanceState.containsKey(EXTRA_PAGE_ID)) {
-				mPageId = savedInstanceState.getInt(EXTRA_PAGE_ID);
-			}
-			if (savedInstanceState.containsKey(EXTRA_DOMAIN)) {
-				mDomain = savedInstanceState.getString(EXTRA_DOMAIN);
-			}
-			if (mPagePids == null) {
+			mTopLevelPid = savedInstanceState.getString(EXTRA_TOP_LEVEL_PID);
+			mDomain = savedInstanceState.getString(EXTRA_DOMAIN);
+			if (savedInstanceState.containsKey(EXTRA_PAGE_PIDS)) {
+				mPagePids = Arrays.asList(savedInstanceState.getStringArray(EXTRA_PAGE_PIDS));
+				initPageViewerFragment();
+			} else {
 				new DownloadPageListTask("http", mDomain, mTopLevelPid, new DownloadPidListResultHandler() {
 
 					@Override
 					public void onSuccess(List<String> pidList) {
 						mPagePids = pidList;
-						mViewProgressBar.setVisibility(View.INVISIBLE);
-						Log.d(TAG, "initializing PageViewerFragment");
-						mPageViewerFragment.init(mDomain, mPagePids);
+						initPageViewerFragment();
 					}
 
 					@Override
@@ -93,19 +90,31 @@ public class PageViewerActivity extends Activity implements EventListener {
 		}
 	}
 
+	private void initPageViewerFragment() {
+		Log.d(TAG, "initializing PageViewerFragment");
+		mViewProgressBar.setVisibility(View.INVISIBLE);
+		if (!mPageViewerFragment.isPopulated()) {
+			mPageViewerFragment.populate(mDomain, mPagePids);
+		} else {
+			int currentPageIndex = mPageViewerFragment.getCurrentPageIndex();
+			Log.d(TAG, "current page: " + currentPageIndex);
+			showPage(currentPageIndex);
+		}
+	}
+
 	@Override
 	public void onReady() {
 		Log.d(TAG, "PageViewerFragment ready");
 		int currentPageIndex = mPageViewerFragment.getCurrentPageIndex();
 		Log.d(TAG, "current page: " + currentPageIndex);
-		showPage(mPageViewerFragment, currentPageIndex);
+		showPage(currentPageIndex);
 	}
 
 	@Override
 	public void onSingleTap(float x, float y) {
 		Log.d(TAG, "Showing metadata after single tap");
 		int pageIndex = mPageViewerFragment.getCurrentPageIndex();
-		String pagePid = mPagePids.get(pageIndex);
+		String pagePid = mPageViewerFragment.getPagePid(pageIndex);
 		Intent intent = new Intent(this, PageMetadataActivity.class);
 		intent.putExtra(PageMetadataActivity.EXTRA_TOP_LEVEL_PID, mTopLevelPid);
 		intent.putExtra(PageMetadataActivity.EXTRA_PAGE_PID, pagePid);
@@ -116,19 +125,19 @@ public class PageViewerActivity extends Activity implements EventListener {
 	public void showNextPage() {
 		int index = mPageViewerFragment.getCurrentPageIndex() + 1;
 		Log.d(TAG, "showing next page (" + index + ")");
-		showPage(mPageViewerFragment, index);
+		showPage(index);
 	}
 
 	public void showPreviousPage() {
 		int index = mPageViewerFragment.getCurrentPageIndex() - 1;
 		Log.d(TAG, "showing previous page (" + index + ")");
-		showPage(mPageViewerFragment, index);
+		showPage(index);
 	}
 
-	private void showPage(PageViewerFragment viewerFragment, int index) {
+	private void showPage(int index) {
 		mControlFragment.setBtnPreviousPageEnabled(index > 0);
-		mControlFragment.setBtnNextPageEnabled(index < (mPagePids.size() - 1));
-		viewerFragment.showPage(index);
+		mControlFragment.setBtnNextPageEnabled(index < (mPageViewerFragment.getPageNumber() - 1));
+		mPageViewerFragment.showPage(index);
 	}
 
 }

@@ -22,16 +22,17 @@ public class PageControlsFragment extends Fragment implements OnClickListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_page_controls, container, false);
+		View view = inflater.inflate(R.layout.fragment_page_controls, container, false);
+		mBtnPreviousPage = (Button) view.findViewById(R.id.btnPreviousPage);
+		mBtnPreviousPage.setOnClickListener(this);
+		mBtnNextPage = (Button) view.findViewById(R.id.btnNextPage);
+		mBtnNextPage.setOnClickListener(this);
+		return view;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		mBtnPreviousPage = (Button) getView().findViewById(R.id.btnPreviousPage);
-		mBtnPreviousPage.setOnClickListener(this);
-		mBtnNextPage = (Button) getView().findViewById(R.id.btnNextPage);
-		mBtnNextPage.setOnClickListener(this);
 	}
 
 	@Override

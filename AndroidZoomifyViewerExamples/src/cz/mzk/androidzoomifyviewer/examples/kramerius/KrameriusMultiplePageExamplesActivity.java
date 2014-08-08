@@ -74,7 +74,6 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 			KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);
 			intent.putExtra(PageViewerActivity.EXTRA_DOMAIN, url.getDomain());
 			intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
-			intent.putExtra(PageViewerActivity.EXTRA_PAGE_ID, 0);
 			startActivity(intent);
 		} catch (ParseException e) {
 			Log.e(TAG, "error parsing url '" + urlStr + "'");

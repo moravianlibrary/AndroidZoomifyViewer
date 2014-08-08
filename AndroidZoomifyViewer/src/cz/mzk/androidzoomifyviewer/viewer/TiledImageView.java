@@ -67,7 +67,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private boolean mDrawLayerWithWorseResolution = true;
 
 	// private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
-	private ViewMode mViewMode = ViewMode.NO_FREE_SPACE_ALIGN_CENTER;
+	// private ViewMode mViewMode = ViewMode.NO_FREE_SPACE_ALIGN_CENTER;
+	private ViewMode mViewMode = ViewMode.NO_FREE_SPACE_ALIGN_TOP_LEFT;
 
 	// test stuff
 

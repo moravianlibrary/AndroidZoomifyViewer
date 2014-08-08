@@ -1,5 +1,6 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.Fragment;
@@ -22,16 +23,20 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
  * @author Martin Řehánek
  * 
  */
-public class PageViewerFragment extends Fragment implements OnTouchListener, ImageInitializationHandler,
-		SingleTapListener {
+public class PageViewerFragment extends Fragment implements IPageViewerFragment, OnTouchListener,
+		ImageInitializationHandler, SingleTapListener {
 
 	private static final String TAG = PageViewerFragment.class.getSimpleName();
 
+	public static final String KEY_DOMAIN = PageViewerFragment.class.getSimpleName() + "_domain";
+	public static final String KEY_PAGE_PIDS = PageViewerFragment.class.getSimpleName() + "_pagePids";
+	public static final String KEY_CURRENT_PAGE_INDEX = PageViewerFragment.class.getSimpleName() + "_pageIndex";
+	public static final String KEY_POPULATED = PageViewerFragment.class.getSimpleName() + ":_populated";
+
 	private String mDomain;
-	private List<String> mPids;
+	private List<String> mPagePids;
 	private int mCurrentPageIndex;
 
-	private EventListener mEventListener;
 	private TiledImageView mImageView;
 
 	// Views to reflect TiledImageView state
@@ -43,29 +48,46 @@ public class PageViewerFragment extends Fragment implements OnTouchListener, Ima
 	private View mViewNoAccessRights;
 
 	private GestureDetector mGestureDetector;
+	private EventListener mEventListener;
+
+	private boolean mPopulated = false;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null) {
+			mDomain = savedInstanceState.getString(KEY_DOMAIN);
+			mPopulated = savedInstanceState.getBoolean(KEY_POPULATED);
+			mCurrentPageIndex = savedInstanceState.getInt(KEY_CURRENT_PAGE_INDEX, 0);
+			if (savedInstanceState.containsKey(KEY_PAGE_PIDS)) {
+				mPagePids = Arrays.asList(savedInstanceState.getStringArray(KEY_PAGE_PIDS));
+			}
+		}
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_page_viewer, container, false);
+		View view = inflater.inflate(R.layout.fragment_page_viewer, container, false);
+		mProgressView = view.findViewById(R.id.progressView);
+		mProgressView.setOnTouchListener(this);
+		mErrorView = view.findViewById(R.id.errorView);
+		mErrorView.setOnTouchListener(this);
+		mErrorTitle = (TextView) view.findViewById(R.id.errorTitle);
+		mErrorResourceUrl = (TextView) view.findViewById(R.id.errorResourceUrl);
+		mErrorDescription = (TextView) view.findViewById(R.id.errorDescription);
+		mImageView = (TiledImageView) view.findViewById(R.id.tiledImageView);
+		mImageView.setImageInitializationHandler(this);
+		// mImageView.setTileDownloadHandler(this);
+		mImageView.setSingleTapListener(this);
+		mViewNoAccessRights = view.findViewById(R.id.viewNoAccessRights);
+		mViewNoAccessRights.setOnTouchListener(this);
+		return view;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		mGestureDetector = initGestureDetector(getActivity());
-		mProgressView = getView().findViewById(R.id.progressView);
-		mProgressView.setOnTouchListener(this);
-		mErrorView = getView().findViewById(R.id.errorView);
-		mErrorView.setOnTouchListener(this);
-		mErrorTitle = (TextView) getView().findViewById(R.id.errorTitle);
-		mErrorResourceUrl = (TextView) getView().findViewById(R.id.errorResourceUrl);
-		mErrorDescription = (TextView) getView().findViewById(R.id.errorDescription);
-		mImageView = (TiledImageView) getView().findViewById(R.id.tiledImageView);
-		mImageView.setImageInitializationHandler(this);
-		// mImageView.setTileDownloadHandler(this);
-		mImageView.setSingleTapListener(this);
-		mViewNoAccessRights = getView().findViewById(R.id.viewNoAccessRights);
-		mViewNoAccessRights.setOnTouchListener(this);
 	}
 
 	private GestureDetector initGestureDetector(Context context) {
@@ -79,40 +101,66 @@ public class PageViewerFragment extends Fragment implements OnTouchListener, Ima
 		});
 	}
 
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putString(KEY_DOMAIN, mDomain);
+		outState.putInt(KEY_CURRENT_PAGE_INDEX, mCurrentPageIndex);
+		outState.putBoolean(KEY_POPULATED, mPopulated);
+		if (mPagePids != null) {
+			String[] pidsArray = new String[mPagePids.size()];
+			outState.putStringArray(KEY_PAGE_PIDS, mPagePids.toArray(pidsArray));
+		}
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public void setEventListener(EventListener eventListener) {
 		this.mEventListener = eventListener;
 	}
 
-	public void init(String domain, List<String> pids) {
+	@Override
+	public void populate(String domain, List<String> pagePids) {
+		Log.d(TAG, "populating");
 		this.mDomain = domain;
-		this.mPids = pids;
+		this.mPagePids = pagePids;
 		this.mCurrentPageIndex = 0;
+		this.mPopulated = true;
+		hideViews();
 		if (mEventListener != null) {
 			mEventListener.onReady();
 		}
 	}
 
+	@Override
+	public boolean isPopulated() {
+		return mPopulated;
+	}
+
+	@Override
 	public int getCurrentPageIndex() {
 		return mCurrentPageIndex;
 	}
 
+	@Override
 	public Integer getNextPageIndex() {
 		int next = mCurrentPageIndex + 1;
-		return next == mPids.size() ? null : Integer.valueOf(next);
+		return next == mPagePids.size() ? null : Integer.valueOf(next);
 	}
 
+	@Override
 	public Integer getPreviousPageIndex() {
 		int next = mCurrentPageIndex - 1;
 		return next == -1 ? null : Integer.valueOf(next);
 	}
 
+	@Override
 	public void showPage(int pageIndex) {
 		Log.d(TAG, "Showing page " + pageIndex);
-		if (pageIndex >= 0 && pageIndex < mPids.size()) {
+		if (pageIndex >= 0 && pageIndex < mPagePids.size()) {
 			hideViews();
 			mProgressView.setVisibility(View.VISIBLE);
 			mCurrentPageIndex = pageIndex;
-			String pid = mPids.get(pageIndex);
+			String pid = mPagePids.get(pageIndex);
 			String url = buildZoomifyBaseUrl(pid);
 			mImageView.loadImage(url.toString());
 		} else {
@@ -127,13 +175,6 @@ public class PageViewerFragment extends Fragment implements OnTouchListener, Ima
 		builder.append("search/zoomify/");
 		builder.append(pid).append('/');
 		return builder.toString();
-	}
-
-	public interface EventListener {
-		public void onReady();
-
-		public void onSingleTap(float x, float y);
-
 	}
 
 	private void hideViews() {
@@ -216,6 +257,16 @@ public class PageViewerFragment extends Fragment implements OnTouchListener, Ima
 	public boolean onTouch(View v, MotionEvent event) {
 		mGestureDetector.onTouchEvent(event);
 		return true;
+	}
+
+	@Override
+	public String getPagePid(int pageIndex) {
+		return mPagePids.get(pageIndex);
+	}
+
+	@Override
+	public int getPageNumber() {
+		return mPagePids.size();
 	}
 
 }
