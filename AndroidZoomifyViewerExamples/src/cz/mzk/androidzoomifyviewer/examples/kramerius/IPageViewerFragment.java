@@ -2,6 +2,8 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 import java.util.List;
 
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
+
 /**
  * @author Martin Řehánek
  * 
@@ -64,6 +66,13 @@ public interface IPageViewerFragment {
 	 * @return Number of pages.
 	 */
 	public abstract int getPageNumber();
+
+	/**
+	 * Sets view mode for all pages from now on.
+	 * 
+	 * @param mode
+	 */
+	public void setViewMode(ViewMode mode);
 
 	public interface EventListener {
 		/**

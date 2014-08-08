@@ -12,6 +12,7 @@ import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask.DownloadPidListResultHandler;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.IPageViewerFragment.EventListener;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek
@@ -139,6 +140,13 @@ public class PageViewerActivity extends Activity implements EventListener {
 		mControlFragment.setBtnNextPageEnabled(index < (mPageViewerFragment.getPageNumber() - 1));
 		mControlFragment.setPageCounterContent(mPageViewerFragment.getPageNumber(), index + 1);
 		mPageViewerFragment.showPage(index);
+	}
+
+	public void setViewMode(ViewMode mode) {
+		mPageViewerFragment.setViewMode(mode);
+		if (mPageViewerFragment.isPopulated()) {
+			mPageViewerFragment.showPage(mPageViewerFragment.getCurrentPageIndex());
+		}
 	}
 
 }

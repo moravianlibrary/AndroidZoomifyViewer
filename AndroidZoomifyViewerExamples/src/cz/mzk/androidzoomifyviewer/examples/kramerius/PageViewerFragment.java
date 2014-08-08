@@ -18,6 +18,7 @@ import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek
@@ -267,6 +268,11 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	@Override
 	public int getPageNumber() {
 		return mPagePids.size();
+	}
+
+	@Override
+	public void setViewMode(ViewMode mode) {
+		mImageView.setViewMode(mode);
 	}
 
 }
