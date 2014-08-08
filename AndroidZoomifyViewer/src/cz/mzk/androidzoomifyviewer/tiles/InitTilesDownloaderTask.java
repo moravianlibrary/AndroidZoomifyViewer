@@ -64,8 +64,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 					imageServerResponseException.getErrorCode());
 		} else if (invalidXmlException != null) {
 			handler.onInvalidData(invalidXmlException.getUrl(), invalidXmlException.getMessage());
-		}
-		if (otherIoException != null) {
+		} else if (otherIoException != null) {
 			handler.onDataTransferError(otherIoException.getUrl(), otherIoException.getMessage());
 		} else {
 			handler.onSuccess(downloader);

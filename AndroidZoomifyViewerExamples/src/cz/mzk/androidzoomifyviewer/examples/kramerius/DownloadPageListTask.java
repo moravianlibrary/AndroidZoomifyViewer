@@ -27,7 +27,7 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 	private final String mProtocol;
 	private final String mDomain;
 	private final String mTopLevelPid;
-	private final DownloadPidListResultHandler mUtilizer;
+	private final DownloadPidListResultHandler handler;
 	private Exception mException = null;
 
 	public DownloadPageListTask(String mProtocol, String mDomain, String mTopLevelPid,
@@ -35,7 +35,7 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 		this.mProtocol = mProtocol;
 		this.mDomain = mDomain;
 		this.mTopLevelPid = mTopLevelPid;
-		this.mUtilizer = mUtilizer;
+		this.handler = mUtilizer;
 	}
 
 	@Override
@@ -76,7 +76,6 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 			URL url = new URL(resourceUrl);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setConnectTimeout(5000);// 5s
-			// TODO: resit dalsi kody (redirect apod.)
 			if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
 				throw new IOException("error downloding " + resourceUrl + " (code=" + urlConnection.getResponseCode()
 						+ ")");
@@ -107,16 +106,16 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 	@Override
 	protected void onPostExecute(List<String> result) {
 		if (mException != null) {
-			// TODO: poresit chybu
-			Log.e(TAG, "error downloading/parsing json", mException);
+			handler.onError(mException.getMessage());
 		} else {
-			mUtilizer.onSuccess(result);
+			handler.onSuccess(result);
 		}
 	}
 
-	// TODO: Handler with multiple errors
 	public interface DownloadPidListResultHandler {
 		public void onSuccess(List<String> pidList);
+
+		public void onError(String errorMessage);
 	}
 
 }

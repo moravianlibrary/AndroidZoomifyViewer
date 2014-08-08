@@ -46,6 +46,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	private SingleTapListener mSingleTapListener;
 
+	private boolean pageInitialized = false;
+
 	// SHIFTS
 	private VectorD mInitialShift = VectorD.ZERO_VECTOR;
 	// private VectorD mUserShift = VectorD.ZERO_VECTOR;
@@ -104,7 +106,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		mTilesCache = CacheManager.getTilesCache();
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
-		// setWillNotDraw(false);
 	}
 
 	public ViewMode getViewMode() {
@@ -139,13 +140,14 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 	}
 
-	public void loadImage(final String zoomifyBaseUrl) {
+	public void loadImage(String zoomifyBaseUrl) {
 		Log.d(TAG, "loading new image, base url: " + zoomifyBaseUrl);
 		cancelUnnecessaryTasks();
+		pageInitialized = false;
 		mPinchZoomManager = new PinchZoomManager(this, 1.0f);
 		mDoubleTapZoomManager = new DoubleTapZoomManager(this);
-		resizeFactorsInitialized = false;
 		mSwipeShiftManager = new SwipeShiftManager();
+		resizeFactorsInitialized = false;
 		mZoomifyBaseUrl = zoomifyBaseUrl;
 		mActiveImageDownloader = null;
 		initTilesDownloaderAsync();
@@ -158,7 +160,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					@Override
 					public void onSuccess(TilesDownloader downloader) {
 						Log.d(TAG, "downloader initialized");
-						// mDownloaderCache.put(zoomifyBaseUrl, downloader);
 						mActiveImageDownloader = downloader;
 						if (DEV_MODE) {
 							ImageProperties imageProperties = downloader.getImageProperties();
@@ -168,6 +169,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 						if (mImageInitializationHandler != null) {
 							mImageInitializationHandler.onImagePropertiesProcessed();
 						}
+						pageInitialized = true;
 						invalidate();
 					}
 
@@ -675,9 +677,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	@SuppressLint("NewApi")
 	public boolean onTouchEvent(MotionEvent event) {
 		int action = event.getActionMasked();
-		if (Build.VERSION.SDK_INT >= 19) {
-		}
-		if (mSwipeShiftManager != null && mPinchZoomManager != null && mDoubleTapZoomManager != null) {
+		if (pageInitialized) {
 			SwipeShiftManager.State swipeShiftManagerState = mSwipeShiftManager.getState();
 			PinchZoomManager.State zoomManagerState = mPinchZoomManager.getState();
 			DoubleTapZoomManager.State doubleTapZoomManagerState = mDoubleTapZoomManager.getState();
@@ -780,12 +780,14 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					return super.onTouchEvent(event);
 				}
 			} else {
-				Log.w(TAG, "not initialized");
+				Log.w(TAG_STATES, "ignoring event while double tap zooming animation in progress");
 				return false;
+
 			}
 		} else {
-			Log.w(TAG_STATES, "ignoring event while double tap zooming animation in progress");
-			return false;
+			Log.d(TAG_STATES, "not initialized yet");
+			mGestureDetector.onTouchEvent(event);
+			return true;
 		}
 	}
 
@@ -823,6 +825,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 		if (mSingleTapListener != null) {
 			mSingleTapListener.onSingleTap(e.getX(), e.getY());
+		} else {
+			Log.d(TAG_STATES, "imgView: SingleTapListener not initialized");
 		}
 		return true;
 	}

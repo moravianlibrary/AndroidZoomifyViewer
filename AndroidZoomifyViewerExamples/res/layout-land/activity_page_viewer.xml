@@ -1,19 +1,40 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <fragment
-        android:id="@+id/fragmentControls"
-        android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
-    <fragment
-        android:id="@+id/fragmentViewer"
-        android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment"
+        <fragment
+            android:id="@+id/fragmentControls"
+            android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true" />
+
+        <fragment
+            android:id="@+id/fragmentViewer"
+            android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@id/fragmentControls" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/viewProgressBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toLeftOf="@id/fragmentControls" />
+        android:alpha="0.8"
+        android:background="@color/black"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible" >
 
-</RelativeLayout>
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </LinearLayout>
+
+</FrameLayout>

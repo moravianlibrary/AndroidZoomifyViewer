@@ -3,10 +3,14 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 import java.util.List;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import cz.mzk.androidzoomifyviewer.examples.R;
@@ -18,7 +22,8 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
  * @author Martin Řehánek
  * 
  */
-public class PageViewerFragment extends Fragment implements ImageInitializationHandler, SingleTapListener {
+public class PageViewerFragment extends Fragment implements OnTouchListener, ImageInitializationHandler,
+		SingleTapListener {
 
 	private static final String TAG = PageViewerFragment.class.getSimpleName();
 
@@ -37,6 +42,8 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 	private TextView mErrorResourceUrl;
 	private View mViewNoAccessRights;
 
+	private GestureDetector mGestureDetector;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_page_viewer, container, false);
@@ -45,8 +52,11 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		mGestureDetector = initGestureDetector(getActivity());
 		mProgressView = getView().findViewById(R.id.progressView);
+		mProgressView.setOnTouchListener(this);
 		mErrorView = getView().findViewById(R.id.errorView);
+		mErrorView.setOnTouchListener(this);
 		mErrorTitle = (TextView) getView().findViewById(R.id.errorTitle);
 		mErrorResourceUrl = (TextView) getView().findViewById(R.id.errorResourceUrl);
 		mErrorDescription = (TextView) getView().findViewById(R.id.errorDescription);
@@ -55,6 +65,18 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 		// mImageView.setTileDownloadHandler(this);
 		mImageView.setSingleTapListener(this);
 		mViewNoAccessRights = getView().findViewById(R.id.viewNoAccessRights);
+		mViewNoAccessRights.setOnTouchListener(this);
+	}
+
+	private GestureDetector initGestureDetector(Context context) {
+		return new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+
+			@Override
+			public boolean onSingleTapConfirmed(MotionEvent e) {
+				mEventListener.onSingleTap(e.getX(), e.getY());
+				return true;
+			}
+		});
 	}
 
 	public void setEventListener(EventListener eventListener) {
@@ -84,9 +106,11 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 		return next == -1 ? null : Integer.valueOf(next);
 	}
 
-	public void goToPage(int pageIndex) {
+	public void showPage(int pageIndex) {
+		Log.d(TAG, "Showing page " + pageIndex);
 		if (pageIndex >= 0 && pageIndex < mPids.size()) {
-			resetViews();
+			hideViews();
+			mProgressView.setVisibility(View.VISIBLE);
 			mCurrentPageIndex = pageIndex;
 			String pid = mPids.get(pageIndex);
 			String url = buildZoomifyBaseUrl(pid);
@@ -112,8 +136,8 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 
 	}
 
-	private void resetViews() {
-		mProgressView.setVisibility(View.VISIBLE);
+	private void hideViews() {
+		mProgressView.setVisibility(View.INVISIBLE);
 		mViewNoAccessRights.setVisibility(View.INVISIBLE);
 		mErrorView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.INVISIBLE);
@@ -121,6 +145,7 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 
 	@Override
 	public void onImagePropertiesProcessed() {
+		Log.d(TAG, "onImagePropertiesProcessed");
 		mProgressView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.VISIBLE);
 		// TODO: handle situations when tiles not available and whole image
@@ -129,14 +154,13 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 
 	@Override
 	public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
+		Log.d(TAG, "onImagePropertiesUnhandableResponseCodeError");
+		mProgressView.setVisibility(View.INVISIBLE);
+		mImageView.setVisibility(View.INVISIBLE);
 		if (responseCode == 403) {
-			mProgressView.setVisibility(View.INVISIBLE);
-			mImageView.setVisibility(View.INVISIBLE);
 			mErrorView.setVisibility(View.INVISIBLE);
 			mViewNoAccessRights.setVisibility(View.VISIBLE);
 		} else {
-			mProgressView.setVisibility(View.INVISIBLE);
-			mImageView.setVisibility(View.INVISIBLE);
 			mViewNoAccessRights.setVisibility(View.INVISIBLE);
 			mErrorView.setVisibility(View.VISIBLE);
 			mErrorTitle.setText("Cannot process server resource");
@@ -147,6 +171,7 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 
 	@Override
 	public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
+		Log.d(TAG, "onImagePropertiesRedirectionLoopError");
 		mProgressView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.INVISIBLE);
 		mViewNoAccessRights.setVisibility(View.INVISIBLE);
@@ -158,6 +183,7 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 
 	@Override
 	public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
+		Log.d(TAG, "onImagePropertiesDataTransferError");
 		mProgressView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.INVISIBLE);
 		mViewNoAccessRights.setVisibility(View.INVISIBLE);
@@ -169,6 +195,7 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 
 	@Override
 	public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
+		Log.d(TAG, "onImagePropertiesInvalidDataError");
 		mProgressView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.INVISIBLE);
 		mViewNoAccessRights.setVisibility(View.INVISIBLE);
@@ -184,4 +211,11 @@ public class PageViewerFragment extends Fragment implements ImageInitializationH
 			mEventListener.onSingleTap(x, y);
 		}
 	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		mGestureDetector.onTouchEvent(event);
+		return true;
+	}
+
 }

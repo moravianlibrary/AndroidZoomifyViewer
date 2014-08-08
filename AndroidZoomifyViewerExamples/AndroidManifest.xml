@@ -36,7 +36,6 @@
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesOtherErrorsExamplesActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.SingleImageWorkingExamplesActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity" />
-<!--         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.FullscreenPagesActivity" /> -->
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
         
