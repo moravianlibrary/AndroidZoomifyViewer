@@ -1,5 +1,7 @@
 package cz.mzk.androidzoomifyviewer;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import android.os.AsyncTask;
 import android.os.Build;
 

@@ -27,10 +27,11 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 	private final String mProtocol;
 	private final String mDomain;
 	private final String mTopLevelPid;
-	private final PagePidListUtilizer mUtilizer;
+	private final DownloadPidListResultHandler mUtilizer;
 	private Exception mException = null;
 
-	public DownloadPageListTask(String mProtocol, String mDomain, String mTopLevelPid, PagePidListUtilizer mUtilizer) {
+	public DownloadPageListTask(String mProtocol, String mDomain, String mTopLevelPid,
+			DownloadPidListResultHandler mUtilizer) {
 		this.mProtocol = mProtocol;
 		this.mDomain = mDomain;
 		this.mTopLevelPid = mTopLevelPid;
@@ -109,14 +110,13 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 			// TODO: poresit chybu
 			Log.e(TAG, "error downloading/parsing json", mException);
 		} else {
-			// mUtilizer.utilize(TestData.getTestPages(mTopLevelPid));
-			mUtilizer.utilize(result);
+			mUtilizer.onSuccess(result);
 		}
 	}
 
-	// TODO: rename
-	public interface PagePidListUtilizer {
-		public void utilize(List<String> pidList);
+	// TODO: Handler with multiple errors
+	public interface DownloadPidListResultHandler {
+		public void onSuccess(List<String> pidList);
 	}
 
 }

@@ -47,7 +47,7 @@ public class KrameriusObjectPersistentUrl {
 			StringBuilder builder = new StringBuilder();
 			builder.append(protocol).append(PROTOCOL_SUFFIX);
 			builder.append(domain).append(DOMAIN_SUFFIX);
-			builder.append(pid);
+			builder.append(pid).append('/');
 			stringValue = builder.toString();
 		}
 		return stringValue;

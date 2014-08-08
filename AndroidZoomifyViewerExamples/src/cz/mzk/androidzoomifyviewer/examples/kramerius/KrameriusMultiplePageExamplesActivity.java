@@ -70,12 +70,11 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 
 	void startFullscreenPagesActivity(String urlStr) {
 		try {
-			Intent intent = new Intent(this, FullscreenPagesActivity.class);
+			Intent intent = new Intent(this, PageViewerActivity.class);
 			KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);
-			intent.putExtra(FullscreenPagesActivity.EXTRA_PROTOCOL, url.getProtocol());
-			intent.putExtra(FullscreenPagesActivity.EXTRA_DOMAIN, url.getDomain());
-			intent.putExtra(FullscreenPagesActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
-			intent.putExtra(FullscreenPagesActivity.EXTRA_PAGE_ID, 0);
+			intent.putExtra(PageViewerActivity.EXTRA_DOMAIN, url.getDomain());
+			intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
+			intent.putExtra(PageViewerActivity.EXTRA_PAGE_ID, 0);
 			startActivity(intent);
 		} catch (ParseException e) {
 			Log.e(TAG, "error parsing url '" + urlStr + "'");

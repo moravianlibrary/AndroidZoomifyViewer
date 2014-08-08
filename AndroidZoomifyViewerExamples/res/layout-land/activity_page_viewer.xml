@@ -1,0 +1,19 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <fragment
+        android:id="@+id/fragmentControls"
+        android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true" />
+
+    <fragment
+        android:id="@+id/fragmentViewer"
+        android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@id/fragmentControls" />
+
+</RelativeLayout>

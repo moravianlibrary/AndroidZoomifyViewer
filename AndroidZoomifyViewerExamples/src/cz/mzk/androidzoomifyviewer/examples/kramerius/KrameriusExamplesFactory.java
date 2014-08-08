@@ -45,10 +45,18 @@ public class KrameriusExamplesFactory {
 		String krameriusMzk = "kramerius.mzk.cz";
 		String krameriusNdkMzk = "krameriusndktest.mzk.cz";
 		String dockerMzk = "docker.mzk.cz";
+		String krameriusTestMzk = "krameriustest.mzk.cz";
 
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
-		result.add(new MonographExample("http://kramerius.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
+		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
 				"Když slunéčko svítí", krameriusMzk));
+		result.add(new MonographExample(
+				"http://krameriustest.mzk.cz/search/handle/uuid:8069c22a-0ab2-41c3-b7a5-5dcca16ce089",
+				"Chrudimský kancionál (no tiles)", krameriusTestMzk));
+		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:6430d7ae-0ea5-4587-9aab-9d7d9c42a791",
+				"Kde slunce (no rights)", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:5e1e9cd8-eecd-4627-9a1a-09c53caaf9a8",
 				"Stát československý", krameriusMzk));
@@ -62,7 +70,6 @@ public class KrameriusExamplesFactory {
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:db53e7df-82dc-11e0-bc9f-0050569d679d",
 				"Grosser Erdbeschreibung. Blatt N. 698-802.", krameriusMzk));
-
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:a69b1ae8-82e1-11e0-bc9f-0050569d679d",
 				"Atlas minor Sive totius orbis terrarum contracta delinea[ta] ex conatibus", krameriusMzk));
@@ -101,13 +108,13 @@ public class KrameriusExamplesFactory {
 				"Allerneuste Geheimniße der Freymäurer", krameriusMzk));
 
 		// obrazky nejsou v image serveru:
-//		result.add(new MonographExample(
-//				"http://kramerius.mzk.cz/search/handle/uuid:95efa662-9110-11e0-af9b-0050569d679d",
-//				"NO_TILES: Atlantis", krameriusMzk));
-//		result.add(new MonographExample(
-//				"http://kramerius.mzk.cz/search/handle/uuid:8d818753-62e3-11e1-8115-0050569d679d",
-//				"NO_TILES: 700 letá slawnost poswátného poutního místa Marie-Celly, od 1. ledna až do 31. prosince, léta Páně 1857, kteráž úplnými jubilejními odpustky Swatým Otcem, papežem Piem IX., nadána jest pro wssecky poutníky Marie Cellské",
-//				krameriusMzk));
+		// result.add(new MonographExample(
+		// "http://kramerius.mzk.cz/search/handle/uuid:95efa662-9110-11e0-af9b-0050569d679d",
+		// "NO_TILES: Atlantis", krameriusMzk));
+		// result.add(new MonographExample(
+		// "http://kramerius.mzk.cz/search/handle/uuid:8d818753-62e3-11e1-8115-0050569d679d",
+		// "NO_TILES: 700 letá slawnost poswátného poutního místa Marie-Celly, od 1. ledna až do 31. prosince, léta Páně 1857, kteráž úplnými jubilejními odpustky Swatým Otcem, papežem Piem IX., nadána jest pro wssecky poutníky Marie Cellské",
+		// krameriusMzk));
 		//
 		// // nezacina na prvni strance (v jsonu budou typu "predni vazba"
 		// apod.)
@@ -116,9 +123,9 @@ public class KrameriusExamplesFactory {
 		// "900 let rajhradského kláštera (1048-1948)", krameriusMzk));
 
 		// bez prav ke cteni
-//		result.add(new MonographExample(
-//				"http://krameriusndktest.mzk.cz/search/handle/uuid:bc6c7800-ebb5-11e3-b72e-005056827e52",
-//				"NO_RIGHTS: Vodní rod", krameriusNdkMzk));
+		// result.add(new MonographExample(
+		// "http://krameriusndktest.mzk.cz/search/handle/uuid:bc6c7800-ebb5-11e3-b72e-005056827e52",
+		// "NO_RIGHTS: Vodní rod", krameriusNdkMzk));
 		return result;
 	}
 
