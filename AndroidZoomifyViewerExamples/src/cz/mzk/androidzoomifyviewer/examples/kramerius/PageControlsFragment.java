@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import cz.mzk.androidzoomifyviewer.examples.R;
 
 /**
@@ -19,6 +20,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener {
 
 	private Button mBtnPreviousPage;
 	private Button mBtnNextPage;
+	private TextView mPageCounter;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,6 +29,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener {
 		mBtnPreviousPage.setOnClickListener(this);
 		mBtnNextPage = (Button) view.findViewById(R.id.btnNextPage);
 		mBtnNextPage.setOnClickListener(this);
+		mPageCounter = (TextView) view.findViewById(R.id.pageCounter);
 		return view;
 	}
 
@@ -52,6 +55,11 @@ public class PageControlsFragment extends Fragment implements OnClickListener {
 
 	public void setBtnNextPageEnabled(boolean enabled) {
 		mBtnNextPage.setEnabled(enabled);
+	}
+
+	public void setPageCounterContent(int pages, int activePage) {
+		String text = "" + activePage + "/" + pages;
+		mPageCounter.setText(text);
 	}
 
 }

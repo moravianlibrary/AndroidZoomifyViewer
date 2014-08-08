@@ -137,6 +137,7 @@ public class PageViewerActivity extends Activity implements EventListener {
 	private void showPage(int index) {
 		mControlFragment.setBtnPreviousPageEnabled(index > 0);
 		mControlFragment.setBtnNextPageEnabled(index < (mPageViewerFragment.getPageNumber() - 1));
+		mControlFragment.setPageCounterContent(mPageViewerFragment.getPageNumber(), index + 1);
 		mPageViewerFragment.showPage(index);
 	}
 
