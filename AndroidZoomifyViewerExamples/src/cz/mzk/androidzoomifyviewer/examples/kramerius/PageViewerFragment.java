@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -13,7 +14,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
@@ -38,9 +45,10 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	private List<String> mPagePids;
 	private int mCurrentPageIndex;
 
-	private TiledImageView mImageView;
+	private TiledImageView mTiledImageView;
+	private ImageView mImageView;
 
-	// Views to reflect TiledImageView state
+	// Views to reflect image states
 	private View mProgressView;
 	private View mErrorView;
 	private TextView mErrorTitle;
@@ -52,6 +60,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	private EventListener mEventListener;
 
 	private boolean mPopulated = false;
+	private ImageRequest mImageRequest;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -76,10 +85,12 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 		mErrorTitle = (TextView) view.findViewById(R.id.errorTitle);
 		mErrorResourceUrl = (TextView) view.findViewById(R.id.errorResourceUrl);
 		mErrorDescription = (TextView) view.findViewById(R.id.errorDescription);
-		mImageView = (TiledImageView) view.findViewById(R.id.tiledImageView);
-		mImageView.setImageInitializationHandler(this);
-		// mImageView.setTileDownloadHandler(this);
-		mImageView.setSingleTapListener(this);
+		mTiledImageView = (TiledImageView) view.findViewById(R.id.tiledImageView);
+		mTiledImageView.setImageInitializationHandler(this);
+		// mTiledImageView.setTileDownloadHandler(this);
+		mTiledImageView.setSingleTapListener(this);
+		mImageView = (ImageView) view.findViewById(R.id.imageView);
+		mImageView.setOnTouchListener(this);
 		mViewNoAccessRights = view.findViewById(R.id.viewNoAccessRights);
 		mViewNoAccessRights.setOnTouchListener(this);
 		return view;
@@ -112,6 +123,14 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 			outState.putStringArray(KEY_PAGE_PIDS, mPagePids.toArray(pidsArray));
 		}
 		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		if (mImageRequest != null) {
+			mImageRequest.cancel();
+		}
 	}
 
 	@Override
@@ -158,12 +177,15 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	public void showPage(int pageIndex) {
 		Log.d(TAG, "Showing page " + pageIndex);
 		if (pageIndex >= 0 && pageIndex < mPagePids.size()) {
+			if (mImageRequest != null) {
+				mImageRequest.cancel();
+			}
 			hideViews();
 			mProgressView.setVisibility(View.VISIBLE);
 			mCurrentPageIndex = pageIndex;
 			String pid = mPagePids.get(pageIndex);
 			String url = buildZoomifyBaseUrl(pid);
-			mImageView.loadImage(url.toString());
+			mTiledImageView.loadImage(url.toString());
 		} else {
 			Log.w(TAG, "Page index out of range: " + pageIndex);
 		}
@@ -182,41 +204,78 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 		mProgressView.setVisibility(View.INVISIBLE);
 		mViewNoAccessRights.setVisibility(View.INVISIBLE);
 		mErrorView.setVisibility(View.INVISIBLE);
+		mTiledImageView.setVisibility(View.INVISIBLE);
 		mImageView.setVisibility(View.INVISIBLE);
 	}
 
 	@Override
 	public void onImagePropertiesProcessed() {
 		Log.d(TAG, "onImagePropertiesProcessed");
-		mProgressView.setVisibility(View.INVISIBLE);
-		mImageView.setVisibility(View.VISIBLE);
-		// TODO: handle situations when tiles not available and whole image
-		// should be loaded from datastream instead
+		hideViews();
+		mTiledImageView.setVisibility(View.VISIBLE);
 	}
 
 	@Override
 	public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
 		Log.d(TAG, "onImagePropertiesUnhandableResponseCodeError");
-		mProgressView.setVisibility(View.INVISIBLE);
-		mImageView.setVisibility(View.INVISIBLE);
-		if (responseCode == 403) {
-			mErrorView.setVisibility(View.INVISIBLE);
+		hideViews();
+		switch (responseCode) {
+		case 403: // FORBIDDEN
 			mViewNoAccessRights.setVisibility(View.VISIBLE);
-		} else {
-			mViewNoAccessRights.setVisibility(View.INVISIBLE);
+			break;
+		// TODO: remove this temporary hack
+		// @see https://github.com/ceskaexpedice/kramerius/issues/110
+		case 500:
+		case 404: // NOT FOUND
+			mProgressView.setVisibility(View.VISIBLE);
+			loadPageImageFromDatastream();
+			break;
+		case 401:// UNAUTHORIZED
+			// TODO: urge user to log in
+		default:
 			mErrorView.setVisibility(View.VISIBLE);
 			mErrorTitle.setText("Cannot process server resource");
 			mErrorResourceUrl.setText(imagePropertiesUrl);
 			mErrorDescription.setText("HTTP code: " + responseCode);
 		}
+
+	}
+
+	private void loadPageImageFromDatastream() {
+		String pid = mPagePids.get(mCurrentPageIndex);
+		int height = mImageView.getHeight();
+		// int height = 500;
+		final String url = buildScaledImageDatastreamUrl(pid, height);
+		Log.d(TAG, "url: " + url);
+		mImageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+			@Override
+			public void onResponse(Bitmap bitmap) {
+				mImageView.setImageBitmap((Bitmap) bitmap);
+				mImageView.setVisibility(View.VISIBLE);
+			}
+		}, 0, 0, null, new Response.ErrorListener() {
+			public void onErrorResponse(VolleyError error) {
+				mErrorView.setVisibility(View.VISIBLE);
+				mErrorTitle.setText("Cannot process server resource");
+				mErrorResourceUrl.setText(url);
+				mErrorDescription.setText(error.getMessage());
+			}
+		});
+		VolleyRequestManager.addToRequestQueue(mImageRequest);
+	}
+
+	private String buildScaledImageDatastreamUrl(String pid, int height) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("http://").append(mDomain);
+		builder.append("/search/img?pid=").append(pid);
+		builder.append("&stream=IMG_FULL&action=SCALE&scaledHeight=").append(height);
+		return builder.toString();
 	}
 
 	@Override
 	public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
 		Log.d(TAG, "onImagePropertiesRedirectionLoopError");
-		mProgressView.setVisibility(View.INVISIBLE);
-		mImageView.setVisibility(View.INVISIBLE);
-		mViewNoAccessRights.setVisibility(View.INVISIBLE);
+		hideViews();
 		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Redirection loop");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
@@ -226,9 +285,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	@Override
 	public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
 		Log.d(TAG, "onImagePropertiesDataTransferError");
-		mProgressView.setVisibility(View.INVISIBLE);
-		mImageView.setVisibility(View.INVISIBLE);
-		mViewNoAccessRights.setVisibility(View.INVISIBLE);
+		hideViews();
 		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Data transfer error");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
@@ -238,9 +295,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	@Override
 	public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
 		Log.d(TAG, "onImagePropertiesInvalidDataError");
-		mProgressView.setVisibility(View.INVISIBLE);
-		mImageView.setVisibility(View.INVISIBLE);
-		mViewNoAccessRights.setVisibility(View.INVISIBLE);
+		hideViews();
 		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Invalid content in ImageProperties.xml");
 		mErrorResourceUrl.setText(imagePropertiesUrl);
@@ -272,7 +327,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	@Override
 	public void setViewMode(ViewMode mode) {
-		mImageView.setViewMode(mode);
+		mTiledImageView.setViewMode(mode);
 	}
 
 }

@@ -39,7 +39,7 @@ public class FullscreenSingleImageActivity extends Activity implements ImageInit
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
-		if (AndroidZoomifyViewerExamplesApp.DEV_MODE) {
+		if (AppConfig.DEV_MODE) {
 			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectDiskWrites().detectNetwork()
 					.penaltyLog()
 					// .detectAll()

@@ -9,10 +9,12 @@
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> -->
+
+
     <!-- for profilinig only -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
+    <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> -->
 
     <application
         android:name="AndroidZoomifyViewerExamplesApp"
@@ -38,7 +40,6 @@
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerActivity" />
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
-        
         <activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
     </application>
 
