@@ -43,7 +43,17 @@ public class SwipeShiftManager {
 		Log.d(TAG_STATES, "shift: " + state.name());
 	}
 
-	public void notifyDragging(float newX, float newY, int maxShiftUp, int maxShiftDown, int maxShiftLeft,
+	/**
+	 * 
+	 * @param newX
+	 * @param newY
+	 * @param maxShiftUp
+	 * @param maxShiftDown
+	 * @param maxShiftLeft
+	 * @param maxShiftRight
+	 * @return true if swipe distance was higher than treshold (gesture was recognized)
+	 */
+	public boolean notifyDragging(float newX, float newY, int maxShiftUp, int maxShiftDown, int maxShiftLeft,
 			int maxShiftRight) {
 		float diffX = newX - mLastX;
 		float diffY = newY - mLastY;
@@ -66,15 +76,19 @@ public class SwipeShiftManager {
 		}
 
 		VectorD currentDrag = new VectorD(currentDragX, currentDragY);
-		accumulatedSwipeShift = VectorD.sum(accumulatedSwipeShift, currentDrag);
-		mLastX = newX;
-		mLastY = newY;
-		state = State.DRAGGING;
-
-		// TODO: only in dev mode
 		double currentDragDistance = currentDrag.getSize();
-		// Log.d(TAG, "state: " + state.name());
-		Log.d(TAG_STATES, "shift: " + state.name() + String.format(", distance: %.2f", currentDragDistance));
+		if (currentDragDistance > 0.01) {
+			accumulatedSwipeShift = VectorD.sum(accumulatedSwipeShift, currentDrag);
+			mLastX = newX;
+			mLastY = newY;
+			state = State.DRAGGING;
+			Log.d(TAG_STATES, "shift: " + state.name() + String.format(", distance: %.2f", currentDragDistance));
+			return true;
+		} else {
+			Log.d(TAG_STATES, "shift: " + state.name() + String.format(", distance: %.2f", currentDragDistance)
+					+ " (ignored)");
+			return false;
+		}
 	}
 
 	public State getState() {
