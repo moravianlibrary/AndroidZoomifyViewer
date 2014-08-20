@@ -26,9 +26,9 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	private boolean mDiskCacheDisabled = false;
 	private final LruCache<String, String> mMemoryCache;
 
-	public MemoryAndDiskImagePropertiesCache(Context context) {
+	public MemoryAndDiskImagePropertiesCache(Context context, boolean clearCache) {
 		mMemoryCache = initMemoryCache();
-		initDiskCacheAsync(context);
+		initDiskCacheAsync(context, clearCache);
 	}
 
 	private LruCache<String, String> initMemoryCache() {
@@ -38,11 +38,11 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 		return cache;
 	}
 
-	private void initDiskCacheAsync(Context context) {
+	private void initDiskCacheAsync(Context context, boolean clearCache) {
 		try {
 			File cacheDir = getDiskCacheDir(context);
 			int appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-			new InitDiskCacheTask(appVersion).execute(cacheDir);
+			new InitDiskCacheTask(appVersion, clearCache).execute(cacheDir);
 		} catch (NameNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -73,9 +73,11 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 	private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
 		private final int appVersion;
+		private final boolean clearCache;
 
-		public InitDiskCacheTask(int appVersion) {
+		public InitDiskCacheTask(int appVersion, boolean clearCache) {
 			this.appVersion = appVersion;
+			this.clearCache = clearCache;
 		}
 
 		@Override
@@ -85,16 +87,26 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 				// Thread.currentThread().toString());
 				File cacheDir = params[0];
 				try {
+					if (clearCache) {
+						Log.w(TAG, "clearing disk cache");
+						boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+						if (!cleared) {
+							Log.w(TAG, "failed to delete content of dir " + cacheDir.getAbsolutePath());
+							return null;
+						}
+					}
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE);
 					mDiskCacheLock.notifyAll();
+					return null;
 				} catch (IOException e) {
-					Log.w(TAG, "error opening disk cache, disabling");
+					Log.w(TAG, "error initializing disk cache, disabling");
 					mDiskCacheDisabled = true;
+					mDiskCacheLock.notifyAll();
+					return null;
 				}
 				// Log.d(TAG, "assuming mDiskCacheLock: " +
 				// Thread.currentThread().toString());
 			}
-			return null;
 		}
 	}
 

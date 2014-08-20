@@ -33,9 +33,9 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	private boolean mDiskCacheDisabled = false;
 	private final LruCache<String, Bitmap> mMemoryCache;
 
-	public MemoryAndDiskTilesCache(Context context) {
+	public MemoryAndDiskTilesCache(Context context, boolean clearCache) {
 		mMemoryCache = initMemoryCache();
-		initDiskCacheAsync(context);
+		initDiskCacheAsync(context, clearCache);
 	}
 
 	private LruCache<String, Bitmap> initMemoryCache() {
@@ -57,11 +57,11 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		return cache;
 	}
 
-	private void initDiskCacheAsync(Context context) {
+	private void initDiskCacheAsync(Context context, boolean clearCache) {
 		try {
 			File cacheDir = getDiskCacheDir(context);
 			int appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-			new InitDiskCacheTask(appVersion).execute(cacheDir);
+			new InitDiskCacheTask(appVersion, clearCache).execute(cacheDir);
 		} catch (NameNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -92,26 +92,40 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
 	private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
 		private final int appVersion;
+		private final boolean clearCache;
 
-		public InitDiskCacheTask(int appVersion) {
+		public InitDiskCacheTask(int appVersion, boolean clearCache) {
 			this.appVersion = appVersion;
+			this.clearCache = clearCache;
 		}
 
 		@Override
 		protected Void doInBackground(File... params) {
 			synchronized (mDiskCacheLock) {
-				//Log.d(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "assuming mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 				File cacheDir = params[0];
 				try {
+					if (clearCache) {
+						Log.w(TAG, "clearing disk cache");
+						boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+						if (!cleared) {
+							Log.w(TAG, "failed to delete content of dir " + cacheDir.getAbsolutePath());
+							return null;
+						}
+					}
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE);
 					mDiskCacheLock.notifyAll();
+					return null;
 				} catch (IOException e) {
 					Log.w(TAG, "error opening disk cache, disabling");
 					mDiskCacheDisabled = true;
+					mDiskCacheLock.notifyAll();
+					return null;
 				}
-				//Log.d(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "assuming mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 			}
-			return null;
 		}
 	}
 
@@ -124,14 +138,16 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
 	private void storeTileToMemoryCache(String key, Bitmap bmp) {
 		synchronized (mMemoryCache) {
-			//Log.d(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
+			// Log.d(TAG, "assuming mMemoryCache lock: " +
+			// Thread.currentThread().toString());
 			if (mMemoryCache.get(key) == null) {
 				Log.d(TAG, "storing to memory cache: " + key);
 				mMemoryCache.put(key, bmp);
 			} else {
 				Log.d(TAG, "already in memory cache: " + key);
 			}
-			//Log.d(TAG, "releasing mMemoryCache lock: " + Thread.currentThread().toString());
+			// Log.d(TAG, "releasing mMemoryCache lock: " +
+			// Thread.currentThread().toString());
 		}
 	}
 
@@ -140,7 +156,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		OutputStream out = null;
 		try {
 			synchronized (mDiskCacheLock) {
-				//Log.d(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "assuming mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 				while (mDiskCache == null && !mDiskCacheDisabled) {
 					try {
 						mDiskCacheLock.wait();
@@ -169,7 +186,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 						}
 					}
 				}
-				//Log.d(TAG, "releasing mDiskCacheLock: " + Thread.currentThread().toString());
+				// Log.d(TAG, "releasing mDiskCacheLock: " +
+				// Thread.currentThread().toString());
 			}
 		} catch (IOException e) {
 			Log.e(TAG, "failed to store tile to disk cache: " + e.getMessage());

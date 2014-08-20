@@ -327,6 +327,7 @@ public class TilesDownloader {
 	public Bitmap downloadTile(TileId tileId) throws OtherIOException, TooManyRedirectionsException,
 			ImageServerResponseException {
 		int tileGroup = computeTileGroup(tileId);
+		//int tileGroup = 0;
 		String tileUrl = buildTileUrl(tileGroup, tileId);
 		Log.d(TAG, "TILE URL: " + tileUrl);
 		return downloadTile(tileUrl, MAX_REDIRECTIONS);

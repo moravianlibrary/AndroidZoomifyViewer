@@ -251,6 +251,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 			// px
 			int bestLayerId = mActiveImageDownloader.getBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
+			//int bestLayerId = 3;
 			// Log.d(TAG, "best layer id: " + bestLayerId);
 
 			mVisibleImageInCanvas = computeVisibleInCanvas(canv);
