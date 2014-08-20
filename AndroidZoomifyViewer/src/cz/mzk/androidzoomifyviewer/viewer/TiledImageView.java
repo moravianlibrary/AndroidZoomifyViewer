@@ -332,11 +332,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		case FIT_TO_SCREEN:
 			mInitialResizingFactor = resizingFactorFitToScreen;
 			break;
-		case NO_FREE_SPACE_ALIGN_CENTER:
-		case NO_FREE_SPACE_ALIGN_TOP_LEFT:
+		default:
 			mInitialResizingFactor = resizingFactorNoFreeSpace;
 			break;
-
 		}
 		// Log.d(TAG, "fit to screen factor: " + mInitialResizeFactor);
 		mMinResizingFactor = Math.min(resizingFactorFitToScreen, resizingFactorNoFreeSpace);
@@ -618,36 +616,53 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// actualHeight);
 
 		// TODO: pocitat znovu jen pri zmene
+
+		double extraWidth = canvasWidth - actualWidth;
+		double extraHeight = canvasHeight - actualHeight;
+
+		double xLeft = 0;
+		double xCenter = extraWidth / 2.0;
+		double xRight = extraWidth;
+		double yTop = 0;
+		double yCenter = extraHeight / 2.0;
+		double yBottom = extraHeight;
+
 		switch (mViewMode) {
 		case FIT_TO_SCREEN:
-		case NO_FREE_SPACE_ALIGN_CENTER:
-			// zarovnat na stred
-			int x = computeOffsetCenter(canvasWidth, actualWidth);
-			int y = computeOffsetCenter(canvasHeight, actualHeight);
-			mInitialShift = new VectorD(x, y);
+			mInitialShift = new VectorD(xCenter, yCenter);
 			break;
-		case NO_FREE_SPACE_ALIGN_TOP_LEFT:
-			// zarovnat k levemu hornimu rohu
-			mInitialShift = VectorD.ZERO_VECTOR;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP:
+			mInitialShift = new VectorD(xLeft, yTop);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER:
+			mInitialShift = new VectorD(xLeft, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM:
+			mInitialShift = new VectorD(xLeft, yBottom);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP:
+			mInitialShift = new VectorD(xCenter, yTop);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER:
+			mInitialShift = new VectorD(xCenter, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM:
+			mInitialShift = new VectorD(xCenter, yBottom);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP:
+			mInitialShift = new VectorD(xRight, yTop);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER:
+			mInitialShift = new VectorD(xRight, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM:
+			mInitialShift = new VectorD(xRight, yBottom);
 			break;
 		}
 		VectorD totalShift = getTotalShift();
 		return new Rect((int) (0 + totalShift.x), (int) (0 + totalShift.y), (int) (actualWidth + totalShift.x),
 				(int) (actualHeight + totalShift.y));
 	}
-
-	private int computeOffsetCenter(double canvasWidth, double imageInCanvasWidth) {
-		double freeSpace = canvasWidth - imageInCanvasWidth;
-		// Log.d(TAG, "free width=" + freeSpace);
-		return (int) (freeSpace / 2.0);
-	}
-
-	// private int computeOffsetAlign(double canvasWidth, double
-	// imageInCanvasWidth) {
-	// double freeSpace = canvasWidth - imageInCanvasWidth;
-	// // Log.d(TAG, "free width=" + freeSpace);
-	// return (int) (freeSpace / 2.0);
-	// }
 
 	private Rect pxToDp(Rect rectPx) {
 		int top = (int) (rectPx.top / this.getContext().getResources().getDisplayMetrics().density);
@@ -810,7 +825,19 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	public enum ViewMode {
-		FIT_TO_SCREEN, NO_FREE_SPACE_ALIGN_TOP_LEFT, NO_FREE_SPACE_ALIGN_CENTER
+		FIT_TO_SCREEN, //
+
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP, //
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER, //
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM, //
+
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP, //
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER, //
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM, //
+
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP, //
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER, //
+		NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM, //
 	}
 
 	private static final String TAG_STATES = "state";
