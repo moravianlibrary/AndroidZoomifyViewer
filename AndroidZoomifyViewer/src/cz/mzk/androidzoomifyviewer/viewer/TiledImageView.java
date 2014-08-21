@@ -770,9 +770,13 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				case (MotionEvent.ACTION_MOVE):
 					if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG
 							|| swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
-						mSwipeShiftManager.notifyDragging(event.getX(), event.getY(), maxShiftUp, maxShiftDown,
-								maxShiftLeft, maxShiftRight);
-						invalidate();
+						boolean swiped = mSwipeShiftManager.notifyDragging(event.getX(), event.getY(), maxShiftUp,
+								maxShiftDown, maxShiftLeft, maxShiftRight);
+						if (!swiped) {
+							mGestureDetector.onTouchEvent(event);
+						} else {
+							invalidate();
+						}
 						return true;
 					} else {
 						int fingers = event.getPointerCount();
