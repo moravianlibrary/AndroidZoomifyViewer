@@ -67,8 +67,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private boolean mDrawLayerWithWorseResolution = true;
 
 	private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
-	// private ViewMode mViewMode = ViewMode.NO_FREE_SPACE_ALIGN_CENTER;
-	// private ViewMode mViewMode = ViewMode.NO_FREE_SPACE_ALIGN_TOP_LEFT;
 
 	// test stuff
 
@@ -251,7 +249,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 			// px
 			int bestLayerId = mActiveImageDownloader.getBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
-			//int bestLayerId = 3;
+			// int bestLayerId = 5;
 			// Log.d(TAG, "best layer id: " + bestLayerId);
 
 			mVisibleImageInCanvas = computeVisibleInCanvas(canv);

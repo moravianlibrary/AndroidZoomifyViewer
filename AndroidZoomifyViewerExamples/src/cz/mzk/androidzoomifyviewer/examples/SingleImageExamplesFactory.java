@@ -222,7 +222,7 @@ public class SingleImageExamplesFactory {
 		result.add(new ImageExample("Medieval Town of Gruyères", "http://www.fookes.com/ezimager/zoomify/122_2259/"));
 		result.add(new ImageExample("Stained Glass Window", "http://www.fookes.com/ezimager/zoomify/122_2209/"));
 		result.add(new ImageExample("Gruyères Castle and Church", "http://www.fookes.com/ezimager/zoomify/122_2264/"));
-		// result.add(new Example("", ""));
+		// result.add(new ImageExample("", ""));
 		return result;
 	}
 }

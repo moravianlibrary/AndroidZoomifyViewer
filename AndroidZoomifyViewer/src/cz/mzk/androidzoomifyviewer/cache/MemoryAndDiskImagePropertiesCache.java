@@ -20,8 +20,8 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	private static final String TAG = MemoryAndDiskImagePropertiesCache.class.getSimpleName();
 	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 1MB
 	private static final int MEMORY_CACHE_ITEM_SIZE = 100;
-	private static final String DISK_CACHE_SUBDIR = "imgPropCache";
-	private final Object mDiskCacheLock = new Object();
+	private static final String DISK_CACHE_SUBDIR = "imageProperties";
+	private final Object mDiskCacheInitializationLock = new Object();
 	private DiskLruCache mDiskCache = null;
 	private boolean mDiskCacheDisabled = false;
 	private final LruCache<String, String> mMemoryCache;
@@ -82,32 +82,47 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 		@Override
 		protected Void doInBackground(File... params) {
-			synchronized (mDiskCacheLock) {
-				// Log.d(TAG, "assuming mDiskCacheLock: " +
-				// Thread.currentThread().toString());
-				File cacheDir = params[0];
+			synchronized (mDiskCacheInitializationLock) {
+				Log.d(TAG, "assuming disk cache initialization lock: " + Thread.currentThread().toString());
 				try {
-					if (clearCache) {
-						Log.w(TAG, "clearing disk cache");
-						boolean cleared = DiskUtils.deleteDirContent(cacheDir);
-						if (!cleared) {
-							Log.w(TAG, "failed to delete content of dir " + cacheDir.getAbsolutePath());
+					File cacheDir = params[0];
+					if (cacheDir.exists()) {
+						if (clearCache) {
+							Log.i(TAG, "clearing image-properties disk cache");
+							boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+							if (!cleared) {
+								Log.w(TAG, "failed to delete content of " + cacheDir.getAbsolutePath());
+								disableDiskCache();
+								return null;
+							}
+						}
+					} else {
+						Log.i(TAG, "creating cache dir " + cacheDir);
+						boolean created = cacheDir.mkdir();
+						if (!created) {
+							Log.w(TAG, "failed to create cache dir " + cacheDir.getAbsolutePath());
+							disableDiskCache();
 							return null;
 						}
 					}
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE);
-					mDiskCacheLock.notifyAll();
 					return null;
 				} catch (IOException e) {
 					Log.w(TAG, "error initializing disk cache, disabling");
 					mDiskCacheDisabled = true;
-					mDiskCacheLock.notifyAll();
+					mDiskCacheInitializationLock.notifyAll();
 					return null;
+				} finally {
+					mDiskCacheInitializationLock.notifyAll();
+					Log.d(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
 				}
-				// Log.d(TAG, "assuming mDiskCacheLock: " +
-				// Thread.currentThread().toString());
 			}
 		}
+	}
+
+	private void disableDiskCache() {
+		Log.i(TAG, "disabling disk cache");
+		mDiskCacheDisabled = true;
 	}
 
 	@Override
@@ -119,52 +134,55 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 	private void storeXmlToMemoryCache(String key, String xml) {
 		synchronized (mMemoryCache) {
-			// Log.d(TAG, "assuming mMemoryCache lock: " +
-			// Thread.currentThread().toString());
+			Log.d(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
 			if (mMemoryCache.get(key) == null) {
 				Log.d(TAG, "storing to memory cache: " + key);
 				mMemoryCache.put(key, xml);
 			} else {
 				Log.d(TAG, "already in memory cache: " + key);
 			}
-			// Log.d(TAG, "releasing mMemoryCache lock: " +
-			// Thread.currentThread().toString());
+			Log.d(TAG, "releasing mMemoryCache lock: " + Thread.currentThread().toString());
+		}
+	}
+
+	private void waitUntilDiskCacheInitializedOrDisabled() {
+		try {
+			synchronized (mDiskCacheInitializationLock) {
+				Log.d(TAG, "assuming disk cache lock: " + Thread.currentThread().toString());
+				// Wait until disk cache is initialized or disabled
+				while (mDiskCache == null && !mDiskCacheDisabled) {
+					try {
+						mDiskCacheInitializationLock.wait();
+					} catch (InterruptedException e) {
+						Log.e(TAG, "waiting for disk cache lock interrupted", e);
+					}
+				}
+			}
+		} finally {
+			Log.d(TAG, "releasing disk cache lock: " + Thread.currentThread().toString());
 		}
 	}
 
 	private void storeXmlToDiskCache(String key, String xml) {
+		waitUntilDiskCacheInitializedOrDisabled();
 		Editor edit = null;
 		try {
-			synchronized (mDiskCacheLock) {
-				// Log.d(TAG, "assuming mDiskCacheLock: " +
-				// Thread.currentThread().toString());
-				while (mDiskCache == null && !mDiskCacheDisabled) {
-					try {
-						mDiskCacheLock.wait();
-					} catch (InterruptedException e) {
-						Log.e(TAG, "waiting for disk cache lock interrupted", e);
-						return;
-					}
-				}
-				if (!mDiskCacheDisabled) {
-					Snapshot fromDiskCache = mDiskCache.get(key);
-					if (fromDiskCache != null) {
-						Log.d(TAG, "already in disk cache: " + key);
+			if (!mDiskCacheDisabled) {
+				Snapshot fromDiskCache = mDiskCache.get(key);
+				if (fromDiskCache != null) {
+					Log.d(TAG, "already in disk cache: " + key);
+				} else {
+					Log.d(TAG, "storing to disk cache: " + key);
+					edit = mDiskCache.edit(key);
+					if (edit != null) {
+						edit.set(0, xml);
+						edit.commit();
 					} else {
-						Log.d(TAG, "storing to disk cache: " + key);
-						edit = mDiskCache.edit(key);
-						if (edit != null) {
-							edit.set(0, xml);
-							edit.commit();
-						} else {
-							// jine vlakno se pokousi zapisovat
-							// tj. spatne implementovana synchronizace
-							Log.e(TAG, key + ": edit allready opened");
-						}
+						// jine vlakno se pokousi zapisovat
+						// tj. spatne implementovana synchronizace
+						Log.e(TAG, key + ": edit allready opened");
 					}
 				}
-				// Log.d(TAG, "releasing mDiskCacheLock: " +
-				// Thread.currentThread().toString());
 			}
 		} catch (IOException e) {
 			Log.e(TAG, "failed to store xml to disk cache: " + e.getMessage());
@@ -203,15 +221,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	}
 
 	private String getXmlFromDiskCache(String key) {
-		// Wait while disk cache is started from background thread
-		while (mDiskCache == null && !mDiskCacheDisabled) {
-			try {
-				mDiskCacheLock.wait();
-			} catch (InterruptedException e) {
-				Log.e(TAG, "waiting for disk cache lock interrupted", e);
-				return null;
-			}
-		}
+		waitUntilDiskCacheInitializedOrDisabled();
 		try {
 			if (!mDiskCacheDisabled) {
 				// long start = System.currentTimeMillis();

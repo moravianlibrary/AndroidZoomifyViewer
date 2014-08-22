@@ -27,8 +27,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
 	private static final String TAG = MemoryAndDiskTilesCache.class.getSimpleName();
 	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
-	private static final String DISK_CACHE_SUBDIR = "bmpCache";
-	private final Object mDiskCacheLock = new Object();
+	private static final String DISK_CACHE_SUBDIR = "tiles";
+	private final Object mDiskCacheInitializationLock = new Object();
 	private DiskLruCache mDiskCache = null;
 	private boolean mDiskCacheDisabled = false;
 	private final LruCache<String, Bitmap> mMemoryCache;
@@ -101,32 +101,47 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
 		@Override
 		protected Void doInBackground(File... params) {
-			synchronized (mDiskCacheLock) {
+			synchronized (mDiskCacheInitializationLock) {
 				// Log.d(TAG, "assuming mDiskCacheLock: " +
 				// Thread.currentThread().toString());
-				File cacheDir = params[0];
 				try {
-					if (clearCache) {
-						Log.w(TAG, "clearing disk cache");
-						boolean cleared = DiskUtils.deleteDirContent(cacheDir);
-						if (!cleared) {
-							Log.w(TAG, "failed to delete content of dir " + cacheDir.getAbsolutePath());
+					File cacheDir = params[0];
+					if (cacheDir.exists()) {
+						if (clearCache) {
+							Log.i(TAG, "clearing tiles disk cache");
+							boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+							if (!cleared) {
+								Log.w(TAG, "failed to delete content of " + cacheDir.getAbsolutePath());
+								disableDiskCache();
+								return null;
+							}
+						}
+					} else {
+						Log.i(TAG, "creating cache dir " + cacheDir);
+						boolean created = cacheDir.mkdir();
+						if (!created) {
+							Log.w(TAG, "failed to create cache dir " + cacheDir.getAbsolutePath());
+							disableDiskCache();
 							return null;
 						}
 					}
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE);
-					mDiskCacheLock.notifyAll();
 					return null;
 				} catch (IOException e) {
 					Log.w(TAG, "error opening disk cache, disabling");
-					mDiskCacheDisabled = true;
-					mDiskCacheLock.notifyAll();
+					disableDiskCache();
 					return null;
+				} finally {
+					Log.d(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
+					mDiskCacheInitializationLock.notifyAll();
 				}
-				// Log.d(TAG, "assuming mDiskCacheLock: " +
-				// Thread.currentThread().toString());
 			}
 		}
+	}
+
+	private void disableDiskCache() {
+		Log.i(TAG, "disabling disk cache");
+		mDiskCacheDisabled = true;
 	}
 
 	@Override
@@ -152,43 +167,31 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	}
 
 	private void storeTileToDiskCache(String key, Bitmap bmp) {
+		waitUntilDiskCacheInitializedOrDisabled();
 		Editor edit = null;
 		OutputStream out = null;
 		try {
-			synchronized (mDiskCacheLock) {
-				// Log.d(TAG, "assuming mDiskCacheLock: " +
-				// Thread.currentThread().toString());
-				while (mDiskCache == null && !mDiskCacheDisabled) {
-					try {
-						mDiskCacheLock.wait();
-					} catch (InterruptedException e) {
-						Log.e(TAG, "waiting for disk cache lock interrupted", e);
-						return;
-					}
-				}
-				if (!mDiskCacheDisabled) {
-					Snapshot fromDiskCache = mDiskCache.get(key);
-					if (fromDiskCache != null) {
-						Log.d(TAG, "already in disk cache: " + key);
+			if (!mDiskCacheDisabled) {
+				Snapshot fromDiskCache = mDiskCache.get(key);
+				if (fromDiskCache != null) {
+					Log.d(TAG, "already in disk cache: " + key);
+				} else {
+					Log.d(TAG, "storing to disk cache: " + key);
+					edit = mDiskCache.edit(key);
+					if (edit != null) {
+						edit.hashCode();
+						out = edit.newOutputStream(0);
+						byte[] bytes = bitmapToByteArray(bmp);
+						out.write(bytes);
+						edit.commit();
 					} else {
-						Log.d(TAG, "storing to disk cache: " + key);
-						edit = mDiskCache.edit(key);
-						if (edit != null) {
-							edit.hashCode();
-							out = edit.newOutputStream(0);
-							byte[] bytes = bitmapToByteArray(bmp);
-							out.write(bytes);
-							edit.commit();
-						} else {
-							// jine vlakno se pokousi zapisovat
-							// tj. spatne implementovana synchronizace
-							Log.e(TAG, key + ": edit allready opened");
-						}
+						// jine vlakno se pokousi zapisovat
+						// tj. spatne implementovana synchronizace
+						Log.e(TAG, key + ": edit allready opened");
 					}
 				}
-				// Log.d(TAG, "releasing mDiskCacheLock: " +
-				// Thread.currentThread().toString());
 			}
+			// }
 		} catch (IOException e) {
 			Log.e(TAG, "failed to store tile to disk cache: " + e.getMessage());
 			try {
@@ -234,16 +237,26 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		}
 	}
 
-	private Bitmap getTileFromDiskCache(String key) {
-		// Wait while disk cache is started from background thread
-		while (mDiskCache == null && !mDiskCacheDisabled) {
-			try {
-				mDiskCacheLock.wait();
-			} catch (InterruptedException e) {
-				Log.e(TAG, "waiting for disk cache lock interrupted", e);
-				return null;
+	private void waitUntilDiskCacheInitializedOrDisabled() {
+		try {
+			synchronized (mDiskCacheInitializationLock) {
+				Log.d(TAG, "assuming disk cache initialization lock: " + Thread.currentThread().toString());
+				// Wait until disk cache is initialized or disabled
+				while (mDiskCache == null && !mDiskCacheDisabled) {
+					try {
+						mDiskCacheInitializationLock.wait();
+					} catch (InterruptedException e) {
+						Log.e(TAG, "waiting for disk cache lock interrupted", e);
+					}
+				}
 			}
+		} finally {
+			Log.d(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
 		}
+	}
+
+	private Bitmap getTileFromDiskCache(String key) {
+		waitUntilDiskCacheInitializedOrDisabled();
 		try {
 			if (!mDiskCacheDisabled) {
 				// long start = System.currentTimeMillis();
