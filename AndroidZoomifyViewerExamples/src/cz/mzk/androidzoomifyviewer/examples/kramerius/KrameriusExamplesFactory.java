@@ -4,11 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.util.Log;
+import cz.mzk.androidzoomifyviewer.examples.SingleImageWorkingExamplesActivity;
+
 /**
  * @author Martin Řehánek
  * 
  */
 public class KrameriusExamplesFactory {
+
+	private static final String TAG = KrameriusExamplesFactory.class.getSimpleName();
 
 	public static class MonographExample {
 		private static final int MAX_TITLE_LENGTH = 30;
@@ -20,8 +25,9 @@ public class KrameriusExamplesFactory {
 
 		public MonographExample(String url, String title, String source) {
 			this.url = url;
-			if (title.length() > MAX_TITLE_LENGTH - TITLE_SUFFIX.length()) {
-				this.title = title.substring(0, MAX_TITLE_LENGTH) + TITLE_SUFFIX;
+			if (title.length() > MAX_TITLE_LENGTH) {
+				int titleSubstringLength = Math.min(title.length(), MAX_TITLE_LENGTH - TITLE_SUFFIX.length());
+				this.title = title.substring(0, titleSubstringLength) + TITLE_SUFFIX;
 			} else {
 				this.title = title;
 			}
@@ -48,6 +54,11 @@ public class KrameriusExamplesFactory {
 		String krameriusTestMzk = "krameriustest.mzk.cz";
 
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
+
+		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:4873e8c7-5967-4003-8544-96f64ca55da7",
+				"Symbiotické zemědělství (pdf)", krameriusMzk));
+
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
 				"Když slunéčko svítí", krameriusMzk));

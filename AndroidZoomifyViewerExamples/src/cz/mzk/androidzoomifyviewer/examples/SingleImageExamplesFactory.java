@@ -223,6 +223,9 @@ public class SingleImageExamplesFactory {
 		result.add(new ImageExample("Stained Glass Window", "http://www.fookes.com/ezimager/zoomify/122_2209/"));
 		result.add(new ImageExample("Gruyères Castle and Church", "http://www.fookes.com/ezimager/zoomify/122_2264/"));
 		// result.add(new ImageExample("", ""));
+		// test
+		// result.add(new ImageExample("localhost test",
+		// "http://10.0.0.2:8888/preview/07AED/"));
 		return result;
 	}
 }
