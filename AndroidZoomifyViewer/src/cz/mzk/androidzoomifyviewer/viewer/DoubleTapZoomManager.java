@@ -11,131 +11,115 @@ import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 public class DoubleTapZoomManager {
 
 	private static final String TAG = DoubleTapZoomManager.class.getSimpleName();
-	private static final String TAG_STATES = "state";
 
 	private final TiledImageView imageView;
 	private State state = State.IDLE;
+	private CountDownTask animationTask = null;
+
+	// centers
+	private PointD zoomCenterInImage;
+	private PointD doubleTapCenterInCanvas;
 
 	// zoom shift
 	private VectorD accumalatedZoomShift = VectorD.ZERO_VECTOR;
 	private VectorD activeZoomShift = VectorD.ZERO_VECTOR;
 
-	// zoom level
-	private double accumulatedZoomLevel = 1.0;
-	private double activeZoomLevel = 1.0;
-
-	private PointD startingZoomCenterInImageCoords;
-	private PointD currentZoomCenterInCanvasCoords;// TODO: just temporary
-
-	private CountDownTask task = null;
+	// zoom scale
+	private double accumulatedZoomScale = 1.0;
+	private double activeZoomScale = 1.0;
 
 	public DoubleTapZoomManager(TiledImageView imageView) {
 		this.imageView = imageView;
 	}
 
-	public void startZoomingAnimation(PointD center) {
+	public void startZooming(PointD doubleTapCenterInCanvasCoords) {
+		// DevTools devTools = imageView.getDevTools();
+		// if (devTools != null) {
+		// devTools.clearCenters();
+		// }
+		this.doubleTapCenterInCanvas = doubleTapCenterInCanvasCoords;
 		state = State.ZOOMING;
-		Log.d(TAG_STATES, "zoom (double tap): " + state.name());
-		currentZoomCenterInCanvasCoords = center;
-		startingZoomCenterInImageCoords = Utils.toImageCoords(currentZoomCenterInCanvasCoords.x,
-				currentZoomCenterInCanvasCoords.y, imageView.getTotalResizeFactor(), imageView.getTotalShift());
-		Log.d("Motion", "POINTER_DOWN, center: x=" + currentZoomCenterInCanvasCoords.x + ", y="
-				+ currentZoomCenterInCanvasCoords.y);
-		task = new CountDownTask();
-		task.executeConcurrentIfPossible();
+		// Log.d(TestTags.STATE, "zoom (double tap): " + state.name());
+		// Log.d(TestTags.MOTION, "POINTER_DOWN, center: x=" +
+		// doubleTapCenterInCanvasCoords.x + ", y="
+		// + doubleTapCenterInCanvasCoords.y);
+		calculateAndRunAnimation();
+	}
+
+	private void calculateAndRunAnimation() {
+		zoomCenterInImage = Utils.toImageCoords(doubleTapCenterInCanvas, imageView.getTotalResizeFactor(),
+				imageView.getTotalShift());
+		animationTask = new CountDownTask();
+		animationTask.executeConcurrentIfPossible();
 	}
 
 	void notifyZoomingIn(double activeZoomLevel) {
-		this.activeZoomLevel = activeZoomLevel;
-		activeZoomShift = VectorD.ZERO_VECTOR;
-		accumalatedZoomShift = computeActiveZoomShift(currentZoomCenterInCanvasCoords,
-				imageView.getTotalResizeFactor(), imageView.getTotalShift());
+		this.activeZoomScale = activeZoomLevel;
+		VectorD newZoomShift = computeActiveZoomShift(doubleTapCenterInCanvas, imageView.getTotalResizeFactor(),
+				imageView.getTotalShift());
+		accumalatedZoomShift = VectorD.sum(accumalatedZoomShift, newZoomShift);
 		imageView.invalidate();
 	}
 
-	private VectorD computeActiveZoomShift(PointD currentZoomCenterInCanvasCoords, double resizeFactor, VectorD shift) {
-
-		VectorD shift2 = new VectorD(shift.x * activeZoomLevel, shift.y * activeZoomLevel);
-		Log.d("z00m",
-				String.format("activeZoomLevel: %.4f", activeZoomLevel)
-						+ String.format(" accumulatedZoomLevel: %.2f", accumulatedZoomLevel));
-		PointD initialZoomCenter = Utils.toCanvasCoords(startingZoomCenterInImageCoords,
+	private VectorD computeActiveZoomShift(PointD doubleTapCenterInCanvasCoords, double resizeFactor, VectorD shift) {
+		// Log.d(TestTags.ZOOM,
+		// String.format("activeZoomLevel: %.4f", activeZoomScale)
+		// + String.format(" accumulatedZoomLevel: %.2f",
+		// accumulatedZoomScale));
+		PointD zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift = Utils.toCanvasCoords(zoomCenterInImage,
 				imageView.getTotalResizeFactor(), imageView.getTotalShift());
-		// PointD initialZoomCenter =
-		// Utils.toCanvasCoords(startingZoomCenterInImageCoords,
-		// resizeFactor, shift);
-
-		VectorD diff = new VectorD(currentZoomCenterInCanvasCoords.x - initialZoomCenter.x,
-				currentZoomCenterInCanvasCoords.y - initialZoomCenter.y);
-		// VectorD diff = new VectorD(initialZoomCenter.x -
-		// currentZoomCenterInCanvasCoords.x, initialZoomCenter.y
-		// - currentZoomCenterInCanvasCoords.y);
-
-		// testCounter++;
-		Log.d("z00m",
-				"zoomMngr: init: " + initialZoomCenter.toString() + " now: "
-						+ currentZoomCenterInCanvasCoords.toString() + " diff: " + diff.toString()
-						+ String.format(" r:%.4f", imageView.getTotalResizeFactor()) + " s: "
-						+ imageView.getTotalShift().toString());// + " c: " +
-																// testCounter);
-
-		PointD testInitialZoomCenter = Utils.toCanvasCoords(startingZoomCenterInImageCoords,
-				imageView.getTotalResizeFactor(), imageView.getTotalShift());
-		VectorD testDiff = new VectorD(currentZoomCenterInCanvasCoords.x - initialZoomCenter.x,
-				currentZoomCenterInCanvasCoords.y - initialZoomCenter.y);
-		// Log.d("z00m", "zoomMngr: test: " + testInitialZoomCenter.toString() +
-		// ", now: "
-		// + currentZoomCenterInCanvasCoords.toString() + ", diff: " +
-		// testDiff.toString() + ", c: " + testCounter);
-
-		double distance = Math.sqrt(Math.pow(diff.x, 2) + Math.pow(diff.y, 2));
-
-		Log.d("zoom", "vector: " + diff.toString() + ", distance: " + String.format("%.3f", distance));
+		// Log.d(TestTags.CENTERS, "gesture: " + doubleTapCenterInCanvasCoords +
+		// ", image: "
+		// + zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift);
+		VectorD diff = new VectorD(
+				(doubleTapCenterInCanvasCoords.x - zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.x),
+				(doubleTapCenterInCanvasCoords.y - zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.y));
+		// Log.d(TestTags.ZOOM,
+		// "zoomMngr: init: " +
+		// zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.toString() +
+		// " now: "
+		// + doubleTapCenterInCanvasCoords.toString() + " diff: " +
+		// diff.toString()
+		// + String.format(" r:%.4f", imageView.getTotalResizeFactor()) + " s: "
+		// + imageView.getTotalShift().toString());
+		// Log.d(TAG, "diff: " + diff.toString() + ", distance: " +
+		// String.format("%.3f", diff.getSize()));
 		return diff;
 	}
 
-	public void cancelZoomingAnimation() {
-		if (task != null && (task.getStatus() == Status.PENDING || task.getStatus() == Status.RUNNING)) {
-			task.cancel(false);
+	public void cancelZooming() {
+		if (animationTask != null
+				&& (animationTask.getStatus() == Status.PENDING || animationTask.getStatus() == Status.RUNNING)) {
+			animationTask.cancel(false);
 		}
 	}
 
-	void notifyZoomingCanceled() {
-		finishAndResetData();
-		state = State.IDLE;
-		Log.d(TAG_STATES, "zoom (double tap): " + state.name());
-		imageView.invalidate();
-	}
-
-	void notifyZoomingFinished() {
-		finishAndResetData();
-		state = State.IDLE;
-		Log.d(TAG_STATES, "zoom (double tap): " + state.name());
-		imageView.invalidate();
-	}
-
-	private void finishAndResetData() {
-		accumulatedZoomLevel *= activeZoomLevel;
-		activeZoomLevel = 1.0;
+	private void storeDataOfCurrentZoom() {
+		animationTask = null;
+		accumulatedZoomScale *= activeZoomScale;
+		activeZoomScale = 1.0;
 		accumalatedZoomShift = VectorD.sum(accumalatedZoomShift, activeZoomShift);
 		activeZoomShift = VectorD.ZERO_VECTOR;
-		startingZoomCenterInImageCoords = null;
+		zoomCenterInImage = null;
+		state = State.IDLE;
+		// Log.d(TestTags.STATE, "zoom (double tap): " + state.name());
+		imageView.invalidate();
 	}
 
 	public State getState() {
 		return state;
 	}
 
-	public PointD getCurrentZoomCenter() {
-		return currentZoomCenterInCanvasCoords;
+	public PointD getDoubleTapCenterInCanvas() {
+		return doubleTapCenterInCanvas;
 	}
 
-	public PointD getInitialZoomCenterInImageCoords() {
-		return startingZoomCenterInImageCoords;
+	public PointD getZoomCenterInImage() {
+		return zoomCenterInImage;
 	}
 
-	public double getCurrentZoomLevel() {
-		return accumulatedZoomLevel * activeZoomLevel;
+	public double getCurrentZoomScale() {
+		return accumulatedZoomScale * activeZoomScale;
 	}
 
 	public VectorD getCurrentZoomShift() {
@@ -148,9 +132,16 @@ public class DoubleTapZoomManager {
 
 	private class CountDownTask extends ConcurrentAsyncTask<Void, Double, Void> {
 
+		// FIXME: if not enough free threads
+		// (e.g. small thread pool and tiles are being downloaded)
+		// the animation doesn't take place right away which is obvious to user
+		// Perhaps limit number of tiles-downloading-tasks being run in
+		// parallel? (according to the pool size)
+
 		@Override
 		protected Void doInBackground(Void... params) {
-			long start = System.currentTimeMillis();
+			// long start = System.currentTimeMillis();
+			long waitTime = 10;
 			double resizeRatio = 1.0;
 			while (resizeRatio < 2.0) {
 				if (isCancelled()) {
@@ -159,14 +150,14 @@ public class DoubleTapZoomManager {
 				resizeRatio += 0.05;
 				publishProgress(resizeRatio);
 				try {
-					Thread.sleep(50);
+					Thread.sleep(waitTime);
 				} catch (InterruptedException e) {
 					Log.d(TAG, "thread killed", e);
 				}
 			}
-			long now = System.currentTimeMillis();
-			long time = now - start;
-			Log.d(TAG, "animation length: " + time + " ms");
+			// long now = System.currentTimeMillis();
+			// long time = now - start;
+			// Log.d(TAG, "animation length: " + time + " ms");
 			return null;
 		}
 
@@ -177,12 +168,14 @@ public class DoubleTapZoomManager {
 
 		@Override
 		protected void onCancelled(Void result) {
-			notifyZoomingCanceled();
+			Log.d(TAG, "canceled");
+			storeDataOfCurrentZoom();
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			notifyZoomingFinished();
+			Log.d(TAG, "finished");
+			storeDataOfCurrentZoom();
 		}
 
 	}

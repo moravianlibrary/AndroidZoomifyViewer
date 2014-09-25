@@ -38,9 +38,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private DevTools devTools = null;
 	private ImageCoordsPoints testPoints = null;
 
-	private boolean resizeFactorsInitialized = false;
-	private double mInitialResizingFactor = 0.0;
-	private double mMinResizingFactor = 0.0;
+	private boolean mViewmodeScaleFactorInitialized = false;
+	private double mViewmodeScaleFactor = -1.0;
+	private double mViewmodeMinScaleFactor = -1.0; // TODO: use in DoubleTapZoomManager
 
 	private String mZoomifyBaseUrl;
 
@@ -49,7 +49,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private boolean pageInitialized = false;
 
 	// SHIFTS
-	private VectorD mInitialShift = VectorD.ZERO_VECTOR;
+	private boolean mViewmodeShiftInitialized = false;
+	private VectorD mViewmodeShift = VectorD.ZERO_VECTOR;
+
 	// private VectorD mUserShift = VectorD.ZERO_VECTOR;
 	// private int mInitialShiftX = 0;
 	// private int mInitialShiftY = 0;
@@ -67,6 +69,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private boolean mDrawLayerWithWorseResolution = true;
 
 	private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
+	// private ViewMode mViewMode =
+	// ViewMode.NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP;
 
 	// test stuff
 
@@ -135,7 +139,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			}
 		}
 		if (mDoubleTapZoomManager != null) {
-			mDoubleTapZoomManager.cancelZoomingAnimation();
+			mDoubleTapZoomManager.cancelZooming();
 		}
 	}
 
@@ -146,7 +150,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		mPinchZoomManager = new PinchZoomManager(this, 1.0f);
 		mDoubleTapZoomManager = new DoubleTapZoomManager(this);
 		mSwipeShiftManager = new SwipeShiftManager();
-		resizeFactorsInitialized = false;
+		mViewmodeScaleFactorInitialized = false;
+		mViewmodeShiftInitialized = false;
 		mZoomifyBaseUrl = zoomifyBaseUrl;
 		mActiveImageDownloader = null;
 		initTilesDownloaderAsync();
@@ -214,8 +219,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		if (DEV_MODE) {
 			devTools.drawCanvasYellow(canv);
 		}
-		// Log.d(TAG, "canvas(px): width=" + canvWidth + ", height=" +
-		// canvHeight);
+		Log.d(TestTags.CENTERS, "canvas(px): width=" + canvWidth + ", height=" + canvHeight);
 		double canvWidthDp = pxToDp(canvWidth);
 		double canvHeightDp = pxToDp(canvHeight);
 		// Log.d(TAG, "canvas(dp): width=" + canvWidthDp + ", height=" +
@@ -225,16 +229,21 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			if (DEV_MODE) {
 				devTools.drawCanvasBlue(canv);
 			}
-			if (!resizeFactorsInitialized) {
-				initResizeFactors(canv);
-				resizeFactorsInitialized = true;
+			if (!mViewmodeScaleFactorInitialized) {
+				initViewmodeScaleFactors(canv);
+				mViewmodeScaleFactorInitialized = true;
 			}
+			if (!mViewmodeShiftInitialized) {
+				computeViewmodeShift(canv, mActiveImageDownloader);
+				mViewmodeShiftInitialized = true;
+			}
+
 			if (mPinchZoomManager.getState() == PinchZoomManager.State.READY_TO_PINCH
 					|| mPinchZoomManager.getState() == PinchZoomManager.State.PINCHING) {
-				double minZoomLevel = mMinResizingFactor / mInitialResizingFactor
-						/ mDoubleTapZoomManager.getCurrentZoomLevel();
+				double minZoomLevel = mViewmodeMinScaleFactor / mViewmodeScaleFactor
+						/ mDoubleTapZoomManager.getCurrentZoomScale();
 				Log.d(TAG_STATES, "minZoomLevel: " + minZoomLevel);
-				mPinchZoomManager.setMinZoomLevel(minZoomLevel);
+				mPinchZoomManager.setMinZoomScale(minZoomLevel);
 			}
 
 			// za hranice canvas cela oblast s obrazkem
@@ -295,20 +304,35 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				// && (zoomState == ZoomManager.State.READY_TO_PINCH ||
 				// zoomState == ZoomManager.State.PINCHING || shiftState ==
 				// SwipeShiftManager.State.IDLE)) {
-				PointD initialZoomCenterInImageCoords = null;
-				PointD currentZoomCenter = null;
+				PointD zoomCenterInImage = null;
+				PointD gestureCenterInCanvas = null;
 				if (mDoubleTapZoomManager.getState() == DoubleTapZoomManager.State.ZOOMING) {
-					initialZoomCenterInImageCoords = mDoubleTapZoomManager.getInitialZoomCenterInImageCoords();
-					currentZoomCenter = mDoubleTapZoomManager.getCurrentZoomCenter();
+					zoomCenterInImage = mDoubleTapZoomManager.getZoomCenterInImage();
+					gestureCenterInCanvas = mDoubleTapZoomManager.getDoubleTapCenterInCanvas();
 				} else {
-					initialZoomCenterInImageCoords = mPinchZoomManager.getInitialZoomCenterInImageCoords();
-					currentZoomCenter = mPinchZoomManager.getCurrentZoomCenter();
+					zoomCenterInImage = mPinchZoomManager.getStartingZoomCenterInImageCoords();
+					gestureCenterInCanvas = mPinchZoomManager.getCurrentZoomCenterInCanvas();
 				}
-				if (initialZoomCenterInImageCoords != null && currentZoomCenter != null) {
-					PointD initialZoomCenterCanvas = Utils.toCanvasCoords(initialZoomCenterInImageCoords,
+				if (zoomCenterInImage != null && gestureCenterInCanvas != null) {
+					PointD zoomCenterInImageInCanvasCoords = Utils.toCanvasCoords(zoomCenterInImage,
 							getTotalResizeFactor(), getTotalShift());
-					devTools.drawZoomCenters(canv, currentZoomCenter, initialZoomCenterCanvas, getTotalResizeFactor(),
+					// devTools.drawZoomCenters(canv, currentZoomCenter,
+					// initialZoomCenterCanvas, getTotalResizeFactor(),
+					// getTotalShift());
+					// devTools.drawZoomCenters(canv,
+					// currentZoomCenterInCanvasCoords,
+					// startingZoomCenterInCanvasCoords);
+					devTools.drawZoomCenters(canv, gestureCenterInCanvas, zoomCenterInImage, getTotalResizeFactor(),
 							getTotalShift());
+					//
+					// devTools.drawZoomCenters2(canv,
+					// mDoubleTapZoomManager.getDoubleTapCenterInCanvas(),
+					// mDoubleTapZoomManager.devZoomCenterInCanvasCoords);
+					Log.d(TestTags.CENTERS, "zoomCenterImage: " + zoomCenterInImageInCanvasCoords);
+					Log.d(TestTags.CENTERS, "gestureCenter: " + gestureCenterInCanvas);
+					Log.d(TestTags.CENTERS, "--------------------------------");
+				} else {
+					devTools.drawZoomCenters(canv, null, null);
 				}
 			}
 			// long end = System.currentTimeMillis();
@@ -320,22 +344,22 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 	}
 
-	private void initResizeFactors(Canvas canv) {
+	private void initViewmodeScaleFactors(Canvas canv) {
 		ImageProperties imageProperties = mActiveImageDownloader.getImageProperties();
-		double resizingFactorFitToScreen = computeResizingFactorFitToScreen(canv.getWidth(), canv.getHeight(),
+		double scaleFactorFitToScreen = computeScaleFactorFitToScreen(canv.getWidth(), canv.getHeight(),
 				imageProperties.getWidth(), imageProperties.getHeight());
-		double resizingFactorNoFreeSpace = computeResizingFactorNoFreeSpace(canv.getWidth(), canv.getHeight(),
+		double scaleFactorNoFreeSpace = computeScaleFactorNoFreeSpace(canv.getWidth(), canv.getHeight(),
 				imageProperties.getWidth(), imageProperties.getHeight());
 		switch (mViewMode) {
 		case FIT_TO_SCREEN:
-			mInitialResizingFactor = resizingFactorFitToScreen;
+			mViewmodeScaleFactor = scaleFactorFitToScreen;
 			break;
 		default:
-			mInitialResizingFactor = resizingFactorNoFreeSpace;
+			mViewmodeScaleFactor = scaleFactorNoFreeSpace;
 			break;
 		}
 		// Log.d(TAG, "fit to screen factor: " + mInitialResizeFactor);
-		mMinResizingFactor = Math.min(resizingFactorFitToScreen, resizingFactorNoFreeSpace);
+		mViewmodeMinScaleFactor = Math.min(scaleFactorFitToScreen, scaleFactorNoFreeSpace);
 	}
 
 	public DevTools getDevTools() {
@@ -353,8 +377,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	public double getTotalResizeFactor() {
-		return mInitialResizingFactor * mPinchZoomManager.getCurrentZoomLevel()
-				* mDoubleTapZoomManager.getCurrentZoomLevel();
+		return mViewmodeScaleFactor * mPinchZoomManager.getCurrentZoomScale()
+				* mDoubleTapZoomManager.getCurrentZoomScale();
 	}
 
 	private boolean isInVisibleImage(Rect imageInCanvasVisible, Point point) {
@@ -376,7 +400,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		VectorD pinchZoomShift = mPinchZoomManager.getCurrentZoomShift();
 		VectorD doubleTapZoomShift = mDoubleTapZoomManager.getCurrentZoomShift();
 		// return VectorD.sum(mUserShift, mInitialShift, zoomShift);
-		return VectorD.sum(mInitialShift, swipeShift, pinchZoomShift, doubleTapZoomShift);
+		return VectorD.sum(mViewmodeShift, swipeShift, pinchZoomShift, doubleTapZoomShift);
 	}
 
 	private void drawLayers(Canvas canv, TilesDownloader downloader, int layerId) {
@@ -472,27 +496,19 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	private int[][] getCornerVisibleTilesCoords(TilesDownloader downloader, int layerId) {
-		// double resizeFactor = mZoomManager.getActualZoomLevel() *
-		// mInitialResizeFactor;
 		double resizeFactor = getTotalResizeFactor();
-		// int shiftX = mUserShiftX + mCenterInScreenShiftX;
-		// int shiftY = mUserShiftY + mCenterInScreenShiftY;
 		int imageWidthMinusOne = downloader.getImageProperties().getWidth() - 1;
 		int imageHeightMinusOne = downloader.getImageProperties().getHeight() - 1;
 
 		VectorD totalShift = getTotalShift();
-		// TODO
-		// int topLeftVisibleX = collapseToInterval((int)
-		// ((mImageInCanvasVisible.left - totalShift.x) / resizeFactor), 0,
-		// imageWidthMinusOne);
 		int topLeftVisibleX = collapseToInterval(
 				(int) Utils.toImageX(mVisibleImageInCanvas.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
-		int topLeftVisibleY = collapseToInterval((int) ((mVisibleImageInCanvas.top - totalShift.y) / resizeFactor), 0,
-				imageHeightMinusOne);
+		int topLeftVisibleY = collapseToInterval(
+				(int) Utils.toImageY(mVisibleImageInCanvas.top, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
 		int bottomRightVisibleX = collapseToInterval(
-				(int) ((mVisibleImageInCanvas.right - totalShift.x) / resizeFactor), 0, imageWidthMinusOne);
+				(int) Utils.toImageX(mVisibleImageInCanvas.right, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
 		int bottomRightVisibleY = collapseToInterval(
-				(int) ((mVisibleImageInCanvas.bottom - totalShift.y) / resizeFactor), 0, imageHeightMinusOne);
+				(int) Utils.toImageY(mVisibleImageInCanvas.bottom, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
 
 		int[] topLeftVisibleTileCoords = downloader.getTileCoords(layerId, topLeftVisibleX, topLeftVisibleY);
 		int[] bottomRightVisibleTileCoords = downloader
@@ -558,7 +574,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		return result;
 	}
 
-	private double computeResizingFactorFitToScreen(double canvasWidth, double canvasHeight, double imgOriginalWidth,
+	private double computeScaleFactorFitToScreen(double canvasWidth, double canvasHeight, double imgOriginalWidth,
 			double imgOriginalHeight) {
 		double widthRatio = canvasWidth / imgOriginalWidth;
 		double heightRatio = canvasHeight / imgOriginalHeight;
@@ -578,7 +594,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 	}
 
-	private double computeResizingFactorNoFreeSpace(double canvasWidth, double canvasHeight, double imgOriginalWidth,
+	private double computeScaleFactorNoFreeSpace(double canvasWidth, double canvasHeight, double imgOriginalWidth,
 			double imgOriginalHeight) {
 		double widthRatio = canvasWidth / imgOriginalWidth;
 		double heightRatio = canvasHeight / imgOriginalHeight;
@@ -599,6 +615,58 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 	}
 
+	private void computeViewmodeShift(Canvas canv, TilesDownloader downloader) {
+		double canvasWidth = canv.getWidth();
+		double canvasHeight = canv.getHeight();
+		double imageOriginalWidth = downloader.getImageProperties().getWidth();
+		double imageOriginalHeight = downloader.getImageProperties().getHeight();
+		double actualWidth = imageOriginalWidth * mViewmodeScaleFactor;
+		double actualHeight = imageOriginalHeight * mViewmodeScaleFactor;
+		double extraSpaceWidth = canvasWidth - actualWidth;
+		double extraSpaceHeight = canvasHeight - actualHeight;
+
+		double xLeft = 0;
+		double xCenter = extraSpaceWidth / 2.0;
+		double xRight = extraSpaceWidth;
+		double yTop = 0;
+		double yCenter = extraSpaceHeight / 2.0;
+		double yBottom = extraSpaceHeight;
+
+		switch (mViewMode) {
+		case FIT_TO_SCREEN:
+			mViewmodeShift = new VectorD(xCenter, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP:
+			mViewmodeShift = new VectorD(xLeft, yTop);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER:
+			mViewmodeShift = new VectorD(xLeft, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM:
+			mViewmodeShift = new VectorD(xLeft, yBottom);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP:
+			mViewmodeShift = new VectorD(xCenter, yTop);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER:
+			mViewmodeShift = new VectorD(xCenter, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM:
+			mViewmodeShift = new VectorD(xCenter, yBottom);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP:
+			mViewmodeShift = new VectorD(xRight, yTop);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER:
+			mViewmodeShift = new VectorD(xRight, yCenter);
+			break;
+		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM:
+			mViewmodeShift = new VectorD(xRight, yBottom);
+			break;
+		}
+		Log.d(TestTags.CENTERS, "initial shift:" + mViewmodeShift);
+	}
+
 	private Rect computeImageInCanvasCordsPossibly(Canvas canv, TilesDownloader downloader) {
 		double canvasWidth = canv.getWidth();
 		double canvasHeight = canv.getHeight();
@@ -608,59 +676,93 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// mInitialResizeFactor;
 		// TODO; use Utils.toCanvasCoords here
 		double resizeFactor = getTotalResizeFactor();
-		int actualWidth = (int) (imageOriginalWidth * resizeFactor);
-		int actualHeight = (int) (imageOriginalHeight * resizeFactor);
+		// int actualWidth = (int) (imageOriginalWidth * resizeFactor);
+		// int actualHeight = (int) (imageOriginalHeight * resizeFactor);
+		double actualWidth = imageOriginalWidth * resizeFactor;
+		double actualHeight = imageOriginalHeight * resizeFactor;
+
 		// Log.d(TAG, "newImg: width=" + actualWidth + ", height=" +
 		// actualHeight);
 
 		// TODO: pocitat znovu jen pri zmene
 
-		double extraWidth = canvasWidth - actualWidth;
-		double extraHeight = canvasHeight - actualHeight;
-
-		double xLeft = 0;
-		double xCenter = extraWidth / 2.0;
-		double xRight = extraWidth;
-		double yTop = 0;
-		double yCenter = extraHeight / 2.0;
-		double yBottom = extraHeight;
-
-		switch (mViewMode) {
-		case FIT_TO_SCREEN:
-			mInitialShift = new VectorD(xCenter, yCenter);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP:
-			mInitialShift = new VectorD(xLeft, yTop);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER:
-			mInitialShift = new VectorD(xLeft, yCenter);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM:
-			mInitialShift = new VectorD(xLeft, yBottom);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP:
-			mInitialShift = new VectorD(xCenter, yTop);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER:
-			mInitialShift = new VectorD(xCenter, yCenter);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM:
-			mInitialShift = new VectorD(xCenter, yBottom);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP:
-			mInitialShift = new VectorD(xRight, yTop);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER:
-			mInitialShift = new VectorD(xRight, yCenter);
-			break;
-		case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM:
-			mInitialShift = new VectorD(xRight, yBottom);
-			break;
-		}
+		// TODO: test only
+		// mInitialShift = VectorD.ZERO_VECTOR;
 		VectorD totalShift = getTotalShift();
 		return new Rect((int) (0 + totalShift.x), (int) (0 + totalShift.y), (int) (actualWidth + totalShift.x),
 				(int) (actualHeight + totalShift.y));
 	}
+
+	// private Rect computeImageInCanvasCordsPossibly(Canvas canv,
+	// TilesDownloader downloader) {
+	// double canvasWidth = canv.getWidth();
+	// double canvasHeight = canv.getHeight();
+	// double imageOriginalWidth = downloader.getImageProperties().getWidth();
+	// double imageOriginalHeight = downloader.getImageProperties().getHeight();
+	// // double resizeFactor = mZoomManager.getActualZoomLevel() *
+	// // mInitialResizeFactor;
+	// // TODO; use Utils.toCanvasCoords here
+	// double resizeFactor = getTotalResizeFactor();
+	// // int actualWidth = (int) (imageOriginalWidth * resizeFactor);
+	// // int actualHeight = (int) (imageOriginalHeight * resizeFactor);
+	// double actualWidth = imageOriginalWidth * resizeFactor;
+	// double actualHeight = imageOriginalHeight * resizeFactor;
+	//
+	// // Log.d(TAG, "newImg: width=" + actualWidth + ", height=" +
+	// // actualHeight);
+	//
+	// // TODO: pocitat znovu jen pri zmene
+	//
+	// double extraWidth = canvasWidth - actualWidth;
+	// double extraHeight = canvasHeight - actualHeight;
+	//
+	// double xLeft = 0;
+	// double xCenter = extraWidth / 2.0;
+	// double xRight = extraWidth;
+	// double yTop = 0;
+	// double yCenter = extraHeight / 2.0;
+	// double yBottom = extraHeight;
+	//
+	// switch (mViewMode) {
+	// case FIT_TO_SCREEN:
+	// mInitialShift = new VectorD(xCenter, yCenter);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP:
+	// mInitialShift = new VectorD(xLeft, yTop);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER:
+	// mInitialShift = new VectorD(xLeft, yCenter);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM:
+	// mInitialShift = new VectorD(xLeft, yBottom);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP:
+	// mInitialShift = new VectorD(xCenter, yTop);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER:
+	// mInitialShift = new VectorD(xCenter, yCenter);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM:
+	// mInitialShift = new VectorD(xCenter, yBottom);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP:
+	// mInitialShift = new VectorD(xRight, yTop);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER:
+	// mInitialShift = new VectorD(xRight, yCenter);
+	// break;
+	// case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM:
+	// mInitialShift = new VectorD(xRight, yBottom);
+	// break;
+	// }
+	// Log.d(TestTags.CENTERS, "initial shift:" + mInitialShift);
+	// // TODO: test only
+	// // mInitialShift = VectorD.ZERO_VECTOR;
+	// VectorD totalShift = getTotalShift();
+	// return new Rect((int) (0 + totalShift.x), (int) (0 + totalShift.y), (int)
+	// (actualWidth + totalShift.x),
+	// (int) (actualHeight + totalShift.y));
+	// }
 
 	private Rect pxToDp(Rect rectPx) {
 		int top = (int) (rectPx.top / this.getContext().getResources().getDisplayMetrics().density);
@@ -714,7 +816,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 							mSwipeShiftManager.notifyDraggingFinished(false);
 						}
 						if (zoomManagerState == PinchZoomManager.State.IDLE) {
-							mPinchZoomManager.notifyReadyToPinch(event, getTotalResizeFactor(), getTotalShift());
+							mPinchZoomManager.startPinching(event, getTotalResizeFactor(), getTotalShift());
 							return true;
 						} else {
 							Log.w(TAG, "unexpected ACTION_POINTER_DOWN");
@@ -742,10 +844,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 						// GestureDetector
 						mGestureDetector.onTouchEvent(event);
 						if (zoomManagerState == PinchZoomManager.State.PINCHING) {
-							mPinchZoomManager.notifyPinchingFinished();
+							mPinchZoomManager.finish();
 						}
 						if (zoomManagerState == PinchZoomManager.State.READY_TO_PINCH) {
-							mPinchZoomManager.notifyCanceled();
+							mPinchZoomManager.cancel();
 						} else {
 							Log.w(TAG, "unexpected ACTION_POINTER_UP");
 						}
@@ -779,8 +881,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					} else {
 						int fingers = event.getPointerCount();
 						if (fingers == 2) {
-							boolean refresh = mPinchZoomManager.notifyPinchingContinues(event, visibleImageCenter,
-									getTotalResizeFactor(), getTotalShift());
+							boolean refresh = mPinchZoomManager.continuePinching(event, visibleImageCenter,
+									getTotalResizeFactor(), getTotalShift(), maxShiftUp, maxShiftDown, maxShiftLeft,
+									maxShiftRight);
 							if (refresh) {
 								invalidate();
 							}
@@ -872,7 +975,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		} else {
 			Log.d(TAG_STATES, "imgView: onDoubleTap: " + point.toString());
 		}
-		mDoubleTapZoomManager.startZoomingAnimation(point);
+		mDoubleTapZoomManager.startZooming(point);
 
 		return true;
 	}

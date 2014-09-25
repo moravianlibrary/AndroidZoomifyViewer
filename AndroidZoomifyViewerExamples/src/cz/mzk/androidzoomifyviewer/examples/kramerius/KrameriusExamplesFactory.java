@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import android.util.Log;
-import cz.mzk.androidzoomifyviewer.examples.SingleImageWorkingExamplesActivity;
-
 /**
  * @author Martin Řehánek
  * 
@@ -57,14 +54,14 @@ public class KrameriusExamplesFactory {
 
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:4873e8c7-5967-4003-8544-96f64ca55da7",
-				"Symbiotické zemědělství (pdf)", krameriusMzk));
+				"(pdf) Symbiotické zemědělství", krameriusMzk));
 
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
 				"Když slunéčko svítí", krameriusMzk));
 		result.add(new MonographExample(
 				"http://krameriustest.mzk.cz/search/handle/uuid:8069c22a-0ab2-41c3-b7a5-5dcca16ce089",
-				"Chrudimský kancionál (no tiles)", krameriusTestMzk));
+				"(no tiles) Chrudimský kancionál ", krameriusTestMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:6430d7ae-0ea5-4587-9aab-9d7d9c42a791",
 				"Kde slunce (no rights)", krameriusMzk));
@@ -88,7 +85,6 @@ public class KrameriusExamplesFactory {
 				"http://kramerius.mzk.cz/search/handle/uuid:1a232219-82e0-11e0-bc9f-0050569d679d",
 				"Atlas von den an Böhmen und Mähren gränzenden Fürstenthümern Schlesiens mit der Grafschaft Glatz",
 				krameriusMzk));
-
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:392a9006-1c98-4903-97f4-14212d097c99",
 				"[Administrativ-Karte des Erzherzogthumes Oesterreich ob der Enns]. Blatt 16, Umgebungen von Kirchdorf und Windischgarsten",

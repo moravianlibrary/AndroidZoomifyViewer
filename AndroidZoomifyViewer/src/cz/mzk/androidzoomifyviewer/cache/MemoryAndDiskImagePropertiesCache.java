@@ -18,7 +18,7 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCache implements ImagePropertiesCache {
 
 	private static final String TAG = MemoryAndDiskImagePropertiesCache.class.getSimpleName();
-	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 1MB
+	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
 	private static final int MEMORY_CACHE_ITEM_SIZE = 100;
 	private static final String DISK_CACHE_SUBDIR = "imageProperties";
 	private final Object mDiskCacheInitializationLock = new Object();

@@ -1,5 +1,8 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -21,6 +24,8 @@ public class DevTools {
 	private Paint mPaintGreen;
 	private Paint mPaintBlack;
 	private Paint mPaintWhite;
+	private List<PointD> zoomCentersInImage = new ArrayList<PointD>();
+	private List<PointD> gestureCentersInCanvas = new ArrayList<PointD>();
 
 	public DevTools(Context context) {
 		initPaints(context);
@@ -82,27 +87,37 @@ public class DevTools {
 		canv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 15f, paint);
 	}
 
-	int testCounter = 0;
+	public void clearCenters() {
+		gestureCentersInCanvas.clear();
+		zoomCentersInImage.clear();
+	}
 
-	public void drawZoomCenters(Canvas canv, PointD currentZoomCenter, PointD initialZoomCenterInCanvas,
+	public void drawZoomCenters(Canvas canv, PointD currentZoomCenterInCanvas, PointD initialZoomCenterInCanvas) {
+		if (currentZoomCenterInCanvas != null && initialZoomCenterInCanvas != null) {
+			gestureCentersInCanvas.add(currentZoomCenterInCanvas);
+			zoomCentersInImage.add(initialZoomCenterInCanvas);
+		}
+		for (int i = 0; i < zoomCentersInImage.size(); i++) {
+			PointD initial = zoomCentersInImage.get(i);
+			canv.drawCircle((float) initial.x, (float) initial.y, 15.0f, mPaintGreen);
+			PointD current = gestureCentersInCanvas.get(i);
+			canv.drawCircle((float) current.x, (float) current.y, 12.0f, mPaintRed);
+			canv.drawLine((float) initial.x, (float) initial.y, (float) current.x, (float) current.y, mPaintRed);
+			canv.drawText("" + i, (float) initial.x, (float) initial.y, mPaintBlack);
+		}
+
+	}
+
+	public void drawZoomCenters(Canvas canv, PointD gestureCenterInCanvas, PointD zoomCenterInImage,
 			double resizeFactor, VectorD totalShift) {
-		if (currentZoomCenter != null) {
-			canv.drawCircle((float) currentZoomCenter.x, (float) currentZoomCenter.y, 10.0f, mPaintRed);
-			canv.drawLine((float) initialZoomCenterInCanvas.x, (float) initialZoomCenterInCanvas.y,
-					(float) currentZoomCenter.x, (float) currentZoomCenter.y, mPaintRed);
+		if (gestureCenterInCanvas != null && zoomCenterInImage != null) {
+			PointD zoomCenterInImageInCanvasCoords = Utils.toCanvasCoords(zoomCenterInImage, resizeFactor, totalShift);
+			canv.drawCircle((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					15.0f, mPaintGreen);
+			canv.drawCircle((float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, 12.0f, mPaintRed);
+			canv.drawLine((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					(float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, mPaintRed);
 		}
-		if (initialZoomCenterInCanvas != null) {
-			canv.drawCircle((float) initialZoomCenterInCanvas.x, (float) initialZoomCenterInCanvas.y, 10.0f,
-					mPaintGreen);
-		}
-		testCounter++;
-		VectorD diff = new VectorD(currentZoomCenter.x - initialZoomCenterInCanvas.x, currentZoomCenter.y
-				- initialZoomCenterInCanvas.y);
-
-		Log.d("z00m",
-				"devTools: init: " + initialZoomCenterInCanvas.toString() + " now: " + currentZoomCenter.toString()
-						+ " diff: " + diff.toString() + String.format(" r:%.3f", resizeFactor) + " s: " + totalShift
-						+ " c: " + testCounter);
 	}
 
 }

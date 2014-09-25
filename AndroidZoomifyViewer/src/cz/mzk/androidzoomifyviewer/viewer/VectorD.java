@@ -19,6 +19,10 @@ public class VectorD {
 		return new VectorD(this.x + x, this.y + y);
 	}
 
+	public VectorD plus(VectorD newVector) {
+		return new VectorD(this.x + newVector.x, this.y + newVector.y);
+	}
+
 	public VectorD plusX(double x) {
 		return new VectorD(this.x + x, this.y);
 	}
@@ -40,10 +44,6 @@ public class VectorD {
 	public String toString() {
 		return String.format("[%.2f;%.2f]", x, y);
 	}
-
-	// public Vector toVector() {
-	// return new Vector((int) x, (int) y);
-	// }
 
 	public double getSize() {
 		return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));

@@ -3,8 +3,8 @@
 
     <color name="androidzoomifyviewer_black">#000000</color>
     <color name="androidzoomifyviewer_white">#FFFFFF</color>
-    <color name="androidzoomifyviewer_red">#ffff0000</color>
-    <color name="androidzoomifyviewer_green">#00FF00</color>
+    <color name="androidzoomifyviewer_red">#80ff0000</color>
+    <color name="androidzoomifyviewer_green">#8000FF00</color>
     <color name="androidzoomifyviewer_blue">#0000FF</color>
     <color name="androidzoomifyviewer_blue_light">#3AAFDE</color>
     <color name="androidzoomifyviewer_yellow">#FFFF00</color>
