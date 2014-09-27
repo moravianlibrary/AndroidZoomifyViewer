@@ -1,13 +1,9 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.util.Log;
 import cz.mzk.androidzoomifyviewer.R;
 
 /**
@@ -24,8 +20,6 @@ public class DevTools {
 	private Paint mPaintGreen;
 	private Paint mPaintBlack;
 	private Paint mPaintWhite;
-	private List<PointD> zoomCentersInImage = new ArrayList<PointD>();
-	private List<PointD> gestureCentersInCanvas = new ArrayList<PointD>();
 
 	public DevTools(Context context) {
 		initPaints(context);
@@ -74,10 +68,6 @@ public class DevTools {
 		for (Point corner : testPoints.getCorners()) {
 			drawImageCoordPoint(canv, corner, resizeFactor, imageShiftInCanvas, mPaintYellow);
 		}
-		// for (Point clickedPoint : testPoints.getClickedPoints()) {
-		// drawImageCoordPoint(canv, clickedPoint, resizeFactor, totalShift,
-		// mPaintWhite);
-		// }
 	}
 
 	private void drawImageCoordPoint(Canvas canv, Point point, double resizeFactor, VectorD imageShiftInCanvas,
@@ -85,27 +75,6 @@ public class DevTools {
 		int resizedAndShiftedX = (int) (point.x * resizeFactor + imageShiftInCanvas.x);
 		int resizedAndShiftedY = (int) (point.y * resizeFactor + imageShiftInCanvas.y);
 		canv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 15f, paint);
-	}
-
-	public void clearCenters() {
-		gestureCentersInCanvas.clear();
-		zoomCentersInImage.clear();
-	}
-
-	public void drawZoomCenters(Canvas canv, PointD currentZoomCenterInCanvas, PointD initialZoomCenterInCanvas) {
-		if (currentZoomCenterInCanvas != null && initialZoomCenterInCanvas != null) {
-			gestureCentersInCanvas.add(currentZoomCenterInCanvas);
-			zoomCentersInImage.add(initialZoomCenterInCanvas);
-		}
-		for (int i = 0; i < zoomCentersInImage.size(); i++) {
-			PointD initial = zoomCentersInImage.get(i);
-			canv.drawCircle((float) initial.x, (float) initial.y, 15.0f, mPaintGreen);
-			PointD current = gestureCentersInCanvas.get(i);
-			canv.drawCircle((float) current.x, (float) current.y, 12.0f, mPaintRed);
-			canv.drawLine((float) initial.x, (float) initial.y, (float) current.x, (float) current.y, mPaintRed);
-			canv.drawText("" + i, (float) initial.x, (float) initial.y, mPaintBlack);
-		}
-
 	}
 
 	public void drawZoomCenters(Canvas canv, PointD gestureCenterInCanvas, PointD zoomCenterInImage,
@@ -118,6 +87,23 @@ public class DevTools {
 			canv.drawLine((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
 					(float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, mPaintRed);
 		}
+	}
+
+	public void highlightTile(Canvas canv, Rect rect) {
+		Paint paint = mPaintBlack;
+		// vertical borders
+		canv.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint);
+		canv.drawLine(rect.right, rect.top, rect.right, rect.bottom, paint);
+		// horizontal borders
+		canv.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
+		canv.drawLine(rect.left, rect.bottom, rect.left, rect.bottom, paint);
+		// diagonals
+		canv.drawLine(rect.left, rect.top, rect.right, rect.bottom, paint);
+		canv.drawLine(rect.right, rect.top, rect.left, rect.bottom, paint);
+		// center
+		int centerX = (int) (rect.left + (rect.right - rect.left) / 2.0);
+		int centerY = (int) (rect.top + (double) (rect.bottom - rect.top) / 2.0);
+		canv.drawCircle((float) centerX, (float) centerY, 7.0f, paint);
 	}
 
 }

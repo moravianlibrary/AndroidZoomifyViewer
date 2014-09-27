@@ -22,6 +22,12 @@ public class ImageProperties {
 		this.level = xTiles * yTiles;
 	}
 	
+//	public int getWidthInMaxZoomEstimate(){
+//		int xTiles = (int) Math.ceil(width/tileSize);
+//		
+//		
+//	}
+	
 	public int getLevel(){
 		return level;
 	}

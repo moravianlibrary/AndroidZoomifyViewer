@@ -17,4 +17,10 @@ public class PointD {
 		return String.format("[%.3f;%.3f]", x, y);
 	}
 
+	public VectorD minus(PointD other) {
+		double newX = x - other.x;
+		double newY = y - other.y;
+		return new VectorD(newX, newY);
+	}
+
 }

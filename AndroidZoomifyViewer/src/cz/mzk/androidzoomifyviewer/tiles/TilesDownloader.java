@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
  * This class encapsulates image metadata from ImageProperties.xml and provides
@@ -327,7 +328,7 @@ public class TilesDownloader {
 	public Bitmap downloadTile(TileId tileId) throws OtherIOException, TooManyRedirectionsException,
 			ImageServerResponseException {
 		int tileGroup = computeTileGroup(tileId);
-		//int tileGroup = 0;
+		// int tileGroup = 0;
 		String tileUrl = buildTileUrl(tileGroup, tileId);
 		Log.d(TAG, "TILE URL: " + tileUrl);
 		return downloadTile(tileUrl, MAX_REDIRECTIONS);
@@ -459,22 +460,72 @@ public class TilesDownloader {
 		return new int[] { x, y };
 	}
 
-	public int getBestLayerId(int canvasImageWidthDp, int canvasImageHeightDp) {
+	/**
+	 * Selects highest layer, tiles of which whould all fit into the image area
+	 * in canvas (with exception of border tiles partially overflowing).
+	 * 
+	 * For determining this, canvas width/height can be taken into account
+	 * either in pixels or density independent pixels or combination of both
+	 * (weighted arithemtic mean). Parameter pxRatio is used for this. For
+	 * example height of image area in canvas is being computed this way:
+	 * 
+	 * height = pxRatio heightPx + (1-pxRatio) * heightDp
+	 * 
+	 * So to use px only, pxRatio should be 1.0. To use dp, pxRatio should be
+	 * 0.0.
+	 * 
+	 * Be aware that for devices with big displays and high display density
+	 * putting big weight to px might caus extensive number of tiles needed.
+	 * That would lead to lots of parallel tasks for fetching tiles and hence
+	 * decreased ui responsivness due to network/disk (cache) access and thread
+	 * synchronization. Also possible app crashes.
+	 * 
+	 * On the other hand to much weight to dp could cause demanding
+	 * not-deep-enought tile layer and as a consequence image would seem blurry.
+	 * Also devices with small displays and very high resolution would with
+	 * great weight on px require unneccessary number of tiles which most of
+	 * people would not appreciate anyway because of limitations of human eyes.
+	 * 
+	 * 
+	 * @param imageInCanvasWidthPx
+	 * @param imageInCanvasHeightPx
+	 * @param pxRatio
+	 *            Ratio between pixels and density-independent pixels for
+	 *            computing image_size_in_canvas. Must be between 0 and 1.
+	 *            dpRatio = (1-pxRatio)
+	 * @return id of layer, that would best fill image are in canvas with only
+	 *         border tiles overflowing that area
+	 */
+	public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx, double pxRatio) {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
+		double dpRatio = 1.0 - pxRatio;
+
+		if (pxRatio < 0.0) {
+			throw new IllegalArgumentException("px ratio must be >= 0");
+		} else if (pxRatio > 1.0) {
+			throw new IllegalArgumentException("px ratio must be <= 1");
+		}
+
+		int imageInCanvasWidthDp = 0;
+		int imageInCanvasHeightDp = 0;
+		if (pxRatio < 1.0) {// optimization: initialize only if will be used
+			imageInCanvasWidthDp = Utils.pxToDp(imageInCanvasWidthPx);
+			imageInCanvasHeightDp = Utils.pxToDp(imageInCanvasHeightPx);
+		}
+
+		int canvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * pxRatio);
+		int canvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * pxRatio);
+
 		for (int layerId = layers.size() - 1; layerId >= 0; layerId--) {
 			int horizontalTiles = layers.get(layerId).getTilesHorizontal();
 			int layerWidthWithoutLastTile = imageProperties.getTileSize() * (horizontalTiles - 1);
 
 			int verticalTiles = layers.get(layerId).getTilesVertical();
 			int layerHeightWithoutLastTile = imageProperties.getTileSize() * (verticalTiles - 1);
-			// Log.d(TAG, "layer=" + layerId + ", totalWidthMinusOneTile=" +
-			// widthInLayerWithoutLastTile);
 
-			// tj. vrstva, ktera by pri vyskladani zabrala cely obrazek v canvas
-			// v dp
-			if (layerWidthWithoutLastTile <= canvasImageHeightDp && layerHeightWithoutLastTile <= canvasImageHeightDp) {
+			if (layerWidthWithoutLastTile <= canvasWidth && layerHeightWithoutLastTile <= canvasHeight) {
 				return layerId;
 			}
 		}

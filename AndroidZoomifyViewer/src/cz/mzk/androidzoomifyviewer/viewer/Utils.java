@@ -1,5 +1,6 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
 
 /**
@@ -47,6 +48,14 @@ public class Utils {
 
 	public static String toString(Rect rect) {
 		return toString(rect, "px");
+	}
+
+	public static int dpToPx(int dp) {
+		return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+	}
+
+	public static int pxToDp(int px) {
+		return (int) (px / Resources.getSystem().getDisplayMetrics().density);
 	}
 
 }
