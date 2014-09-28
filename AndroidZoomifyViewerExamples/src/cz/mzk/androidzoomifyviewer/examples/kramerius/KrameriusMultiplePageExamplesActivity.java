@@ -45,7 +45,7 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 		private final ArrayList<MonographExample> itemsArrayList;
 
 		public MyAdapter(Context context, ArrayList<MonographExample> itemsArrayList) {
-			super(context, R.layout.activity_bak_test_list_row, itemsArrayList);
+			super(context, R.layout.item_kramerius_example, itemsArrayList);
 			this.context = context;
 			this.itemsArrayList = itemsArrayList;
 		}
@@ -53,9 +53,11 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View rowView = inflater.inflate(R.layout.activity_bak_test_list_row, parent, false);
+			View rowView = inflater.inflate(R.layout.item_kramerius_example, parent, false);
 			((TextView) rowView.findViewById(R.id.label)).setText(itemsArrayList.get(position).getTitle());
+			((TextView) rowView.findViewById(R.id.note)).setText(itemsArrayList.get(position).getNote());
 			((TextView) rowView.findViewById(R.id.src)).setText(itemsArrayList.get(position).getSource());
+
 			rowView.setOnClickListener(new OnClickListener() {
 
 				@Override

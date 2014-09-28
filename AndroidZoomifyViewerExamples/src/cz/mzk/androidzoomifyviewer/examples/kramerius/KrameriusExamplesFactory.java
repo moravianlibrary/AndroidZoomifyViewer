@@ -18,9 +18,10 @@ public class KrameriusExamplesFactory {
 
 		private final String url;
 		private final String title;
+		private final String note;
 		private final String source;
 
-		public MonographExample(String url, String title, String source) {
+		public MonographExample(String url, String title, String note, String source) {
 			this.url = url;
 			if (title.length() > MAX_TITLE_LENGTH) {
 				int titleSubstringLength = Math.min(title.length(), MAX_TITLE_LENGTH - TITLE_SUFFIX.length());
@@ -28,6 +29,7 @@ public class KrameriusExamplesFactory {
 			} else {
 				this.title = title;
 			}
+			this.note = note;
 			this.source = source;
 		}
 
@@ -42,6 +44,10 @@ public class KrameriusExamplesFactory {
 		public String getSource() {
 			return source;
 		}
+
+		public CharSequence getNote() {
+			return note;
+		}
 	}
 
 	public static ArrayList<MonographExample> getTestTopLevelUrls() {
@@ -53,49 +59,54 @@ public class KrameriusExamplesFactory {
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
 		result.add(new MonographExample(
-				"http://kramerius.mzk.cz/search/handle/uuid:4873e8c7-5967-4003-8544-96f64ca55da7",
-				"(pdf) Symbiotické zemědělství", krameriusMzk));
-
-		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
-				"Když slunéčko svítí", krameriusMzk));
+				"Když slunéčko svítí", "works correctly", krameriusMzk));
+		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:4873e8c7-5967-4003-8544-96f64ca55da7",
+				"Symbiotické zemědělství", "no tiles, no image, just pdf", krameriusMzk));
+		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:f5a09c95-2fd8-11e0-83a8-0050569d679d", "Máj",
+				"no tiles - images in datastreams", krameriusMzk));
+		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:4689b175-f1e1-11e1-a3c6-0050569d679d", "Divadelní šepty",
+				"no tiles - image in datastream", krameriusMzk));
 		result.add(new MonographExample(
 				"http://krameriustest.mzk.cz/search/handle/uuid:8069c22a-0ab2-41c3-b7a5-5dcca16ce089",
-				"(no tiles) Chrudimský kancionál ", krameriusTestMzk));
+				"Chrudimský kancionál", "no tiles", krameriusTestMzk));
 		result.add(new MonographExample(
-				"http://kramerius.mzk.cz/search/handle/uuid:6430d7ae-0ea5-4587-9aab-9d7d9c42a791",
-				"Kde slunce (no rights)", krameriusMzk));
+				"http://kramerius.mzk.cz/search/handle/uuid:6430d7ae-0ea5-4587-9aab-9d7d9c42a791", "Kde slunce",
+				"no access rights", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:5e1e9cd8-eecd-4627-9a1a-09c53caaf9a8",
-				"Stát československý", krameriusMzk));
+				"Stát československý", "", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:36e7c070-4bd3-4bc4-b991-3b66fe16f936",
-				"[Thajský rukopis na palmových listech]", krameriusMzk));
+				"[Thajský rukopis na palmových listech]", "", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:b73aff3f-5420-41d5-8adf-e1086492eb80",
 				"Weypis oné žalostné Cesty Gežjsse, Marye, a Jozeffa, do Egipta z Nazaretu : kterak welké Zármutky, Strach, Hlad, Žjžeň, ty tři Swaté Osoby zakusili, a gak welicý Zázrakowé na té Cestě se dáli : Wytažený z Žiwota Krysta Pána, a Panny Marye, a nynj w Pjseň vwedeno",
-				krameriusMzk));
+				"", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:db53e7df-82dc-11e0-bc9f-0050569d679d",
-				"Grosser Erdbeschreibung. Blatt N. 698-802.", krameriusMzk));
+				"Grosser Erdbeschreibung. Blatt N. 698-802.", "", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:a69b1ae8-82e1-11e0-bc9f-0050569d679d",
-				"Atlas minor Sive totius orbis terrarum contracta delinea[ta] ex conatibus", krameriusMzk));
+				"Atlas minor Sive totius orbis terrarum contracta delinea[ta] ex conatibus", "", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:1a232219-82e0-11e0-bc9f-0050569d679d",
-				"Atlas von den an Böhmen und Mähren gränzenden Fürstenthümern Schlesiens mit der Grafschaft Glatz",
+				"Atlas von den an Böhmen und Mähren gränzenden Fürstenthümern Schlesiens mit der Grafschaft Glatz", "",
 				krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:392a9006-1c98-4903-97f4-14212d097c99",
 				"[Administrativ-Karte des Erzherzogthumes Oesterreich ob der Enns]. Blatt 16, Umgebungen von Kirchdorf und Windischgarsten",
-				krameriusMzk));
+				"", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:51ec134e-c700-4125-bfb6-422ebf2cc664",
-				"Abhandlung Dreyer so nothwendig- als nützlichen INSTRUMENTEN", krameriusMzk));
+				"Abhandlung Dreyer so nothwendig- als nützlichen INSTRUMENTEN", "", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:e256d5f7-4d86-4324-90f5-4f398b9427c4",
 				"Anti-Alkoran : To gest: Mocnj a nepřemoženj důvodové toho, že Alkorán Turecký z ďábla possel, a to půwodem Aryánů s wědomým proti Duchu Swatému rauhánjm",
-				krameriusMzk));
+				"", krameriusMzk));
 
 		// result.add(new MonographExample(
 		// "http://krameriusndktest.mzk.cz/search/handle/uuid:efd23340-c9da-11e2-b6da-005056827e52",
@@ -106,13 +117,13 @@ public class KrameriusExamplesFactory {
 		// zobrazuje se divne, prvni polovina jakoby roztazene
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:831e1f40-d297-42af-a06f-c1e04863f043",
-				"Allerneuste Geheimniße der Freymäurer", krameriusMzk));
+				"Allerneuste Geheimniße der Freymäurer", "erroneous tiles or bug in viewer", krameriusMzk));
 		// vypada to, jako by to slo az od 30 strany
 		// do konce se to i na webu zobrazuje divne - dve stranky pod sebou v
 		// prohlizecce, kdyz to rozkliknu pres strom
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:0b4d383c-3616-4116-ac07-d7f6bd98e7a6",
-				"Allerneuste Geheimniße der Freymäurer", krameriusMzk));
+				"Allerneuste Geheimniße der Freymäurer", "erroneous tiles or bug in viewer", krameriusMzk));
 
 		// obrazky nejsou v image serveru:
 		// result.add(new MonographExample(
