@@ -23,4 +23,10 @@ public class PointD {
 		return new VectorD(newX, newY);
 	}
 
+	public PointD plus(VectorD vector) {
+		double newX = x + vector.x;
+		double newY = y + vector.y;
+		return new PointD(newX, newY);
+	}
+
 }

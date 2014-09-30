@@ -21,9 +21,9 @@ public class Utils {
 		return builder.toString();
 	}
 
-	public static PointD toImageCoords(PointD canvasCoords, double imageToCanvasResizeFactor, VectorD imageShiftInCanvas) {
-		double imageX = (canvasCoords.x - imageShiftInCanvas.x) / imageToCanvasResizeFactor;
-		double imageY = (canvasCoords.y - imageShiftInCanvas.y) / imageToCanvasResizeFactor;
+	public static PointD toImageCoords(PointD canvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+		double imageX = (canvasCoords.x - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
+		double imageY = (canvasCoords.y - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
 		return new PointD(imageX, imageY);
 	}
 

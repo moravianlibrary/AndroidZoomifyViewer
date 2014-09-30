@@ -59,23 +59,29 @@ public class KrameriusExamplesFactory {
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
 		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:d088d506-97b9-45f1-89e6-b965f90a89e8",
+				"General-Karte des Fürst zu Fürstenbergschen Fideikommissbesitzstandes", "working tiles", krameriusMzk));
+		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
-				"Když slunéčko svítí", "works correctly", krameriusMzk));
+				"Když slunéčko svítí", "working tiles", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:4873e8c7-5967-4003-8544-96f64ca55da7",
 				"Symbiotické zemědělství", "no tiles, no image, just pdf", krameriusMzk));
 		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:a980edb0-a1e3-11dd-b501-000d606f5dc6",
+				"Mladá fronta (1949)", "no tiles, just images, no rights", krameriusMzk));
+		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:f5a09c95-2fd8-11e0-83a8-0050569d679d", "Máj",
-				"no tiles - images in datastreams", krameriusMzk));
+				"no tiles, images in datastreams, working (book)", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:4689b175-f1e1-11e1-a3c6-0050569d679d", "Divadelní šepty",
-				"no tiles - image in datastream", krameriusMzk));
+				"no tiles, image in datastream, working (newspaper)", krameriusMzk));
 		result.add(new MonographExample(
 				"http://krameriustest.mzk.cz/search/handle/uuid:8069c22a-0ab2-41c3-b7a5-5dcca16ce089",
 				"Chrudimský kancionál", "no tiles", krameriusTestMzk));
 		result.add(new MonographExample(
-				"http://kramerius.mzk.cz/search/handle/uuid:6430d7ae-0ea5-4587-9aab-9d7d9c42a791", "Kde slunce",
-				"no access rights", krameriusMzk));
+				"http://kramerius.mzk.cz/search/handle/uuid:6430d7ae-0ea5-4587-9aab-9d7d9c42a791",
+				"Kde slunce výjde zítra", "tiles, no access rights", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:5e1e9cd8-eecd-4627-9a1a-09c53caaf9a8",
 				"Stát československý", "", krameriusMzk));

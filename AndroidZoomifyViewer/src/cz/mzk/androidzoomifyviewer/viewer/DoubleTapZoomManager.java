@@ -59,16 +59,15 @@ public class DoubleTapZoomManager {
 			// ", max: " + maxZoomScale);
 			this.activeZoomScale = previousActiveZoomScale;
 		}
-		updateActiveZoomShift();
+		VectorD newShift = computeNewShift();
+		activeZoomShift = newShift.plus(activeZoomShift);
 		imageView.invalidate();
 	}
 
-	private void updateActiveZoomShift() {
-		activeZoomShift = VectorD.ZERO_VECTOR;
+	private VectorD computeNewShift() {
 		PointD zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift = Utils.toCanvasCoords(zoomCenterInImage,
 				imageView.getCurrentScaleFactor(), imageView.getTotalShift());
-		activeZoomShift = new VectorD(
-				(doubleTapCenterInCanvas.x - zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.x),
+		return new VectorD((doubleTapCenterInCanvas.x - zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.x),
 				(doubleTapCenterInCanvas.y - zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.y));
 	}
 

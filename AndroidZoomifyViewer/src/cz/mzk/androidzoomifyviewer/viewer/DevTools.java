@@ -58,8 +58,12 @@ public class DevTools {
 		canv.drawRect(imageVisiblePart, mPaintGreen);
 	}
 
-	public void drawVisibleImageCenterRed(Canvas canv, int visibleImageCenterX, int visibleImageCenterY) {
-		canv.drawCircle(visibleImageCenterX, visibleImageCenterY, 10.0f, mPaintRed);
+	public void drawPointBlue(Canvas canv, PointD pointInCanvas) {
+		canv.drawCircle((float) pointInCanvas.x, (float) pointInCanvas.y, 20.0f, mPaintBlue);
+	}
+
+	public void drawPointYellow(Canvas canv, PointD pointInCanvas) {
+		canv.drawCircle((float) pointInCanvas.x, (float) pointInCanvas.y, 20.0f, mPaintYellow);
 	}
 
 	public void drawImageCoordPoints(Canvas canv, ImageCoordsPoints testPoints, double resizeFactor,

@@ -19,7 +19,7 @@ public class PinchZoomManager {
 	// general zooming state variables
 	private double startingFingerDistance;
 	private PointD startingZoomCenterInImageCoords;
-	private PointD currentZoomCenterInCanvasCoords;// TODO: just temporary
+	private PointD currentZoomCenterInCanvasCoords;
 
 	// zoom shift
 	private VectorD accumalatedZoomShift = VectorD.ZERO_VECTOR;
@@ -75,12 +75,7 @@ public class PinchZoomManager {
 			int maxShiftLeft, int maxShiftRight) {
 		state = State.PINCHING;
 		Log.d(TestTags.STATE, "pinch zoom: " + state.name());
-		// PointD previousZoomCenterInCanvasCoords =
-		// currentZoomCenterInCanvasCoords;
 		currentZoomCenterInCanvasCoords = computeTwoFingersCenter(event);
-		// double size =
-		// previousZoomCenterInCanvasCoords.minus(currentZoomCenterInCanvasCoords).getSize();
-		// Log.d(TAG, "size: " + size);
 		double currentFingerDistance = computeTwoFingersDistance(event);
 		activeZoomScale = currentFingerDistance / startingFingerDistance;
 		double currentZoomScale = getCurrentZoomScale();
@@ -117,22 +112,9 @@ public class PinchZoomManager {
 			// TODO: resit, jestli nebude viditelna oblast mimo stranku,
 			Log.d(TAG, "zooming out");
 		}
-		activeZoomShift = VectorD.ZERO_VECTOR;// to je kvuli toho, aby se v
-												// computActiveZoomShift
-												// nepouzil ten z
-												// predchoziho
-												// notifyPinchingContinues
-												// pres
-												// imageView.getTotalShift()
-		// activeZoomShift = newShift;
-		VectorD newShift = computeActiveZoomShift(currentZoomCenterInCanvasCoords);
-		// accumalatedZoomShift = VectorD.sum(accumalatedZoomShift,
-		// activeZoomShift);
-		// accumalatedZoomShift +=activeZoomShift;
-		activeZoomShift = newShift;
-		// activeZoomShift = VectorD.sum(activeZoomShift, newShift);
-		// Log.d(TestTags.MOTION, "MOVE finished");
-		// return distance > 50.0;
+		VectorD newShift = computeNewShift();
+		activeZoomShift = newShift.plus(activeZoomShift);
+		// Log.d(TestTags.CENTERS, "shift: " + newShift);
 	}
 
 	public void finish() {
@@ -160,9 +142,9 @@ public class PinchZoomManager {
 
 	private double computeTwoFingersDistance(MotionEvent event) {
 		// float to double
-		double x = event.getX(0) - event.getX(1);
-		double y = event.getY(0) - event.getY(1);
-		return Math.sqrt(x * x + y * y);
+		double diffX = event.getX(0) - event.getX(1);
+		double diffY = event.getY(0) - event.getY(1);
+		return Math.sqrt(diffX * diffX + diffY * diffY);
 	}
 
 	private PointD computeTwoFingersCenter(MotionEvent event) {
@@ -172,11 +154,7 @@ public class PinchZoomManager {
 		return new PointD(0.5 * x, 0.5 * y);
 	}
 
-	private VectorD computeActiveZoomShift(PointD currentZoomCenterInCanvasCoords) {
-		// Log.d(TestTags.ZOOM,
-		// String.format("activeZoomLevel: %.4f", activeZoomScale)
-		// + String.format(" accumulatedZoomLevel: %.2f",
-		// accumulatedZoomScale));
+	private VectorD computeNewShift() {
 		PointD startingZoomCenterInCanvasCoords = Utils.toCanvasCoords(startingZoomCenterInImageCoords,
 				imageView.getCurrentScaleFactor(), imageView.getTotalShift());
 		VectorD diff = new VectorD(currentZoomCenterInCanvasCoords.x - startingZoomCenterInCanvasCoords.x,

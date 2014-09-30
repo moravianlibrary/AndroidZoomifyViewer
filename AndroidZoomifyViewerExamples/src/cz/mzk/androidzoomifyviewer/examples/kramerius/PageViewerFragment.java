@@ -188,6 +188,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 			mCurrentPageIndex = pageIndex;
 			String pid = mPagePids.get(pageIndex);
 			String url = buildZoomifyBaseUrl(pid);
+			//Log.d(TAG, "base url:" + url);
 			mTiledImageView.loadImage(url.toString());
 		} else {
 			Log.w(TAG, "Page index out of range: " + pageIndex);
@@ -220,7 +221,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	@Override
 	public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
-		Log.d(TAG, "onImagePropertiesUnhandableResponseCodeError");
+		Log.d(TAG, "onImagePropertiesUnhandableResponseCodeError, code: " + responseCode);
 		hideViews();
 		switch (responseCode) {
 		case 403: // FORBIDDEN
@@ -305,7 +306,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	@Override
 	public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
-		// Log.d(TAG, "onImagePropertiesInvalidDataError");
+		Log.d(TAG, "onImagePropertiesInvalidDataError");
 		hideViews();
 		mErrorView.setVisibility(View.VISIBLE);
 		mErrorTitle.setText("Invalid content in ImageProperties.xml");
