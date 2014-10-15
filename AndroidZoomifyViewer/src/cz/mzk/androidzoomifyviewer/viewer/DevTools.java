@@ -1,5 +1,8 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -14,100 +17,170 @@ public class DevTools {
 
 	private static final String TAG = DevTools.class.getSimpleName();
 
-	private Paint mPaintBlue;
-	private Paint mPaintRed;
-	private Paint mPaintYellow;
-	private Paint mPaintGreen;
-	private Paint mPaintBlack;
-	private Paint mPaintWhite;
+	private Canvas mCanv;
+
+	private final Paint paintBlue;
+	private final Paint paintRed;
+	private final Paint paintYellow;
+	private final Paint paintGreen;
+	private final Paint paintBlack;
+	private final Paint paintWhite;
+
+	private final Paint paintRedTrans;
+	private final Paint paintYellowTrans;
+	private final Paint paintBlackTrans;
 
 	public DevTools(Context context) {
-		initPaints(context);
+		// init paints
+		paintBlue = new Paint();
+		paintBlue.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue));
+		paintRed = new Paint();
+		paintRed.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_red));
+		paintYellow = new Paint();
+		paintYellow.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow));
+		paintGreen = new Paint();
+		paintGreen.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_green));
+		paintBlack = new Paint();
+		paintBlack.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black));
+		paintWhite = new Paint();
+		paintWhite.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_white));
+		// transparent
+		paintRedTrans = new Paint();
+		paintRedTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_red_trans));
+		paintYellowTrans = new Paint();
+		paintYellowTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow_trans));
+		paintBlackTrans = new Paint();
+		paintBlackTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black_trans));
 	}
 
-	private void initPaints(Context context) {
-		mPaintBlue = new Paint();
-		mPaintBlue.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue));
-		mPaintRed = new Paint();
-		mPaintRed.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_red));
-		mPaintYellow = new Paint();
-		mPaintYellow.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow));
-		mPaintGreen = new Paint();
-		mPaintGreen.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_green));
-		mPaintBlack = new Paint();
-		mPaintBlack.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black));
-		mPaintWhite = new Paint();
-		mPaintWhite.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_white));
+	public void fillWholeCanvasWithColor(Paint paint) {
+		Rect wholeCanvas = new Rect(0, 0, mCanv.getWidth(), mCanv.getHeight());
+		mCanv.drawRect(wholeCanvas, paint);
 	}
 
-	public void drawCanvasYellow(Canvas canv) {
-		Rect wholeCanvas = new Rect(0, 0, canv.getWidth(), canv.getHeight());
-		canv.drawRect(wholeCanvas, mPaintYellow);
+	public void fillRectAreaWithColor(Rect rect, Paint paint) {
+		mCanv.drawRect(rect, paint);
 	}
 
-	public void drawCanvasBlue(Canvas canv) {
-		Rect wholeCanvas = new Rect(0, 0, canv.getWidth(), canv.getHeight());
-		canv.drawRect(wholeCanvas, mPaintBlue);
+	public void drawPoint(PointD pointInCanvas, Paint paint, float size) {
+		mCanv.drawCircle((float) pointInCanvas.x, (float) pointInCanvas.y, size, paint);
 	}
 
-	public void drawWholeImageRed(Canvas canv, Rect wholeImage) {
-		canv.drawRect(wholeImage, mPaintRed);
-	}
-
-	public void drawImageVisiblePartGreen(Canvas canv, Rect imageVisiblePart) {
-		canv.drawRect(imageVisiblePart, mPaintGreen);
-	}
-
-	public void drawPointBlue(Canvas canv, PointD pointInCanvas) {
-		canv.drawCircle((float) pointInCanvas.x, (float) pointInCanvas.y, 20.0f, mPaintBlue);
-	}
-
-	public void drawPointYellow(Canvas canv, PointD pointInCanvas) {
-		canv.drawCircle((float) pointInCanvas.x, (float) pointInCanvas.y, 20.0f, mPaintYellow);
-	}
-
-	public void drawImageCoordPoints(Canvas canv, ImageCoordsPoints testPoints, double resizeFactor,
-			VectorD imageShiftInCanvas) {
-		drawImageCoordPoint(canv, testPoints.getCenter(), resizeFactor, imageShiftInCanvas, mPaintYellow);
+	public void drawImageCoordPoints(ImageCoordsPoints testPoints, double resizeFactor, VectorD imageShiftInCanvas) {
+		drawImageCoordPoint(testPoints.getCenter(), resizeFactor, imageShiftInCanvas, paintYellow);
 		for (Point corner : testPoints.getCorners()) {
-			drawImageCoordPoint(canv, corner, resizeFactor, imageShiftInCanvas, mPaintYellow);
+			drawImageCoordPoint(corner, resizeFactor, imageShiftInCanvas, paintYellow);
 		}
 	}
 
-	private void drawImageCoordPoint(Canvas canv, Point point, double resizeFactor, VectorD imageShiftInCanvas,
-			Paint paint) {
+	private void drawImageCoordPoint(Point point, double resizeFactor, VectorD imageShiftInCanvas, Paint paint) {
 		int resizedAndShiftedX = (int) (point.x * resizeFactor + imageShiftInCanvas.x);
 		int resizedAndShiftedY = (int) (point.y * resizeFactor + imageShiftInCanvas.y);
-		canv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 15f, paint);
+		mCanv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 15f, paint);
 	}
 
-	public void drawZoomCenters(Canvas canv, PointD gestureCenterInCanvas, PointD zoomCenterInImage,
-			double resizeFactor, VectorD totalShift) {
+	public void drawZoomCenters(PointD gestureCenterInCanvas, PointD zoomCenterInImage, double resizeFactor,
+			VectorD totalShift) {
 		if (gestureCenterInCanvas != null && zoomCenterInImage != null) {
 			PointD zoomCenterInImageInCanvasCoords = Utils.toCanvasCoords(zoomCenterInImage, resizeFactor, totalShift);
-			canv.drawCircle((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
-					15.0f, mPaintGreen);
-			canv.drawCircle((float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, 12.0f, mPaintRed);
-			canv.drawLine((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
-					(float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, mPaintRed);
+			mCanv.drawCircle((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					15.0f, paintGreen);
+			mCanv.drawCircle((float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, 12.0f, paintRed);
+			mCanv.drawLine((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					(float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, paintRed);
 		}
 	}
 
-	public void highlightTile(Canvas canv, Rect rect) {
-		Paint paint = mPaintBlack;
+	public void highlightTile(Rect rect, Paint paint) {
 		// vertical borders
-		canv.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint);
-		canv.drawLine(rect.right, rect.top, rect.right, rect.bottom, paint);
+		mCanv.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint);
+		mCanv.drawLine(rect.right, rect.top, rect.right, rect.bottom, paint);
 		// horizontal borders
-		canv.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
-		canv.drawLine(rect.left, rect.bottom, rect.left, rect.bottom, paint);
+		mCanv.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
+		mCanv.drawLine(rect.left, rect.bottom, rect.left, rect.bottom, paint);
 		// diagonals
-		canv.drawLine(rect.left, rect.top, rect.right, rect.bottom, paint);
-		canv.drawLine(rect.right, rect.top, rect.left, rect.bottom, paint);
+		mCanv.drawLine(rect.left, rect.top, rect.right, rect.bottom, paint);
+		mCanv.drawLine(rect.right, rect.top, rect.left, rect.bottom, paint);
 		// center
 		int centerX = (int) (rect.left + (rect.right - rect.left) / 2.0);
 		int centerY = (int) (rect.top + (double) (rect.bottom - rect.top) / 2.0);
-		canv.drawCircle((float) centerX, (float) centerY, 7.0f, paint);
+		mCanv.drawCircle((float) centerX, (float) centerY, 7.0f, paint);
+	}
+
+	public void setCanvas(Canvas canv) {
+		this.mCanv = canv;
+	}
+
+	public Paint getPaintBlue() {
+		return paintBlue;
+	}
+
+	public Paint getPaintRed() {
+		return paintRed;
+	}
+
+	public Paint getPaintYellow() {
+		return paintYellow;
+	}
+
+	public Paint getPaintGreen() {
+		return paintGreen;
+	}
+
+	public Paint getPaintBlack() {
+		return paintBlack;
+	}
+
+	public Paint getPaintWhite() {
+		return paintWhite;
+	}
+
+	public Paint getPaintRedTrans() {
+		return paintRedTrans;
+	}
+
+	public Paint getPaintYellowTrans() {
+		return paintYellowTrans;
+	}
+
+	public Paint getPaintBlackTrans() {
+		return paintBlackTrans;
+	}
+
+	private final List<RectWithPaint> rectStackAfterPrimaryDraws = new ArrayList<RectWithPaint>();
+
+	public void clearRectStack() {
+		rectStackAfterPrimaryDraws.clear();
+	}
+
+	public void addToRectStack(RectWithPaint rect) {
+		rectStackAfterPrimaryDraws.add(rect);
+	}
+
+	public void drawRectStack() {
+		for (RectWithPaint rect : rectStackAfterPrimaryDraws) {
+			fillRectAreaWithColor(rect.getRect(), rect.getPaint());
+		}
+	}
+
+	public static class RectWithPaint {
+		private final Rect rect;
+		private final Paint paint;
+
+		public RectWithPaint(Rect rect, Paint paint) {
+			super();
+			this.rect = rect;
+			this.paint = paint;
+		}
+
+		public Rect getRect() {
+			return rect;
+		}
+
+		public Paint getPaint() {
+			return paint;
+		}
+
 	}
 
 }

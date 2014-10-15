@@ -1,5 +1,6 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -75,6 +76,9 @@ public class PinchZoomManager {
 			int maxShiftLeft, int maxShiftRight) {
 		state = State.PINCHING;
 		Log.d(TestTags.STATE, "pinch zoom: " + state.name());
+		// previousZoomCenterInCanvasCoords =
+		// Utils.toCanvasCoords(startingZoomCenterInImageCoords,
+		// imageView.getCurrentScaleFactor(), imageView.getTotalShift());
 		currentZoomCenterInCanvasCoords = computeTwoFingersCenter(event);
 		double currentFingerDistance = computeTwoFingersDistance(event);
 		activeZoomScale = currentFingerDistance / startingFingerDistance;
@@ -83,38 +87,180 @@ public class PinchZoomManager {
 		double maxZoomScale = (imageView.getMaxScaleFactor() * currentZoomScale) / imageView.getCurrentScaleFactor();
 
 		if (currentZoomScale <= maxZoomScale && currentZoomScale >= minZoomScale) {
-			Log.d(TAG, "current: " + currentZoomScale);
-			updateActiveZoomShift();
+			// Log.d(TAG, "current: " + currentZoomScale);
+			updateActiveZoomShift(maxShiftUp, maxShiftDown, maxShiftLeft, maxShiftRight);
 			return true;
 		} else if (currentZoomScale < minZoomScale) {
 			activeZoomScale = 1.0f;
 			accumulatedZoomScale = minZoomScale;
 			// Log.d(TAG, "current < min; current: " + currentZoomScale +
 			// ", min: " + minZoomScale);
-			updateActiveZoomShift();
-			return false;
+			updateActiveZoomShift(maxShiftUp, maxShiftDown, maxShiftLeft, maxShiftRight);
+			return true;
 		} else if (currentZoomScale > maxZoomScale) {
 			activeZoomScale = 1.0f;
 			accumulatedZoomScale = maxZoomScale;
 			// Log.d(TAG, "current > max; current: " + currentZoomScale +
 			// ", max: " + maxZoomScale);
-			updateActiveZoomShift();
-			return false;
+			updateActiveZoomShift(maxShiftUp, maxShiftDown, maxShiftLeft, maxShiftRight);
+			return true;
 		} else {
 			throw new IllegalStateException();
 		}
 	}
 
-	private void updateActiveZoomShift() {
+	private void updateActiveZoomShift(int maxShiftUp, int maxShiftDown, int maxShiftLeft, int maxShiftRight) {
+
+		PointD startingZoomCenterInCanvasCoords = Utils.toCanvasCoords(startingZoomCenterInImageCoords,
+				imageView.getCurrentScaleFactor(), imageView.getTotalShift());
+		VectorD newShift = new VectorD(currentZoomCenterInCanvasCoords.x - startingZoomCenterInCanvasCoords.x,
+				currentZoomCenterInCanvasCoords.y - startingZoomCenterInCanvasCoords.y);
 		if (activeZoomScale > 1) {// zooming in
 			Log.d(TAG, "zooming in");
+			activeZoomShift = newShift.plus(activeZoomShift);
 		} else {// zooming out
-			// TODO: resit, jestli nebude viditelna oblast mimo stranku,
 			Log.d(TAG, "zooming out");
+			Log.d(TAG, "new shift: " + newShift);
+			// Log.d(TAG, "max: up: " + maxShiftUp + ", down: " + maxShiftDown +
+			// ", left: " + maxShiftLeft + ", right: "
+			// + maxShiftRight);
+			// Log.d(TAG, "max: up: " + maxShiftUp + ", down: " + maxShiftDown);
+			VectorD newShiftLimited = limitNewShiftForZoomOut(newShift);
+			activeZoomShift = newShiftLimited.plus(activeZoomShift);
 		}
-		VectorD newShift = computeNewShift();
-		activeZoomShift = newShift.plus(activeZoomShift);
-		// Log.d(TestTags.CENTERS, "shift: " + newShift);
+	}
+
+	private VectorD limitNewShiftForZoomOut(VectorD newShift) {
+		double limitedLocalX = newShift.x;
+		double limitedLocalY = newShift.y;
+		double scaleFactor = imageView.getCurrentScaleFactor();
+
+		// Log.d(TestTags.CORNERS, "---------------------------");
+		// Log.d(TestTags.CORNERS, "scale: " + scaleFactor);
+
+		RectD paddingRectImg = new RectD(0.0, 0.0, imageView.getCanvasImagePaddingHorizontal(),
+				imageView.getCanvasImagePaddingVertical());
+
+		Rect imageAreaInCanvasWithoutAnyShift = imageView.computeImageAreaInCanvas(scaleFactor, VectorD.ZERO_VECTOR);
+		RectD paddingRectCanv = convertToPaddingInCanvas(paddingRectImg, imageAreaInCanvasWithoutAnyShift);
+
+		// Log.d(TestTags.CORNERS, "padding rect img: " + paddingRectImg);
+		// Log.d(TestTags.CORNERS, "padding rect canv: " + paddingRectCanv);
+
+		VectorD totalShift = imageView.getTotalShift();
+		VectorD totalPlusNewShift = totalShift.plus(newShift);
+		// Log.d(TestTags.CORNERS, "shift:\n\t total: " + totalShift +
+		// "\n\t new: " + newShift + "\n\t total+new: "
+		// + totalPlusNewShift);
+		Rect imageAreaInCanvasWithNewShift = imageView.computeImageAreaInCanvas(scaleFactor, totalPlusNewShift);
+		DevTools devTools = imageView.getDevTools();
+
+		// horizontal
+		double extraSpaceHorizontalCanv = paddingRectCanv.height();
+		double maxTop = extraSpaceHorizontalCanv;
+		double minBottom = imageView.getHeight() - extraSpaceHorizontalCanv;
+
+		if (imageAreaInCanvasWithNewShift.top > maxTop) {
+			// Log.d(TestTags.CORNERS, "TOP");
+			double limitedGlobalY = maxTop;
+			// Log.d(TestTags.CORNERS, "newY: " + limitedLocalY);
+			limitedLocalY = limitedGlobalY - totalShift.y;
+			// Log.d(TestTags.CORNERS, "limitedGlobalY: " + limitedGlobalY);
+			// Log.d(TestTags.CORNERS, "limitedLocalY: " + limitedLocalY);
+		} else if (imageAreaInCanvasWithNewShift.bottom < minBottom) {
+			// Log.d(TestTags.CORNERS, "BOTTOM");
+			double limitedGlobalY = minBottom - imageAreaInCanvasWithoutAnyShift.bottom;
+			// Log.d(TestTags.CORNERS, "newY: " + limitedLocalY);
+			limitedLocalY = limitedGlobalY - totalShift.y;
+			// Log.d(TestTags.CORNERS, "limitedGlobalY: " + limitedGlobalY);
+			// Log.d(TestTags.CORNERS, "limitedLocalY: " + limitedLocalY);
+		}
+
+		// vertical
+		double extraSpaceVerticalCanv = paddingRectCanv.width();
+		double maxLeft = extraSpaceVerticalCanv;
+		double minRight = imageView.getWidth() - extraSpaceVerticalCanv;
+		if (imageAreaInCanvasWithNewShift.left > maxLeft) {
+			// Log.d(TestTags.CORNERS, "LEFT");
+			double limitedGlobalX = maxLeft;
+			// Log.d(TestTags.CORNERS, "newX: " + limitedLocalX);
+			limitedLocalX = limitedGlobalX - totalShift.x;
+			// Log.d(TestTags.CORNERS, "limitedGlobalX: " + limitedGlobalX);
+			// Log.d(TestTags.CORNERS, "limitedLocalX: " + limitedLocalX);
+		} else if (imageAreaInCanvasWithNewShift.right < minRight) {
+			// Log.d(TestTags.CORNERS, "RIGHT");
+			double limitedGlobalX = minRight - imageAreaInCanvasWithoutAnyShift.right;
+			// Log.d(TestTags.CORNERS, "newX: " + limitedLocalX);
+			limitedLocalX = limitedGlobalX - totalShift.x;
+			// Log.d(TestTags.CORNERS, "limitedGlobalY: " + limitedGlobalX);
+			// Log.d(TestTags.CORNERS, "limitedLocalY: " + limitedLocalX);
+		}
+
+		VectorD limitedNewShift = new VectorD(limitedLocalX, limitedLocalY);
+		if (devTools != null) {
+			// devTools.clearRectStack();
+			// VectorD totalPlusLimitedNewShift =
+			// totalShift.plus(limitedNewShift);
+			// Rect imageAreaInCanvasWithLimitedShift =
+			// imageView.computeImageAreaInCanvas(scaleFactor,
+			// totalPlusLimitedNewShift);
+			// devTools.addToRectStack(new
+			// RectWithPaint(imageAreaInCanvasWithoutAnyShift,
+			// devTools.getPaintBlackTrans()));
+			// devTools.addToRectStack(new
+			// RectWithPaint(imageAreaInCanvasWithLimitedShift,
+			// devTools.getPaintRedTrans()));
+			// devTools.addToRectStack(new
+			// RectWithPaint(imageAreaInCanvasWithNewShift,
+			// devTools.getPaintYellowTrans()));
+			// Rect paddingRectangleVisualisation =
+			// paddingVisualisation(paddingRectCanv);
+			// devTools.addToRectStack(new
+			// RectWithPaint(paddingRectangleVisualisation,
+			// devTools.getPaintGreen()));
+		}
+
+		return limitedNewShift;
+	}
+
+	private RectD convertToPaddingInCanvas(RectD paddingRectImg, Rect imageAreaInCanvasWithoutAnyShift) {
+		PointD rightBottomImg = new PointD(paddingRectImg.right, paddingRectImg.bottom);
+		PointD rightBottomCanv = Utils.toCanvasCoords(rightBottomImg, imageView.getMinScaleFactor(),
+				VectorD.ZERO_VECTOR);
+		double width = rightBottomCanv.x;
+		double height = rightBottomCanv.y;
+
+		if (width != 0) {
+			if (imageAreaInCanvasWithoutAnyShift.width() >= imageView.getWidth()) {
+				width = 0;
+			} else {
+				double min = (imageView.getWidth() - imageAreaInCanvasWithoutAnyShift.width()) * 0.5;
+				width = Math.min(width, min);
+			}
+		}
+
+		if (height != 0) {
+			if (imageAreaInCanvasWithoutAnyShift.height() >= imageView.getHeight()) {
+				height = 0;
+			} else {
+				double min = (imageView.getHeight() - imageAreaInCanvasWithoutAnyShift.height()) * 0.5;
+				height = Math.min(height, min);
+			}
+		}
+
+		return new RectD(0, 0, width, height);
+	}
+
+	private Rect paddingVisualisation(RectD paddingRectCanv) {
+		int x = (int) paddingRectCanv.width();
+		int y = (int) paddingRectCanv.height();
+		if (x == 0) {
+			x = 10;
+		}
+		if (y == 0) {
+			y = 10;
+		}
+		return new Rect(0, 0, x, y);
 	}
 
 	public void finish() {

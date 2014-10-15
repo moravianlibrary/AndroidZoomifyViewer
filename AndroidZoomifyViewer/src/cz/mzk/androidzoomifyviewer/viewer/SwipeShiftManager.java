@@ -51,7 +51,8 @@ public class SwipeShiftManager {
 	 * @param maxShiftDown
 	 * @param maxShiftLeft
 	 * @param maxShiftRight
-	 * @return true if swipe distance was higher than treshold (gesture was recognized)
+	 * @return true if swipe distance was higher than treshold (gesture was
+	 *         recognized)
 	 */
 	public boolean notifyDragging(float newX, float newY, int maxShiftUp, int maxShiftDown, int maxShiftLeft,
 			int maxShiftRight) {
@@ -61,18 +62,22 @@ public class SwipeShiftManager {
 
 		// horizontal
 		float currentDragX = 0;
-		if (diffX > 0) {// move left
-			currentDragX = Math.min(diffX, maxShiftLeft);
-		} else if (diffX < 0) {// move right
-			currentDragX = -Math.min(-diffX, maxShiftRight);
+		if (diffX != 0) {
+			if (diffX > 0) {// move left
+				currentDragX = Math.min(diffX, maxShiftLeft);
+			} else {// move right
+				currentDragX = -Math.min(-diffX, maxShiftRight);
+			}
 		}
 
 		// vertical
 		float currentDragY = 0;
-		if (diffY > 0) { // move up
-			currentDragY = Math.min(diffY, maxShiftUp);
-		} else { // move down
-			currentDragY = -Math.min(-diffY, maxShiftDown);
+		if (diffY != 0) {
+			if (diffY > 0) { // move up
+				currentDragY = Math.min(diffY, maxShiftUp);
+			} else { // move down
+				currentDragY = -Math.min(-diffY, maxShiftDown);
+			}
 		}
 
 		VectorD currentDrag = new VectorD(currentDragX, currentDragY);

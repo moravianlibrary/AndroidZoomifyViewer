@@ -1,5 +1,7 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import java.util.Locale;
+
 /**
  * @author Martin Řehánek
  * 
@@ -14,7 +16,7 @@ public class PointD {
 	}
 
 	public String toString() {
-		return String.format("[%.3f;%.3f]", x, y);
+		return String.format(Locale.US, "[%.3f;%.3f]", x, y);
 	}
 
 	public VectorD minus(PointD other) {

@@ -38,6 +38,20 @@ public class Utils {
 		return result;
 	}
 
+	public static PointD computeShift(PointD inImageCoords, PointD inCanvasCoords, double imageToCanvasScaleFactor) {
+		double shiftX = inCanvasCoords.x - inImageCoords.x * imageToCanvasScaleFactor;
+		double shiftY = inCanvasCoords.y - inImageCoords.y * imageToCanvasScaleFactor;
+		return new PointD(shiftX, shiftY);
+	}
+
+	public static double computeShiftX(double xInImageCoords, double xInCanvasCoords, double imageToCanvasScaleFactor) {
+		return xInCanvasCoords - xInImageCoords * imageToCanvasScaleFactor;
+	}
+	
+	public static double computeShiftY(double yInImageCoords, double yInCanvasCoords, double imageToCanvasScaleFactor) {
+		return yInCanvasCoords - yInImageCoords * imageToCanvasScaleFactor;
+	}
+
 	public static double toImageX(double canvasX, double imageToCanvasResizeFactor, double imageShiftInCanvasX) {
 		return (canvasX - imageShiftInCanvasX) / imageToCanvasResizeFactor;
 	}
