@@ -1,6 +1,7 @@
 package cz.mzk.androidzoomifyviewer.examples;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -173,9 +174,9 @@ public class FullscreenSingleImageActivity extends Activity implements ImageInit
 	}
 
 	@Override
-	public void onSingleTap(float x, float y) {
+	public void onSingleTap(float x, float y, Rect boundingBox) {
 		PointD point = new PointD(x, y);
-		Toast.makeText(this, "Single tap at " + point.toString(), Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Single tap at " + point.toString() + ", img: " + boundingBox, Toast.LENGTH_LONG).show();
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -110,7 +111,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-				mEventListener.onSingleTap(e.getX(), e.getY());
+				mEventListener.onSingleTap(e.getX(), e.getY(), null);
 				return true;
 			}
 		});
@@ -188,7 +189,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 			mCurrentPageIndex = pageIndex;
 			String pid = mPagePids.get(pageIndex);
 			String url = buildZoomifyBaseUrl(pid);
-			//Log.d(TAG, "base url:" + url);
+			// Log.d(TAG, "base url:" + url);
 			mTiledImageView.loadImage(url.toString());
 		} else {
 			Log.w(TAG, "Page index out of range: " + pageIndex);
@@ -315,9 +316,9 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	}
 
 	@Override
-	public void onSingleTap(float x, float y) {
+	public void onSingleTap(float x, float y, Rect boundingBox) {
 		if (mEventListener != null) {
-			mEventListener.onSingleTap(x, y);
+			mEventListener.onSingleTap(x, y, boundingBox);
 		}
 	}
 

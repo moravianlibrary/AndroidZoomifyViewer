@@ -2,6 +2,7 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 import java.util.List;
 
+import android.graphics.Rect;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
@@ -88,8 +89,10 @@ public interface IPageViewerFragment {
 		 *            X coordinates of tap.
 		 * @param y
 		 *            Y coordinates of tap.
+		 * @param boundingBox
+		 *            area containing the image or null
 		 */
-		public void onSingleTap(float x, float y);
+		public void onSingleTap(float x, float y, Rect boundingBox);
 
 	}
 

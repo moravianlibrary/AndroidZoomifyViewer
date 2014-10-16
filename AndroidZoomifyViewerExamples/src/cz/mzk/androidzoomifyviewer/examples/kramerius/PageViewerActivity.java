@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -112,7 +113,7 @@ public class PageViewerActivity extends Activity implements EventListener {
 	}
 
 	@Override
-	public void onSingleTap(float x, float y) {
+	public void onSingleTap(float x, float y, Rect boundingBox) {
 		Log.d(TAG, "Showing metadata after single tap");
 		int pageIndex = mPageViewerFragment.getCurrentPageIndex();
 		String pagePid = mPageViewerFragment.getPagePid(pageIndex);

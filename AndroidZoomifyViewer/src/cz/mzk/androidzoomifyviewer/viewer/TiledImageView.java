@@ -86,7 +86,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private SwipeShiftManager mSwipeShiftManager;
 	private GestureDetector mGestureDetector;
 
-	private PointD visibleImageCenter;
+	private PointD mVisibleImageCenter;
 
 	private ImageInitializationHandler mImageInitializationHandler;
 	private TileDownloadHandler mTileDownloadHandler;
@@ -268,12 +268,6 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				devTools.fillRectAreaWithColor(mImageInCanvas, devTools.getPaintRedTrans());
 			}
 
-			int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(),
-					mImageInCanvas.height(), 0.5);
-
-			// int bestLayerId = 5;
-			// Log.d(TAG, "best layer id: " + bestLayerId);
-
 			mVisibleImageInCanvas = computeVisibleInCanvas(canv);
 			if (devTools != null) {
 				devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreen());
@@ -291,7 +285,11 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			// TODO: pokud je mid ve viditelne strance, posunout canvas tim
 			// smerem
 
-			visibleImageCenter = computeVisibleImageCenter();
+			//TODO: really necessary to compute this always?
+			mVisibleImageCenter = computeVisibleImageCenter();
+
+			int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(),
+					mImageInCanvas.height(), 0.5);
 
 			drawLayers(canv, mActiveImageDownloader, bestLayerId);
 
@@ -827,7 +825,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					} else {
 						int fingers = event.getPointerCount();
 						if (fingers == 2) {
-							boolean refresh = mPinchZoomManager.continuePinching(event, visibleImageCenter, maxShiftUp,
+							boolean refresh = mPinchZoomManager.continuePinching(event, mVisibleImageCenter, maxShiftUp,
 									maxShiftDown, maxShiftLeft, maxShiftRight);
 							if (refresh) {
 								invalidate();
@@ -891,7 +889,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			Log.d(TAG_STATES, "imgView: onSingleTapConfirmed: " + point.toString());
 		}
 		if (mSingleTapListener != null) {
-			mSingleTapListener.onSingleTap(e.getX(), e.getY());
+			mSingleTapListener.onSingleTap(e.getX(), e.getY(), mVisibleImageInCanvas);
 		} else {
 			Log.d(TAG_STATES, "imgView: SingleTapListener not initialized");
 		}
@@ -974,8 +972,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		 *            x coordinate of the tap
 		 * @param y
 		 *            y coordinate of the tap
+		 * @param boundingBox
+		 *            area containing the image
 		 */
-		public void onSingleTap(float x, float y);
+		public void onSingleTap(float x, float y, Rect boundingBox);
 	}
 
 	/**
