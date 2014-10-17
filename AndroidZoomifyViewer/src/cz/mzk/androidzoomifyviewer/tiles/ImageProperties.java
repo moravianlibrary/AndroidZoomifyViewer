@@ -10,27 +10,28 @@ public class ImageProperties {
 	private final int height;
 	private final int numtiles; // pro kontrolu
 	private final int tileSize;
-	private final int level;
+
+	// private final int level;
 
 	public ImageProperties(int width, int height, int numtiles, int tilesize) {
 		this.width = width;
 		this.height = height;
 		this.numtiles = numtiles;
 		this.tileSize = tilesize;
-		int xTiles = (int) Math.ceil(width/tileSize);
-		int yTiles = (int) Math.ceil(height/tileSize);
-		this.level = xTiles * yTiles;
+		// int xTiles = (int) Math.ceil(width / tileSize);
+		// int yTiles = (int) Math.ceil(height / tileSize);
+		// this.level = xTiles * yTiles;
 	}
-	
-//	public int getWidthInMaxZoomEstimate(){
-//		int xTiles = (int) Math.ceil(width/tileSize);
-//		
-//		
-//	}
-	
-	public int getLevel(){
-		return level;
-	}
+
+	// public int getWidthInMaxZoomEstimate(){
+	// int xTiles = (int) Math.ceil(width/tileSize);
+	//
+	//
+	// }
+
+	// public int getLevel(){
+	// return level;
+	// }
 
 	public int getWidth() {
 		return width;

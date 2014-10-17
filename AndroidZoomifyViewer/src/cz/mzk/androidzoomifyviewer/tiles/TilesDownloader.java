@@ -392,23 +392,26 @@ public class TilesDownloader {
 	private int computeTileGroup(TileId tileId) {
 		int x = tileId.getX();
 		int y = tileId.getY();
+		int level = tileId.getLayer();
 		double tileSize = imageProperties.getTileSize();
 		double width = imageProperties.getWidth();
 		double height = imageProperties.getHeight();
-		double layersNum = layers.size();
-		int level = imageProperties.getLevel();
-		// Log.d(TAG, "x: " + x + ", y: " + y + ", d: " + layersNum + ", l: " +
+		double depth = layers.size();
+
+		// Log.d(TAG, tileId.toString());
+		// Log.d(TAG, "x: " + x + ", y: " + y + ", d: " + depth + ", l: " +
 		// level);
 		// Log.d(TAG, "width: " + width + ", height: " + height + ", tileSize: "
 		// + tileSize);
-		double first = Math.ceil(Math.floor(width / Math.pow(2, layersNum - level - 1)) / tileSize);
+
+		double first = Math.ceil(Math.floor(width / Math.pow(2, depth - level - 1)) / tileSize);
 		double index = x + y * first;
 		for (int i = 1; i <= level; i++) {
-			index += Math.ceil(Math.floor(width / Math.pow(2, layersNum - i)) / tileSize)
-					* Math.ceil(Math.floor(height / Math.pow(2, layersNum - i)) / tileSize);
+			index += Math.ceil(Math.floor(width / Math.pow(2, depth - i)) / tileSize)
+					* Math.ceil(Math.floor(height / Math.pow(2, depth - i)) / tileSize);
 		}
 		// Log.d(TAG, "index: " + index);
-		int result = (int) (index % tileSize);
+		int result = (int) (index / tileSize);
 		// Log.d(TAG, "tile group: " + result);
 		return result;
 	}
