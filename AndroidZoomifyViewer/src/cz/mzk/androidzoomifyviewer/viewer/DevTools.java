@@ -29,6 +29,8 @@ public class DevTools {
 	private final Paint paintRedTrans;
 	private final Paint paintYellowTrans;
 	private final Paint paintBlackTrans;
+	private final Paint paintGreenTrans;
+	private final Paint paintBlueTrans;
 
 	public DevTools(Context context) {
 		// init paints
@@ -51,6 +53,10 @@ public class DevTools {
 		paintYellowTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow_trans));
 		paintBlackTrans = new Paint();
 		paintBlackTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black_trans));
+		paintGreenTrans = new Paint();
+		paintGreenTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_green_trans));
+		paintBlueTrans = new Paint();
+		paintBlueTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue_trans));
 	}
 
 	public void fillWholeCanvasWithColor(Paint paint) {
@@ -67,9 +73,9 @@ public class DevTools {
 	}
 
 	public void drawImageCoordPoints(ImageCoordsPoints testPoints, double resizeFactor, VectorD imageShiftInCanvas) {
-		drawImageCoordPoint(testPoints.getCenter(), resizeFactor, imageShiftInCanvas, paintYellow);
+		drawImageCoordPoint(testPoints.getCenter(), resizeFactor, imageShiftInCanvas, paintYellowTrans);
 		for (Point corner : testPoints.getCorners()) {
-			drawImageCoordPoint(corner, resizeFactor, imageShiftInCanvas, paintYellow);
+			drawImageCoordPoint(corner, resizeFactor, imageShiftInCanvas, paintYellowTrans);
 		}
 	}
 
@@ -145,6 +151,14 @@ public class DevTools {
 
 	public Paint getPaintBlackTrans() {
 		return paintBlackTrans;
+	}
+
+	public Paint getPaintGreenTrans() {
+		return paintGreenTrans;
+	}
+
+	public Paint getPaintBlueTrans() {
+		return paintBlueTrans;
 	}
 
 	private final List<RectWithPaint> rectStackAfterPrimaryDraws = new ArrayList<RectWithPaint>();

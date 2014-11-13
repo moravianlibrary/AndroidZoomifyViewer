@@ -19,11 +19,12 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.viewer.TestTags;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
- * This class encapsulates image metadata from ImageProperties.xml and provides
- * method for downloading tiles (bitmaps) for given image.
+ * This class encapsulates image metadata from ImageProperties.xml and provides method for downloading tiles (bitmaps) for given
+ * image.
  * 
  * @author Martin Řehánek
  * 
@@ -58,26 +59,22 @@ public class TilesDownloader {
 	}
 
 	/**
-	 * Initializes TilesDownloader by downloading and processing
-	 * ImageProperties.xml. Instead of downloading, ImageProperties.xml may be
-	 * loaded from cache. Also ImageProperties.xml is saved to cache after being
-	 * downloaded.
+	 * Initializes TilesDownloader by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
+	 * may be loaded from cache. Also ImageProperties.xml is saved to cache after being downloaded.
 	 * 
 	 * @throws IllegalStateException
 	 *             If this method had already been called
 	 * @throws TooManyRedirectionsException
-	 *             If max. number of redirections exceeded before downloading
-	 *             ImageProperties.xml. This probably means redirection loop.
+	 *             If max. number of redirections exceeded before downloading ImageProperties.xml. This probably means redirection
+	 *             loop.
 	 * @throws ImageServerResponseException
-	 *             If zoomify server response code for ImageProperties.xml
-	 *             cannot be handled here (everything apart from OK and 3xx
-	 *             redirections).
+	 *             If zoomify server response code for ImageProperties.xml cannot be handled here (everything apart from OK and
+	 *             3xx redirections).
 	 * @throws InvalidDataException
-	 *             If ImageProperties.xml contains invalid data - empty content,
-	 *             not well formed xml, missing required attributes, etc.
+	 *             If ImageProperties.xml contains invalid data - empty content, not well formed xml, missing required attributes,
+	 *             etc.
 	 * @throws OtherIOException
-	 *             In case of other error (invalid URL, error transfering data,
-	 *             ...)
+	 *             In case of other error (invalid URL, error transfering data, ...)
 	 */
 	public void init() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
 			InvalidDataException {
@@ -87,7 +84,6 @@ public class TilesDownloader {
 			Log.d(TAG, "initializing: " + baseUrl);
 		}
 		HttpURLConnection.setFollowRedirects(false);
-		// String imagePropertiesUrl = baseUrl + "ImageProperties.xml";
 		String propertiesXml = getImagePropertiesXml();
 		imageProperties = loadFromXml(propertiesXml);
 		Log.d(TAG, imageProperties.toString());
@@ -276,24 +272,25 @@ public class TilesDownloader {
 		double height = imageProperties.getHeight();
 		double tileSize = imageProperties.getTileSize();
 		for (int layer = 0; layer < numberOfLayers; layer++) {
-			int sizeHorizontal = (int) Math
-					.ceil(Math.floor(width / Math.pow(2, numberOfLayers - layer - 1)) / tileSize);
-			int sizeVertical = (int) Math.ceil(Math.floor(height / Math.pow(2, numberOfLayers - layer - 1)) / tileSize);
+			int tilesHorizontal = (int) Math.ceil(Math.floor(width / Math.pow(2, numberOfLayers - layer - 1))
+					/ tileSize);
+			int tilesVertical = (int) Math
+					.ceil(Math.floor(height / Math.pow(2, numberOfLayers - layer - 1)) / tileSize);
+			// Log.d(TestTags.TILES, "number of layers: " + numberOfLayers);
 			// Log.d(TAG, "layer=" + layer + ": horizontal=" + sizeHorizontal +
 			// ", vertical=" + sizeVertical);
-			result.add(new Layer(sizeVertical, sizeHorizontal));
+			result.add(new Layer(tilesVertical, tilesHorizontal));
 		}
 		return result;
 	}
 
 	private int computeNumberOfLayers() {
-		double ai = (int) Math.ceil(Math.max(imageProperties.getWidth(), imageProperties.getHeight())
-				/ imageProperties.getTileSize());
+		double ai = Math.max((double) imageProperties.getWidth(), (double) imageProperties.getHeight())
+				/ imageProperties.getTileSize();
 		int i = 0;
 		do {
 			i++;
 			ai = Math.ceil(ai / 2.0);
-			// System.out.println("a" + i + ": " + ai);
 		} while (ai != 1);
 		return i + 1;
 	}
@@ -314,16 +311,14 @@ public class TilesDownloader {
 	 * @throws IllegalStateException
 	 *             If methodi init had not been called yet.
 	 * @throws TooManyRedirectionsException
-	 *             If max. number of redirections exceeded before downloading
-	 *             tile. This probably means redirection loop.
+	 *             If max. number of redirections exceeded before downloading tile. This probably means redirection loop.
 	 * @throws ImageServerResponseException
-	 *             If zoomify server response code for tile cannot be handled
-	 *             here (everything apart from OK and 3xx redirections).
+	 *             If zoomify server response code for tile cannot be handled here (everything apart from OK and 3xx
+	 *             redirections).
 	 * @throws InvalidDataException
 	 *             If tile contains invalid data.
 	 * @throws OtherIOException
-	 *             In case of other IO error (invalid URL, error transfering
-	 *             data, ...)
+	 *             In case of other IO error (invalid URL, error transfering data, ...)
 	 */
 	public Bitmap downloadTile(TileId tileId) throws OtherIOException, TooManyRedirectionsException,
 			ImageServerResponseException {
@@ -445,59 +440,56 @@ public class TilesDownloader {
 		if (pixelY < 0 || pixelY >= imageProperties.getHeight()) {
 			throw new IllegalArgumentException("y coord out of range: " + pixelY);
 		}
+
+		// optimization
 		if (layerId == 0) {
 			return new int[] { 0, 0 };
 		}
 		// Log.d(TAG, "getting picture for layer=" + layerId + ", x=" + pixelX +
 		// ", y=" + pixelY);
+		// Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
 		double step = imageProperties.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
-		// Log.d(TAG, "step:" + step);
+		// Log.d(TestTags.TILES, "step: " + step);
 		// x
 		double cx_step = pixelX / step;
-		// Log.d(TAG, (cx_step - 1) + " < x <= " + cx_step);
+		// Log.d(TestTags.TILES, (cx_step - 1) + " < x <= " + cx_step);
 		int x = (int) Math.floor(cx_step);
 		// y
 		double cy_step = pixelY / step;
-		// Log.d(TAG, (cy_step - 1) + " < y <= " + cy_step);
+		// Log.d(TestTags.TILES, (cy_step - 1) + " < y <= " + cy_step);
 		int y = (int) Math.floor(cy_step);
-		return new int[] { x, y };
+		int[] result = new int[] { x, y };
+		// Log.d(TestTags.TILES, "px: [" + pixelX + "," + pixelY + "] -> " + Utils.toString(result));
+		return result;
 	}
 
 	/**
-	 * Selects highest layer, tiles of which whould all fit into the image area
-	 * in canvas (with exception of border tiles partially overflowing).
+	 * Selects highest layer, tiles of which whould all fit into the image area in canvas (with exception of border tiles
+	 * partially overflowing).
 	 * 
-	 * For determining this, canvas width/height can be taken into account
-	 * either in pixels or density independent pixels or combination of both
-	 * (weighted arithemtic mean). Parameter pxRatio is used for this. For
-	 * example height of image area in canvas is being computed this way:
+	 * For determining this, canvas width/height can be taken into account either in pixels or density independent pixels or
+	 * combination of both (weighted arithemtic mean). Parameter pxRatio is used for this. For example height of image area in
+	 * canvas is being computed this way:
 	 * 
 	 * height = pxRatio heightPx + (1-pxRatio) * heightDp
 	 * 
-	 * So to use px only, pxRatio should be 1.0. To use dp, pxRatio should be
-	 * 0.0.
+	 * So to use px only, pxRatio should be 1.0. To use dp, pxRatio should be 0.0.
 	 * 
-	 * Be aware that for devices with big displays and high display density
-	 * putting big weight to px might caus extensive number of tiles needed.
-	 * That would lead to lots of parallel tasks for fetching tiles and hence
-	 * decreased ui responsivness due to network/disk (cache) access and thread
-	 * synchronization. Also possible app crashes.
+	 * Be aware that for devices with big displays and high display density putting big weight to px might caus extensive number
+	 * of tiles needed. That would lead to lots of parallel tasks for fetching tiles and hence decreased ui responsivness due to
+	 * network/disk (cache) access and thread synchronization. Also possible app crashes.
 	 * 
-	 * On the other hand to much weight to dp could cause demanding
-	 * not-deep-enought tile layer and as a consequence image would seem blurry.
-	 * Also devices with small displays and very high resolution would with
-	 * great weight on px require unneccessary number of tiles which most of
-	 * people would not appreciate anyway because of limitations of human eyes.
+	 * On the other hand to much weight to dp could cause demanding not-deep-enought tile layer and as a consequence image would
+	 * seem blurry. Also devices with small displays and very high resolution would with great weight on px require unneccessary
+	 * number of tiles which most of people would not appreciate anyway because of limitations of human eyes.
 	 * 
 	 * 
 	 * @param imageInCanvasWidthPx
 	 * @param imageInCanvasHeightPx
 	 * @param pxRatio
-	 *            Ratio between pixels and density-independent pixels for
-	 *            computing image_size_in_canvas. Must be between 0 and 1.
+	 *            Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
 	 *            dpRatio = (1-pxRatio)
-	 * @return id of layer, that would best fill image are in canvas with only
-	 *         border tiles overflowing that area
+	 * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
 	 */
 	public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx, double pxRatio) {
 		if (!initialized) {
@@ -538,8 +530,7 @@ public class TilesDownloader {
 	/**
 	 * 
 	 * @param layerId
-	 * @return size (width and height) of all tiles except the last one in each
-	 *         row or column since these are not allways squares.
+	 * @return size (width and height) of all tiles except the last one in each row or column since these are not allways squares.
 	 */
 	public int getTilesSizeInImageCoords(int layerId) {
 		if (!initialized) {
@@ -568,8 +559,13 @@ public class TilesDownloader {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
 		int basicSize = imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
-		if (tileVerticalIndex == layers.get(layerId).getTilesVertical() - 1) {
-			return imageProperties.getHeight() - basicSize * (layers.get(layerId).getTilesVertical() - 1);
+		// Log.d(TestTags.TILES, "tileVerticalIndex:" + tileVerticalIndex);
+		int verticalTilesForLayer = layers.get(layerId).getTilesVertical();
+		int lastTilesIndex = verticalTilesForLayer - 1;
+		// Log.d(TestTags.TILES, "tiles vertical for layer: " + layerId + ": " + tilesVerticalForLayer);
+		// Log.d(TestTags.TILES, "last tile's index: " + layerId + ": " + lastTilesIndex);
+		if (tileVerticalIndex == lastTilesIndex) {
+			return imageProperties.getHeight() - basicSize * (lastTilesIndex);
 		} else {
 			return basicSize;
 		}

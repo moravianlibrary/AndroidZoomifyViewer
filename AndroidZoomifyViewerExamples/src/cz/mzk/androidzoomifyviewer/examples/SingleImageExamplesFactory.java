@@ -203,6 +203,8 @@ public class SingleImageExamplesFactory {
 
 	public static List<ImageExample> getWorkingExamples() {
 		List<ImageExample> result = new ArrayList<ImageExample>();
+		// result.add(new ImageExample("tiles problem 1", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles/"));
+		// result.add(new ImageExample("tiles problem 2", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles2/"));
 		result.add(new ImageExample("mapy.mzk.cz 1", "http://mapy.mzk.cz/AA22/0103/"));
 		result.add(new ImageExample("mapy.mzk.cz 2", "http://mapy.mzk.cz/AA22/0104/"));
 		result.add(new ImageExample("mapy.mzk.cz 3", "http://mapy.mzk.cz/AA22/0105/"));

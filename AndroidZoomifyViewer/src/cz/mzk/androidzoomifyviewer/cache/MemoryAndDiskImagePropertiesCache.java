@@ -49,8 +49,8 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	}
 
 	/**
-	 * Creates a unique subdirectory of the designated app cache directory.
-	 * Tries to use external but if not mounted, falls back on internal storage.
+	 * Creates a unique subdirectory of the designated app cache directory. Tries to use external but if not mounted, falls back
+	 * on internal storage.
 	 * 
 	 * @param context
 	 * @return
@@ -66,7 +66,6 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 		// || !Environment.isExternalStorageRemovable() ?
 		// context.getExternalCacheDir().getPath() : context
 		// .getCacheDir().getPath();
-		// context.getc
 		String cacheDirPath = context.getCacheDir().getPath();
 		return new File(cacheDirPath + File.separator + DISK_CACHE_SUBDIR);
 	}
@@ -83,7 +82,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 		@Override
 		protected Void doInBackground(File... params) {
 			synchronized (mDiskCacheInitializationLock) {
-				Log.d(TAG, "assuming disk cache initialization lock: " + Thread.currentThread().toString());
+				Log.v(TAG, "assuming disk cache initialization lock: " + Thread.currentThread().toString());
 				try {
 					File cacheDir = params[0];
 					if (cacheDir.exists()) {
@@ -114,7 +113,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 					return null;
 				} finally {
 					mDiskCacheInitializationLock.notifyAll();
-					Log.d(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
+					Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
 				}
 			}
 		}
@@ -134,21 +133,21 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 	private void storeXmlToMemoryCache(String key, String xml) {
 		synchronized (mMemoryCache) {
-			Log.d(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
+			Log.v(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
 			if (mMemoryCache.get(key) == null) {
 				Log.d(TAG, "storing to memory cache: " + key);
 				mMemoryCache.put(key, xml);
 			} else {
 				Log.d(TAG, "already in memory cache: " + key);
 			}
-			Log.d(TAG, "releasing mMemoryCache lock: " + Thread.currentThread().toString());
+			Log.v(TAG, "releasing mMemoryCache lock: " + Thread.currentThread().toString());
 		}
 	}
 
 	private void waitUntilDiskCacheInitializedOrDisabled() {
 		try {
 			synchronized (mDiskCacheInitializationLock) {
-				Log.d(TAG, "assuming disk cache lock: " + Thread.currentThread().toString());
+				Log.v(TAG, "assuming disk cache lock: " + Thread.currentThread().toString());
 				// Wait until disk cache is initialized or disabled
 				while (mDiskCache == null && !mDiskCacheDisabled) {
 					try {
@@ -159,7 +158,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 				}
 			}
 		} finally {
-			Log.d(TAG, "releasing disk cache lock: " + Thread.currentThread().toString());
+			Log.v(TAG, "releasing disk cache lock: " + Thread.currentThread().toString());
 		}
 	}
 
@@ -178,8 +177,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 						edit.set(0, xml);
 						edit.commit();
 					} else {
-						// jine vlakno se pokousi zapisovat
-						// tj. spatne implementovana synchronizace
+						// another thread trying to write, i.e. incorrectly implemented synchronization
 						Log.e(TAG, key + ": edit allready opened");
 					}
 				}
@@ -203,14 +201,12 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 		String inMemoryCache = mMemoryCache.get(key);
 		// long afterHitOrMiss = System.currentTimeMillis();
 		if (inMemoryCache != null) {
-			// Log.d(TAG, "memory cache hit: " + key);
-			// Log.d(TAG, "memory cache hit, delay: " + (afterHitOrMiss - start)
-			// + " ms");
+			Log.d(TAG, "memory cache hit: " + key);
+			// Log.d(TAG, "memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
 			return inMemoryCache;
 		} else {
-			// Log.d(TAG, "memory cache miss: " + key);
-			// Log.d(TAG, "memory cache miss, delay: " + (afterHitOrMiss -
-			// start) + " ms");
+			Log.d(TAG, "memory cache miss: " + key);
+			// Log.d(TAG, "memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
 			String fromDiskCache = getXmlFromDiskCache(key);
 			// store also to memory cache (nonblocking)
 			if (fromDiskCache != null) {
@@ -234,19 +230,14 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 					// long afterDecoding = System.currentTimeMillis();
 					// long retrieval = afterHit - start;
 					// long decoding = afterDecoding - afterHit;
-					// Log.d(TAG, "disk cache hit, delay: " + (retrieval +
-					// decoding) + "ms (retrieval: " + retrieval
-					// + "ms, decoding: " + decoding + " ms)");
-					// Log.d(TAG, "disk cache hit: " + key + ", delay: " +
-					// (retrieval + decoding) + "ms (retrieval: "
-					// + retrieval + ", decoding: " + decoding);
+					// long total = retrieval + decoding;
+					// Log.d(TAG, "disk cache hit, delay: " + total + "ms (retrieval: " + retrieval + "ms, decoding: " + decoding
+					// + " ms)");
 					return result;
 				} else {
 					// long afterMiss = System.currentTimeMillis();
-					// Log.d(TAG, "disk cache miss:, delay: " + (afterMiss -
-					// start) + " ms");
-					// Log.d(TAG, "disk cache miss: " + key + ", delay: " +
-					// (afterMiss - start) + " ms");
+					// Log.d(TAG, "disk cache miss:, delay: " + (afterMiss - start) + " ms");
+					// Log.d(TAG, "disk cache miss: " + key + ", delay: " + (afterMiss - start) + " ms");
 					return null;
 				}
 			} else {

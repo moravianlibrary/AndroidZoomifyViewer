@@ -270,7 +270,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 			mVisibleImageInCanvas = computeVisibleInCanvas(canv);
 			if (devTools != null) {
-				devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreen());
+				devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreenTrans());
 			}
 
 			maxShiftUp = mImageInCanvas.top >= 0 ? 0 : -mImageInCanvas.top;
@@ -285,11 +285,11 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			// TODO: pokud je mid ve viditelne strance, posunout canvas tim
 			// smerem
 
-			//TODO: really necessary to compute this always?
+			// TODO: really necessary to compute this always?
 			mVisibleImageCenter = computeVisibleImageCenter();
 
 			int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(),
-					mImageInCanvas.height(), 0.5);
+					mImageInCanvas.height(), 0.0);
 
 			drawLayers(canv, mActiveImageDownloader, bestLayerId);
 
@@ -429,7 +429,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		for (int y = topLeftVisibleTileCoords[1]; y <= bottomRightVisibleTileCoords[1]; y++) {
 			for (int x = topLeftVisibleTileCoords[0]; x <= bottomRightVisibleTileCoords[0]; x++) {
 				int[] visibleTile = { x, y };
-				// Log.d(TAG, "visible: " + toString(tile));
+				// Log.d(TestTags.TILES, "visible: " + Utils.toString(visibleTile));
 				visibleTiles.add(visibleTile);
 			}
 		}
@@ -520,10 +520,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	private int[][] getCornerVisibleTilesCoords(TilesDownloader downloader, int layerId) {
 		double resizeFactor = getCurrentScaleFactor();
+		VectorD totalShift = getTotalShift();
 		int imageWidthMinusOne = downloader.getImageProperties().getWidth() - 1;
 		int imageHeightMinusOne = downloader.getImageProperties().getHeight() - 1;
 
-		VectorD totalShift = getTotalShift();
 		int topLeftVisibleX = collapseToInterval(
 				(int) Utils.toImageX(mVisibleImageInCanvas.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
 		int topLeftVisibleY = collapseToInterval(
@@ -532,13 +532,14 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				(int) Utils.toImageX(mVisibleImageInCanvas.right, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
 		int bottomRightVisibleY = collapseToInterval(
 				(int) Utils.toImageY(mVisibleImageInCanvas.bottom, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
+		// Log.d(TestTags.TILES, "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
+		// Log.d(TestTags.TILES, "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
 
 		int[] topLeftVisibleTileCoords = downloader.getTileCoords(layerId, topLeftVisibleX, topLeftVisibleY);
 		int[] bottomRightVisibleTileCoords = downloader
 				.getTileCoords(layerId, bottomRightVisibleX, bottomRightVisibleY);
-		// Log.d(TAG, "top_left:     " + toString(topLeftVisibleTileCoords));
-		// Log.d(TAG, "bottom_right: " +
-		// toString(bottomRightVisibleTileCoords));
+		// Log.d(TestTags.TILES, "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
+		// Log.d(TestTags.TILES, "bottom_right: " + Utils.toString(bottomRightVisibleTileCoords));
 		return new int[][] { topLeftVisibleTileCoords, bottomRightVisibleTileCoords };
 	}
 
@@ -586,6 +587,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		double tileBasicSize = ((double) downloader.getTilesSizeInImageCoords(tileId.getLayer()) * scaleFactor);
 		double tileWidth = ((double) downloader.getTileWidthInImage(tileId.getLayer(), tileId.getX()) * scaleFactor);
 		double tileHeight = ((double) downloader.getTileHeightInImage(tileId.getLayer(), tileId.getY()) * scaleFactor);
+		// Log.d(TestTags.TILES, "tileWidth: " + tileWidth + ", tileHeight:" + tileHeight);
 
 		double left = tileBasicSize * tileId.getX() + mImageInCanvas.left;
 		double right = left + tileWidth;
@@ -708,12 +710,14 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		double imgHeight = mActiveImageDownloader.getImageProperties().getHeight();
 		// double scaleFactor = getCurrentScaleFactor();
 		// VectorD shift = getTotalShift();
-		PointD imgTopLef = new PointD(0, 0);
+		PointD imgTopLeft = new PointD(0, 0);
 		PointD imgBottomRight = new PointD(imgWidth, imgHeight);
-		PointD imgInCanvasTopLeft = Utils.toCanvasCoords(imgTopLef, scaleFactor, shift);
+		PointD imgInCanvasTopLeft = Utils.toCanvasCoords(imgTopLeft, scaleFactor, shift);
 		PointD imgInCanvasBottomRight = Utils.toCanvasCoords(imgBottomRight, scaleFactor, shift);
-		return new Rect((int) imgInCanvasTopLeft.x, (int) imgInCanvasTopLeft.y, (int) imgInCanvasBottomRight.x,
+		Rect result = new Rect((int) imgInCanvasTopLeft.x, (int) imgInCanvasTopLeft.y, (int) imgInCanvasBottomRight.x,
 				(int) imgInCanvasBottomRight.y);
+		// Log.d(TestTags.TILES, "computeAreaInCanvas result: " + result.toShortString());
+		return result;
 	}
 
 	private Rect computeVisibleInCanvas(Canvas canv) {
@@ -825,8 +829,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					} else {
 						int fingers = event.getPointerCount();
 						if (fingers == 2) {
-							boolean refresh = mPinchZoomManager.continuePinching(event, mVisibleImageCenter, maxShiftUp,
-									maxShiftDown, maxShiftLeft, maxShiftRight);
+							boolean refresh = mPinchZoomManager.continuePinching(event, mVisibleImageCenter,
+									maxShiftUp, maxShiftDown, maxShiftLeft, maxShiftRight);
 							if (refresh) {
 								invalidate();
 							}
@@ -964,9 +968,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	public interface SingleTapListener {
 		/**
-		 * This method is called after single tap, that is confirmed not to be
-		 * double tap and also has not been used internally by this view. I.e.
-		 * for zooming, swiping etc.
+		 * This method is called after single tap, that is confirmed not to be double tap and also has not been used internally by
+		 * this view. I.e. for zooming, swiping etc.
 		 * 
 		 * @param x
 		 *            x coordinate of the tap
@@ -979,10 +982,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	/**
-	 * Exactly one of these methods is called eventually after loadImage().
-	 * Either onImagePropertiesProcessed() if ImageProperties.xml is found,
-	 * downloaded and processed or one of the other methods in case of some
-	 * error.
+	 * Exactly one of these methods is called eventually after loadImage(). Either onImagePropertiesProcessed() if
+	 * ImageProperties.xml is found, downloaded and processed or one of the other methods in case of some error.
 	 * 
 	 * @author martin
 	 * 
@@ -996,9 +997,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		public void onImagePropertiesProcessed();
 
 		/**
-		 * Response to HTTP request for ImageProperties.xml returned code that
-		 * cannot be handled here. That means almost everything except for some
-		 * 2xx codes and some 3xx codes for which redirection is applied.
+		 * Response to HTTP request for ImageProperties.xml returned code that cannot be handled here. That means almost
+		 * everything except for some 2xx codes and some 3xx codes for which redirection is applied.
 		 * 
 		 * @param imagePropertiesUrl
 		 * @param responseCode
@@ -1031,8 +1031,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	/**
-	 * Exactly one of these methods is called after tile is downloaded and
-	 * stored to cache or something goes wrong in this process.
+	 * Exactly one of these methods is called after tile is downloaded and stored to cache or something goes wrong in this
+	 * process.
 	 * 
 	 * @author martin
 	 * 
@@ -1049,9 +1049,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 		/**
 		 * 
-		 * Response to HTTP request for tile returned code that cannot be
-		 * handled here. That means almost everything except for some 2xx codes
-		 * and some 3xx codes for which redirection is applied.
+		 * Response to HTTP request for tile returned code that cannot be handled here. That means almost everything except for
+		 * some 2xx codes and some 3xx codes for which redirection is applied.
 		 * 
 		 * @param tileId
 		 *            Tile id.

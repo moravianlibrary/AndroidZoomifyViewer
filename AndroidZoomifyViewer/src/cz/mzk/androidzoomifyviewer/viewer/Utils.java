@@ -47,7 +47,7 @@ public class Utils {
 	public static double computeShiftX(double xInImageCoords, double xInCanvasCoords, double imageToCanvasScaleFactor) {
 		return xInCanvasCoords - xInImageCoords * imageToCanvasScaleFactor;
 	}
-	
+
 	public static double computeShiftY(double yInImageCoords, double yInCanvasCoords, double imageToCanvasScaleFactor) {
 		return yInCanvasCoords - yInImageCoords * imageToCanvasScaleFactor;
 	}
@@ -70,6 +70,10 @@ public class Utils {
 
 	public static int pxToDp(int px) {
 		return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+	}
+
+	public static String coordsToString(int[] coords) {
+		return "[" + coords[0] + ',' + coords[1] + ']';
 	}
 
 }

@@ -59,6 +59,9 @@ public class KrameriusExamplesFactory {
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
 		result.add(new MonographExample(
+				"http://krameriusndktest.mzk.cz/search/handle/uuid:0d8192f0-320f-11e2-824c-005056827e51",
+				"Powinnosti manželů, rodičů, hospodářů a poddaných křesťanských", "tiles problem", krameriusNdkMzk));
+		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:d088d506-97b9-45f1-89e6-b965f90a89e8",
 				"General-Karte des Fürst zu Fürstenbergschen Fideikommissbesitzstandes", "working tiles", krameriusMzk));
 		result.add(new MonographExample(

@@ -59,10 +59,10 @@ public class DownloadAndCacheTileTask extends ConcurrentAsyncTask<Void, Void, Bi
 				if (!isCancelled()) {
 					CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tileId);
 				} else {
-					Log.d(TAG, "tile processing canceled after downloading and before saving data");
+					Log.v(TAG, "tile processing canceled task after downloading and before saving data");
 				}
 			} else {
-				Log.d(TAG, "tile processing canceled before download started");
+				Log.v(TAG, "tile processing task canceled before download started");
 			}
 		} catch (TooManyRedirectionsException e) {
 			tooManyRedirectionsException = e;
@@ -76,7 +76,7 @@ public class DownloadAndCacheTileTask extends ConcurrentAsyncTask<Void, Void, Bi
 		// invalidXmlException = e;
 		// }
 		finally {
-			Log.d(TAG, "ending downloader task");
+			// Log.d(TAG, "tile processing task finished");
 		}
 		return null;
 	}
