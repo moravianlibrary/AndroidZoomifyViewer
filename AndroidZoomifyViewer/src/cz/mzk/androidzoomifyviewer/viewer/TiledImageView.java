@@ -289,7 +289,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			mVisibleImageCenter = computeVisibleImageCenter();
 
 			int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(),
-					mImageInCanvas.height(), 0.0);
+					mImageInCanvas.height(), 0.5);
 
 			drawLayers(canv, mActiveImageDownloader, bestLayerId);
 
