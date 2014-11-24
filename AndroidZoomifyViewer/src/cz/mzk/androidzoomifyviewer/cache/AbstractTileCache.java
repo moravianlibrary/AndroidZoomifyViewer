@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import android.graphics.Bitmap;
+import android.os.Build;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 /**
@@ -70,5 +72,13 @@ public abstract class AbstractTileCache {
 		map.put(Character.valueOf('.'), Character.valueOf('u'));
 		map.put(Character.valueOf('~'), Character.valueOf('v'));
 		return map;
+	}
+
+	protected int getBitmapSizeInKB(Bitmap bitmap) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+			return bitmap.getByteCount() / 1024;
+		} else {
+			return (bitmap.getRowBytes() * bitmap.getHeight()) / 1024;
+		}
 	}
 }

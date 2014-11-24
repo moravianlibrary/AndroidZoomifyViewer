@@ -3,6 +3,8 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.TextView;
 import cz.mzk.androidzoomifyviewer.examples.R;
 
@@ -10,7 +12,7 @@ import cz.mzk.androidzoomifyviewer.examples.R;
  * @author Martin Řehánek
  * 
  */
-public class PageMetadataActivity extends Activity {
+public class PageMetadataActivity extends Activity implements OnClickListener {
 
 	private static final String TAG = PageMetadataActivity.class.getSimpleName();
 
@@ -22,6 +24,7 @@ public class PageMetadataActivity extends Activity {
 	private String mPagePid;
 	private int mPageIndex = -1;
 
+	private View mRoot;
 	private TextView mViewTopLevelPid;
 	private TextView mViewPagePid;
 	private TextView mViewPageIndex;
@@ -30,6 +33,8 @@ public class PageMetadataActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_page_metadata);
+		mRoot = findViewById(R.id.root);
+		mRoot.setOnClickListener(this);
 		mViewTopLevelPid = (TextView) findViewById(R.id.topLevelPid);
 		mViewPagePid = (TextView) findViewById(R.id.pagePid);
 		mViewPageIndex = (TextView) findViewById(R.id.pageIndex);
@@ -69,6 +74,11 @@ public class PageMetadataActivity extends Activity {
 		} else {
 			Log.d(TAG, "bundle is null");
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		finish();
 	}
 
 }

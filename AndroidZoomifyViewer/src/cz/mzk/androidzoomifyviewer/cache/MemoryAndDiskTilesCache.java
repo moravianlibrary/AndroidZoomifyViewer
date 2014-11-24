@@ -12,8 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.util.LruCache;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
@@ -48,7 +48,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
 				// The cache size will be measured in kilobytes rather than number of items.
-				return bitmap.getByteCount() / 1024;
+				return getBitmapSizeInKB(bitmap);
 			}
 		};
 		Log.d(TAG, "in-memory lru cache allocated with " + cacheSizeKB + " kB");

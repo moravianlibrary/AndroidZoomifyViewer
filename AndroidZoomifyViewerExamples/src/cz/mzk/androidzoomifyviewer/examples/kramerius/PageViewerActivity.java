@@ -3,12 +3,16 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 import java.util.Arrays;
 import java.util.List;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask.DownloadPidListResultHandler;
@@ -19,7 +23,7 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
  * @author Martin Řehánek
  * 
  */
-public class PageViewerActivity extends Activity implements EventListener {
+public class PageViewerActivity extends FragmentActivity implements EventListener {
 
 	private static final String TAG = PageViewerActivity.class.getSimpleName();
 
@@ -31,6 +35,7 @@ public class PageViewerActivity extends Activity implements EventListener {
 	private String mTopLevelPid;
 	private List<String> mPagePids;
 
+	private View root;
 	private View mViewProgressBar;
 	private IPageViewerFragment mPageViewerFragment;
 	private PageControlsFragment mControlFragment;
@@ -39,10 +44,12 @@ public class PageViewerActivity extends Activity implements EventListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_page_viewer);
+		root = findViewById(R.id.root);
 		mViewProgressBar = findViewById(R.id.viewProgressBar);
-		mPageViewerFragment = (IPageViewerFragment) getFragmentManager().findFragmentById(R.id.fragmentViewer);
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		mPageViewerFragment = (IPageViewerFragment) fragmentManager.findFragmentById(R.id.fragmentViewer);
 		mPageViewerFragment.setEventListener(this);
-		mControlFragment = (PageControlsFragment) getFragmentManager().findFragmentById(R.id.fragmentControls);
+		mControlFragment = (PageControlsFragment) fragmentManager.findFragmentById(R.id.fragmentControls);
 		if (savedInstanceState != null) {
 			restoreOrLoadData(savedInstanceState);
 		} else {
