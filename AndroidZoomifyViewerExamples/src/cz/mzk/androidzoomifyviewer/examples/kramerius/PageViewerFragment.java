@@ -3,11 +3,11 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 import java.util.Arrays;
 import java.util.List;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;

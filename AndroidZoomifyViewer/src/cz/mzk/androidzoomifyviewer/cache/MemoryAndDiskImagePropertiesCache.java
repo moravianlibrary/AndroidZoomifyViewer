@@ -6,8 +6,8 @@ import java.io.IOException;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
+import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.util.LruCache;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 

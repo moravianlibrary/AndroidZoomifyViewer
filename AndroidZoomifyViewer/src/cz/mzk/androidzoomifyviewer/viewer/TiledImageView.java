@@ -454,6 +454,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
 			if (tile != null) {
 				Rect tileInCanvas = toTileAreaInCanvas(visibleTileId, tile, downloader);
+				Log.d(TAG, "drawing layer");
 				canv.drawBitmap(tile, null, tileInCanvas, null);
 				if (devTools != null) {
 					devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());

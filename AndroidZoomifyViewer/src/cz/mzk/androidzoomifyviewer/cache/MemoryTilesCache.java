@@ -1,15 +1,14 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.util.LruCache;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 /**
- * This LRU cache stores tiles only in memory as bitmaps. Raw bitmaps occupy
- * significant amount of memory (megabytes), so tiles are typically often
- * removed from cache and hit ratio is low. Size of available memory is 1/8 of
- * total max memory dedicated to app.
+ * This LRU cache stores tiles only in memory as bitmaps. Raw bitmaps occupy significant amount of memory (megabytes), so tiles
+ * are typically often removed from cache and hit ratio is low. Size of available memory is 1/8 of total max memory dedicated to
+ * app.
  * 
  * @author Martin Řehánek
  * 
@@ -30,9 +29,8 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
 		mMemoryCache = new LruCache<String, Bitmap>(cacheSizeKB) {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
-				// The cache size will be measured in kilobytes rather than
-				// number of items.
-				return bitmap.getByteCount() / 1024;
+				// The cache size will be measured in kilobytes rather than number of items.
+				return getBitmapSizeInKB(bitmap);
 			}
 		};
 		Log.d(TAG, "Lru cache allocated with " + cacheSizeKB + " kB");
