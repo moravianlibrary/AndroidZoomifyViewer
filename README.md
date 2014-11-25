@@ -13,6 +13,8 @@ Main features are:
  
 ## Requirements
 Minimal SDK version is 9 (Android 2.3) for both library itself and example project.
+Library project needs android-support-v4.jar so that LruCache works in API < 12.
+Examples App project depends on appcompat-v7 (from SDK 21) in order to enable Fragments, ActionBar/ToolBar in older versions.
 
 ## Using the library in your app
 The library project is located in AndroidZoomifyViewer directory. Project depends only on android-support-v4.
