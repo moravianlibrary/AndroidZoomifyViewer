@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- out of 100 -->
+	<integer name="pxRatio">100</integer>
+</resources>

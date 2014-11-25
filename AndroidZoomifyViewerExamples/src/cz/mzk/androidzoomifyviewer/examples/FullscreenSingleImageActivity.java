@@ -1,11 +1,17 @@
 package cz.mzk.androidzoomifyviewer.examples;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.StrictMode;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
@@ -14,46 +20,39 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek
  * 
  */
-public class FullscreenSingleImageActivity extends Activity implements ImageInitializationHandler, TileDownloadHandler,
-		SingleTapListener {
+public class FullscreenSingleImageActivity extends ActionBarActivity implements ImageInitializationHandler,
+		TileDownloadHandler, SingleTapListener {
 
 	private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
-
 	public static final String EXTRA_BASE_URL = "baseUrl";
 
+	// data
+	private String mBaseUrl;
+	// toolbar
+	private Toolbar mToolbar;
+	private Spinner mViewModeSpinner;
+	// tiled image
 	private TiledImageView mImageView;
-
-	// Views to reflect TiledImageView state
+	// views to reflect state
 	private View mProgressView;
 	private View mErrorView;
 	private TextView mErrorTitle;
 	private TextView mErrorDescription;
 	private TextView mErrorResourceUrl;
 
-	private String mBaseUrl;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.d(TAG, "onCreate");
-		if (AppConfig.DEV_MODE) {
-			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectDiskWrites().detectNetwork()
-					.penaltyLog()
-					// .detectAll()
-					.build());
-		}
-
 		super.onCreate(savedInstanceState);
+		Log.v(TAG, "onCreate");
 		setContentView(R.layout.activity_fullscreen_single_image);
-		if (savedInstanceState != null) {
-			restoreData(savedInstanceState);
-		} else {
-			restoreData(getIntent().getExtras());
-		}
+		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		mViewModeSpinner = (Spinner) findViewById(R.id.viewModeSpinner);
 		mProgressView = findViewById(R.id.progressView);
 		mErrorView = findViewById(R.id.errorView);
 		mErrorTitle = (TextView) findViewById(R.id.errorTitle);
@@ -63,7 +62,83 @@ public class FullscreenSingleImageActivity extends Activity implements ImageInit
 		mImageView.setImageInitializationHandler(this);
 		mImageView.setTileDownloadHandler(this);
 		mImageView.setSingleTapListener(this);
+		mImageView.setViewMode(AppConfig.VIEW_MODE);
+
+		loadActivityData(savedInstanceState, getIntent());
+		createToolbar();
 		showImage();
+	}
+
+	private void loadActivityData(Bundle savedInstanceState, Intent intent) {
+		if (savedInstanceState != null) {
+			loadActivityData(savedInstanceState);
+		} else {
+			loadActivityData(getIntent().getExtras());
+		}
+	}
+
+	private void loadActivityData(Bundle bundle) {
+		if (bundle != null) {
+			Log.v(TAG, "loading activity data");
+			if (bundle.containsKey(EXTRA_BASE_URL)) {
+				mBaseUrl = bundle.getString(EXTRA_BASE_URL);
+				// Log.d(TAG, "base url: '" + mBaseUrl + "'");
+			}
+		} else {
+			Log.w(TAG, "bundle is null");
+		}
+	}
+
+	private void createToolbar() {
+		if (mToolbar != null) {
+			setSupportActionBar(mToolbar);
+			getSupportActionBar().setDisplayShowTitleEnabled(false);
+			getSupportActionBar().setDisplayUseLogoEnabled(false);
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
+			mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+			mToolbar.setNavigationOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					finish();
+				}
+			});
+			createViewModeSpinner();
+		}
+	}
+
+	private void createViewModeSpinner() {
+		mViewModeSpinner.setAdapter(new ArrayAdapter<ViewMode>(this, R.layout.menu_item_view_mode, ViewMode.values()));
+		mViewModeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				AppConfig.VIEW_MODE = ViewMode.values()[position];
+				if (mImageView != null) {
+					mImageView.setViewMode(AppConfig.VIEW_MODE);
+					mImageView.loadImage(mBaseUrl);
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				// nothing
+			}
+		});
+	}
+
+	private void showImage() {
+		Log.v(TAG, "showing image");
+		mImageView.setVisibility(View.INVISIBLE);
+		mProgressView.setVisibility(View.VISIBLE);
+		mImageView.loadImage(mBaseUrl);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mViewModeSpinner.setSelection(AppConfig.VIEW_MODE.ordinal());
 	}
 
 	@Override
@@ -76,25 +151,6 @@ public class FullscreenSingleImageActivity extends Activity implements ImageInit
 	protected void onStop() {
 		mImageView.cancelUnnecessaryTasks();
 		super.onStop();
-	}
-
-	private void restoreData(Bundle savedInstanceState) {
-		if (savedInstanceState != null) {
-			Log.d(TAG, "restoring");
-			if (savedInstanceState.containsKey(EXTRA_BASE_URL)) {
-				mBaseUrl = savedInstanceState.getString(EXTRA_BASE_URL);
-				Log.d(TAG, "base url: '" + mBaseUrl + "'");
-			}
-		} else {
-			Log.d(TAG, "bundle is null");
-		}
-	}
-
-	private void showImage() {
-		Log.d(TAG, "showing image");
-		mImageView.setVisibility(View.INVISIBLE);
-		mProgressView.setVisibility(View.VISIBLE);
-		mImageView.loadImage(mBaseUrl);
 	}
 
 	@Override

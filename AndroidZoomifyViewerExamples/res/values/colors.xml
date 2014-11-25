@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
-    <color name="red">#ffff0000</color>
-    <color name="green">#00FF00</color>
-    <color name="blue">#0000FF</color>
-    <color name="blue_light">#3AAFDE</color>
-    <color name="yellow">#FFFF00</color>
-    <color name="grey">#C0C0C0</color>
-    <color name="cyamon">#00FFFF</color>
-    <color name="grey_light">#E8E8E8 </color>
-    <color name="brown">#c67935</color>
-    <color name="brown_dark">#66401e</color>
+	<color name="black">#000000</color>
+	<color name="white">#FFFFFF</color>
+	<color name="red">#ffff0000</color>
+	<color name="green">#00FF00</color>
+	<color name="blue">#0000FF</color>
+	<color name="blue_light">#3AAFDE</color>
+	<color name="yellow">#FFFF00</color>
+	<color name="grey">#C0C0C0</color>
+	<color name="cyamon">#00FFFF</color>
+	<color name="grey_light">#E8E8E8 </color>
+	<color name="brown">#c67935</color>
+	<color name="brown_dark">#66401e</color>
+
+	<!-- theme -->
+	<color name="theme_primary">#3f51b5</color>
+	<color name="theme_primary_dark">#303f9f</color>
+	<color name="theme_primary_light">#E8EAF6</color>
+	<color name="theme_accent">#f50057</color>
+	<color name="fab">@color/theme_accent</color>
+
 
 </resources>

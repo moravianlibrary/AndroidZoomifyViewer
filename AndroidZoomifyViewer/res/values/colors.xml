@@ -14,6 +14,7 @@
     <color name="androidzoomifyviewer_brown">#c67935</color>
     <color name="androidzoomifyviewer_brown_dark">#66401e</color>
     <!-- transparent versions -->
+    <color name="androidzoomifyviewer_white_trans">#85FFFFFF</color>
     <color name="androidzoomifyviewer_red_trans">#80ff0000</color>
     <color name="androidzoomifyviewer_yellow_trans">#80FFFF00</color>
     <color name="androidzoomifyviewer_black_trans">#80000000</color>

@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -17,6 +18,7 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import cz.mzk.androidzoomifyviewer.CacheManager;
+import cz.mzk.androidzoomifyviewer.R;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndCacheTileTask;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndCacheTileTask.TileDownloadResultHandler;
@@ -33,8 +35,8 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 public class TiledImageView extends View implements OnGestureListener, OnDoubleTapListener {
 
 	private static final String TAG = TiledImageView.class.getSimpleName();
+	public static boolean DEV_MODE = false;
 
-	private static final boolean DEV_MODE = false;
 	private DevTools devTools = null;
 	private ImageCoordsPoints testPoints = null;
 
@@ -108,6 +110,15 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		mTilesCache = CacheManager.getTilesCache();
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
+		logDeviceSizeCategory();
+	}
+
+	private void logDeviceSizeCategory() {
+		int size = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+		String category = size == Configuration.SCREENLAYOUT_SIZE_SMALL ? "small"
+				: size == Configuration.SCREENLAYOUT_SIZE_NORMAL ? "normal"
+						: size == Configuration.SCREENLAYOUT_SIZE_LARGE ? "large" : "xlarge";
+		Log.d(TAG, "display size category: " + category);
 	}
 
 	public ViewMode getViewMode() {
@@ -158,7 +169,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	private void initTilesDownloaderAsync() {
-		new InitTilesDownloaderTask(mZoomifyBaseUrl,
+		double pxRatio = getResources().getInteger(R.integer.pxRatio) / 100.0;
+		new InitTilesDownloaderTask(mZoomifyBaseUrl, pxRatio,
 				new InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler() {
 
 					@Override
@@ -288,8 +300,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			// TODO: really necessary to compute this always?
 			mVisibleImageCenter = computeVisibleImageCenter();
 
-			int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(),
-					mImageInCanvas.height(), 0.5);
+			int bestLayerId = mActiveImageDownloader
+					.computeBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
 
 			drawLayers(canv, mActiveImageDownloader, bestLayerId);
 
@@ -454,10 +466,12 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
 			if (tile != null) {
 				Rect tileInCanvas = toTileAreaInCanvas(visibleTileId, tile, downloader);
-				Log.d(TAG, "drawing layer");
+				// Log.d(TAG, "drawing layer");
 				canv.drawBitmap(tile, null, tileInCanvas, null);
 				if (devTools != null) {
-					devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
+					// devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
+					// devTools.highlightTile(tileInCanvas, devTools.getPaintWhiteTrans());
+					devTools.highlightTile(tileInCanvas, devTools.getPaintRed());
 				}
 			} else {
 				if (!downloader.getTaskRegistry().isRunning(visibleTileId)) {

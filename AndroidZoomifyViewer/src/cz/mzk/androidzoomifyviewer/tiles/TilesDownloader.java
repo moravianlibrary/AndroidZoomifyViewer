@@ -41,10 +41,12 @@ public class TilesDownloader {
 	private boolean initialized = false;
 	private ImageProperties imageProperties;
 	private List<Layer> layers;
+	private double pxRatio;
 
-	public TilesDownloader(String baseUrl) {
+	public TilesDownloader(String baseUrl, double pxRatio) {
 		this.baseUrl = baseUrl;
 		this.imagePropertiesUrl = toImagePropertiesUrl(baseUrl);
+		this.pxRatio = pxRatio;
 	};
 
 	private String toImagePropertiesUrl(String baseUrl) {
@@ -491,12 +493,11 @@ public class TilesDownloader {
 	 *            dpRatio = (1-pxRatio)
 	 * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
 	 */
-	public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx, double pxRatio) {
+	public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
 		double dpRatio = 1.0 - pxRatio;
-
 		if (pxRatio < 0.0) {
 			throw new IllegalArgumentException("px ratio must be >= 0");
 		} else if (pxRatio > 1.0) {
@@ -509,9 +510,8 @@ public class TilesDownloader {
 			imageInCanvasWidthDp = Utils.pxToDp(imageInCanvasWidthPx);
 			imageInCanvasHeightDp = Utils.pxToDp(imageInCanvasHeightPx);
 		}
-
-		int canvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * pxRatio);
-		int canvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * pxRatio);
+		int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * pxRatio);
+		int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * pxRatio);
 
 		for (int layerId = layers.size() - 1; layerId >= 0; layerId--) {
 			int horizontalTiles = layers.get(layerId).getTilesHorizontal();
@@ -520,7 +520,7 @@ public class TilesDownloader {
 			int verticalTiles = layers.get(layerId).getTilesVertical();
 			int layerHeightWithoutLastTile = imageProperties.getTileSize() * (verticalTiles - 1);
 
-			if (layerWidthWithoutLastTile <= canvasWidth && layerHeightWithoutLastTile <= canvasHeight) {
+			if (layerWidthWithoutLastTile <= imgInCanvasWidth && layerHeightWithoutLastTile <= imgInCanvasHeight) {
 				return layerId;
 			}
 		}

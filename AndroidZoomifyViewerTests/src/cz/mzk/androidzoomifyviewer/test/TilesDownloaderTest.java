@@ -23,7 +23,8 @@ public class TilesDownloaderTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String baseUrl = "http://krameriustest.mzk.cz/search/zoomify/uuid:821b6258-43d0-42c8-ad27-5b83bb6667bc/";
-		new InitTilesDownloaderTask(baseUrl, new ImagePropertiesDownloadResultHandler() {
+		double pxRatio = 0.5;
+		new InitTilesDownloaderTask(baseUrl, pxRatio, new ImagePropertiesDownloadResultHandler() {
 
 			@Override
 			public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {

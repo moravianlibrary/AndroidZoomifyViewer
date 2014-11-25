@@ -18,44 +18,35 @@ public class DevTools {
 	private static final String TAG = DevTools.class.getSimpleName();
 
 	private Canvas mCanv;
-
-	private final Paint paintBlue;
-	private final Paint paintRed;
-	private final Paint paintYellow;
-	private final Paint paintGreen;
-	private final Paint paintBlack;
-	private final Paint paintWhite;
-
-	private final Paint paintRedTrans;
-	private final Paint paintYellowTrans;
-	private final Paint paintBlackTrans;
-	private final Paint paintGreenTrans;
-	private final Paint paintBlueTrans;
+	// colors
+	private final Paint paintBlue = new Paint();
+	private final Paint paintRed = new Paint();
+	private final Paint paintYellow = new Paint();
+	private final Paint paintGreen = new Paint();
+	private final Paint paintBlack = new Paint();
+	private final Paint paintWhite = new Paint();
+	// transparent colors
+	private final Paint paintRedTrans = new Paint();
+	private final Paint paintWhiteTrans = new Paint();
+	private final Paint paintYellowTrans = new Paint();
+	private final Paint paintBlackTrans = new Paint();
+	private final Paint paintGreenTrans = new Paint();
+	private final Paint paintBlueTrans = new Paint();
 
 	public DevTools(Context context) {
 		// init paints
-		paintBlue = new Paint();
 		paintBlue.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue));
-		paintRed = new Paint();
 		paintRed.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_red));
-		paintYellow = new Paint();
 		paintYellow.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow));
-		paintGreen = new Paint();
 		paintGreen.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_green));
-		paintBlack = new Paint();
 		paintBlack.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black));
-		paintWhite = new Paint();
 		paintWhite.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_white));
 		// transparent
-		paintRedTrans = new Paint();
+		paintWhiteTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_white_trans));
 		paintRedTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_red_trans));
-		paintYellowTrans = new Paint();
 		paintYellowTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow_trans));
-		paintBlackTrans = new Paint();
 		paintBlackTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black_trans));
-		paintGreenTrans = new Paint();
 		paintGreenTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_green_trans));
-		paintBlueTrans = new Paint();
 		paintBlueTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue_trans));
 	}
 
@@ -139,6 +130,10 @@ public class DevTools {
 
 	public Paint getPaintWhite() {
 		return paintWhite;
+	}
+
+	public Paint getPaintWhiteTrans() {
+		return paintWhiteTrans;
 	}
 
 	public Paint getPaintRedTrans() {

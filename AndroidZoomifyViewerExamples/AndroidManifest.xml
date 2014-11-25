@@ -1,46 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cz.mzk.androidzoomifyviewer.examples"
-    android:versionCode="1"
-    android:versionName="1.0" >
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	package="cz.mzk.androidzoomifyviewer.examples"
+	android:versionCode="1"
+	android:versionName="1.0">
 
-    <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="19" />
+	<uses-sdk
+		android:minSdkVersion="9"
+		android:targetSdkVersion="21" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> -->
+	<uses-permission android:name="android.permission.INTERNET" />
+	<!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" 
+		/> -->
 
 
-    <!-- for profilinig only -->
-    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
-    <!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> -->
+	<!-- for profilinig only -->
+	<!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+		/> -->
+	<!-- <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+		/> -->
 
-    <application
-        android:name="AndroidZoomifyViewerExamplesApp"
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-        <activity
-            android:name="cz.mzk.androidzoomifyviewer.examples.MainActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+	<application
+		android:name="AndroidZoomifyViewerExamplesApp"
+		android:allowBackup="true"
+		android:icon="@drawable/ic_launcher"
+		android:label="@string/app_name"
+		android:theme="@style/AppTheme">
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.MainActivity"
+			android:label="@string/app_name">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.FullscreenSingleImageActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesHttpResponseCodeExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesRedirectionLoopExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesInvalidContentExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesOtherErrorsExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.SingleImageWorkingExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
-    </application>
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.FullscreenSingleImageActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesHttpResponseCodeExamplesActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesRedirectionLoopExamplesActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesInvalidContentExamplesActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesOtherErrorsExamplesActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.SingleImageWorkingExamplesActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
+		<activity
+			android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
+	</application>
 
 </manifest>

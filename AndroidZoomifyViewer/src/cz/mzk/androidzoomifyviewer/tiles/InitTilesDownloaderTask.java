@@ -14,6 +14,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsExce
 public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, TilesDownloader> {
 	private static final String TAG = InitTilesDownloaderTask.class.getSimpleName();
 	private final String zoomifyBaseUrl;
+	private final double pxRatio;
 	private final ImagePropertiesDownloadResultHandler handler;
 
 	private OtherIOException otherIoException;
@@ -25,19 +26,21 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 	 * 
 	 * @param zoomifyBaseUrl
 	 *            Zoomify base url, not null
+	 * @param pxRatio 
 	 * @param handler
 	 *            ImageProperties.xml download result handler, not null
 	 */
-	public InitTilesDownloaderTask(String zoomifyBaseUrl, ImagePropertiesDownloadResultHandler handler) {
+	public InitTilesDownloaderTask(String zoomifyBaseUrl, double pxRatio, ImagePropertiesDownloadResultHandler handler) {
 		this.zoomifyBaseUrl = zoomifyBaseUrl;
 		this.handler = handler;
+		this.pxRatio = pxRatio;
 	}
 
 	@Override
 	protected TilesDownloader doInBackground(Void... params) {
 		try {
 			Log.d(TAG, "downloading metadata from '" + zoomifyBaseUrl + "'");
-			TilesDownloader downloader = new TilesDownloader(zoomifyBaseUrl);
+			TilesDownloader downloader = new TilesDownloader(zoomifyBaseUrl, pxRatio);
 			if (!isCancelled()) {
 				downloader.init();
 				return downloader;

@@ -57,7 +57,12 @@ public class DownloadAndCacheTileTask extends ConcurrentAsyncTask<Void, Void, Bi
 			if (!isCancelled()) {
 				Bitmap tile = downloader.downloadTile(tileId);
 				if (!isCancelled()) {
-					CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tileId);
+					if (tile != null) {
+						CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tileId);
+					} else {
+						// TODO: examine this
+						Log.v(TAG, "tile is null");
+					}
 				} else {
 					Log.v(TAG, "tile processing canceled task after downloading and before saving data");
 				}
