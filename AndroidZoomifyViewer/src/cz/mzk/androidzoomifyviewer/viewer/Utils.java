@@ -1,5 +1,7 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import java.math.BigDecimal;
+
 import android.content.res.Resources;
 import android.graphics.Rect;
 
@@ -74,6 +76,45 @@ public class Utils {
 
 	public static String coordsToString(int[] coords) {
 		return "[" + coords[0] + ',' + coords[1] + ']';
+	}
+
+	/**
+	 * Should not be used for big number, use Math.pow(double, double) instead.
+	 * 
+	 * @param x
+	 * @param power
+	 * @return
+	 */
+	public static int pow(int x, int power) {
+		int result = 1;
+		for (int i = 1; i <= power; i++) {
+			result *= x;
+		}
+		return result;
+	}
+
+	/**
+	 * General base logarithm.
+	 * 
+	 * @param x
+	 * @param base
+	 * @return
+	 */
+	public static double logarithm(double x, double base) {
+		return Math.log(x) / Math.log(base);
+	}
+
+	/**
+	 * Rounds float to given decimals.
+	 * 
+	 * @param d
+	 * @param decimals
+	 * @return
+	 */
+	public static float round(float d, int decimals) {
+		BigDecimal bd = new BigDecimal(Float.toString(d));
+		bd = bd.setScale(decimals, BigDecimal.ROUND_HALF_UP);
+		return bd.floatValue();
 	}
 
 }

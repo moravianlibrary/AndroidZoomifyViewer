@@ -281,6 +281,11 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			}
 
 			mVisibleImageInCanvas = computeVisibleInCanvas(canv);
+			// Log.d(TestTags.TEST, "canvas: width: " + canv.getWidth() + ", height: " + canv.getHeight());
+			// Log.d(TestTags.TEST, "whole   image in canvas: " + mImageInCanvas.toShortString());
+			// Log.d(TestTags.TEST, "visible image in canvas: " + mVisibleImageInCanvas.toShortString());
+			// Log.d(TestTags.TEST, "visible image in canvas: width: " + mVisibleImageInCanvas.width() + ", height: " +
+			// mVisibleImageInCanvas.height());
 			if (devTools != null) {
 				devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreenTrans());
 			}
@@ -302,6 +307,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 			int bestLayerId = mActiveImageDownloader
 					.computeBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
+			// Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
 			drawLayers(canv, mActiveImageDownloader, bestLayerId);
 
@@ -466,7 +472,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
 			if (tile != null) {
 				Rect tileInCanvas = toTileAreaInCanvas(visibleTileId, tile, downloader);
-				// Log.d(TAG, "drawing layer");
+				// Log.d(TestTags.TEST, "drawing tile: " + visibleTileId + " to: " + tileInCanvas.toShortString());
 				canv.drawBitmap(tile, null, tileInCanvas, null);
 				if (devTools != null) {
 					// devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
@@ -598,11 +604,12 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	private Rect toTileAreaInCanvas(TileId tileId, Bitmap tile, TilesDownloader downloader) {
 		double scaleFactor = getCurrentScaleFactor();
-
-		double tileBasicSize = ((double) downloader.getTilesSizeInImageCoords(tileId.getLayer()) * scaleFactor);
-		double tileWidth = ((double) downloader.getTileWidthInImage(tileId.getLayer(), tileId.getX()) * scaleFactor);
-		double tileHeight = ((double) downloader.getTileHeightInImage(tileId.getLayer(), tileId.getY()) * scaleFactor);
-		// Log.d(TestTags.TILES, "tileWidth: " + tileWidth + ", tileHeight:" + tileHeight);
+		int[] tileSizesInImage = downloader.getTileSizesInImageCoords(tileId);
+		double tileBasicSize = scaleFactor * tileSizesInImage[0];
+		double tileWidth = scaleFactor * tileSizesInImage[1];
+		double tileHeight = scaleFactor * tileSizesInImage[2];
+		// Log.d(TestTags.TEST, "tileInCanvas " + tileId.toString() + ": basic: " + tileBasicSize + ", width: " + tileWidth +
+		// ", height:" + tileHeight);
 
 		double left = tileBasicSize * tileId.getX() + mImageInCanvas.left;
 		double right = left + tileWidth;

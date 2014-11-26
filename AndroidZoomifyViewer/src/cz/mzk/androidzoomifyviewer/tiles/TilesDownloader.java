@@ -19,7 +19,6 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
-import cz.mzk.androidzoomifyviewer.viewer.TestTags;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
@@ -32,6 +31,10 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
 public class TilesDownloader {
 
 	private static final String TAG = TilesDownloader.class.getSimpleName();
+	/**
+	 * @see https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
+	 */
+	public static final boolean COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION = true;
 	private static final int MAX_REDIRECTIONS = 5;
 	private static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
 	private static final int TILES_TIMEOUT = 5000;
@@ -53,10 +56,14 @@ public class TilesDownloader {
 		return baseUrl + "ImageProperties.xml";
 	}
 
-	public ImageProperties getImageProperties() {
+	private void checkInitialized() {
 		if (!initialized) {
 			throw new IllegalStateException("not initialized (" + baseUrl + ")");
 		}
+	}
+
+	public ImageProperties getImageProperties() {
+		checkInitialized();
 		return imageProperties;
 	}
 
@@ -268,39 +275,53 @@ public class TilesDownloader {
 
 	private List<Layer> initLayers() {
 		int numberOfLayers = computeNumberOfLayers();
-		// Log.d(TAG, "layers: " + numberOfLayers);
+		// Log.d(TAG, "layers #: " + numberOfLayers);
 		List<Layer> result = new ArrayList<Layer>(numberOfLayers);
 		double width = imageProperties.getWidth();
 		double height = imageProperties.getHeight();
 		double tileSize = imageProperties.getTileSize();
 		for (int layer = 0; layer < numberOfLayers; layer++) {
-			int tilesHorizontal = (int) Math.ceil(Math.floor(width / Math.pow(2, numberOfLayers - layer - 1))
-					/ tileSize);
-			int tilesVertical = (int) Math
-					.ceil(Math.floor(height / Math.pow(2, numberOfLayers - layer - 1)) / tileSize);
-			// Log.d(TestTags.TILES, "number of layers: " + numberOfLayers);
-			// Log.d(TAG, "layer=" + layer + ": horizontal=" + sizeHorizontal +
-			// ", vertical=" + sizeVertical);
+			double powerOf2 = Utils.pow(2, numberOfLayers - layer - 1);
+			int tilesHorizontal = (int) Math.ceil(Math.floor(width / powerOf2) / tileSize);
+			int tilesVertical = (int) Math.ceil(Math.floor(height / powerOf2) / tileSize);
 			result.add(new Layer(tilesVertical, tilesHorizontal));
 		}
 		return result;
 	}
 
 	private int computeNumberOfLayers() {
-		double ai = Math.max((double) imageProperties.getWidth(), (double) imageProperties.getHeight())
-				/ imageProperties.getTileSize();
+		// double ai = -1;
+		float tilesInLayer = -1f;
+		int tilesInLayerInt = -1;
+		// Log.d("blabla", "width: " + imageProperties.getWidth() + ", height: " + imageProperties.getHeight());
+		float maxDimension = Math.max(imageProperties.getWidth(), imageProperties.getHeight());
+		float tileSize = imageProperties.getTileSize();
 		int i = 0;
 		do {
+			// if (i == 0) {
+			// // ai = Math.ceil(maxMeasurement / tileSize);
+			// ai = maxMeasurement / tileSize;
+			// } else {
+			// // ai = Math.ceil(ai / 2.0);
+			// ai = ai / 2.0;
+			// }
+			tilesInLayer = (float) (maxDimension / (tileSize * Utils.pow(2, i)));
+			// Log.d("blabla", "a" + i + " : b" + i + " = " + ai + " : " + bi);
+			// Log.d("blabla", "testI: " + tilesInLayer);
 			i++;
-			ai = Math.ceil(ai / 2.0);
-		} while (ai != 1);
-		return i + 1;
+			tilesInLayerInt = (int) Math.ceil(COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION ? Utils.round(tilesInLayer, 3)
+					: tilesInLayer);
+		} while (tilesInLayerInt != 1);
+		// float diff = tilesInLayer - 1.0f;
+		// Log.d("blabla", "diff: " + diff);
+		// Log.d("blabla", "layers: " + i);
+		// double testD = Math.ceil(Utils.logarithm(maxMeasurement, 2) / ((double) imageProperties.getTileSize()));
+		// Log.d("blabla", "d!=" + testD);
+		return i;
 	}
 
 	public DownloadAndSaveTileTasksRegistry getTaskRegistry() {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+		checkInitialized();
 		return taskRegistry;
 	}
 
@@ -324,6 +345,7 @@ public class TilesDownloader {
 	 */
 	public Bitmap downloadTile(TileId tileId) throws OtherIOException, TooManyRedirectionsException,
 			ImageServerResponseException {
+		checkInitialized();
 		int tileGroup = computeTileGroup(tileId);
 		// int tileGroup = 0;
 		String tileUrl = buildTileUrl(tileGroup, tileId);
@@ -422,16 +444,12 @@ public class TilesDownloader {
 	}
 
 	public List<Layer> getLayers() {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+		checkInitialized();
 		return layers;
 	}
 
 	public int[] getTileCoords(int layerId, int pixelX, int pixelY) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+		checkInitialized();
 		if (layerId < 0 || layerId >= layers.size()) {
 			throw new IllegalArgumentException("layer out of range: " + layerId);
 		}
@@ -494,9 +512,7 @@ public class TilesDownloader {
 	 * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
 	 */
 	public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+		checkInitialized();
 		double dpRatio = 1.0 - pxRatio;
 		if (pxRatio < 0.0) {
 			throw new IllegalArgumentException("px ratio must be >= 0");
@@ -512,6 +528,17 @@ public class TilesDownloader {
 		}
 		int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * pxRatio);
 		int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * pxRatio);
+		// int layersNum = layers.size();
+		// if (true) {
+		// // if (layersNum>=3){
+		// // return 2;
+		// // }else
+		// if (layersNum >= 2) {
+		// return 1;
+		// } else {
+		// return 0;
+		// }
+		// }
 
 		for (int layerId = layers.size() - 1; layerId >= 0; layerId--) {
 			int horizontalTiles = layers.get(layerId).getTilesHorizontal();
@@ -529,22 +556,25 @@ public class TilesDownloader {
 
 	/**
 	 * 
-	 * @param layerId
-	 * @return size (width and height) of all tiles except the last one in each row or column since these are not allways squares.
+	 * @param tileId
+	 * @return int array of size 3 containing dimensions in image coordinates for given tile. First item is basic size, that is
+	 *         width/hight of typical tile (i.e. every tile except the border ones - unless there are only border ones). Second
+	 *         item is tile's width, third is it's height.
 	 */
-	public int getTilesSizeInImageCoords(int layerId) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+	public int[] getTileSizesInImageCoords(TileId tileId) {
+		checkInitialized();
+		int basicSize = getTilesBasicSizeInImageCoords(tileId.getLayer());
+		int width = getTileWidthInImageCoords(tileId.getLayer(), tileId.getX(), basicSize);
+		int height = getTileHeightInImageCoords(tileId.getLayer(), tileId.getY(), basicSize);
+		return new int[] { basicSize, width, height };
+	}
+
+	private int getTilesBasicSizeInImageCoords(int layerId) {
 		return imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
 	}
 
 	// TODO: sjednotit slovnik, tomuhle obcas rikam 'step'
-	public int getTileWidthInImage(int layerId, int tileHorizontalIndex) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
-		int basicSize = imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
+	private int getTileWidthInImageCoords(int layerId, int tileHorizontalIndex, int basicSize) {
 		if (tileHorizontalIndex == layers.get(layerId).getTilesHorizontal() - 1) {
 			int result = imageProperties.getWidth() - basicSize * (layers.get(layerId).getTilesHorizontal() - 1);
 			// Log.d(TAG, "TILE FAR RIGHT WIDTH: " + result);
@@ -554,16 +584,14 @@ public class TilesDownloader {
 		}
 	}
 
-	public int getTileHeightInImage(int layerId, int tileVerticalIndex) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
-		int basicSize = imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
+	private int getTileHeightInImageCoords(int layerId, int tileVerticalIndex, int basicSize) {
 		// Log.d(TestTags.TILES, "tileVerticalIndex:" + tileVerticalIndex);
 		int verticalTilesForLayer = layers.get(layerId).getTilesVertical();
+		// Log.d(TAG, "vertical tiles for layer " + layerId + ": " + verticalTilesForLayer);
 		int lastTilesIndex = verticalTilesForLayer - 1;
 		// Log.d(TestTags.TILES, "tiles vertical for layer: " + layerId + ": " + tilesVerticalForLayer);
 		// Log.d(TestTags.TILES, "last tile's index: " + layerId + ": " + lastTilesIndex);
+		// Log.d(TestTags.TEST, "tileVerticalI: " + tileVerticalIndex + ", lastTilesI: " + lastTilesIndex);
 		if (tileVerticalIndex == lastTilesIndex) {
 			return imageProperties.getHeight() - basicSize * (lastTilesIndex);
 		} else {
@@ -572,18 +600,14 @@ public class TilesDownloader {
 	}
 
 	public double getLayerWidth(int layerId) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+		checkInitialized();
 		double result = (double) imageProperties.getWidth() / Math.pow(2, layers.size() - layerId - 1);
 		// Log.d(TAG, "layer " + layerId + ", width=" + result + " px");
 		return result;
 	}
 
 	public double getLayerHeight(int layerId) {
-		if (!initialized) {
-			throw new IllegalStateException("not initialized (" + baseUrl + ")");
-		}
+		checkInitialized();
 		return (double) imageProperties.getHeight() / Math.pow(2, layers.size() - layerId - 1);
 	}
 
@@ -642,6 +666,7 @@ public class TilesDownloader {
 	}
 
 	public String getImagePropertiesUrl() {
+		checkInitialized();
 		return imagePropertiesUrl;
 	}
 

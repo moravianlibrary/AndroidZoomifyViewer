@@ -203,9 +203,10 @@ public class SingleImageExamplesFactory {
 
 	public static List<ImageExample> getWorkingExamples() {
 		List<ImageExample> result = new ArrayList<ImageExample>();
-		// result.add(new ImageExample("tiles problem 1", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles/"));
-		// result.add(new ImageExample("tiles problem 2", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles2/"));
-		result.add(new ImageExample("Anti-Alkoran", "http://kramerius.mzk.cz/search/zoomify/uuid:a7ed9c10-4726-4b5b-a5c6-9449bb45c4b7/"));
+		result.add(new ImageExample("tiles problem 1", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles/"));
+		result.add(new ImageExample("tiles problem 2", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles2/"));
+		result.add(new ImageExample("tiles problem 3",
+				"http://kramerius.mzk.cz/search/zoomify/uuid:a7ed9c10-4726-4b5b-a5c6-9449bb45c4b7/"));
 		result.add(new ImageExample("mapy.mzk.cz 1", "http://mapy.mzk.cz/AA22/0103/"));
 		result.add(new ImageExample("mapy.mzk.cz 2", "http://mapy.mzk.cz/AA22/0104/"));
 		result.add(new ImageExample("mapy.mzk.cz 3", "http://mapy.mzk.cz/AA22/0105/"));
@@ -217,9 +218,8 @@ public class SingleImageExamplesFactory {
 		result.add(new ImageExample("tricedesigns.com 3",
 				"http://www.tricedesigns.com/panoramas/office-outside/office-outside/"));
 		result.add(new ImageExample("kramerius.mzk.cz",
-				//"http://kramerius.mzk.cz/search/zoomify/uuid:afdd8ea1-ad6f-474c-9611-152cfd3a14b3/"
-				"http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"
-				));
+		// "http://kramerius.mzk.cz/search/zoomify/uuid:afdd8ea1-ad6f-474c-9611-152cfd3a14b3/"
+				"http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"));
 		// http://www.fookes.com/ezimager/zoomify/classic/
 		result.add(new ImageExample("Gruyère Panorama", "http://www.fookes.com/ezimager/zoomify/104_0486/"));
 		result.add(new ImageExample("La Chaudalla, Charmey", "http://www.fookes.com/ezimager/zoomify/109_0977/"));
