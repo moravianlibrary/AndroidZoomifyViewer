@@ -70,8 +70,16 @@ public class Utils {
 		return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
 	}
 
+	public static double dpToPx(double dp) {
+		return dp * Resources.getSystem().getDisplayMetrics().density;
+	}
+
 	public static int pxToDp(int px) {
 		return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+	}
+
+	public static double pxToDp(double px) {
+		return px / Resources.getSystem().getDisplayMetrics().density;
 	}
 
 	public static String coordsToString(int[] coords) {

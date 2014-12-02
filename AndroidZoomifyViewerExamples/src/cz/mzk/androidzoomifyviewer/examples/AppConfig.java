@@ -9,7 +9,7 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 public class AppConfig {
 
 	public static boolean DEV_MODE = true;
-	public static final boolean DEV_MODE_CLEAR_CACHE_ON_STARTUP = true;
+	public static final boolean DEV_MODE_CLEAR_CACHE_ON_STARTUP = false;
 	public static ViewMode VIEW_MODE = ViewMode.FIT_TO_SCREEN;
 
 }

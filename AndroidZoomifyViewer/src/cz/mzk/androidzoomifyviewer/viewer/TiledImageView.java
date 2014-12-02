@@ -842,7 +842,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 						if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG) {
 							mSwipeShiftManager.notifyCanceled();
 						} else if (swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
-							mSwipeShiftManager.notifyDraggingFinished(false);
+							// TODO
+							// mSwipeShiftManager.notifyDraggingFinished(false);
+							mSwipeShiftManager.notifyCanceled();
 						}
 						if (pinchZoomManagerState == PinchZoomManager.State.IDLE) {
 							mPinchZoomManager.startPinching(event, getCurrentScaleFactor(), getTotalShift());
@@ -857,7 +859,13 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					}
 				case (MotionEvent.ACTION_UP):
 					if (swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
-						mSwipeShiftManager.notifyDraggingFinished(true);
+						boolean isSingleTap = mSwipeShiftManager.notifyDraggingFinished(true, event.getX(),
+								event.getY());
+						if (isSingleTap) {
+							if (mSingleTapListener != null) {
+								mSingleTapListener.onSingleTap(event.getX(), event.getY(), mVisibleImageInCanvas);
+							}
+						}
 						return true;
 					} else if (swipeShiftManagerState == SwipeShiftManager.State.READY_TO_DRAG) {
 						mSwipeShiftManager.notifyCanceled();
@@ -901,10 +909,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 							|| swipeShiftManagerState == SwipeShiftManager.State.DRAGGING) {
 						boolean swiped = mSwipeShiftManager.notifyDragging(event.getX(), event.getY(), maxShiftUp,
 								maxShiftDown, maxShiftLeft, maxShiftRight);
-						if (!swiped) {
-							mGestureDetector.onTouchEvent(event);
-						} else {
+						if (swiped) {
 							invalidate();
+						} else {
+							mGestureDetector.onTouchEvent(event);
 						}
 						return true;
 					} else {

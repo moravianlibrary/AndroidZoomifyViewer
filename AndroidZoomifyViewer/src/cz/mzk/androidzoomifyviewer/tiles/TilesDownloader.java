@@ -348,9 +348,8 @@ public class TilesDownloader {
 			ImageServerResponseException {
 		checkInitialized();
 		int tileGroup = computeTileGroup(tileId);
-		// int tileGroup = 0;
 		String tileUrl = buildTileUrl(tileGroup, tileId);
-		Log.d(TAG, "TILE URL: " + tileUrl);
+		Log.v(TAG, "TILE URL: " + tileUrl);
 		return downloadTile(tileUrl, MAX_REDIRECTIONS);
 	}
 
