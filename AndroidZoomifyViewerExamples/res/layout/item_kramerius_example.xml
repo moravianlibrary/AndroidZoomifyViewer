@@ -2,26 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
-    
-    <!-- TODO: prejmenovat -->
-
 
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="5dp"
+        android:textColor="@color/black"
         android:textSize="30sp" >
-    </TextView>
+    </TextView> 
 
-    <!-- android:textColor="@color/black" -->
+    <TextView
+        android:id="@+id/note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/label"
+        android:paddingLeft="5dp"
+        android:textColor="@color/black"
+        android:textSize="20sp" >
+    </TextView>
 
     <TextView
         android:id="@+id/src"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/label"
+        android:layout_below="@id/note"
         android:paddingLeft="5dp"
+        android:textColor="@color/black"
         android:textSize="12sp" >
     </TextView>
     <!-- android:textColor="@color/LightSkyBlue" -->

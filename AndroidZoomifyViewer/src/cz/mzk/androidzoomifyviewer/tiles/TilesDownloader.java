@@ -38,7 +38,7 @@ public class TilesDownloader {
 	private static final int MAX_REDIRECTIONS = 5;
 	private static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
 	private static final int TILES_TIMEOUT = 5000;
-	private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry();
+	private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
 	private String baseUrl;
 	private String imagePropertiesUrl;
 	private boolean initialized = false;
@@ -299,11 +299,11 @@ public class TilesDownloader {
 		int i = 0;
 		do {
 			// if (i == 0) {
-			// // ai = Math.ceil(maxMeasurement / tileSize);
-			// ai = maxMeasurement / tileSize;
+			// ai = Math.ceil(maxDimension / tileSize);
+			// // ai = maxDimension / tileSize;
 			// } else {
-			// // ai = Math.ceil(ai / 2.0);
-			// ai = ai / 2.0;
+			// ai = Math.ceil(ai / 2.0);
+			// // ai = ai / 2.0;
 			// }
 			tilesInLayer = (float) (maxDimension / (tileSize * Utils.pow(2, i)));
 			// Log.d("blabla", "a" + i + " : b" + i + " = " + ai + " : " + bi);
@@ -312,6 +312,7 @@ public class TilesDownloader {
 			tilesInLayerInt = (int) Math.ceil(COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION ? Utils.round(tilesInLayer, 3)
 					: tilesInLayer);
 		} while (tilesInLayerInt != 1);
+		// } while (ai != 1);
 		// float diff = tilesInLayer - 1.0f;
 		// Log.d("blabla", "diff: " + diff);
 		// Log.d("blabla", "layers: " + i);
@@ -539,15 +540,48 @@ public class TilesDownloader {
 		// return 0;
 		// }
 		// }
+		if (true) {
+			return bestLayerAtLeastAsBigAs(imgInCanvasWidth, imgInCanvasHeight);
+		}
 
-		for (int layerId = layers.size() - 1; layerId >= 0; layerId--) {
+		int topLayer = layers.size() - 1;
+		// Log.d(TestTags.TEST, "imgInCanvas: width: " + imgInCanvasWidth + ", height: " + imgInCanvasHeight);
+		for (int layerId = topLayer; layerId >= 0; layerId--) {
 			int horizontalTiles = layers.get(layerId).getTilesHorizontal();
 			int layerWidthWithoutLastTile = imageProperties.getTileSize() * (horizontalTiles - 1);
+			// int testWidth = imageProperties.getTileSize() * horizontalTiles;
 
 			int verticalTiles = layers.get(layerId).getTilesVertical();
 			int layerHeightWithoutLastTile = imageProperties.getTileSize() * (verticalTiles - 1);
+			// int testHeight = imageProperties.getTileSize() * verticalTiles;
+			double layerWidth = getLayerWidth(layerId);
+			// double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
+			double layerHeight = getLayerHeight(layerId);
+			// Log.d(TestTags.TEST, "layer " + layerId + ": width: " + layerWidth + ", height: " + layerHeight);
+			if (layerWidth <= imgInCanvasWidth && layerHeight <= imgInCanvasHeight) {
+				// Log.d(TestTags.TEST, "selected layer: " + layerId);
+				return layerId;
+				// return layerId == topLayer ? topLayer : layerId + 1;
+			}
 
-			if (layerWidthWithoutLastTile <= imgInCanvasWidth && layerHeightWithoutLastTile <= imgInCanvasHeight) {
+			// if (testWidth <= imgInCanvasWidth && testHeight <= imgInCanvasHeight) {
+			// if (layerWidthWithoutLastTile <= imgInCanvasWidth && layerHeightWithoutLastTile <= imgInCanvasHeight) {
+			// return layerId;
+			// }
+		}
+		int layerId = 0;
+		// int layerId = layers.size() - 1;
+		// Log.d(TestTags.TEST, "selected layer: " + layerId);
+		// return layers.size() - 1;
+		return layerId;
+	}
+
+	private int bestLayerAtLeastAsBigAs(int imgInCanvasWidth, int imageInCanvasHeight) {
+		// Log.d(TestTags.TEST, "imgInCanvas: width: " + imgInCanvasWidth + ", height: " + imageInCanvasHeight);
+		for (int layerId = 0; layerId < layers.size(); layerId++) {
+			double layerWidth = getLayerWidth(layerId);
+			double layerHeight = getLayerHeight(layerId);
+			if (layerWidth >= imgInCanvasWidth && layerHeight >= imageInCanvasHeight) {
 				return layerId;
 			}
 		}
@@ -601,14 +635,14 @@ public class TilesDownloader {
 
 	public double getLayerWidth(int layerId) {
 		checkInitialized();
-		double result = (double) imageProperties.getWidth() / Math.pow(2, layers.size() - layerId - 1);
+		double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
 		// Log.d(TAG, "layer " + layerId + ", width=" + result + " px");
 		return result;
 	}
 
 	public double getLayerHeight(int layerId) {
 		checkInitialized();
-		return (double) imageProperties.getHeight() / Math.pow(2, layers.size() - layerId - 1);
+		return imageProperties.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
 	}
 
 	public class TooManyRedirectionsException extends Exception {

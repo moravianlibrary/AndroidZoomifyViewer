@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -19,10 +18,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.R;
+import cz.mzk.androidzoomifyviewer.cache.TileBitmap;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
-import cz.mzk.androidzoomifyviewer.tiles.DownloadAndCacheTileTask;
-import cz.mzk.androidzoomifyviewer.tiles.DownloadAndCacheTileTask.TileDownloadResultHandler;
-import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTasksRegistry;
+import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandler;
+import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask.TileDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
@@ -36,6 +35,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	private static final String TAG = TiledImageView.class.getSimpleName();
 	public static boolean DEV_MODE = false;
+	public static boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS = false;
 
 	private DevTools devTools = null;
 	private ImageCoordsPoints testPoints = null;
@@ -110,15 +110,30 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		mTilesCache = CacheManager.getTilesCache();
 		mGestureDetector = new GestureDetector(context, this);
 		mGestureDetector.setOnDoubleTapListener(this);
-		logDeviceSizeCategory();
+		if (DEV_MODE) {
+			logDeviceScreenCategory();
+			logHwAcceleration();
+		}
 	}
 
-	private void logDeviceSizeCategory() {
-		int size = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-		String category = size == Configuration.SCREENLAYOUT_SIZE_SMALL ? "small"
-				: size == Configuration.SCREENLAYOUT_SIZE_NORMAL ? "normal"
-						: size == Configuration.SCREENLAYOUT_SIZE_LARGE ? "large" : "xlarge";
-		Log.d(TAG, "display size category: " + category);
+	private void logDeviceScreenCategory() {
+		// int size = getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+		// String category = size == Configuration.SCREENLAYOUT_SIZE_SMALL ? "small"
+		// : size == Configuration.SCREENLAYOUT_SIZE_NORMAL ? "normal"
+		// : size == Configuration.SCREENLAYOUT_SIZE_LARGE ? "large" : "xlarge";
+		// Log.d(TestTags.DISPLAY, "display size: " + category);
+		String screenType = getResources().getString(R.string.screen_type);
+		Log.d(TestTags.DISPLAY, "screen type: " + screenType);
+		double pixelRatio = getResources().getInteger(R.integer.pxRatio) / 100.0;
+		Log.d(TestTags.DISPLAY, String.format("pxRatio: %.2f", pixelRatio));
+	}
+
+	@SuppressLint("NewApi")
+	private void logHwAcceleration() {
+		if (Build.VERSION.SDK_INT >= 11) {
+			Log.d(TestTags.DISPLAY, "(Window) HW accelerated: " + isHardwareAccelerated());
+			// Log.d(TestTags.DISPLAY, "HW accelerated: " + canv.isHardwareAccelerated());
+		}
 	}
 
 	public ViewMode getViewMode() {
@@ -140,22 +155,22 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		this.mViewMode = viewMode;
 	}
 
-	public void cancelUnnecessaryTasks() {
+	public void cancelAllTasks() {
 		if (mActiveImageDownloader != null) {
-			for (DownloadAndCacheTileTask task : mActiveImageDownloader.getTaskRegistry().getAllTasks()) {
-				if (task != null) {
-					task.cancel(false);
-				}
-			}
+			mActiveImageDownloader.getTaskRegistry().cancelAllTasks();
+		}
+		if (CacheManager.getTilesCache() != null) {
+			CacheManager.getTilesCache().cancelAllTasks();
 		}
 		if (mDoubleTapZoomManager != null) {
 			mDoubleTapZoomManager.cancelZooming();
 		}
+		// TODO: animace posunovani
 	}
 
 	public void loadImage(String zoomifyBaseUrl) {
 		Log.d(TAG, "loading new image, base url: " + zoomifyBaseUrl);
-		cancelUnnecessaryTasks();
+		cancelAllTasks();
 		pageInitialized = false;
 		mPinchZoomManager = new PinchZoomManager(this, 1.0f);
 		mDoubleTapZoomManager = new DoubleTapZoomManager(this);
@@ -242,6 +257,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	@Override
 	public void onDraw(final Canvas canv) {
+		// Debug.startMethodTracing("default");
 		// long start = System.currentTimeMillis();
 		mCanvWidth = canv.getWidth();
 		mCanvHeight = canv.getHeight();
@@ -265,11 +281,11 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				mViewmodeScaleFactorsInitialized = true;
 			}
 			if (!mViewmodeShiftInitialized) {
-				initViewmodeShift(canv, mActiveImageDownloader);
+				initViewmodeShift(canv);
 				mViewmodeShiftInitialized = true;
 			}
 			if (!mMinZoomCanvasImagePaddingInitialized) {
-				initMinZoomPadding(canv, mActiveImageDownloader);
+				initMinZoomPadding(canv);
 				mMinZoomCanvasImagePaddingInitialized = true;
 			}
 
@@ -281,11 +297,12 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			}
 
 			mVisibleImageInCanvas = computeVisibleInCanvas(canv);
+			// Log.d(TestTags.TEST, "canvas width: " + canv.getWidth() + ", height: " + canv.getHeight());
 			// Log.d(TestTags.TEST, "canvas: width: " + canv.getWidth() + ", height: " + canv.getHeight());
 			// Log.d(TestTags.TEST, "whole   image in canvas: " + mImageInCanvas.toShortString());
 			// Log.d(TestTags.TEST, "visible image in canvas: " + mVisibleImageInCanvas.toShortString());
-			// Log.d(TestTags.TEST, "visible image in canvas: width: " + mVisibleImageInCanvas.width() + ", height: " +
-			// mVisibleImageInCanvas.height());
+			// Log.d(TestTags.TEST, "visible image in canvas: width: " + mVisibleImageInCanvas.width() + ", height: "
+			// + mVisibleImageInCanvas.height());
 			if (devTools != null) {
 				devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreenTrans());
 			}
@@ -309,7 +326,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 					.computeBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
 			// Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
-			drawLayers(canv, mActiveImageDownloader, bestLayerId);
+			drawLayers(canv, bestLayerId, true);
 
 			if (devTools != null) {
 				PinchZoomManager.State pinchZoomState = mPinchZoomManager.getState();
@@ -343,6 +360,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			// long end = System.currentTimeMillis();
 			// Log.d("timing", "onDraw: " + (end - start) + " ms");
 		}
+		// Debug.stopMethodTracing();
 	}
 
 	private void initViewmodeScaleFactors(Canvas canv) {
@@ -433,14 +451,13 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		return VectorD.sum(mViewmodeShift, swipeShift, pinchZoomShift, doubleTapZoomShift);
 	}
 
-	private void drawLayers(Canvas canv, TilesDownloader downloader, int layerId) {
+	private void drawLayers(Canvas canv, int layerId, boolean bestLayer) {
 		// long start = System.currentTimeMillis();
-		int[][] corners = getCornerVisibleTilesCoords(downloader, layerId);
+		int[][] corners = getCornerVisibleTilesCoords(layerId);
 		int[] topLeftVisibleTileCoords = corners[0];
 		int[] bottomRightVisibleTileCoords = corners[1];
 		// cancel downloading/saving of not visible tiles
-		cancelDownloadersForTilesOutOfScreen(layerId, downloader.getTaskRegistry(), bottomRightVisibleTileCoords,
-				topLeftVisibleTileCoords);
+		cancelDownloadingTilesOutOfScreen(layerId, bottomRightVisibleTileCoords, topLeftVisibleTileCoords);
 
 		// find visible tiles
 		List<int[]> visibleTiles = new ArrayList<int[]>();
@@ -451,84 +468,128 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				visibleTiles.add(visibleTile);
 			}
 		}
+		if (bestLayer) {
+			// possibly increase memory cache
+			if (CacheManager.getTilesCache() != null) {
+				int minCacheSize = (int) (visibleTiles.size() * 1.25);
+				// int maxCacheSize = (int) (visibleTiles.size() * 5.5);
+				// CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize, maxCacheSize);
+				CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize);
+			}
+		}
 		// check if all visible tiles within layer are available
 		boolean allTilesAvailable = true;
 		for (int[] visibleTile : visibleTiles) {
 			TileId visibleTileId = new TileId(layerId, visibleTile[0], visibleTile[1]);
-			Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
-			if (tile == null) {
+			boolean tileAccessible = FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS ? CacheManager.getTilesCache()
+					.containsTile(mZoomifyBaseUrl, visibleTileId) : CacheManager.getTilesCache().containsTileInMemory(
+					mZoomifyBaseUrl, visibleTileId);
+			if (!tileAccessible) {
 				allTilesAvailable = false;
 				break;
 			}
 		}
 		// if not all visible tiles available,
 		// draw under layer with worse resolution
+		// TODO: disable, just for testing
+		// mDrawLayerWithWorseResolution = false;
 		if (!allTilesAvailable && layerId != 0 && mDrawLayerWithWorseResolution) {
-			drawLayers(canv, downloader, layerId - 1);
+			drawLayers(canv, layerId - 1, false);
 		}
 		// draw visible tiles if available, start downloading otherwise
 		for (int[] visibleTile : visibleTiles) {
 			TileId visibleTileId = new TileId(layerId, visibleTile[0], visibleTile[1]);
-			Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
-			if (tile != null) {
-				Rect tileInCanvas = toTileAreaInCanvas(visibleTileId, tile, downloader);
-				// Log.d(TestTags.TEST, "drawing tile: " + visibleTileId + " to: " + tileInCanvas.toShortString());
-				canv.drawBitmap(tile, null, tileInCanvas, null);
-				if (devTools != null) {
-					// devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
-					// devTools.highlightTile(tileInCanvas, devTools.getPaintWhiteTrans());
-					devTools.highlightTile(tileInCanvas, devTools.getPaintRed());
-				}
+			if (FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS) {
+				fetchTileBlocking(canv, visibleTileId);
 			} else {
-				if (!downloader.getTaskRegistry().isRunning(visibleTileId)) {
-					new DownloadAndCacheTileTask(downloader, mZoomifyBaseUrl, visibleTileId,
-							new TileDownloadResultHandler() {
-
-								@Override
-								public void onUnhandableResponseCode(TileId tileId, String tileUrl, int responseCode) {
-									if (mTileDownloadHandler != null) {
-										mTileDownloadHandler.onTileUnhandableResponseError(tileId, tileUrl,
-												responseCode);
-									}
-								}
-
-								@Override
-								public void onSuccess(TileId tileId, Bitmap bitmap) {
-									invalidate();
-									if (mTileDownloadHandler != null) {
-										mTileDownloadHandler.onTileProcessed(tileId);
-									}
-								}
-
-								@Override
-								public void onRedirectionLoop(TileId tileId, String tileUrl, int redirections) {
-									if (mTileDownloadHandler != null) {
-										mTileDownloadHandler.onTileRedirectionLoopError(tileId, tileUrl, redirections);
-									}
-								}
-
-								@Override
-								public void onInvalidData(TileId tileId, String tileUrl, String errorMessage) {
-									if (mTileDownloadHandler != null) {
-										mTileDownloadHandler.onTileInvalidDataError(tileId, tileUrl, errorMessage);
-									}
-								}
-
-								@Override
-								public void onDataTransferError(TileId tileId, String tileUrl, String errorMessage) {
-									if (mTileDownloadHandler != null) {
-										mTileDownloadHandler.onTileDataTransferError(tileId, tileUrl, errorMessage);
-									}
-								}
-							}).executeConcurrentIfPossible();
-
-				}
+				fetchTileNonblocking(canv, visibleTileId);
 			}
 		}
 		// long end = System.currentTimeMillis();
 		// Log.d(TAG, "drawLayers (layer=" + layerId + "): " + (end - start) +
 		// " ms");
+	}
 
+	private void fetchTileBlocking(Canvas canv, TileId visibleTileId) {
+		Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
+		if (tile != null) {
+			drawTile(canv, visibleTileId, tile);
+		} else {
+			downloadTile(visibleTileId);
+		}
+	}
+
+	private void fetchTileNonblocking(Canvas canv, TileId visibleTileId) {
+		TileBitmap tile = mTilesCache.getTileAsync(mZoomifyBaseUrl, visibleTileId, new FetchingBitmapFromDiskHandler() {
+
+			@Override
+			public void onFetched() {
+				invalidate();
+			}
+		});
+		switch (tile.getState()) {
+		case IN_MEMORY:
+			drawTile(canv, visibleTileId, tile.getBitmap());
+			break;
+		case IN_DISK:
+			// nothing, wait for fetch
+			break;
+		case NOT_FOUND:
+			downloadTile(visibleTileId);
+		}
+	}
+
+	private void downloadTile(TileId visibleTileId) {
+		mActiveImageDownloader.getTaskRegistry().registerTask(visibleTileId, mZoomifyBaseUrl,
+				new TileDownloadResultHandler() {
+
+					@Override
+					public void onUnhandableResponseCode(TileId tileId, String tileUrl, int responseCode) {
+						if (mTileDownloadHandler != null) {
+							mTileDownloadHandler.onTileUnhandableResponseError(tileId, tileUrl, responseCode);
+						}
+					}
+
+					@Override
+					public void onSuccess(TileId tileId, Bitmap bitmap) {
+						invalidate();
+						if (mTileDownloadHandler != null) {
+							mTileDownloadHandler.onTileProcessed(tileId);
+						}
+					}
+
+					@Override
+					public void onRedirectionLoop(TileId tileId, String tileUrl, int redirections) {
+						if (mTileDownloadHandler != null) {
+							mTileDownloadHandler.onTileRedirectionLoopError(tileId, tileUrl, redirections);
+						}
+					}
+
+					@Override
+					public void onInvalidData(TileId tileId, String tileUrl, String errorMessage) {
+						if (mTileDownloadHandler != null) {
+							mTileDownloadHandler.onTileInvalidDataError(tileId, tileUrl, errorMessage);
+						}
+					}
+
+					@Override
+					public void onDataTransferError(TileId tileId, String tileUrl, String errorMessage) {
+						if (mTileDownloadHandler != null) {
+							mTileDownloadHandler.onTileDataTransferError(tileId, tileUrl, errorMessage);
+						}
+					}
+				});
+	}
+
+	private void drawTile(Canvas canv, TileId visibleTileId, Bitmap tileBmp) {
+		Rect tileInCanvas = toTileAreaInCanvas(visibleTileId, tileBmp);
+		// Log.d(TestTags.TEST, "drawing tile: " + visibleTileId + " to: " + tileInCanvas.toShortString());
+		canv.drawBitmap(tileBmp, null, tileInCanvas, null);
+		if (devTools != null) {
+			// devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
+			// devTools.highlightTile(tileInCanvas, devTools.getPaintWhiteTrans());
+			devTools.highlightTile(tileInCanvas, devTools.getPaintRed());
+		}
 	}
 
 	public int getCanvWidth() {
@@ -539,11 +600,11 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		return mCanvHeight;
 	}
 
-	private int[][] getCornerVisibleTilesCoords(TilesDownloader downloader, int layerId) {
+	private int[][] getCornerVisibleTilesCoords(int layerId) {
 		double resizeFactor = getCurrentScaleFactor();
 		VectorD totalShift = getTotalShift();
-		int imageWidthMinusOne = downloader.getImageProperties().getWidth() - 1;
-		int imageHeightMinusOne = downloader.getImageProperties().getHeight() - 1;
+		int imageWidthMinusOne = mActiveImageDownloader.getImageProperties().getWidth() - 1;
+		int imageHeightMinusOne = mActiveImageDownloader.getImageProperties().getHeight() - 1;
 
 		int topLeftVisibleX = collapseToInterval(
 				(int) Utils.toImageX(mVisibleImageInCanvas.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
@@ -556,32 +617,30 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// Log.d(TestTags.TILES, "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
 		// Log.d(TestTags.TILES, "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
 
-		int[] topLeftVisibleTileCoords = downloader.getTileCoords(layerId, topLeftVisibleX, topLeftVisibleY);
-		int[] bottomRightVisibleTileCoords = downloader
-				.getTileCoords(layerId, bottomRightVisibleX, bottomRightVisibleY);
+		int[] topLeftVisibleTileCoords = mActiveImageDownloader
+				.getTileCoords(layerId, topLeftVisibleX, topLeftVisibleY);
+		int[] bottomRightVisibleTileCoords = mActiveImageDownloader.getTileCoords(layerId, bottomRightVisibleX,
+				bottomRightVisibleY);
 		// Log.d(TestTags.TILES, "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
 		// Log.d(TestTags.TILES, "bottom_right: " + Utils.toString(bottomRightVisibleTileCoords));
 		return new int[][] { topLeftVisibleTileCoords, bottomRightVisibleTileCoords };
 	}
 
-	private void cancelDownloadersForTilesOutOfScreen(int layerId,
-			DownloadAndSaveTileTasksRegistry tileDownloaderTaskRegister, int[] bottomRightVisibleTileCoords,
+	private void cancelDownloadingTilesOutOfScreen(int layerId, int[] bottomRightVisibleTileCoords,
 			int[] topLeftVisibleTileCoords) {
 		// No longer visible pics (within this layer) but still running.
 		// Will be stopped (perhpas except of those closest to screen)
 		// int canceled = 0;
-		for (String running : tileDownloaderTaskRegister.getAllTaskTileIds()) {
-			TileId runningTileId = TileId.valueOf(running);
+		for (TileId runningTileId : mActiveImageDownloader.getTaskRegistry().getAllTaskTileIds()) {
 			if (runningTileId.getLayer() == layerId) {
 				if (runningTileId.getX() < topLeftVisibleTileCoords[0]
 						|| runningTileId.getX() > bottomRightVisibleTileCoords[0]
 						|| runningTileId.getY() < topLeftVisibleTileCoords[1]
 						|| runningTileId.getY() > bottomRightVisibleTileCoords[1]) {
-					DownloadAndCacheTileTask task = tileDownloaderTaskRegister.getTask(runningTileId);
-					if (task != null) {
-						task.cancel(false);
-						// canceled++;
-					}
+					boolean wasCanceled = mActiveImageDownloader.getTaskRegistry().cancel(runningTileId);
+					// if (wasCanceled) {
+					// canceled++;
+					// }
 				}
 			}
 		}
@@ -602,9 +661,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 	}
 
-	private Rect toTileAreaInCanvas(TileId tileId, Bitmap tile, TilesDownloader downloader) {
+	private Rect toTileAreaInCanvas(TileId tileId, Bitmap tile) {
 		double scaleFactor = getCurrentScaleFactor();
-		int[] tileSizesInImage = downloader.getTileSizesInImageCoords(tileId);
+		int[] tileSizesInImage = mActiveImageDownloader.getTileSizesInImageCoords(tileId);
 		double tileBasicSize = scaleFactor * tileSizesInImage[0];
 		double tileWidth = scaleFactor * tileSizesInImage[1];
 		double tileHeight = scaleFactor * tileSizesInImage[2];
@@ -661,11 +720,11 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		}
 	}
 
-	private void initViewmodeShift(Canvas canv, TilesDownloader downloader) {
+	private void initViewmodeShift(Canvas canv) {
 		double canvasWidth = canv.getWidth();
 		double canvasHeight = canv.getHeight();
-		double imageOriginalWidth = downloader.getImageProperties().getWidth();
-		double imageOriginalHeight = downloader.getImageProperties().getHeight();
+		double imageOriginalWidth = mActiveImageDownloader.getImageProperties().getWidth();
+		double imageOriginalHeight = mActiveImageDownloader.getImageProperties().getHeight();
 		double actualWidth = imageOriginalWidth * mInitialScaleFactor;
 		double actualHeight = imageOriginalHeight * mInitialScaleFactor;
 		double extraSpaceWidthCanv = canvasWidth - actualWidth;
@@ -713,9 +772,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		Log.d(TestTags.CENTERS, "initial shift:" + mViewmodeShift);
 	}
 
-	private void initMinZoomPadding(Canvas canv, TilesDownloader imageDownloader) {
-		PointD imgBottomRight = new PointD(imageDownloader.getImageProperties().getWidth(), imageDownloader
-				.getImageProperties().getHeight());
+	private void initMinZoomPadding(Canvas canv) {
+		PointD imgBottomRight = new PointD(mActiveImageDownloader.getImageProperties().getWidth(),
+				mActiveImageDownloader.getImageProperties().getHeight());
 		PointD imgInCanvasBottomRight = Utils.toCanvasCoords(imgBottomRight, mMinScaleFactor, VectorD.ZERO_VECTOR);
 		double freeWidth = (canv.getWidth() - imgInCanvasBottomRight.x) * 0.5;
 		double freeHeight = (canv.getHeight() - imgInCanvasBottomRight.y) * 0.5;

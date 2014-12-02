@@ -149,7 +149,7 @@ public class FullscreenSingleImageActivity extends ActionBarActivity implements 
 
 	@Override
 	protected void onStop() {
-		mImageView.cancelUnnecessaryTasks();
+		mImageView.cancelAllTasks();
 		super.onStop();
 	}
 

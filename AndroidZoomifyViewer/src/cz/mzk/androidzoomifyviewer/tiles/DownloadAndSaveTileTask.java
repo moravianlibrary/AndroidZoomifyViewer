@@ -13,9 +13,9 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsExce
  * @author Martin Řehánek
  * 
  */
-public class DownloadAndCacheTileTask extends ConcurrentAsyncTask<Void, Void, Bitmap> {
+public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bitmap> {
 
-	private static final String TAG = DownloadAndCacheTileTask.class.getSimpleName();
+	private static final String TAG = DownloadAndSaveTileTask.class.getSimpleName();
 	private final TilesDownloader downloader;
 	private final String zoomifyBaseUrl;
 	private final TileId tileId;
@@ -38,17 +38,12 @@ public class DownloadAndCacheTileTask extends ConcurrentAsyncTask<Void, Void, Bi
 	 *            Tile download result handler, not null
 	 * @param tilesCache
 	 */
-	public DownloadAndCacheTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TileId tileId,
+	public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TileId tileId,
 			TileDownloadResultHandler handler) {
 		this.downloader = downloader;
 		this.zoomifyBaseUrl = zoomifyBaseUrl;
 		this.tileId = tileId;
 		this.handler = handler;
-	}
-
-	@Override
-	protected void onPreExecute() {
-		downloader.getTaskRegistry().registerTask(this, tileId);
 	}
 
 	@Override

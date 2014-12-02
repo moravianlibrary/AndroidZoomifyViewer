@@ -1,11 +1,15 @@
-package cz.mzk.androidzoomifyviewer.cache;
+package cz.mzk.androidzoomifyviewer.cache.tmp;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.os.Build;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
@@ -13,9 +17,12 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
  * @author Martin Řehánek
  * 
  */
+
 public abstract class AbstractTileCache {
 
+	protected static final int DEFAULT_DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
 	private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
+
 	private static final char SEPARATOR = '-';
 	private static final char ESCAPE_CHAR = '-';
 
@@ -81,6 +88,43 @@ public abstract class AbstractTileCache {
 		} else {
 			return (bitmap.getRowBytes() * bitmap.getHeight()) / 1024;
 		}
+	}
+
+	/**
+	 * Creates a unique subdirectory of the designated app cache directory. Tries to use external but if not mounted, falls back
+	 * on internal storage.
+	 * 
+	 * @param context
+	 * @param diskCacheDir
+	 * @return
+	 */
+	protected static File getDiskCacheDir(Context context, String subdir) {
+		// Check if media is mounted or storage is built-in, if so, try and use
+		// external cache dir (and exteranlscache dir is not null}
+		// otherwise use internal cache dir
+		// TODO: rozmyslet velikost cache podle zvoleneho uloziste
+		// FIXME: na S3 haze nullpointerexception
+		// String cacheDirPath =
+		// Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+		// || !Environment.isExternalStorageRemovable() ?
+		// context.getExternalCacheDir().getPath() : context
+		// .getCacheDir().getPath();
+		String cacheDirPath = context.getCacheDir().getPath();
+		return new File(cacheDirPath + File.separator + subdir);
+	}
+
+	protected static int getDefaultMemoryCacheSizeKB() {
+		// Get max available VM memory, exceeding this amount will throw an OutOfMemory exception. Stored in kilobytes as LruCache
+		// takes an int in its constructor.
+		int maxMemoryKB = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		// Use 1/8th of the available memory for this memory cache.
+		return maxMemoryKB / 8;
+	}
+
+	protected byte[] bitmapToByteArray(Bitmap bitmap) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		bitmap.compress(CompressFormat.PNG, 100, bos);
+		return bos.toByteArray();
 	}
 
 }

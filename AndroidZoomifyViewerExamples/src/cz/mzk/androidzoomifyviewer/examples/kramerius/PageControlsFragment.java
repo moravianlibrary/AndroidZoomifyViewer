@@ -24,6 +24,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
 
 	private static final String TAG = PageControlsFragment.class.getSimpleName();
 
+	private View mRoot;
 	private Button mBtnPreviousPage;
 	private Button mBtnNextPage;
 	private TextView mPageCounter;
@@ -31,16 +32,17 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_page_controls, container, false);
-		mBtnPreviousPage = (Button) view.findViewById(R.id.btnPreviousPage);
+		mRoot = inflater.inflate(R.layout.fragment_page_controls, container, false);
+		mRoot.setOnClickListener(this);
+		mBtnPreviousPage = (Button) mRoot.findViewById(R.id.btnPreviousPage);
 		mBtnPreviousPage.setOnClickListener(this);
-		mBtnNextPage = (Button) view.findViewById(R.id.btnNextPage);
+		mBtnNextPage = (Button) mRoot.findViewById(R.id.btnNextPage);
 		mBtnNextPage.setOnClickListener(this);
-		mPageCounter = (TextView) view.findViewById(R.id.pageCounter);
-		mSpinnerViewMode = (Spinner) view.findViewById(R.id.spinnerViewMode);
+		mPageCounter = (TextView) mRoot.findViewById(R.id.pageCounter);
+		mSpinnerViewMode = (Spinner) mRoot.findViewById(R.id.spinnerViewMode);
 		mSpinnerViewMode.setOnItemSelectedListener(this);
 		mSpinnerViewMode.setAdapter(getSpinnerAdapter());
-		return view;
+		return mRoot;
 	}
 
 	private SpinnerAdapter getSpinnerAdapter() {
@@ -59,7 +61,15 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
 
 	@Override
 	public void onClick(View v) {
-		if (v == mBtnPreviousPage) {
+		if (v == mRoot) {
+			// CacheStatistics statistics = CacheManager.getTilesCache().getKeyCacheStatistics();
+			// if (statistics != null) {
+			// int requests = statistics.getRequests();
+			// float avgTime = Utils.round(statistics.getAverageTime(), 1);
+			// float hitRatio = Utils.round(statistics.getHitRatio(), 1);
+			// Log.d(TestTags.TEST, "requests: " + requests + ", avg time: " + avgTime + ", hit ratio: " + hitRatio);
+			// }
+		} else if (v == mBtnPreviousPage) {
 			PageViewerActivity activity = (PageViewerActivity) getActivity();
 			activity.showPreviousPage();
 		} else if (v == mBtnNextPage) {

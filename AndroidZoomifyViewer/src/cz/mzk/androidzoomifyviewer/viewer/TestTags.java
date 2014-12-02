@@ -12,5 +12,7 @@ public class TestTags {
 	public static final String STATE = "State";
 	public static final String CORNERS = "Corners";
 	public static final String TILES = "T_error";
-	// public static final String TEST = "test";
+	public static final String TEST = "test";
+	public static final String DISPLAY = "display";
+	public static final String CACHE = "cache";
 }

@@ -13,6 +13,9 @@
 	<!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" 
 		/> -->
 
+	<!-- for profiling -->
+	<!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
+
 
 	<!-- for profilinig only -->
 	<!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 

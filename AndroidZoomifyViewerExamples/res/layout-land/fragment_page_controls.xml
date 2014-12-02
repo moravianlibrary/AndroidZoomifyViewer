@@ -9,7 +9,7 @@
     android:padding="5dp" >
 
     <TextView
-        android:layout_width="wrap_content"
+    	android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:background="#d4c46a"

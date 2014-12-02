@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.cache;
+package cz.mzk.androidzoomifyviewer.cache.tmp;
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
@@ -18,22 +18,26 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
 	private static final String TAG = MemoryTilesCache.class.getSimpleName();
 
 	private LruCache<String, Bitmap> mMemoryCache;
+	private State state = State.INITIALIZING;
 
 	public MemoryTilesCache() {
-		// Get max available VM memory, exceeding this amount will throw an
-		// OutOfMemory exception. Stored in kilobytes as LruCache takes an
-		// int in its constructor.
-		int maxMemoryKB = (int) (Runtime.getRuntime().maxMemory() / 1024);
-		// Use 1/8th of the available memory for this memory cache.
-		final int cacheSizeKB = maxMemoryKB / 8;
-		mMemoryCache = new LruCache<String, Bitmap>(cacheSizeKB) {
-			@Override
-			protected int sizeOf(String key, Bitmap bitmap) {
-				// The cache size will be measured in kilobytes rather than number of items.
-				return getBitmapSizeInKB(bitmap);
-			}
-		};
-		Log.d(TAG, "Lru cache allocated with " + cacheSizeKB + " kB");
+		this(getDefaultMemoryCacheSizeKB());
+	}
+
+	public MemoryTilesCache(int cacheSizeKB) {
+		if (cacheSizeKB == 0) {
+			state = State.DISABLED;
+		} else {
+			mMemoryCache = new LruCache<String, Bitmap>(cacheSizeKB) {
+				@Override
+				protected int sizeOf(String key, Bitmap bitmap) {
+					// The cache size will be measured in kilobytes rather than number of items.
+					return getBitmapSizeInKB(bitmap);
+				}
+			};
+			Log.d(TAG, "Lru cache allocated with " + cacheSizeKB + " kB");
+			state = State.READY;
+		}
 	}
 
 	@Override
@@ -58,6 +62,11 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
 		int missCount = mMemoryCache.missCount();
 		float hitRatio = (float) hitCount / (float) (hitCount + missCount) * 100f;
 		Log.d(TAG, String.format("hit ratio: %,.2f %%", hitRatio));
+	}
+
+	@Override
+	public State getState() {
+		return state;
 	}
 
 }
