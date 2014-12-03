@@ -1,8 +1,7 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import android.os.AsyncTask.Status;
+import android.os.CountDownTimer;
 import android.util.Log;
-import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 
 /**
  * @author Martin Řehánek
@@ -11,10 +10,14 @@ import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 public class DoubleTapZoomManager {
 
 	private static final String TAG = DoubleTapZoomManager.class.getSimpleName();
+	public static final long ANIM_LENGTH_MS = 250;
+	public static final long ANIM_STEP_MS = 30;
+	public static final double MIN_RESIZE_RATIO = 1.0;
+	public static final double MAX_RESIZE_RATIO = 3.0;
 
 	private final TiledImageView imageView;
 	private State state = State.IDLE;
-	private CountDownTask animationTask = null;
+	private AnimationTimer animationTimer = null;
 
 	// centers
 	private PointD zoomCenterInImage;
@@ -45,8 +48,8 @@ public class DoubleTapZoomManager {
 	private void calculateAndRunAnimation() {
 		zoomCenterInImage = Utils.toImageCoords(doubleTapCenterInCanvas, imageView.getCurrentScaleFactor(),
 				imageView.getTotalShift());
-		animationTask = new CountDownTask();
-		animationTask.executeConcurrentIfPossible();
+		animationTimer = new AnimationTimer();
+		animationTimer.start();
 	}
 
 	void notifyZoomingIn(double activeZoomScale) {
@@ -71,15 +74,14 @@ public class DoubleTapZoomManager {
 				(doubleTapCenterInCanvas.y - zoomCenterInCanvasCoordsAfterZoomScaleBeforeZoomShift.y));
 	}
 
-	public void cancelZooming() {
-		if (animationTask != null
-				&& (animationTask.getStatus() == Status.PENDING || animationTask.getStatus() == Status.RUNNING)) {
-			animationTask.cancel(false);
+	public void cancelAnimation() {
+		if (animationTimer != null) {
+			animationTimer.cancel();
 		}
 	}
 
 	private void storeDataOfCurrentZoom() {
-		animationTask = null;
+		animationTimer = null;
 		accumulatedZoomScale *= activeZoomScale;
 		activeZoomScale = 1.0;
 		accumalatedZoomShift = VectorD.sum(accumalatedZoomShift, activeZoomShift);
@@ -114,54 +116,28 @@ public class DoubleTapZoomManager {
 		IDLE, ZOOMING
 	}
 
-	private class CountDownTask extends ConcurrentAsyncTask<Void, Double, Void> {
+	private class AnimationTimer extends CountDownTimer {
 
-		// FIXME: if not enough free threads
-		// (e.g. small thread pool and tiles are being downloaded)
-		// the animation doesn't take place right away which is obvious to user
-		// Perhaps limit number of tiles-downloading-tasks being run in
-		// parallel? (according to the pool size)
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			// long start = System.currentTimeMillis();
-			long waitTime = 10;
-			double resizeRatio = 1.0;
-			while (resizeRatio < 2.0) {
-				try {
-					Thread.sleep(waitTime);
-				} catch (InterruptedException e) {
-					Log.d(TAG, "thread killed", e);
-				}
-				if (isCancelled()) {
-					break;
-				}
-				resizeRatio += 0.05;
-				publishProgress(resizeRatio);
-			}
-			// long now = System.currentTimeMillis();
-			// long time = now - start;
-			// Log.d(TAG, "animation length: " + time + " ms");
-			return null;
+		protected AnimationTimer() {
+			super(ANIM_LENGTH_MS, ANIM_STEP_MS);
 		}
 
 		@Override
-		protected void onProgressUpdate(Double... values) {
-			notifyZoomingIn(values[0]);
+		public void onTick(long millisUntilFinished) {
+			float remainingTimeRatio = millisUntilFinished / ((float) ANIM_LENGTH_MS);
+			double resizeDiff = MAX_RESIZE_RATIO - MIN_RESIZE_RATIO;
+			double scale = MIN_RESIZE_RATIO + (1 - remainingTimeRatio) * resizeDiff;
+			// Log.d(TAG, String.format("scale: %.2f", scale));
+			notifyZoomingIn(scale);
 		}
 
 		@Override
-		protected void onCancelled(Void result) {
-			Log.d(TAG, "canceled");
+		public void onFinish() {
+			double scale = MAX_RESIZE_RATIO;
+			// Log.d(TAG, String.format("scale: %.2f", scale));
+			notifyZoomingIn(scale);
 			storeDataOfCurrentZoom();
 		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			Log.d(TAG, "finished");
-			storeDataOfCurrentZoom();
-		}
-
 	}
 
 }

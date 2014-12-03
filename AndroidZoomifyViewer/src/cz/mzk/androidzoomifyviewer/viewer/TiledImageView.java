@@ -163,7 +163,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			CacheManager.getTilesCache().cancelAllTasks();
 		}
 		if (mDoubleTapZoomManager != null) {
-			mDoubleTapZoomManager.cancelZooming();
+			mDoubleTapZoomManager.cancelAnimation();
 		}
 		// TODO: animace posunovani
 	}
