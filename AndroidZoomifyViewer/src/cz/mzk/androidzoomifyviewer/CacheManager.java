@@ -59,7 +59,7 @@ public class CacheManager {
 		}
 		int columns = (int) Math.ceil(width / TILE_SIZE_PX);
 		int rows = (int) Math.ceil(height / TILE_SIZE_PX);
-		int result = rows * columns * 3;
+		int result = rows * columns * 2;
 		Log.d(TAG, "screen width: " + width + ", height: " + height + ", initial tiles cache size: " + result);
 		return result;
 	}
