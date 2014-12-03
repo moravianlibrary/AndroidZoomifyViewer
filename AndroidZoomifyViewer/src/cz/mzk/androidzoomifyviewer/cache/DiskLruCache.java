@@ -434,11 +434,26 @@ public final class DiskLruCache implements Closeable {
 		}
 	}
 
-	public synchronized boolean contains(String key) throws IOException {
+	public synchronized boolean containsReadable(String key) throws IOException {
 		checkNotClosed();
 		validateKey(key);
 		Entry entry = lruEntries.get(key);
-		return entry != null;
+		if (entry == null) {
+			return false;
+		}
+
+		if (!entry.readable) {
+			return false;
+		}
+
+		for (int i = 0; i < valueCount; i++) {
+			File file = entry.getCleanFile(i);
+			if (!file.exists()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

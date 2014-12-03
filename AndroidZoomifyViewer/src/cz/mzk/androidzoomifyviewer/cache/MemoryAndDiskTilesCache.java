@@ -285,7 +285,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		waitUntilDiskCacheInitializedOrDisabled();
 		try {
 			if (mDiskCacheEnabled) {
-				return mDiskCache.contains(key);
+				return mDiskCache.containsReadable(key);
 			} else {
 				return false;
 			}
@@ -311,6 +311,10 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					// long total = retrieval + decoding;
 					// Log.d(TAG, "disk cache hit: " + key + ", delay: " + total + "ms (retrieval: " + retrieval +
 					// "ms, decoding: " + decoding + " ms)");
+					if (stream == null) {
+						Log.w(TAG, "bitmap from disk cache was null, removing record");
+						mDiskCache.remove(key);
+					}
 					return stream;
 				} else {
 					// long afterMiss = System.currentTimeMillis();
@@ -349,13 +353,13 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		Bitmap inMemoryCache = getTileFromMemoryCache(key);
 		// long afterHitOrMiss = System.currentTimeMillis();
 		if (inMemoryCache != null) {
-			// Log.d(TAG, "memory cache hit: " + key);
+			// Log.v(TAG, "memory cache hit: " + key);
 			// Log.d(TAG, "memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
 			return new TileBitmap(State.IN_MEMORY, inMemoryCache);
 		} else {
-			// Log.d(TAG, "memory cache miss: " + key);
+			// Log.v(TAG, "memory cache miss: " + key);
 			try {
-				if (mDiskCache.contains(key)) {
+				if (mDiskCache.containsReadable(key)) {
 					mBitmapFetchManager.registerTask(key, listener);
 					return new TileBitmap(State.IN_DISK, null);
 				} else {

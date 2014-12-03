@@ -146,18 +146,18 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	private void waitUntilDiskCacheInitializedOrDisabled() {
 		try {
 			synchronized (mDiskCacheInitializationLock) {
-				Log.v(TAG, "assuming disk cache lock: " + Thread.currentThread().toString());
+				Log.v(TAG, "assuming disk cache initialization lock: " + Thread.currentThread().toString());
 				// Wait until disk cache is initialized or disabled
 				while (mDiskCache == null && !mDiskCacheDisabled) {
 					try {
 						mDiskCacheInitializationLock.wait();
 					} catch (InterruptedException e) {
-						Log.e(TAG, "waiting for disk cache lock interrupted", e);
+						Log.e(TAG, "waiting for disk cache initialization lock was interrupted", e);
 					}
 				}
 			}
 		} finally {
-			Log.v(TAG, "releasing disk cache lock: " + Thread.currentThread().toString());
+			Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
 		}
 	}
 

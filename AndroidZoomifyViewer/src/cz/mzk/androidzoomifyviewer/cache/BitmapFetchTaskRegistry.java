@@ -28,13 +28,13 @@ public class BitmapFetchTaskRegistry {
 				FetchBitmapFromDiskAndStoreToMemoryCacheTask task = new FetchBitmapFromDiskAndStoreToMemoryCacheTask(
 						cache, key, fetchedListener);
 				tasks.put(key, task);
-				// Log.v(TAG, "registration performed: " + key + ": (total " + tasks.size() + ")");
+				Log.v(TAG, "registration performed: " + key + ": (total " + tasks.size() + ")");
 				task.executeConcurrentIfPossible();
 			} else {
-				// Log.v(TAG, "registration ignored: already registered: " + key + ": (total " + tasks.size() + ")");
+				Log.v(TAG, "registration ignored: already registered: " + key + ": (total " + tasks.size() + ")");
 			}
 		} else {
-			// Log.v(TAG, "registration ignored: to many tasks: " + key + ": (total " + tasks.size() + ")");
+			Log.v(TAG, "registration ignored: to many tasks: " + key + ": (total " + tasks.size() + ")");
 		}
 	}
 
@@ -70,9 +70,11 @@ public class BitmapFetchTaskRegistry {
 					Bitmap fromDiskCache = cache.getTileFromDiskCache(key);
 					if (!isCancelled()) {
 						if (fromDiskCache != null) {
+							Log.v(TAG, "storing to memory cache: " + key);
 							cache.storeTileToMemoryCache(key, fromDiskCache);
 							success = true;
 						} else {
+							Log.e(TAG, "tile bitmap is null: " + key);
 							success = false;
 						}
 					}
@@ -86,6 +88,7 @@ public class BitmapFetchTaskRegistry {
 
 		@Override
 		protected void onCancelled() {
+			// Log.v(TAG, "canceled: " + key);
 			super.onCancelled();
 			unregisterTask(key);
 		}
