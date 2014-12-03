@@ -10,16 +10,12 @@ import java.util.Set;
  */
 public abstract class AbstractImagePropertiesCache {
 
-	private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
-
-	private static final char SEPARATOR = '-';
 	private static final char ESCAPE_CHAR = '-';
+	private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
 
 	// TODO: exception if file name to long (probably over 127 chars)
 	String buildKey(String zoomifyBaseUrl) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(escapeSpecialChars(zoomifyBaseUrl)).append(SEPARATOR);
-		return builder.toString();
+		return escapeSpecialChars(zoomifyBaseUrl);
 	}
 
 	private String escapeSpecialChars(String zoomifyBaseUrl) {

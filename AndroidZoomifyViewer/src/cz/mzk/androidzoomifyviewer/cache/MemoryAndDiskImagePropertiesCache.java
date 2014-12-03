@@ -19,7 +19,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 	private static final String TAG = MemoryAndDiskImagePropertiesCache.class.getSimpleName();
 	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
-	private static final int MEMORY_CACHE_ITEM_SIZE = 100;
+	private static final int MEMORY_CACHE_ITEM_SIZE = 10;
 	private static final String DISK_CACHE_SUBDIR = "imageProperties";
 	private final Object mDiskCacheInitializationLock = new Object();
 	private DiskLruCache mDiskCache = null;
@@ -32,8 +32,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	}
 
 	private LruCache<String, String> initMemoryCache() {
-		LruCache<String, String> cache = new LruCache<String, String>(MEMORY_CACHE_ITEM_SIZE) {
-		};
+		LruCache<String, String> cache = new LruCache<String, String>(MEMORY_CACHE_ITEM_SIZE);
 		Log.d(TAG, "in-memory lru cache allocated for " + MEMORY_CACHE_ITEM_SIZE + " items");
 		return cache;
 	}
