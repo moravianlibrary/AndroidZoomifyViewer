@@ -101,7 +101,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			throw new IllegalStateException(TiledImageView.class.getSimpleName() + " has been initialized  already");
 		}
 		long diskCacheBytes = context.getResources().getInteger(R.integer.androidzoomifyviewer_disk_cache_size_kb) * 1024;
-		boolean clearDiskCacheOnStart = context.getResources().getBoolean(R.bool.androidzoomifyviewer_dev_mode);
+		boolean clearDiskCacheOnStart = context.getResources().getBoolean(R.bool.androidzoomifyviewer_disk_cache_clear_on_startup);
 		CacheManager.initialize(context, clearDiskCacheOnStart, diskCacheBytes);
 		initialized = true;
 	}
@@ -135,9 +135,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// : size == Configuration.SCREENLAYOUT_SIZE_NORMAL ? "normal"
 		// : size == Configuration.SCREENLAYOUT_SIZE_LARGE ? "large" : "xlarge";
 		// Log.d(TestTags.DISPLAY, "display size: " + category);
-		String screenType = getResources().getString(R.string.screen_type);
+		String screenType = getResources().getString(R.string.androidzoomifyviewer_screen_type);
 		TestLoggers.DISPLAY.d("screen type: " + screenType);
-		double pixelRatio = getResources().getInteger(R.integer.pxRatio) / 100.0;
+		double pixelRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;
 		TestLoggers.DISPLAY.d(String.format("pxRatio: %.2f", pixelRatio));
 	}
 
@@ -196,7 +196,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	private void initTilesDownloaderAsync() {
-		double pxRatio = getResources().getInteger(R.integer.pxRatio) / 100.0;
+		double pxRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;
 		new InitTilesDownloaderTask(mZoomifyBaseUrl, pxRatio,
 				new InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler() {
 

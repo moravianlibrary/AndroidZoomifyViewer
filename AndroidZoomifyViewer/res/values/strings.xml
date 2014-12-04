@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="screen_type">default</string>
+	<string name="androidzoomifyviewer_screen_type">default</string>
 
 </resources>
