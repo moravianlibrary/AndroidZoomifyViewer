@@ -16,8 +16,8 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import cz.mzk.androidzoomifyviewer.CacheManager;
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
@@ -30,15 +30,18 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
  */
 public class TilesDownloader {
 
-	private static final String TAG = TilesDownloader.class.getSimpleName();
 	/**
 	 * @see https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
 	 */
 	public static final boolean COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION = true;
-	private static final int MAX_REDIRECTIONS = 5;
-	private static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
-	private static final int TILES_TIMEOUT = 5000;
+	public static final int MAX_REDIRECTIONS = 5;
+	public static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
+	public static final int TILES_TIMEOUT = 5000;
+
+	private static final Logger logger = new Logger(TilesDownloader.class);
+
 	private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
+
 	private String baseUrl;
 	private String imagePropertiesUrl;
 	private boolean initialized = false;
@@ -90,12 +93,12 @@ public class TilesDownloader {
 		if (initialized) {
 			throw new IllegalStateException("already initialized (" + baseUrl + ")");
 		} else {
-			Log.d(TAG, "initializing: " + baseUrl);
+			logger.d("initializing: " + baseUrl);
 		}
 		HttpURLConnection.setFollowRedirects(false);
 		String propertiesXml = getImagePropertiesXml();
 		imageProperties = loadFromXml(propertiesXml);
-		Log.d(TAG, imageProperties.toString());
+		logger.d(imageProperties.toString());
 		layers = initLayers();
 		initialized = true;
 	}
@@ -119,14 +122,14 @@ public class TilesDownloader {
 			throw new TooManyRedirectionsException(urlString, MAX_REDIRECTIONS);
 		}
 		HttpURLConnection urlConnection = null;
-		// Log.d(TAG, urlString + " remaining redirections: " +
+		// logger.d( urlString + " remaining redirections: " +
 		// remainingRedirections);
 		try {
 			URL url = new URL(urlString);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setReadTimeout(IMAGE_PROPERTIES_TIMEOUT);
 			int responseCode = urlConnection.getResponseCode();
-			// Log.d(TAG, "http code: " + responseCode);
+			// logger.d( "http code: " + responseCode);
 			String location = urlConnection.getHeaderField("Location");
 			switch (responseCode) {
 			case 200:
@@ -275,7 +278,7 @@ public class TilesDownloader {
 
 	private List<Layer> initLayers() {
 		int numberOfLayers = computeNumberOfLayers();
-		// Log.d(TAG, "layers #: " + numberOfLayers);
+		// logger.d( "layers #: " + numberOfLayers);
 		List<Layer> result = new ArrayList<Layer>(numberOfLayers);
 		double width = imageProperties.getWidth();
 		double height = imageProperties.getHeight();
@@ -349,7 +352,7 @@ public class TilesDownloader {
 		checkInitialized();
 		int tileGroup = computeTileGroup(tileId);
 		String tileUrl = buildTileUrl(tileGroup, tileId);
-		Log.v(TAG, "TILE URL: " + tileUrl);
+		logger.v("TILE URL: " + tileUrl);
 		return downloadTile(tileUrl, MAX_REDIRECTIONS);
 	}
 
@@ -358,7 +361,7 @@ public class TilesDownloader {
 		if (remainingRedirections == 0) {
 			throw new TooManyRedirectionsException(tileUrl, MAX_REDIRECTIONS);
 		}
-		// Log.d(TAG, tileUrl + " remaining redirections: " +
+		// logger.d( tileUrl + " remaining redirections: " +
 		// remainingRedirections);
 		HttpURLConnection urlConnection = null;
 		try {
@@ -417,10 +420,10 @@ public class TilesDownloader {
 		double height = imageProperties.getHeight();
 		double depth = layers.size();
 
-		// Log.d(TAG, tileId.toString());
-		// Log.d(TAG, "x: " + x + ", y: " + y + ", d: " + depth + ", l: " +
+		// logger.d( tileId.toString());
+		// logger.d( "x: " + x + ", y: " + y + ", d: " + depth + ", l: " +
 		// level);
-		// Log.d(TAG, "width: " + width + ", height: " + height + ", tileSize: "
+		// logger.d( "width: " + width + ", height: " + height + ", tileSize: "
 		// + tileSize);
 
 		double first = Math.ceil(Math.floor(width / Math.pow(2, depth - level - 1)) / tileSize);
@@ -429,9 +432,9 @@ public class TilesDownloader {
 			index += Math.ceil(Math.floor(width / Math.pow(2, depth - i)) / tileSize)
 					* Math.ceil(Math.floor(height / Math.pow(2, depth - i)) / tileSize);
 		}
-		// Log.d(TAG, "index: " + index);
+		// logger.d( "index: " + index);
 		int result = (int) (index / tileSize);
-		// Log.d(TAG, "tile group: " + result);
+		// logger.d( "tile group: " + result);
 		return result;
 	}
 
@@ -465,7 +468,7 @@ public class TilesDownloader {
 		if (layerId == 0) {
 			return new int[] { 0, 0 };
 		}
-		// Log.d(TAG, "getting picture for layer=" + layerId + ", x=" + pixelX +
+		// logger.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
 		// ", y=" + pixelY);
 		// Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
 		double step = imageProperties.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
@@ -610,7 +613,7 @@ public class TilesDownloader {
 	private int getTileWidthInImageCoords(int layerId, int tileHorizontalIndex, int basicSize) {
 		if (tileHorizontalIndex == layers.get(layerId).getTilesHorizontal() - 1) {
 			int result = imageProperties.getWidth() - basicSize * (layers.get(layerId).getTilesHorizontal() - 1);
-			// Log.d(TAG, "TILE FAR RIGHT WIDTH: " + result);
+			// logger.d( "TILE FAR RIGHT WIDTH: " + result);
 			return result;
 		} else {
 			return basicSize;
@@ -620,7 +623,7 @@ public class TilesDownloader {
 	private int getTileHeightInImageCoords(int layerId, int tileVerticalIndex, int basicSize) {
 		// Log.d(TestTags.TILES, "tileVerticalIndex:" + tileVerticalIndex);
 		int verticalTilesForLayer = layers.get(layerId).getTilesVertical();
-		// Log.d(TAG, "vertical tiles for layer " + layerId + ": " + verticalTilesForLayer);
+		// logger.d( "vertical tiles for layer " + layerId + ": " + verticalTilesForLayer);
 		int lastTilesIndex = verticalTilesForLayer - 1;
 		// Log.d(TestTags.TILES, "tiles vertical for layer: " + layerId + ": " + tilesVerticalForLayer);
 		// Log.d(TestTags.TILES, "last tile's index: " + layerId + ": " + lastTilesIndex);
@@ -635,7 +638,7 @@ public class TilesDownloader {
 	public double getLayerWidth(int layerId) {
 		checkInitialized();
 		double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
-		// Log.d(TAG, "layer " + layerId + ", width=" + result + " px");
+		// logger.d( "layer " + layerId + ", width=" + result + " px");
 		return result;
 	}
 

@@ -13,12 +13,13 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
-import android.util.Log;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.TileBitmap.State;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
  * 
@@ -27,22 +28,26 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
  */
 public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesCache {
 
-	private static final String TAG = MemoryAndDiskTilesCache.class.getSimpleName();
-	private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
-	private static final String DISK_CACHE_SUBDIR = "tiles";
+	// public static final int DISK_CACHE_SIZE = 1024; // 100MB
+	// public static final int DISK_CACHE_SIZE = 1024 * 1024 * 100; // 100MB
+	public static final String DISK_CACHE_SUBDIR = "tiles";
+
+	private static final Logger logger = new Logger(MemoryAndDiskTilesCache.class);
+
 	private final LruCache<String, Bitmap> mMemoryCache;
 	private final BitmapFetchTaskRegistry mBitmapFetchManager;
 	private final Object mDiskCacheInitializationLock = new Object();
+
 	private DiskLruCache mDiskCache = null;
 	private boolean mDiskCacheEnabled = true;
 
-	public MemoryAndDiskTilesCache(Context context, boolean clearCache, int memoryCacheMaxItems) {
+	public MemoryAndDiskTilesCache(Context context, boolean clearCache, int memoryCacheMaxItems, long diskCacheBytes) {
 		super();
 		// mMemoryCache = initMemoryCacheFixedSize();
 		mMemoryCache = new LruCache<String, Bitmap>(memoryCacheMaxItems);
-		Log.d(TAG, "Lru cache allocated, max items: " + memoryCacheMaxItems);
+		logger.i("memory cache initialized; max items: " + memoryCacheMaxItems);
 		mBitmapFetchManager = new BitmapFetchTaskRegistry(this);
-		initDiskCacheAsync(context, clearCache);
+		initDiskCacheAsync(context, clearCache, diskCacheBytes);
 	}
 
 	private LruCache<String, Bitmap> initMemoryCacheFixedSize() {
@@ -58,16 +63,16 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 				return getBitmapSizeInKB(bitmap);
 			}
 		};
-		Log.d(TAG, "in-memory lru cache allocated with " + cacheSizeKB + " kB");
+		// logger.d("in-memory lru cache allocated with " + cacheSizeKB + " kB");
 		return cache;
 	}
 
 	// TODO: no need to be async
-	private void initDiskCacheAsync(Context context, boolean clearCache) {
+	private void initDiskCacheAsync(Context context, boolean clearCache, long diskCacheBytes) {
 		try {
 			File cacheDir = getDiskCacheDir(context);
 			int appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-			new InitDiskCacheTask(appVersion, clearCache).execute(cacheDir);
+			new InitDiskCacheTask(appVersion, clearCache, diskCacheBytes).execute(cacheDir);
 		} catch (NameNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -98,10 +103,12 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
 		private final int appVersion;
 		private final boolean clearCache;
+		private final long cacheSizeBytes;
 
-		public InitDiskCacheTask(int appVersion, boolean clearCache) {
+		public InitDiskCacheTask(int appVersion, boolean clearCache, long diskCacheBytes) {
 			this.appVersion = appVersion;
 			this.clearCache = clearCache;
+			this.cacheSizeBytes = diskCacheBytes;
 		}
 
 		@Override
@@ -112,27 +119,28 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					File cacheDir = params[0];
 					if (cacheDir.exists()) {
 						if (clearCache) {
-							// Log.i(TAG, "clearing tiles disk cache");
+							logger.i("clearing disk cache");
 							boolean cleared = DiskUtils.deleteDirContent(cacheDir);
 							if (!cleared) {
-								Log.w(TAG, "failed to delete content of " + cacheDir.getAbsolutePath());
+								logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
 								disableDiskCache();
 								return null;
 							}
 						}
 					} else {
-						// Log.i(TAG, "creating cache dir " + cacheDir);
+						// logger.i("creating cache dir " + cacheDir);
 						boolean created = cacheDir.mkdir();
 						if (!created) {
-							Log.w(TAG, "failed to create cache dir " + cacheDir.getAbsolutePath());
+							logger.w("failed to create cache dir " + cacheDir.getAbsolutePath());
 							disableDiskCache();
 							return null;
 						}
 					}
-					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE);
+					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, cacheSizeBytes);
+					logger.i("disk cache initialized; size: " + Utils.formatBytes(cacheSizeBytes));
 					return null;
 				} catch (IOException e) {
-					Log.w(TAG, "error opening disk cache, disabling");
+					logger.w("error opening disk cache, disabling");
 					disableDiskCache();
 					return null;
 				} finally {
@@ -144,7 +152,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	}
 
 	private void disableDiskCache() {
-		Log.i(TAG, "disabling disk cache");
+		logger.i("disabling disk cache");
 		mDiskCacheEnabled = false;
 	}
 
@@ -159,10 +167,10 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		synchronized (mMemoryCache) {
 			// Log.v(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
 			if (mMemoryCache.get(key) == null) {
-				// Log.d(TAG, "storing to memory cache: " + key);
+				// logger.d("storing to memory cache: " + key);
 				mMemoryCache.put(key, bmp);
 			} else {
-				// Log.d(TAG, "already in memory cache: " + key);
+				// logger.d("already in memory cache: " + key);
 			}
 			// Log.v(TAG, "releasing mMemoryCache lock: " + Thread.currentThread().toString());
 		}
@@ -176,9 +184,9 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 			if (mDiskCacheEnabled) {
 				Snapshot fromDiskCache = mDiskCache.get(key);
 				if (fromDiskCache != null) {
-					// Log.d(TAG, "already in disk cache: " + key);
+					// logger.d("already in disk cache: " + key);
 				} else {
-					// Log.d(TAG, "storing to disk cache: " + key);
+					// logger.d("storing to disk cache: " + key);
 					edit = mDiskCache.edit(key);
 					if (edit != null) {
 						edit.hashCode();
@@ -188,12 +196,12 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 						edit.commit();
 					} else {
 						// another thread trying to write, i.e. incorrectly implemented synchronization
-						Log.e(TAG, key + ": edit allready opened");
+						logger.e(key + ": edit allready opened");
 					}
 				}
 			}
 		} catch (IOException e) {
-			Log.e(TAG, "failed to store tile to disk cache: " + e.getMessage());
+			logger.e("failed to store tile to disk cache: " + e.getMessage());
 			try {
 				if (edit != null) {
 					edit.abort();
@@ -202,7 +210,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					out.close();
 				}
 			} catch (IOException e1) {
-				Log.e(TAG, "failed to cleanup", e1);
+				logger.e("failed to cleanup", e1);
 			}
 		}
 	}
@@ -221,13 +229,13 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		Bitmap inMemoryCache = getTileFromMemoryCache(key);
 		// long afterHitOrMiss = System.currentTimeMillis();
 		if (inMemoryCache != null) {
-			// Log.d(TAG, "memory cache hit: " + key);
-			// Log.d(TAG, "memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
+			// logger.d("memory cache hit: " + key);
+			// logger.d("memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
 			// return new TileBitmap(State.IN_MEMORY, inMemoryCache);
 			return inMemoryCache;
 		} else {
-			// Log.d(TAG, "memory cache miss: " + key);
-			// Log.d(TAG, "memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
+			// logger.d("memory cache miss: " + key);
+			// logger.d("memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
 			Bitmap fromDiskCache = getTileFromDiskCache(key);
 			// store also to memory cache (nonblocking)
 			if (fromDiskCache != null) {
@@ -272,7 +280,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					try {
 						mDiskCacheInitializationLock.wait();
 					} catch (InterruptedException e) {
-						Log.e(TAG, "waiting for disk cache lock interrupted", e);
+						logger.e("waiting for disk cache lock interrupted", e);
 					}
 				}
 			}
@@ -290,7 +298,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 				return false;
 			}
 		} catch (IOException e) {
-			Log.e(TAG, "error loading tile from disk cache: " + key, e);
+			logger.e("error loading tile from disk cache: " + key, e);
 			return false;
 		}
 	}
@@ -309,23 +317,23 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					// long retrieval = afterHit - start;
 					// long decoding = afterDecoding - afterHit;
 					// long total = retrieval + decoding;
-					// Log.d(TAG, "disk cache hit: " + key + ", delay: " + total + "ms (retrieval: " + retrieval +
+					// logger.d("disk cache hit: " + key + ", delay: " + total + "ms (retrieval: " + retrieval +
 					// "ms, decoding: " + decoding + " ms)");
 					if (stream == null) {
-						Log.w(TAG, "bitmap from disk cache was null, removing record");
+						logger.w("bitmap from disk cache was null, removing record");
 						mDiskCache.remove(key);
 					}
 					return stream;
 				} else {
 					// long afterMiss = System.currentTimeMillis();
-					// Log.d(TAG, "disk cache miss: " + key + ", delay: " + (afterMiss - start) + " ms");
+					// logger.d("disk cache miss: " + key + ", delay: " + (afterMiss - start) + " ms");
 					return null;
 				}
 			} else {
 				return null;
 			}
 		} catch (IOException e) {
-			Log.e(TAG, "error loading tile from disk cache: " + key, e);
+			logger.e("error loading tile from disk cache: " + key, e);
 			return null;
 		}
 	}
@@ -354,7 +362,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		// long afterHitOrMiss = System.currentTimeMillis();
 		if (inMemoryCache != null) {
 			// Log.v(TAG, "memory cache hit: " + key);
-			// Log.d(TAG, "memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
+			// logger.d("memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
 			return new TileBitmap(State.IN_MEMORY, inMemoryCache);
 		} else {
 			// Log.v(TAG, "memory cache miss: " + key);
@@ -382,7 +390,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	// synchronized (mMemoryCache) {
 	// int currentSize = mMemoryCache.maxSize();
 	// if (currentSize < minSize) {
-	// // Log.d(TAG, "Increasing cache size " + currentSize + " -> " + minSize + " items");
+	// // logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");
 	// Log.d("blabla", "Increasing cache size " + currentSize + " -> " + minSize + " items");
 	// mMemoryCache.resize(minSize);
 	// } else if (currentSize > maxSize) {
@@ -400,7 +408,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		synchronized (mMemoryCache) {
 			int currentSize = mMemoryCache.maxSize();
 			if (currentSize < minSize) {
-				Log.d(TAG, "Increasing cache size " + currentSize + " -> " + minSize + " items");
+				logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");
 				mMemoryCache.resize(minSize);
 			} else {
 				// Log.v(TAG, "" + currentSize + " >= " + minSize);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import android.util.Log;
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask.TileDownloadResultHandler;
 
 /**
@@ -17,8 +17,9 @@ import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask.TileDownloadRes
  */
 public class DownloadAndSaveTileTasksRegistry {
 
-	private static final String TAG = DownloadAndSaveTileTasksRegistry.class.getSimpleName();
-	private static final int MAX_TASKS_IN_POOL = 10;
+	public static final int MAX_TASKS_IN_POOL = 10;
+
+	private static final Logger logger = new Logger(DownloadAndSaveTileTasksRegistry.class);
 
 	private final Map<TileId, DownloadAndSaveTileTask> tasks = new HashMap<TileId, DownloadAndSaveTileTask>();
 	private final TilesDownloader downloader;
@@ -33,13 +34,13 @@ public class DownloadAndSaveTileTasksRegistry {
 			if (!registered) {
 				DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(downloader, mZoomifyBaseUrl, tileId, handler);
 				tasks.put(tileId, task);
-				Log.v(TAG, "  registered task for " + tileId + ": (total " + tasks.size() + ")");
+				logger.v("  registered task for " + tileId + ": (total " + tasks.size() + ")");
 				task.executeConcurrentIfPossible();
 			} else {
-				// Log.v(TAG, " ignored task registration task for " + tileId + ": (total " + tasks.size() + ")");
+				// logger.v( " ignored task registration task for " + tileId + ": (total " + tasks.size() + ")");
 			}
 		} else {
-			// Log.v(TAG, "registration ignored: to many tasks: " + tileId + ": (total " + tasks.size() + ")");
+			// logger.v( "registration ignored: to many tasks: " + tileId + ": (total " + tasks.size() + ")");
 		}
 	}
 
@@ -51,7 +52,7 @@ public class DownloadAndSaveTileTasksRegistry {
 
 	public void unregisterTask(TileId tileId) {
 		tasks.remove(tileId);
-		Log.v(TAG, "unregistration performed: " + tileId + ": (total " + tasks.size() + ")");
+		logger.v("unregistration performed: " + tileId + ": (total " + tasks.size() + ")");
 	}
 
 	public boolean cancel(TileId id) {

@@ -1,7 +1,7 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
 import android.os.CountDownTimer;
-import android.util.Log;
+import cz.mzk.androidzoomifyviewer.Logger;
 
 /**
  * @author Martin Řehánek
@@ -9,13 +9,15 @@ import android.util.Log;
  */
 public class DoubleTapZoomManager {
 
-	private static final String TAG = DoubleTapZoomManager.class.getSimpleName();
 	public static final long ANIM_LENGTH_MS = 250;
 	public static final long ANIM_STEP_MS = 30;
 	public static final double MIN_RESIZE_RATIO = 1.0;
 	public static final double MAX_RESIZE_RATIO = 3.0;
 
+	private static final Logger logger = new Logger(DoubleTapZoomManager.class);
+
 	private final TiledImageView imageView;
+
 	private State state = State.IDLE;
 	private AnimationTimer animationTimer = null;
 

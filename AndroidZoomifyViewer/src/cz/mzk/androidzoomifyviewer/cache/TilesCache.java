@@ -39,12 +39,12 @@ public interface TilesCache {
 
 	public void cancelAllTasks();
 
-	public static interface FetchingBitmapFromDiskHandler {
-		public void onFetched();
-	}
-
 	public void updateMemoryCacheSizeInItems(int size);
 
 	// public void updateMemoryCacheSizeInItems(int minSize, int maxSize);
+
+	public static interface FetchingBitmapFromDiskHandler {
+		public void onFetched();
+	}
 
 }

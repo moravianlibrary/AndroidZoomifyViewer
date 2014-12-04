@@ -1,9 +1,11 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import android.content.res.Resources;
 import android.graphics.Rect;
+import cz.mzk.androidzoomifyviewer.Logger;
 
 /**
  * @author Martin Řehánek
@@ -11,7 +13,7 @@ import android.graphics.Rect;
  */
 public class Utils {
 
-	private static final String TAG = Utils.class.getSimpleName();
+	private static final Logger logger = new Logger(Utils.class);
 
 	public static String toString(Rect rect, String unit) {
 		StringBuilder builder = new StringBuilder();
@@ -123,6 +125,21 @@ public class Utils {
 		BigDecimal bd = new BigDecimal(Float.toString(d));
 		bd = bd.setScale(decimals, BigDecimal.ROUND_HALF_UP);
 		return bd.floatValue();
+	}
+
+	public static String formatBytes(long cacheSizeBytes) {
+		if (cacheSizeBytes < 1024) {
+			return String.format(Locale.US, "%d B", cacheSizeBytes);
+		} else if (cacheSizeBytes < 1024 * 1024) {
+			long kB = cacheSizeBytes / 1024;
+			return String.format(Locale.US, "%d kB", kB);
+		} else if (cacheSizeBytes < 1024 * 1024 * 1024) {
+			long MB = cacheSizeBytes / (1024 * 1024);
+			return String.format(Locale.US, "%d MB", MB);
+		} else {
+			long GB = cacheSizeBytes / (1024 * 1024 * 1024);
+			return String.format(Locale.US, "%d GB", GB);
+		}
 	}
 
 }

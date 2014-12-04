@@ -2,7 +2,7 @@ package cz.mzk.androidzoomifyviewer.cache;
 
 import java.io.File;
 
-import android.util.Log;
+import cz.mzk.androidzoomifyviewer.Logger;
 
 /**
  * @author Martin Řehánek
@@ -10,18 +10,18 @@ import android.util.Log;
  */
 public class DiskUtils {
 
-	private static final String TAG = DiskUtils.class.getSimpleName();
+	private static final Logger logger = new Logger(DiskUtils.class);
 
 	public static boolean deleteDirContent(File file) {
 		if (file == null) {
 			throw new NullPointerException("file is null");
 		}
 		if (!file.exists()) {
-			Log.w(TAG, "file doesn't exist: " + file.getAbsolutePath());
+			logger.w("file doesn't exist: " + file.getAbsolutePath());
 			return false;
 		}
 		if (!file.isDirectory()) {
-			Log.w(TAG, "not directory: " + file.getAbsolutePath());
+			logger.w("not directory: " + file.getAbsolutePath());
 			return false;
 		} else {
 			File[] filesInDir = file.listFiles();
@@ -41,17 +41,17 @@ public class DiskUtils {
 			throw new NullPointerException("file is null");
 		}
 		if (!file.exists()) {
-			Log.w(TAG, "doesn't exist: " + file.getAbsolutePath());
+			logger.w("doesn't exist: " + file.getAbsolutePath());
 			return false;
 		}
 		if (file.isFile()) {
 			boolean deleted = file.delete();
 			if (!deleted) {
-				Log.w(TAG, "failed to delete file " + file.getAbsolutePath());
+				logger.w("failed to delete file " + file.getAbsolutePath());
 			}
 			return deleted;
 		} else if (!file.isDirectory()) {
-			Log.w(TAG, "not file nor directory: " + file.getAbsolutePath());
+			logger.w("not file nor directory: " + file.getAbsolutePath());
 			return false;
 		} else { // dir
 			File[] filesInDir = file.listFiles();
@@ -64,7 +64,7 @@ public class DiskUtils {
 			}
 			boolean deleted = file.delete();
 			if (!deleted) {
-				Log.w(TAG, "failed to delete directory " + file.getAbsolutePath());
+				logger.w("failed to delete directory " + file.getAbsolutePath());
 			}
 			return deleted;
 		}

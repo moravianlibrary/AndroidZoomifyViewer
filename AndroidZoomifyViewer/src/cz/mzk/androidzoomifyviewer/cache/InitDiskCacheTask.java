@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 import android.os.AsyncTask;
-import android.util.Log;
+import cz.mzk.androidzoomifyviewer.Logger;
 
 public class InitDiskCacheTask extends AsyncTask<File, Void, DiskLruCache> {
-	private static final String TAG = InitDiskCacheTask.class.getSimpleName();
+
+	private static final Logger logger = new Logger(InitDiskCacheTask.class);
 
 	private final Object mDiskCacheInitializationLock = new Object();
 	private final int appVersion;
@@ -25,32 +26,32 @@ public class InitDiskCacheTask extends AsyncTask<File, Void, DiskLruCache> {
 	@Override
 	protected DiskLruCache doInBackground(File... params) {
 		synchronized (mDiskCacheInitializationLock) {
-			Log.v(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+			logger.v("assuming mDiskCacheLock: " + Thread.currentThread().toString());
 			try {
 				File cacheDir = params[0];
 				if (cacheDir.exists()) {
 					if (clearCache) {
-						Log.i(TAG, "clearing tiles disk cache");
+						logger.i("clearing tiles disk cache");
 						boolean cleared = DiskUtils.deleteDirContent(cacheDir);
 						if (!cleared) {
-							Log.w(TAG, "failed to delete content of " + cacheDir.getAbsolutePath());
+							logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
 							return null;
 						}
 					}
 				} else {
-					Log.i(TAG, "creating cache dir " + cacheDir);
+					logger.i("creating cache dir " + cacheDir);
 					boolean created = cacheDir.mkdir();
 					if (!created) {
-						Log.w(TAG, "failed to create cache dir " + cacheDir.getAbsolutePath());
+						logger.e("failed to create cache dir " + cacheDir.getAbsolutePath());
 						return null;
 					}
 				}
 				return DiskLruCache.open(cacheDir, appVersion, 1, cacheSize);
 			} catch (IOException e) {
-				Log.w(TAG, "error opening disk cache");
+				logger.e("error opening disk cache");
 				return null;
 			} finally {
-				Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
+				logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
 				mDiskCacheInitializationLock.notifyAll();
 			}
 		}

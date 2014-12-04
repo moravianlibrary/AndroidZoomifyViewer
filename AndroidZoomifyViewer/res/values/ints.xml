@@ -2,4 +2,5 @@
 <resources>
 	<!-- out of 100 -->
 	<integer name="pxRatio">100</integer>
+	<integer name="androidzoomifyviewer_disk_cache_size_kb">51200</integer>
 </resources>

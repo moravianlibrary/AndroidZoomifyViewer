@@ -10,13 +10,13 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import cz.mzk.androidzoomifyviewer.CacheManager;
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.R;
 import cz.mzk.androidzoomifyviewer.cache.TileBitmap;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
@@ -33,9 +33,12 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
  */
 public class TiledImageView extends View implements OnGestureListener, OnDoubleTapListener {
 
-	private static final String TAG = TiledImageView.class.getSimpleName();
-	public static boolean DEV_MODE = false;
-	public static boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS = false;
+	public static final boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS = false;
+	public static final boolean DEV_MODE = false;
+
+	private static final Logger logger = new Logger(TiledImageView.class);
+
+	private static boolean initialized = false;
 
 	private DevTools devTools = null;
 	private ImageCoordsPoints testPoints = null;
@@ -93,6 +96,16 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	private ImageInitializationHandler mImageInitializationHandler;
 	private TileDownloadHandler mTileDownloadHandler;
 
+	public static void initialize(Context context) {
+		if (initialized) {
+			throw new IllegalStateException(TiledImageView.class.getSimpleName() + " has been initialized  already");
+		}
+		long diskCacheBytes = context.getResources().getInteger(R.integer.androidzoomifyviewer_disk_cache_size_kb) * 1024;
+		boolean clearDiskCacheOnStart = context.getResources().getBoolean(R.bool.androidzoomifyviewer_dev_mode);
+		CacheManager.initialize(context, clearDiskCacheOnStart, diskCacheBytes);
+		initialized = true;
+	}
+
 	public TiledImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
@@ -123,16 +136,15 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		// : size == Configuration.SCREENLAYOUT_SIZE_LARGE ? "large" : "xlarge";
 		// Log.d(TestTags.DISPLAY, "display size: " + category);
 		String screenType = getResources().getString(R.string.screen_type);
-		Log.d(TestTags.DISPLAY, "screen type: " + screenType);
+		TestLoggers.DISPLAY.d("screen type: " + screenType);
 		double pixelRatio = getResources().getInteger(R.integer.pxRatio) / 100.0;
-		Log.d(TestTags.DISPLAY, String.format("pxRatio: %.2f", pixelRatio));
+		TestLoggers.DISPLAY.d(String.format("pxRatio: %.2f", pixelRatio));
 	}
 
 	@SuppressLint("NewApi")
 	private void logHwAcceleration() {
 		if (Build.VERSION.SDK_INT >= 11) {
-			Log.d(TestTags.DISPLAY, "(Window) HW accelerated: " + isHardwareAccelerated());
-			// Log.d(TestTags.DISPLAY, "HW accelerated: " + canv.isHardwareAccelerated());
+			TestLoggers.DISPLAY.d("(Window) HW accelerated: " + isHardwareAccelerated());
 		}
 	}
 
@@ -169,7 +181,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	}
 
 	public void loadImage(String zoomifyBaseUrl) {
-		Log.d(TAG, "loading new image, base url: " + zoomifyBaseUrl);
+		logger.d("loading new image, base url: " + zoomifyBaseUrl);
 		cancelAllTasks();
 		pageInitialized = false;
 		mPinchZoomManager = new PinchZoomManager(this, 1.0f);
@@ -190,7 +202,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 					@Override
 					public void onSuccess(TilesDownloader downloader) {
-						Log.d(TAG, "downloader initialized");
+						logger.d("downloader initialized");
 						mActiveImageDownloader = downloader;
 						if (DEV_MODE) {
 							ImageProperties imageProperties = downloader.getImageProperties();
@@ -269,7 +281,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			// ", height=" + canvHeight);
 			// double canvWidthDp = pxToDp(canvWidth);
 			// double canvHeightDp = pxToDp(canvHeight);
-			// Log.d(TAG, "canvas(dp): width=" + canvWidthDp + ", height=" +
+			// logger.d( "canvas(dp): width=" + canvWidthDp + ", height=" +
 			// canvHeightDp);
 		}
 		if (mActiveImageDownloader != null) {
@@ -312,8 +324,8 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			maxShiftLeft = mImageInCanvas.left >= 0 ? 0 : -mImageInCanvas.left;
 			maxShiftRight = mImageInCanvas.right <= canv.getWidth() ? 0 : mImageInCanvas.right - canv.getWidth();
 
-			// Log.d(TAG, "IMAGE canv:     " + Utils.toString(mImageInCanvas));
-			// Log.d(TAG, "IMAGE canv vis: " +
+			// logger.d( "IMAGE canv:     " + Utils.toString(mImageInCanvas));
+			// logger.d( "IMAGE canv vis: " +
 			// Utils.toString(mImageInCanvasVisible));
 
 			// TODO: pokud je mid ve viditelne strance, posunout canvas tim
@@ -377,9 +389,9 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			mInitialScaleFactor = scaleFactorNoFreeSpace;
 			break;
 		}
-		// Log.d(TAG, "fit to screen factor: " + mInitialResizeFactor);
+		// logger.d( "fit to screen factor: " + mInitialResizeFactor);
 		mMinScaleFactor = Math.min(scaleFactorFitToScreen, scaleFactorNoFreeSpace);
-		Log.d("PinchZoomManager", "minScale: " + mMinScaleFactor);
+		TestLoggers.PINCH_ZOOM.d("minScale: " + mMinScaleFactor);
 		// TODO: spis DP, nez PX
 		// double maxWidthScale = (double) imageProperties.getWidth() / (double)
 		// canv.getWidth();
@@ -394,18 +406,18 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		int mustFitInCanvasObjectWidthPx = imageProperties.getTileSize();
 		int mustFitInCanvasObjectHeightPx = imageProperties.getTileSize();
 
-		Log.d("PinchZoomManager", "canvas px: [" + canv.getWidth() + "," + canv.getHeight() + "]");
-		Log.d("PinchZoomManager", "canvas dp: [" + Utils.pxToDp(canv.getWidth()) + "," + Utils.pxToDp(canv.getHeight())
+		TestLoggers.PINCH_ZOOM.d("canvas px: [" + canv.getWidth() + "," + canv.getHeight() + "]");
+		TestLoggers.PINCH_ZOOM.d("canvas dp: [" + Utils.pxToDp(canv.getWidth()) + "," + Utils.pxToDp(canv.getHeight())
 				+ "]");
-		Log.d("PinchZoomManager", "image px: [" + imageProperties.getWidth() + "," + imageProperties.getHeight() + "]");
-		Log.d("PinchZoomManager", "tile size: " + imageProperties.getTileSize());
+		TestLoggers.PINCH_ZOOM.d("image px: [" + imageProperties.getWidth() + "," + imageProperties.getHeight() + "]");
+		TestLoggers.PINCH_ZOOM.d("tile size: " + imageProperties.getTileSize());
 
 		double maxWidthScalePx = (double) canv.getWidth() / (double) mustFitInCanvasObjectWidthPx;
 		double maxHeightScalePx = (double) canv.getHeight() / (double) mustFitInCanvasObjectHeightPx;
 		double maxWidthScaleDp = (double) Utils.pxToDp(canv.getWidth()) / (double) mustFitInCanvasObjectWidthPx;
 		double maxHeightScaleDp = (double) Utils.pxToDp(canv.getHeight()) / (double) mustFitInCanvasObjectHeightPx;
-		Log.d("PinchZoomManager", "px: maxWidthScale: " + maxWidthScalePx + ", maxHeightScale: " + maxHeightScalePx);
-		Log.d("PinchZoomManager", "dp: maxWidthScale: " + maxWidthScaleDp + ", maxHeightScale: " + maxHeightScaleDp);
+		TestLoggers.PINCH_ZOOM.d("px: maxWidthScale: " + maxWidthScalePx + ", maxHeightScale: " + maxHeightScalePx);
+		TestLoggers.PINCH_ZOOM.d("dp: maxWidthScale: " + maxWidthScaleDp + ", maxHeightScale: " + maxHeightScaleDp);
 		// mMaxScaleFractor = Math.max(maxWidthScaleDp, maxHeightScaleDp);
 		// mMaxScaleFractor = Math.min(maxWidthScaleDp, maxHeightScaleDp);
 		mMaxScaleFactor = Math.min(maxWidthScalePx, maxHeightScalePx);
@@ -464,7 +476,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		for (int y = topLeftVisibleTileCoords[1]; y <= bottomRightVisibleTileCoords[1]; y++) {
 			for (int x = topLeftVisibleTileCoords[0]; x <= bottomRightVisibleTileCoords[0]; x++) {
 				int[] visibleTile = { x, y };
-				// Log.d(TestTags.TILES, "visible: " + Utils.toString(visibleTile));
+				// TestTags.TILES.d( "visible: " + Utils.toString(visibleTile));
 				visibleTiles.add(visibleTile);
 			}
 		}
@@ -506,7 +518,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			}
 		}
 		// long end = System.currentTimeMillis();
-		// Log.d(TAG, "drawLayers (layer=" + layerId + "): " + (end - start) +
+		// logger.d( "drawLayers (layer=" + layerId + "): " + (end - start) +
 		// " ms");
 	}
 
@@ -614,15 +626,15 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				(int) Utils.toImageX(mVisibleImageInCanvas.right, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
 		int bottomRightVisibleY = collapseToInterval(
 				(int) Utils.toImageY(mVisibleImageInCanvas.bottom, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
-		// Log.d(TestTags.TILES, "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
-		// Log.d(TestTags.TILES, "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
+		// TestTags.TILES.d( "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
+		// TestTags.TILES.d( "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
 
 		int[] topLeftVisibleTileCoords = mActiveImageDownloader
 				.getTileCoords(layerId, topLeftVisibleX, topLeftVisibleY);
 		int[] bottomRightVisibleTileCoords = mActiveImageDownloader.getTileCoords(layerId, bottomRightVisibleX,
 				bottomRightVisibleY);
-		// Log.d(TestTags.TILES, "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
-		// Log.d(TestTags.TILES, "bottom_right: " + Utils.toString(bottomRightVisibleTileCoords));
+		// TestTags.TILES.d( "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
+		// TestTags.TILES.d( "bottom_right: " + Utils.toString(bottomRightVisibleTileCoords));
 		return new int[][] { topLeftVisibleTileCoords, bottomRightVisibleTileCoords };
 	}
 
@@ -644,7 +656,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 				}
 			}
 		}
-		// Log.d(TAG, "canceled: " + canceled);
+		// logger.d( "canceled: " + canceled);
 	}
 
 	public void setDrawLayerWithWorseResolution(boolean show) {
@@ -683,7 +695,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			double imgOriginalHeight) {
 		double widthRatio = canvasWidth / imgOriginalWidth;
 		double heightRatio = canvasHeight / imgOriginalHeight;
-		// Log.d(TAG, "widthRatio=" + widthRatio + ", heightRatio=" +
+		// logger.d( "widthRatio=" + widthRatio + ", heightRatio=" +
 		// heightRatio);
 		// preferuj zmenseni
 		if (widthRatio < 1 && heightRatio < 1) {
@@ -703,7 +715,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			double imgOriginalHeight) {
 		double widthRatio = canvasWidth / imgOriginalWidth;
 		double heightRatio = canvasHeight / imgOriginalHeight;
-		// Log.d(TAG, "widthRatio=" + widthRatio + ", heightRatio=" +
+		// logger.d( "widthRatio=" + widthRatio + ", heightRatio=" +
 		// heightRatio);
 
 		// preferuj zmenseni
@@ -769,7 +781,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 			mViewmodeShift = new VectorD(xRight, yBottom);
 			break;
 		}
-		Log.d(TestTags.CENTERS, "initial shift:" + mViewmodeShift);
+		TestLoggers.CENTERS.d("initial shift:" + mViewmodeShift);
 	}
 
 	private void initMinZoomPadding(Canvas canv) {
@@ -797,7 +809,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		PointD imgInCanvasBottomRight = Utils.toCanvasCoords(imgBottomRight, scaleFactor, shift);
 		Rect result = new Rect((int) imgInCanvasTopLeft.x, (int) imgInCanvasTopLeft.y, (int) imgInCanvasBottomRight.x,
 				(int) imgInCanvasBottomRight.y);
-		// Log.d(TestTags.TILES, "computeAreaInCanvas result: " + result.toShortString());
+		// TestTags.TILES.d( "computeAreaInCanvas result: " + result.toShortString());
 		return result;
 	}
 
@@ -850,7 +862,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 							mPinchZoomManager.startPinching(event, getCurrentScaleFactor(), getTotalShift());
 							return true;
 						} else {
-							Log.w(TAG, "unexpected ACTION_POINTER_DOWN");
+							logger.w("unexpected ACTION_POINTER_DOWN");
 							return true;
 						}
 					} else {
@@ -886,7 +898,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 						if (pinchZoomManagerState == PinchZoomManager.State.READY_TO_PINCH) {
 							mPinchZoomManager.cancel();
 						} else {
-							Log.w(TAG, "unexpected ACTION_POINTER_UP");
+							logger.w("unexpected ACTION_POINTER_UP");
 						}
 						if (swipeShiftManagerState == SwipeShiftManager.State.IDLE) {
 							// TODO: enable
@@ -896,7 +908,7 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 							mSwipeShiftManager.notifyReadyToDrag(event.getX(remainingFingerIndex),
 									event.getY(remainingFingerIndex));
 						} else {
-							Log.w(TAG, "unexpected " + SwipeShiftManager.class.getSimpleName() + " state: "
+							logger.w("unexpected " + SwipeShiftManager.class.getSimpleName() + " state: "
 									+ swipeShiftManagerState.name());
 						}
 						return true;
@@ -925,25 +937,25 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 							}
 						} else {
 							// should not ever happen
-							Log.w(TAG, "unexpected ACTION_MOVE");
+							logger.w("unexpected ACTION_MOVE");
 							return true;
 						}
 					}
 				default:
 					if (Build.VERSION.SDK_INT >= 19) {
-						Log.w(TAG, "unexpected event: " + MotionEvent.actionToString(action));
+						logger.w("unexpected event: " + MotionEvent.actionToString(action));
 					} else {
-						Log.w(TAG, "unexpected event");
+						logger.w("unexpected event");
 					}
 					return super.onTouchEvent(event);
 				}
 			} else {
-				Log.w(TAG_STATES, "ignoring event while double tap zooming animation in progress");
+				TestLoggers.STATE.w("ignoring event while double tap zooming animation in progress");
 				return false;
 
 			}
 		} else {
-			Log.d(TAG_STATES, "not initialized yet");
+			TestLoggers.STATE.d("not initialized yet");
 			mGestureDetector.onTouchEvent(event);
 			return true;
 		}
@@ -969,22 +981,20 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 		NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM, //
 	}
 
-	private static final String TAG_STATES = "state";
-
 	@Override
 	@SuppressLint("NewApi")
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		PointD point = new PointD(e.getX(), e.getY());
 		if (Build.VERSION.SDK_INT >= 19) {
-			Log.d(TAG_STATES, "imgView: onSingleTapConfirmed: " + MotionEvent.actionToString(e.getAction()) + ": "
+			TestLoggers.STATE.d("imgView: onSingleTapConfirmed: " + MotionEvent.actionToString(e.getAction()) + ": "
 					+ point.toString());
 		} else {
-			Log.d(TAG_STATES, "imgView: onSingleTapConfirmed: " + point.toString());
+			TestLoggers.STATE.d("imgView: onSingleTapConfirmed: " + point.toString());
 		}
 		if (mSingleTapListener != null) {
 			mSingleTapListener.onSingleTap(e.getX(), e.getY(), mVisibleImageInCanvas);
 		} else {
-			Log.d(TAG_STATES, "imgView: SingleTapListener not initialized");
+			TestLoggers.STATE.d("imgView: SingleTapListener not initialized");
 		}
 		return true;
 	}
@@ -994,10 +1004,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	public boolean onDoubleTap(MotionEvent e) {
 		PointD point = new PointD(e.getX(), e.getY());
 		if (Build.VERSION.SDK_INT >= 19) {
-			Log.d(TAG_STATES,
-					"imgView: onDoubleTap: " + MotionEvent.actionToString(e.getAction()) + ": " + point.toString());
+			TestLoggers.STATE.d("imgView: onDoubleTap: " + MotionEvent.actionToString(e.getAction()) + ": "
+					+ point.toString());
 		} else {
-			Log.d(TAG_STATES, "imgView: onDoubleTap: " + point.toString());
+			TestLoggers.STATE.d("imgView: onDoubleTap: " + point.toString());
 		}
 		mDoubleTapZoomManager.startZooming(point);
 
@@ -1008,10 +1018,10 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 	@SuppressLint("NewApi")
 	public boolean onDoubleTapEvent(MotionEvent e) {
 		// if (Build.VERSION.SDK_INT >= 19) {
-		// Log.d(TAG_STATES, "imgView: onDoubleTapEvent: " +
+		// TestTags.STATE.d("imgView: onDoubleTapEvent: " +
 		// MotionEvent.actionToString(e.getAction()));
 		// } else {
-		// Log.d(TAG_STATES, "imgView: onDoubleTapEvent");
+		// TestTags.STATE.d("imgView: onDoubleTapEvent");
 		// }
 		// return true;
 		return false;
@@ -1019,35 +1029,35 @@ public class TiledImageView extends View implements OnGestureListener, OnDoubleT
 
 	@Override
 	public boolean onDown(MotionEvent e) {
-		// Log.d(TAG_STATES, "imgView: onDown");
+		// TestTags.STATE.d("imgView: onDown");
 		return false;
 	}
 
 	@Override
 	public void onShowPress(MotionEvent e) {
-		// Log.d(TAG_STATES, "imgView: onShowPress");
+		// TestTags.STATE.d("imgView: onShowPress");
 	}
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		// Log.d(TAG_STATES, "imgView: onSingleTapUp");
+		// TestTags.STATE.d("imgView: onSingleTapUp");
 		return false;
 	}
 
 	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-		// Log.d(TAG_STATES, "imgView: onScroll");
+		// TestTags.STATE.d("imgView: onScroll");
 		return false;
 	}
 
 	@Override
 	public void onLongPress(MotionEvent e) {
-		// Log.d(TAG_STATES, "imgView: onLongPress");
+		// TestTags.STATE.d("imgView: onLongPress");
 	}
 
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		// Log.d(TAG_STATES, "imgView: onFling");
+		// TestTags.STATE.d("imgView: onFling");
 		return false;
 	}
 

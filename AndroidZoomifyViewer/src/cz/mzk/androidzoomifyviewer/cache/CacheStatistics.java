@@ -6,7 +6,6 @@ public class CacheStatistics {
 	private final int missCount;
 
 	public CacheStatistics(long totalServingTime, int hitCount, int missCount) {
-		super();
 		this.totalServingTime = totalServingTime;
 		this.hitCount = hitCount;
 		this.missCount = missCount;

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.R;
 
 /**
@@ -15,9 +16,8 @@ import cz.mzk.androidzoomifyviewer.R;
  */
 public class DevTools {
 
-	private static final String TAG = DevTools.class.getSimpleName();
+	private static final Logger logger = new Logger(DevTools.class);
 
-	private Canvas mCanv;
 	// colors
 	private final Paint paintBlue = new Paint();
 	private final Paint paintRed = new Paint();
@@ -32,6 +32,8 @@ public class DevTools {
 	private final Paint paintBlackTrans = new Paint();
 	private final Paint paintGreenTrans = new Paint();
 	private final Paint paintBlueTrans = new Paint();
+
+	private Canvas mCanv;
 
 	public DevTools(Context context) {
 		// init paints
@@ -48,6 +50,10 @@ public class DevTools {
 		paintBlackTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_black_trans));
 		paintGreenTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_green_trans));
 		paintBlueTrans.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue_trans));
+	}
+
+	public void setCanvas(Canvas canv) {
+		this.mCanv = canv;
 	}
 
 	public void fillWholeCanvasWithColor(Paint paint) {
@@ -102,10 +108,6 @@ public class DevTools {
 		int centerX = (int) (rect.left + (rect.right - rect.left) / 2.0);
 		int centerY = (int) (rect.top + (double) (rect.bottom - rect.top) / 2.0);
 		mCanv.drawCircle((float) centerX, (float) centerY, 7.0f, paint);
-	}
-
-	public void setCanvas(Canvas canv) {
-		this.mCanv = canv;
 	}
 
 	public Paint getPaintBlue() {

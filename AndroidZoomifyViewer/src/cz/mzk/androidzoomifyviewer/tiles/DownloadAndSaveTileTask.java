@@ -1,9 +1,9 @@
 package cz.mzk.androidzoomifyviewer.tiles;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.OtherIOException;
@@ -15,7 +15,8 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsExce
  */
 public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bitmap> {
 
-	private static final String TAG = DownloadAndSaveTileTask.class.getSimpleName();
+	private static final Logger logger = new Logger(DownloadAndSaveTileTask.class);
+
 	private final TilesDownloader downloader;
 	private final String zoomifyBaseUrl;
 	private final TileId tileId;
@@ -54,20 +55,19 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
 				if (!isCancelled()) {
 					if (tile != null) {
 						CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tileId);
-						Log.v(TAG, String.format("tile downloaded and saved to disk cache: base url: '%s', tile: '%s'",
+						logger.v(String.format("tile downloaded and saved to disk cache: base url: '%s', tile: '%s'",
 								zoomifyBaseUrl, tileId));
 					} else {
 						// TODO: examine this
-						Log.w(TAG, "tile is null");
+						logger.w("tile is null");
 					}
 				} else {
-					Log.v(TAG,
-							String.format(
-									"tile processing canceled task after downloading and before saving data: base url: '%s', tile: '%s'",
+					logger.v(String
+							.format("tile processing canceled task after downloading and before saving data: base url: '%s', tile: '%s'",
 									zoomifyBaseUrl, tileId));
 				}
 			} else {
-				Log.v(TAG, String.format(
+				logger.v(String.format(
 						"tile processing task canceled before download started: base url: '%s', tile: '%s'",
 						zoomifyBaseUrl, tileId));
 			}

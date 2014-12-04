@@ -1,6 +1,6 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import android.util.Log;
+import cz.mzk.androidzoomifyviewer.Logger;
 
 /**
  * @author Martin Řehánek
@@ -8,10 +8,11 @@ import android.util.Log;
  */
 public class SwipeShiftManager {
 
-	private static final String TAG = SwipeShiftManager.class.getSimpleName();
 	public static final double MIN_DRAG_DISTANCE_TO_RECOGNIZE_SHIFT_DP = 1.0;
 	public static final long MAX_DRAG_TIME_TO_BE_CONSIDERED_SINGLE_TAP_NS = 200000000;
 	public static final double MAX_DRAG_DISTANCE_TO_BE_CONSIDERED_SINGLE_TAP_DP = 10.0;
+
+	private static final Logger logger = new Logger(SwipeShiftManager.class);
 
 	private VectorD accumulatedSwipeShift = VectorD.ZERO_VECTOR;
 	private State state = State.IDLE;
@@ -34,14 +35,14 @@ public class SwipeShiftManager {
 		mLastX = x;
 		mLastY = y;
 		state = State.READY_TO_DRAG;
-		// Log.d(TAG, "state: " + state.name());
-		Log.d(TestTags.STATE, "shift: " + state.name());
+		// logger.d( "state: " + state.name());
+		TestLoggers.STATE.d("shift: " + state.name());
 	}
 
 	public void notifyCanceled() {
 		state = State.IDLE;
-		// Log.d(TAG, "state: " + state.name());
-		Log.d(TestTags.STATE, "shift: " + state.name());
+		// logger.d( "state: " + state.name());
+		TestLoggers.STATE.d("shift: " + state.name());
 	}
 
 	/**
@@ -55,8 +56,8 @@ public class SwipeShiftManager {
 		boolean isConsideredSingleTap = dragConsideredSingleTap(System.nanoTime(), x, y);
 		// TODO: spustit animaci posunu ze setrvacnosti
 		state = State.IDLE;
-		// Log.d(TAG, "state: " + state.name());
-		Log.d(TestTags.STATE, "shift: " + state.name());
+		// logger.d( "state: " + state.name());
+		TestLoggers.STATE.d("shift: " + state.name());
 		return isConsideredSingleTap;
 	}
 
@@ -65,9 +66,9 @@ public class SwipeShiftManager {
 		float diffX = x - mStartX;
 		float diffY = y - mStartY;
 		double distance = Utils.pxToDp(Math.sqrt(diffX * diffX + diffY * diffY));
-		Log.d(TAG, "distance: " + distance + " dp");
+		logger.d("distance: " + distance + " dp");
 		// double timeSec = time / 1000000000.0;
-		// Log.d(TAG, String.format("time: %.3f s", timeSec));
+		// logger.d( String.format("time: %.3f s", timeSec));
 		return time <= MAX_DRAG_TIME_TO_BE_CONSIDERED_SINGLE_TAP_NS
 				&& distance <= MAX_DRAG_DISTANCE_TO_BE_CONSIDERED_SINGLE_TAP_DP;
 	}
@@ -120,11 +121,11 @@ public class SwipeShiftManager {
 			mLastX = newX;
 			mLastY = newY;
 			state = State.DRAGGING;
-			Log.d(TestTags.STATE, String.format("shift: %s, distance: %.2f px / %.2f dp", state.name(),
+			TestLoggers.STATE.d(String.format("shift: %s, distance: %.2f px / %.2f dp", state.name(),
 					currentDragDistancePx, currentDragDistanceDp));
 			return true;
 		} else {
-			Log.d(TestTags.STATE, String.format("shift: %s, distance: %.2f px / %.2f dp (ingored)", state.name(),
+			TestLoggers.STATE.d(String.format("shift: %s, distance: %.2f px / %.2f dp (ingored)", state.name(),
 					currentDragDistancePx, currentDragDistanceDp));
 			return false;
 		}
