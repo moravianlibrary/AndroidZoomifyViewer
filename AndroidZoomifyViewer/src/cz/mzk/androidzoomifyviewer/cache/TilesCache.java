@@ -43,6 +43,9 @@ public interface TilesCache {
 
 	// public void updateMemoryCacheSizeInItems(int minSize, int maxSize);
 
+	// TODO: use this
+	public void close();
+
 	public static interface FetchingBitmapFromDiskHandler {
 		public void onFetched();
 	}

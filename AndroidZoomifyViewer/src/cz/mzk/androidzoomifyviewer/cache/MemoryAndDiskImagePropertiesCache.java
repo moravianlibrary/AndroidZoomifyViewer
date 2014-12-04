@@ -1,14 +1,13 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
 import java.io.File;
-import java.io.IOException;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
+import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 
 /**
@@ -107,7 +106,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 					}
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
 					return null;
-				} catch (IOException e) {
+				} catch (DiskLruCacheException e) {
 					logger.w("error initializing disk cache, disabling");
 					mDiskCacheDisabled = true;
 					mDiskCacheInitializationLock.notifyAll();
@@ -165,7 +164,6 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 	private void storeXmlToDiskCache(String key, String xml) {
 		waitUntilDiskCacheInitializedOrDisabled();
-		Editor edit = null;
 		try {
 			if (!mDiskCacheDisabled) {
 				Snapshot fromDiskCache = mDiskCache.get(key);
@@ -173,25 +171,11 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 					logger.d("already in disk cache: " + key);
 				} else {
 					logger.d("storing to disk cache: " + key);
-					edit = mDiskCache.edit(key);
-					if (edit != null) {
-						edit.set(0, xml);
-						edit.commit();
-					} else {
-						// another thread trying to write, i.e. incorrectly implemented synchronization
-						logger.e(key + ": edit allready opened");
-					}
+					mDiskCache.storeString(0, key, xml);
 				}
 			}
-		} catch (IOException e) {
-			logger.e("failed to store xml to disk cache: " + e.getMessage());
-			try {
-				if (edit != null) {
-					edit.abort();
-				}
-			} catch (IOException e1) {
-				logger.e("failed to cleanup", e1);
-			}
+		} catch (DiskLruCacheException e) {
+			logger.e("failed to store xml to disk cache: " + key, e);
 		}
 	}
 
@@ -221,30 +205,17 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 		waitUntilDiskCacheInitializedOrDisabled();
 		try {
 			if (!mDiskCacheDisabled) {
-				// long start = System.currentTimeMillis();
 				Snapshot snapshot = mDiskCache.get(key);
 				if (snapshot != null) {
-					// long afterHit = System.currentTimeMillis();
-					// InputStream in = snapshot.getInputStream(0);
-					// String result = stringFromStream(in, bufferSize);
 					String result = snapshot.getString(0);
-					// long afterDecoding = System.currentTimeMillis();
-					// long retrieval = afterHit - start;
-					// long decoding = afterDecoding - afterHit;
-					// long total = retrieval + decoding;
-					// logger.d("disk cache hit, delay: " + total + "ms (retrieval: " + retrieval + "ms, decoding: " + decoding
-					// + " ms)");
 					return result;
 				} else {
-					// long afterMiss = System.currentTimeMillis();
-					// logger.d("disk cache miss:, delay: " + (afterMiss - start) + " ms");
-					// logger.d("disk cache miss: " + key + ", delay: " + (afterMiss - start) + " ms");
 					return null;
 				}
 			} else {
 				return null;
 			}
-		} catch (IOException e) {
+		} catch (DiskLruCacheException e) {
 			logger.i("error loading xml from disk cache: " + key, e);
 			return null;
 		}

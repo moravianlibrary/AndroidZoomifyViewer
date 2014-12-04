@@ -1,21 +1,18 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
+import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.TileBitmap.State;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
@@ -139,7 +136,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 					mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, cacheSizeBytes);
 					logger.i("disk cache initialized; size: " + Utils.formatBytes(cacheSizeBytes));
 					return null;
-				} catch (IOException e) {
+				} catch (DiskLruCacheException e) {
 					logger.w("error opening disk cache, disabling");
 					disableDiskCache();
 					return null;
@@ -178,47 +175,19 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
 	private void storeTileToDiskCache(String key, Bitmap bmp) {
 		waitUntilDiskCacheInitializedOrDisabled();
-		Editor edit = null;
-		OutputStream out = null;
 		try {
 			if (mDiskCacheEnabled) {
 				Snapshot fromDiskCache = mDiskCache.get(key);
 				if (fromDiskCache != null) {
-					// logger.d("already in disk cache: " + key);
+					logger.d("already in disk cache: " + key);
 				} else {
-					// logger.d("storing to disk cache: " + key);
-					edit = mDiskCache.edit(key);
-					if (edit != null) {
-						edit.hashCode();
-						out = edit.newOutputStream(0);
-						byte[] bytes = bitmapToByteArray(bmp);
-						out.write(bytes);
-						edit.commit();
-					} else {
-						// another thread trying to write, i.e. incorrectly implemented synchronization
-						logger.e(key + ": edit allready opened");
-					}
+					logger.d("storing to disk cache: " + key);
+					mDiskCache.storeBitmap(0, key, bmp);
 				}
 			}
-		} catch (IOException e) {
-			logger.e("failed to store tile to disk cache: " + e.getMessage());
-			try {
-				if (edit != null) {
-					edit.abort();
-				}
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e1) {
-				logger.e("failed to cleanup", e1);
-			}
+		} catch (DiskLruCacheException e) {
+			logger.e("failed to store tile to disk cache: " + key, e);
 		}
-	}
-
-	private byte[] bitmapToByteArray(Bitmap bitmap) {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		bitmap.compress(CompressFormat.PNG, 100, bos);
-		return bos.toByteArray();
 	}
 
 	@Override
@@ -332,7 +301,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 			} else {
 				return null;
 			}
-		} catch (IOException e) {
+		} catch (DiskLruCacheException e) {
 			logger.e("error loading tile from disk cache: " + key, e);
 			return null;
 		}
@@ -412,6 +381,21 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 				mMemoryCache.resize(minSize);
 			} else {
 				// Log.v(TAG, "" + currentSize + " >= " + minSize);
+			}
+		}
+	}
+
+	@Override
+	public void close() {
+		try {
+			mDiskCache.flush();
+		} catch (DiskLruCacheException e) {
+			logger.e("Error flushing disk cache");
+		} finally {
+			try {
+				mDiskCache.close();
+			} catch (IOException e) {
+				logger.e("Error closing disk cache");
 			}
 		}
 	}

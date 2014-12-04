@@ -1,10 +1,10 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
 import java.io.File;
-import java.io.IOException;
 
 import android.os.AsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 
 public class InitDiskCacheTask extends AsyncTask<File, Void, DiskLruCache> {
 
@@ -47,7 +47,7 @@ public class InitDiskCacheTask extends AsyncTask<File, Void, DiskLruCache> {
 					}
 				}
 				return DiskLruCache.open(cacheDir, appVersion, 1, cacheSize);
-			} catch (IOException e) {
+			} catch (DiskLruCacheException e) {
 				logger.e("error opening disk cache");
 				return null;
 			} finally {

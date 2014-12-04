@@ -1,9 +1,7 @@
 package cz.mzk.androidzoomifyviewer.cache.tmp;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -11,9 +9,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;
-import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask;
-import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Editor;
+import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
+import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask;
 import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask.Listener;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
@@ -88,7 +86,7 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 				// Log.d(TAG, "disk cache miss: " + key + ", delay: " + (afterMiss - start) + " ms");
 				return null;
 			}
-		} catch (IOException e) {
+		} catch (DiskLruCacheException e) {
 			Log.i(TAG, "error loading tile from disk cache: " + key, e);
 			return null;
 		}
@@ -101,43 +99,44 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 		storeTileToDiskCache(key, tile);
 	}
 
+	// TODO: fix if needed
 	private void storeTileToDiskCache(String key, Bitmap bmp) {
-		// waitUntilDiskCacheInitializedOrDisabled();
-		Editor edit = null;
-		OutputStream out = null;
-		try {
-			Snapshot fromDiskCache = mCache.get(key);
-			if (fromDiskCache != null) {
-				Log.d(TAG, "already in disk cache: " + key);
-			} else {
-				Log.d(TAG, "storing to disk cache: " + key);
-				edit = mCache.edit(key);
-				if (edit != null) {
-					edit.hashCode();
-					out = edit.newOutputStream(0);
-					byte[] bytes = bitmapToByteArray(bmp);
-					out.write(bytes);
-					// int kB = bytes.length / 1024;
-					// Log.d(TestTags.CACHE, "bmp size: " + kB + " kB");
-					edit.commit();
-				} else {
-					// another thread trying to write, i.e. incorrectly implemented synchronization
-					Log.e(TAG, key + ": edit allready opened");
-				}
-			}
-		} catch (IOException e) {
-			Log.e(TAG, "failed to store tile to disk cache: " + e.getMessage());
-			try {
-				if (edit != null) {
-					edit.abort();
-				}
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e1) {
-				Log.e(TAG, "failed to cleanup", e1);
-			}
-		}
+		// // waitUntilDiskCacheInitializedOrDisabled();
+		// Editor edit = null;
+		// OutputStream out = null;
+		// try {
+		// Snapshot fromDiskCache = mCache.get(key);
+		// if (fromDiskCache != null) {
+		// Log.d(TAG, "already in disk cache: " + key);
+		// } else {
+		// Log.d(TAG, "storing to disk cache: " + key);
+		// edit = mCache.edit(key);
+		// if (edit != null) {
+		// edit.hashCode();
+		// out = edit.newOutputStream(0);
+		// byte[] bytes = bitmapToByteArray(bmp);
+		// out.write(bytes);
+		// // int kB = bytes.length / 1024;
+		// // Log.d(TestTags.CACHE, "bmp size: " + kB + " kB");
+		// edit.commit();
+		// } else {
+		// // another thread trying to write, i.e. incorrectly implemented synchronization
+		// Log.e(TAG, key + ": edit allready opened");
+		// }
+		// }
+		// } catch (IOException e) {
+		// Log.e(TAG, "failed to store tile to disk cache: " + e.getMessage());
+		// try {
+		// if (edit != null) {
+		// edit.abort();
+		// }
+		// if (out != null) {
+		// out.close();
+		// }
+		// } catch (IOException e1) {
+		// Log.e(TAG, "failed to cleanup", e1);
+		// }
+		// }
 	}
 
 	@Override
