@@ -11,6 +11,7 @@ import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandle
 public class BitmapFetchTaskRegistry {
 
 	public static final int MAX_TASKS = 10;
+	// private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 2);
 
 	private static final Logger logger = new Logger(BitmapFetchTaskRegistry.class);
 
@@ -65,6 +66,13 @@ public class BitmapFetchTaskRegistry {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			// Thread thread = Thread.currentThread();
+			// thread.setPriority(THREAD_PRIORITY);
+			// ThreadGroup group = thread.getThreadGroup();
+			// int threadPriority = thread.getPriority();
+			// TestLoggers.THREADS.d(String.format(
+			// "bmp fetch: priority: %d, TG: name: %s, active: %d, max priority: %d, ", threadPriority,
+			// group.getName(), group.activeCount(), group.getMaxPriority()));
 			try {
 				if (!isCancelled()) {
 					Bitmap fromDiskCache = cache.getTileFromDiskCache(key);

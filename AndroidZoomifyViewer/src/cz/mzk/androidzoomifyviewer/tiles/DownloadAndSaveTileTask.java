@@ -15,6 +15,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsExce
  */
 public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bitmap> {
 
+	// private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 1);
 	private static final Logger logger = new Logger(DownloadAndSaveTileTask.class);
 
 	private final TilesDownloader downloader;
@@ -49,6 +50,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
 
 	@Override
 	protected Bitmap doInBackground(Void... params) {
+		// Thread thread = Thread.currentThread();
+		// thread.setPriority(THREAD_PRIORITY);
+		// ThreadGroup group = thread.getThreadGroup();
+		// int threadPriority = thread.getPriority();
+		// TestLoggers.THREADS.d(String.format("bmp download: priority: %d, TG: name: %s, active: %d, max priority: %d, ",
+		// threadPriority, group.getName(), group.activeCount(), group.getMaxPriority()));
 		try {
 			if (!isCancelled()) {
 				Bitmap tile = downloader.downloadTile(tileId);

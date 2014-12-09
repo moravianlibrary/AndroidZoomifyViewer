@@ -87,6 +87,11 @@ public class DoubletapZoomHandler extends Handler {
 
 		@Override
 		public void run() {
+			// ThreadGroup group = Thread.currentThread().getThreadGroup();
+			// int threadPriority = Thread.currentThread().getPriority();
+			// TestLoggers.THREADS.d(String.format(
+			// "double-tap worker: priority: %d, TG: name: %s, active: %d, max priority: %d, ", threadPriority,
+			// group.getName(), group.activeCount(), group.getMaxPriority()));
 			for (int i = 0; true; i++) {
 				Message msg = Message.obtain();
 				msg.arg1 = workerId;

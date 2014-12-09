@@ -518,7 +518,7 @@ public final class DiskLruCache implements Closeable {
 		return edit(key, ANY_SEQUENCE_NUMBER);
 	}
 
-	public synchronized void storeString(int index, String key, String value) throws DiskLruCacheException {
+	public void storeString(int index, String key, String value) throws DiskLruCacheException {
 		Editor edit = null;
 		try {
 			edit = edit(key);
@@ -542,8 +542,11 @@ public final class DiskLruCache implements Closeable {
 		}
 	}
 
-	// TODO: synchronized?
-	public synchronized void storeBitmap(int index, String key, Bitmap bmp) throws DiskLruCacheException {
+	/**
+	 * Perhaps should bes synchronized. But synchronization on this level causes significant lagging when tiles are being
+	 * downloaded by fetched simultaneously.
+	 */
+	public void storeBitmap(int index, String key, Bitmap bmp) throws DiskLruCacheException {
 		Editor edit = null;
 		OutputStream out = null;
 		try {

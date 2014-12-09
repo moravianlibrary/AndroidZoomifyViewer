@@ -229,6 +229,8 @@ public class TiledImageView extends View {
 
 	@Override
 	public void onDraw(final Canvas canv) {
+		// TestLoggers.THREADS.d("ui: " + Thread.currentThread().getPriority());
+
 		// Debug.startMethodTracing("default");
 		// long start = System.currentTimeMillis();
 		mCanvWidth = canv.getWidth();
@@ -298,6 +300,7 @@ public class TiledImageView extends View {
 				}
 			}
 		}
+		// Debug.stopMethodTracing();
 	}
 
 	private void initViewmodeScaleFactors(Canvas canv) {
@@ -445,7 +448,7 @@ public class TiledImageView extends View {
 		if (tile != null) {
 			drawTile(canv, visibleTileId, tile);
 		} else {
-			downloadTile(visibleTileId);
+			downloadTileAsync(visibleTileId);
 		}
 	}
 
@@ -465,11 +468,11 @@ public class TiledImageView extends View {
 			// nothing, wait for fetch
 			break;
 		case NOT_FOUND:
-			downloadTile(visibleTileId);
+			downloadTileAsync(visibleTileId);
 		}
 	}
 
-	private void downloadTile(TileId visibleTileId) {
+	private void downloadTileAsync(TileId visibleTileId) {
 		mActiveImageDownloader.getTaskRegistry().registerTask(visibleTileId, mZoomifyBaseUrl,
 				new TileDownloadResultHandler() {
 

@@ -17,4 +17,5 @@ public class TestLoggers {
 	public static final Logger DISPLAY = new Logger("display");
 	public static final Logger CACHE = new Logger("cache");
 	public static final Logger PINCH_ZOOM = new Logger("pinch-zoom");
+	// public static final Logger THREADS = new Logger("threads");
 }

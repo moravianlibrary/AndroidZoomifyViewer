@@ -65,6 +65,7 @@ public class FlingShiftHandler extends Handler {
 
 		@Override
 		public void run() {
+			// TestLoggers.THREADS.d("fling worker: " + Thread.currentThread().getPriority());
 			while (true) {
 				Message msg = Message.obtain();
 				msg.arg1 = workerId;
