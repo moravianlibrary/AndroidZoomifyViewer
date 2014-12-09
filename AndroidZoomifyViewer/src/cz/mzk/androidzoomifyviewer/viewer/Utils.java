@@ -64,6 +64,14 @@ public class Utils {
 		return (canvasY - imageShiftInCanvasY) / imageToCanvasResizeFactor;
 	}
 
+	public static double toCanvasX(double imageX, double imageScaleFactor, double imageShiftInCanvasX) {
+		return imageX * imageScaleFactor + imageShiftInCanvasX;
+	}
+
+	public static double toCanvasY(double imageY, double imageScaleFactor, double imageShiftInCanvasY) {
+		return imageY * imageScaleFactor + imageShiftInCanvasY;
+	}
+
 	public static String toString(Rect rect) {
 		return toString(rect, "px");
 	}

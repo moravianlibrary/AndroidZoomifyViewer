@@ -6,7 +6,7 @@ package cz.mzk.androidzoomifyviewer.viewer;
  */
 public class VectorD {
 
-	public static final VectorD ZERO_VECTOR = new VectorD(0f, 0f);
+	public static final VectorD ZERO_VECTOR = new VectorD(0.0, 0.0);
 	public final double x;
 	public final double y;
 
@@ -21,6 +21,10 @@ public class VectorD {
 
 	public VectorD plus(VectorD newVector) {
 		return new VectorD(this.x + newVector.x, this.y + newVector.y);
+	}
+
+	public VectorD minus(VectorD newVector) {
+		return new VectorD(this.x - newVector.x, this.y - newVector.y);
 	}
 
 	public VectorD plusX(double x) {

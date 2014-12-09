@@ -35,6 +35,12 @@ public class DevTools {
 
 	private Canvas mCanv;
 
+	private PointD pinchZoomCenterInCanvas;
+	private PointD pinchZoomCenterInImage;
+
+	private PointD doubletapZoomCenterInCanvas;
+	private PointD doubletapZoomCenterInImage;
+
 	public DevTools(Context context) {
 		// init paints
 		paintBlue.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue));
@@ -70,27 +76,50 @@ public class DevTools {
 	}
 
 	public void drawImageCoordPoints(ImageCoordsPoints testPoints, double resizeFactor, VectorD imageShiftInCanvas) {
-		drawImageCoordPoint(testPoints.getCenter(), resizeFactor, imageShiftInCanvas, paintYellowTrans);
+		drawImageCoordPoint(testPoints.getCenter(), resizeFactor, imageShiftInCanvas, paintRedTrans);
 		for (Point corner : testPoints.getCorners()) {
-			drawImageCoordPoint(corner, resizeFactor, imageShiftInCanvas, paintYellowTrans);
+			drawImageCoordPoint(corner, resizeFactor, imageShiftInCanvas, paintRedTrans);
 		}
 	}
 
 	private void drawImageCoordPoint(Point point, double resizeFactor, VectorD imageShiftInCanvas, Paint paint) {
 		int resizedAndShiftedX = (int) (point.x * resizeFactor + imageShiftInCanvas.x);
 		int resizedAndShiftedY = (int) (point.y * resizeFactor + imageShiftInCanvas.y);
-		mCanv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 15f, paint);
+		mCanv.drawCircle(resizedAndShiftedX, resizedAndShiftedY, 30f, paint);
 	}
 
-	public void drawZoomCenters(PointD gestureCenterInCanvas, PointD zoomCenterInImage, double resizeFactor,
-			VectorD totalShift) {
-		if (gestureCenterInCanvas != null && zoomCenterInImage != null) {
-			PointD zoomCenterInImageInCanvasCoords = Utils.toCanvasCoords(zoomCenterInImage, resizeFactor, totalShift);
-			mCanv.drawCircle((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
-					15.0f, paintGreen);
-			mCanv.drawCircle((float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, 12.0f, paintRed);
+	public void setDoubletapZoomCenters(PointD zoomCenterInCanvas, PointD zoomCenterInImage) {
+		this.doubletapZoomCenterInCanvas = zoomCenterInCanvas;
+		this.doubletapZoomCenterInImage = zoomCenterInImage;
+	}
+
+	public void setPinchZoomCenters(PointD zoomCenterInCanvas, PointD zoomCenterInImage) {
+		this.pinchZoomCenterInCanvas = zoomCenterInCanvas;
+		this.pinchZoomCenterInImage = zoomCenterInImage;
+	}
+
+	public void drawDoubletapZoomCenters(double resizeFactor, VectorD totalShift) {
+		if (doubletapZoomCenterInCanvas != null && doubletapZoomCenterInImage != null) {
+			PointD zoomCenterInImageInCanvasCoords = Utils.toCanvasCoords(doubletapZoomCenterInImage, resizeFactor,
+					totalShift);
 			mCanv.drawLine((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
-					(float) gestureCenterInCanvas.x, (float) gestureCenterInCanvas.y, paintRed);
+					(float) doubletapZoomCenterInCanvas.x, (float) doubletapZoomCenterInCanvas.y, paintGreenTrans);
+			mCanv.drawCircle((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					15.0f, paintYellow);
+			mCanv.drawCircle((float) doubletapZoomCenterInCanvas.x, (float) doubletapZoomCenterInCanvas.y, 12.0f,
+					paintGreen);
+		}
+	}
+
+	public void drawPinchZoomCenters(double resizeFactor, VectorD totalShift) {
+		if (pinchZoomCenterInCanvas != null && pinchZoomCenterInImage != null) {
+			PointD zoomCenterInImageInCanvasCoords = Utils.toCanvasCoords(pinchZoomCenterInImage, resizeFactor,
+					totalShift);
+			mCanv.drawLine((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					(float) pinchZoomCenterInCanvas.x, (float) pinchZoomCenterInCanvas.y, paintBlueTrans);
+			mCanv.drawCircle((float) zoomCenterInImageInCanvasCoords.x, (float) zoomCenterInImageInCanvasCoords.y,
+					15.0f, paintYellow);
+			mCanv.drawCircle((float) pinchZoomCenterInCanvas.x, (float) pinchZoomCenterInCanvas.y, 12.0f, paintBlue);
 		}
 	}
 
@@ -168,7 +197,7 @@ public class DevTools {
 		rectStackAfterPrimaryDraws.add(rect);
 	}
 
-	public void drawRectStack() {
+	public void drawTileRectStack() {
 		for (RectWithPaint rect : rectStackAfterPrimaryDraws) {
 			fillRectAreaWithColor(rect.getRect(), rect.getPaint());
 		}

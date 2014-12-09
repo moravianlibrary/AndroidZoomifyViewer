@@ -125,6 +125,10 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 		intent.putExtra(PageMetadataActivity.EXTRA_TOP_LEVEL_PID, mTopLevelPid);
 		intent.putExtra(PageMetadataActivity.EXTRA_PAGE_PID, pagePid);
 		intent.putExtra(PageMetadataActivity.EXTRA_PAGE_INDEX, pageIndex);
+		intent.putExtra(PageMetadataActivity.EXTRA_BOUNDING_BOX_BOTTOM, boundingBox.bottom);
+		intent.putExtra(PageMetadataActivity.EXTRA_BOUNDING_BOX_LEFT, boundingBox.left);
+		intent.putExtra(PageMetadataActivity.EXTRA_BOUNDING_BOX_RIGHT, boundingBox.right);
+		intent.putExtra(PageMetadataActivity.EXTRA_BOUNDING_BOX_TOP, boundingBox.top);
 		startActivity(intent);
 	}
 

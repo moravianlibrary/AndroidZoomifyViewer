@@ -11,7 +11,6 @@ public class TestLoggers {
 	public static final Logger CENTERS = new Logger("Centers");
 	public static final Logger ZOOM = new Logger("Zoom");
 	public static final Logger MOTION = new Logger("Motion");
-	public static final Logger STATE = new Logger("State");
 	public static final Logger CORNERS = new Logger("Corners");
 	public static final Logger TILES = new Logger("T_error");
 	public static final Logger TEST = new Logger("test");

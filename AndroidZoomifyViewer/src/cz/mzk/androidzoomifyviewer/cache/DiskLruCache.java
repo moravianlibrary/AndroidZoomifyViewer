@@ -542,6 +542,7 @@ public final class DiskLruCache implements Closeable {
 		}
 	}
 
+	// TODO: synchronized?
 	public synchronized void storeBitmap(int index, String key, Bitmap bmp) throws DiskLruCacheException {
 		Editor edit = null;
 		OutputStream out = null;
