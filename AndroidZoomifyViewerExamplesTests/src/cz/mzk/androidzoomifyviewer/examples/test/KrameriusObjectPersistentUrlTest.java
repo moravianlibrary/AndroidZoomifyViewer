@@ -26,7 +26,7 @@ public class KrameriusObjectPersistentUrlTest extends TestCase {
 			assertEquals("http", url1.getProtocol());
 			assertEquals("docker.mzk.cz", url1.getDomain());
 			assertEquals("uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22", url1.getPid());
-			assertEquals("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
+			assertEquals("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22/",
 					url1.toString());
 
 			KrameriusObjectPersistentUrl url2 = parseUrl("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22"
@@ -34,14 +34,14 @@ public class KrameriusObjectPersistentUrlTest extends TestCase {
 			assertEquals("http", url2.getProtocol());
 			assertEquals("docker.mzk.cz", url2.getDomain());
 			assertEquals("uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22", url2.getPid());
-			assertEquals("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
+			assertEquals("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22/",
 					url2.toString());
 
 			KrameriusObjectPersistentUrl url3 = parseUrl("https://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22");
 			assertEquals("https", url3.getProtocol());
 			assertEquals("docker.mzk.cz", url3.getDomain());
 			assertEquals("uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22", url3.getPid());
-			assertEquals("https://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
+			assertEquals("https://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22/",
 					url3.toString());
 
 			KrameriusObjectPersistentUrl url4 = parseUrl("https://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22"
@@ -49,7 +49,7 @@ public class KrameriusObjectPersistentUrlTest extends TestCase {
 			assertEquals("https", url4.getProtocol());
 			assertEquals("docker.mzk.cz", url4.getDomain());
 			assertEquals("uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22", url4.getPid());
-			assertEquals("https://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22",
+			assertEquals("https://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22/",
 					url4.toString());
 
 		} catch (ParseException e) {
@@ -159,7 +159,8 @@ public class KrameriusObjectPersistentUrlTest extends TestCase {
 			assertEquals("http", url.getProtocol());
 			assertEquals("docker.mzk.cz", url.getDomain());
 			assertEquals("uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22", url.getPid());
-			assertEquals("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22", url.toString());
+			assertEquals("http://docker.mzk.cz/search/handle/uuid:530719f5-ee95-4449-8ce7-12b0f4cadb22/",
+					url.toString());
 		} catch (ParseException e) {
 			// e.printStackTrace();
 			fail(e.getMessage());
