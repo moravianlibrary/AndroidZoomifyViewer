@@ -24,10 +24,20 @@ import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<String>> {
 
 	private static final String TAG = DownloadPageListTask.class.getSimpleName();
+	private static final int MAX_REDIRECTS = 5;
 	private final String mProtocol;
 	private final String mDomain;
 	private final String mTopLevelPid;
 	private final DownloadPidListResultHandler handler;
+	private final List<Integer> redirectionsHttpCodes = new ArrayList<Integer>() {
+		{
+			add(300);
+			add(301);
+			add(302);
+			add(303);
+			add(307);
+		}
+	};
 	private Exception mException = null;
 
 	public DownloadPageListTask(String mProtocol, String mDomain, String mTopLevelPid,
@@ -68,7 +78,14 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 
 	private String downloadJson() throws IOException {
 		String resourceUrl = mProtocol + "://" + mDomain + "/search/api/v5.0/item/" + mTopLevelPid + "/children";
-		Log.d(TAG, "downloading json from " + resourceUrl);
+		return downloadJson(resourceUrl, MAX_REDIRECTS);
+	}
+
+	private String downloadJson(String resourceUrl, int remainingRedirects) throws IOException {
+		Log.d(TAG, "downloading json from " + resourceUrl + ", remaining redirects: " + remainingRedirects);
+		if (remainingRedirects == 0) {
+			throw new IOException("max redirections reached (probably redirection loop)");
+		}
 		HttpURLConnection urlConnection = null;
 		InputStream in = null;
 		ByteArrayOutputStream out = null;
@@ -76,9 +93,15 @@ public class DownloadPageListTask extends ConcurrentAsyncTask<Void, Void, List<S
 			URL url = new URL(resourceUrl);
 			urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.setConnectTimeout(5000);// 5s
-			if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-				throw new IOException("error downloding " + resourceUrl + " (code=" + urlConnection.getResponseCode()
-						+ ")");
+			int responseCode = urlConnection.getResponseCode();
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				if (redirectionsHttpCodes.contains(responseCode)) {
+					String newLocation = urlConnection.getHeaderField("Location");
+					return (downloadJson(newLocation, remainingRedirects - 1));
+				} else {
+					throw new IOException("error downloding " + resourceUrl + " (code="
+							+ urlConnection.getResponseCode() + ")");
+				}
 			} else {
 				in = new BufferedInputStream(urlConnection.getInputStream());
 				byte[] buffer = new byte[8 * 1024];

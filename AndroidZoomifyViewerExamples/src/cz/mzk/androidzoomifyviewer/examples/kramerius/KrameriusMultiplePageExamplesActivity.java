@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -64,6 +65,15 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 				public void onClick(View v) {
 					String url = itemsArrayList.get(position).getUrl();
 					startFullscreenPagesActivity(url);
+				}
+			});
+			rowView.setOnLongClickListener(new OnLongClickListener() {
+
+				@Override
+				public boolean onLongClick(View v) {
+					String url = itemsArrayList.get(position).getUrl();
+					Toast.makeText(KrameriusMultiplePageExamplesActivity.this, url, Toast.LENGTH_LONG).show();
+					return true;
 				}
 			});
 			return rowView;
