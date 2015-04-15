@@ -59,6 +59,12 @@ public class KrameriusExamplesFactory {
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
 		result.add(new MonographExample(
+				"https://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",
+				"Atlas de l'Amerique Consistant en 46. Cartes hollandoises et angloises", "HTTPS", dockerMzk));
+		result.add(new MonographExample("http://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",
+				"Atlas de l'Amerique Consistant en 46. Cartes hollandoises et angloises", "HTTPS redirection",
+				dockerMzk));
+		result.add(new MonographExample(
 				"http://krameriusndktest.mzk.cz/search/handle/uuid:0d8192f0-320f-11e2-824c-005056827e51",
 				"Powinnosti manželů, rodičů, hospodářů a poddaných křesťanských", "tiles problem", krameriusNdkMzk));
 		result.add(new MonographExample(

@@ -27,7 +27,9 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 	public static final String EXTRA_DOMAIN = "domain";
 	public static final String EXTRA_TOP_LEVEL_PID = "topLevelPid";
 	public static final String EXTRA_PAGE_PIDS = "pagePids";
+	public static final String EXTRA_PROTOCOL = "protocol";
 
+	private String mProtocol;
 	private String mDomain;
 	private String mTopLevelPid;
 	private List<String> mPagePids;
@@ -56,6 +58,7 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString(EXTRA_PROTOCOL, mProtocol);
 		outState.putString(EXTRA_DOMAIN, mDomain);
 		outState.putString(EXTRA_TOP_LEVEL_PID, mTopLevelPid);
 		if (mPagePids != null) {
@@ -68,13 +71,14 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 	private void restoreOrLoadData(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
 			Log.d(TAG, "restoring data");
+			mProtocol = savedInstanceState.getString(EXTRA_PROTOCOL);
 			mTopLevelPid = savedInstanceState.getString(EXTRA_TOP_LEVEL_PID);
 			mDomain = savedInstanceState.getString(EXTRA_DOMAIN);
 			if (savedInstanceState.containsKey(EXTRA_PAGE_PIDS)) {
 				mPagePids = Arrays.asList(savedInstanceState.getStringArray(EXTRA_PAGE_PIDS));
 				initPageViewerFragment();
 			} else {
-				new DownloadPageListTask("http", mDomain, mTopLevelPid, new DownloadPidListResultHandler() {
+				new DownloadPageListTask(mProtocol, mDomain, mTopLevelPid, new DownloadPidListResultHandler() {
 
 					@Override
 					public void onSuccess(List<String> pidList) {

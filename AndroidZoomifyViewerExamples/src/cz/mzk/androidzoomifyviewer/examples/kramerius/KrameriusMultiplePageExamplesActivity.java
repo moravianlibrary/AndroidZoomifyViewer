@@ -74,6 +74,7 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 		try {
 			Intent intent = new Intent(this, PageViewerActivity.class);
 			KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);
+			intent.putExtra(PageViewerActivity.EXTRA_PROTOCOL, url.getProtocol());
 			intent.putExtra(PageViewerActivity.EXTRA_DOMAIN, url.getDomain());
 			intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
 			startActivity(intent);

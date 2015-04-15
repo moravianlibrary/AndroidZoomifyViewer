@@ -1,9 +1,10 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
-import android.annotation.SuppressLint;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import android.annotation.SuppressLint;
 
 /**
  * @author Martin Řehánek
@@ -24,7 +25,7 @@ public class KrameriusObjectPersistentUrl {
 	private String stringValue = null;
 
 	public KrameriusObjectPersistentUrl(String protocol, String domain, String pid) {
-		this.protocol = protocol;
+		this.protocol = protocol.toLowerCase();
 		this.domain = domain;
 		this.pid = pid;
 	}
