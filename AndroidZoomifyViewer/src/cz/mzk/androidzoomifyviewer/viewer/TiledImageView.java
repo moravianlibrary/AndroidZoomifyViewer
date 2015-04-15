@@ -82,13 +82,14 @@ public class TiledImageView extends View {
 
 	public static void initialize(Context context) {
 		if (initialized) {
-			throw new IllegalStateException(TiledImageView.class.getSimpleName() + " has been initialized  already");
+			logger.w("initialized already");
+		} else {
+			long diskCacheBytes = context.getResources().getInteger(R.integer.androidzoomifyviewer_disk_cache_size_kb) * 1024;
+			boolean clearDiskCacheOnStart = context.getResources().getBoolean(
+					R.bool.androidzoomifyviewer_disk_cache_clear_on_startup);
+			CacheManager.initialize(context, clearDiskCacheOnStart, diskCacheBytes);
+			initialized = true;
 		}
-		long diskCacheBytes = context.getResources().getInteger(R.integer.androidzoomifyviewer_disk_cache_size_kb) * 1024;
-		boolean clearDiskCacheOnStart = context.getResources().getBoolean(
-				R.bool.androidzoomifyviewer_disk_cache_clear_on_startup);
-		CacheManager.initialize(context, clearDiskCacheOnStart, diskCacheBytes);
-		initialized = true;
 	}
 
 	public TiledImageView(Context context, AttributeSet attrs) {
