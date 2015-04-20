@@ -56,3 +56,31 @@ Or you can enable all logs in TiledImageView by setting TiledImageView.DEV_MODE 
 Directory AndroidZoomifyViewerExamples contains Android App project that shows how to use the library. There are some examples of publicly available images in zoomify format as well as possible error situations. 
 Backend project to simulate errors is deployed at AppEngine but no specific AppEngine APIs are used here so it can be deploy into any Servlet container. Backend project for example App project is in directory AndroidZoomifyViewerExamplesBackend.
 
+## HTTPS
+Both Library and Example project can handle https requests. But if you need to access web resources with X.509 certificate, that can't be validated with android pre-installed issuers (for example self-signed or without whole certificate chain packed), you need to add required certificate as a resource and load it within SSL context provider.
+
+1. put DER encoded certifiate(s) in /res/raw
+2. add certificate(s) resource id(s) into CERT_RES_IDS array in class cz.mzk.androidzoomifyviewer.examples.ssl.SSLProvider
+
+If you use Library in your own project, use same technique as in AndroidZoomifyViewerExamples. I.e.:
+
+1. Create own X509TrustManager that uses both default KeyStore and custom KeyStore. (see cz.mzk.androidzoomifyviewer.examples.ssl.TrustManagerWithSystemAndLocalKeystores)
+2. Create your SSL SocketFactory provider with custom KeyStore that loads certificates from resource. SSL SocketProvider must use custom X509TrustManager. (see cz.mzk.androidzoomifyviewer.examples.ssl.SSLSocketFactoryProvider)
+3. Set SSL SocketFactory either for single connection:
+```
+java.net.ssl.HttpsURLConnection.setSSLSocketFactory(factory)
+```
+Or as default factory for all connections with static method:
+```
+java.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(factory)
+```
+I'd advice to set default factory because this way even third party network libraries should work with your custom certificates. Best place for this is in onCreate() of class extending Application (see cz.mzk.androidzoomifyviewer.examples.AndroidZoomifyViewerExamplesApp). 
+
+
+
+
+
+
+
+
+
