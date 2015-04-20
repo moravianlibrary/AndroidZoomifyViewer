@@ -21,25 +21,25 @@ import android.content.Context;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.examples.R;
 
-public class SSLProvider {
+public class SSLSocketFactoryProvider {
 
-	private static final String TAG = SSLProvider.class.getSimpleName();
+	private static final String TAG = SSLSocketFactoryProvider.class.getSimpleName();
 
 	private static final int[] CERT_RES_IDS = new int[] { R.raw.washington_edu, R.raw.terena_ssl_ca_2_whole_chain };
 
-	private static SSLProvider instance;
+	private static SSLSocketFactoryProvider instance;
 	private final SSLContext sslContext;
 
-	public static SSLProvider instanceOf(Context context) throws KeyManagementException, CertificateException,
+	public static SSLSocketFactoryProvider instanceOf(Context context) throws KeyManagementException, CertificateException,
 			KeyStoreException, NoSuchAlgorithmException, IOException {
 		if (instance == null) {
 			// throw new RuntimeException("SSL Provider temporarily disabled");
-			instance = new SSLProvider(context);
+			instance = new SSLSocketFactoryProvider(context);
 		}
 		return instance;
 	}
 
-	private SSLProvider(Context context) throws KeyManagementException, CertificateException, KeyStoreException,
+	private SSLSocketFactoryProvider(Context context) throws KeyManagementException, CertificateException, KeyStoreException,
 			NoSuchAlgorithmException, IOException {
 		KeyStore localKeyStore = initLocalKeyStore(context);
 		TrustManagerWithSystemAndLocalKeystores myTrustManager = new TrustManagerWithSystemAndLocalKeystores(

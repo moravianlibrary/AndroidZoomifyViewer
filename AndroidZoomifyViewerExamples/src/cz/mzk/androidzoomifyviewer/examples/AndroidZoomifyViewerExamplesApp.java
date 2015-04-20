@@ -8,7 +8,7 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.VolleyRequestManager;
-import cz.mzk.androidzoomifyviewer.examples.ssl.SSLProvider;
+import cz.mzk.androidzoomifyviewer.examples.ssl.SSLSocketFactoryProvider;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
@@ -36,7 +36,7 @@ public class AndroidZoomifyViewerExamplesApp extends Application {
 		HttpURLConnection.setFollowRedirects(false);
 		HttpsURLConnection.setFollowRedirects(false);
 		try {
-			HttpsURLConnection.setDefaultSSLSocketFactory(SSLProvider.instanceOf(context).getSslSocketFactory());
+			HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.instanceOf(context).getSslSocketFactory());
 		} catch (Exception e) {
 			Log.e(TAG, "error initializing SSL Socket factory", e);
 		}

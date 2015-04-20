@@ -21,7 +21,7 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 
-import cz.mzk.androidzoomifyviewer.examples.ssl.SSLProvider;
+import cz.mzk.androidzoomifyviewer.examples.ssl.SSLSocketFactoryProvider;
 
 /**
  * @author Martin Řehánek
@@ -67,7 +67,7 @@ public class VolleyRequestManager {
 
 	private static SSLSocketFactory getSslSocketFactory(Context context) {
 		try {
-			return SSLProvider.instanceOf(context).getSslSocketFactory();
+			return SSLSocketFactoryProvider.instanceOf(context).getSslSocketFactory();
 		} catch (Exception e) {
 			Log.d(TAG, "error getting SSL Socket factory", e);
 			return null;
