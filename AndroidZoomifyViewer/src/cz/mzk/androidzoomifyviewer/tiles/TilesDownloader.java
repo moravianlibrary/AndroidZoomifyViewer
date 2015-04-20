@@ -118,6 +118,7 @@ public class TilesDownloader {
 
 	private String downloadPropertiesXml(String urlString, int remainingRedirections)
 			throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
+		logger.d("downloading metadata from " + urlString);
 		if (remainingRedirections == 0) {
 			throw new TooManyRedirectionsException(urlString, MAX_REDIRECTIONS);
 		}
@@ -138,12 +139,14 @@ public class TilesDownloader {
 				if (location == null || location.isEmpty()) {
 					throw new ImageServerResponseException(urlString, responseCode);
 				}
+				urlConnection.disconnect();
 				return downloadPropertiesXml(location, remainingRedirections - 1);
 			case 301:
 				if (location == null || location.isEmpty()) {
 					throw new ImageServerResponseException(urlString, responseCode);
 				}
 				imagePropertiesUrl = toImagePropertiesUrl(location);
+				urlConnection.disconnect();
 				return downloadPropertiesXml(location, remainingRedirections - 1);
 			case 302:
 			case 303:
@@ -152,6 +155,7 @@ public class TilesDownloader {
 				if (location == null || location.isEmpty()) {
 					throw new ImageServerResponseException(urlString, responseCode);
 				}
+				urlConnection.disconnect();
 				return downloadPropertiesXml(location, remainingRedirections - 1);
 			default:
 				throw new ImageServerResponseException(urlString, responseCode);
@@ -358,6 +362,7 @@ public class TilesDownloader {
 
 	private Bitmap downloadTile(String tileUrl, int remainingRedirections) throws TooManyRedirectionsException,
 			ImageServerResponseException, OtherIOException {
+		logger.d("downloading tile from " + tileUrl);
 		if (remainingRedirections == 0) {
 			throw new TooManyRedirectionsException(tileUrl, MAX_REDIRECTIONS);
 		}
@@ -382,6 +387,7 @@ public class TilesDownloader {
 				if (location == null || location.isEmpty()) {
 					throw new ImageServerResponseException(tileUrl, responseCode);
 				} else {
+					urlConnection.disconnect();
 					return downloadTile(location, remainingRedirections - 1);
 				}
 			default:

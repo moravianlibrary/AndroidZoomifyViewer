@@ -41,7 +41,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 	@Override
 	protected TilesDownloader doInBackground(Void... params) {
 		try {
-			logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
+			//logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
 			TilesDownloader downloader = new TilesDownloader(zoomifyBaseUrl, pxRatio);
 			if (!isCancelled()) {
 				downloader.init();
