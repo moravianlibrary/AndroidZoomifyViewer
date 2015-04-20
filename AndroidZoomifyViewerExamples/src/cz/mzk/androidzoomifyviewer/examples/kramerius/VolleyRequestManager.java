@@ -2,11 +2,14 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 import java.io.File;
 
+import javax.net.ssl.SSLSocketFactory;
+
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
+import android.util.Log;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -18,11 +21,15 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 
+import cz.mzk.androidzoomifyviewer.examples.ssl.SSLProvider;
+
 /**
  * @author Martin Řehánek
  * 
  */
 public class VolleyRequestManager {
+
+	private static final String TAG = VolleyRequestManager.class.getSimpleName();
 	public static final int DISK_CACHE_SIZE_B = 1024 * 1024 * 2;// 2MB
 	public static final String DEFAULT_CACHE_DIR = "volley";
 
@@ -46,10 +53,24 @@ public class VolleyRequestManager {
 		// http://android-developers.blogspot.com/2011/09/androids-http-clients.html
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
 			// HttpURLConnection
-			return new HurlStack();
+			SSLSocketFactory sslSocketFactory = getSslSocketFactory(context);
+			if (sslSocketFactory != null) {
+				return new HurlStack(null, sslSocketFactory);
+			} else {
+				return new HurlStack();
+			}
 		} else {
-			// AndroidHttpClient
+			// SSL probably not working, but minSdkVersion is GINGERBREAD anyway
 			return buildAndroidHttpClientStack(context);
+		}
+	}
+
+	private static SSLSocketFactory getSslSocketFactory(Context context) {
+		try {
+			return SSLProvider.instanceOf(context).getSslSocketFactory();
+		} catch (Exception e) {
+			Log.d(TAG, "error getting SSL Socket factory", e);
+			return null;
 		}
 	}
 

@@ -16,8 +16,6 @@ public class KrameriusObjectPersistentUrl {
 	// domeny max. 4. radu
 	private static Pattern URL_PATTERN = Pattern
 			.compile("http(s)?://[a-z0-9]+[a-z0-9-]*[a-z0-9]+(\\.[a-z0-9]+[a-z0-9-]*[a-z0-9]+(\\.[a-z0-9]+[a-z0-9-]*[a-z0-9]+)(\\.[a-z0-9]+[a-z0-9-]*[a-z0-9]+)?)?/search/handle/uuid:([a-z0-9-])+/?");
-	private static final String PROTOCOL_SUFFIX = "://";
-	private static final String DOMAIN_SUFFIX = "/search/handle/";
 
 	private final String protocol;
 	private final String domain;
@@ -46,8 +44,9 @@ public class KrameriusObjectPersistentUrl {
 	public String toString() {
 		if (stringValue == null) {
 			StringBuilder builder = new StringBuilder();
-			builder.append(protocol).append(PROTOCOL_SUFFIX);
-			builder.append(domain).append(DOMAIN_SUFFIX);
+			builder.append(protocol).append("://");
+			builder.append(domain);
+			builder.append("/search/handle/");
 			builder.append(pid).append('/');
 			stringValue = builder.toString();
 		}
@@ -58,7 +57,7 @@ public class KrameriusObjectPersistentUrl {
 	public static KrameriusObjectPersistentUrl valueOf(String url) throws ParseException {
 		Matcher matcher = URL_PATTERN.matcher(url.toLowerCase());
 		if (!matcher.matches()) {
-			throw new ParseException("invalid url '" + url + "'", 123456789);
+			throw new ParseException("\"" + url + "\" doesn't match \"" + URL_PATTERN.pattern() + "\"", -1);
 		}
 		String[] tokens = url.toLowerCase().split("/");
 		String protocol = tokens[0].substring(0, tokens[0].length() - 1);

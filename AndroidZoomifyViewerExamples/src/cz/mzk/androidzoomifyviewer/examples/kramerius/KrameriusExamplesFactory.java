@@ -55,15 +55,12 @@ public class KrameriusExamplesFactory {
 		String krameriusNdkMzk = "krameriusndktest.mzk.cz";
 		String dockerMzk = "docker.mzk.cz";
 		String krameriusTestMzk = "krameriustest.mzk.cz";
+		String krameriusLibCas = "kramerius.lib.cas.cz";
+		String krameriusFsvCuni = "kramerius.fsv.cuni.cz";
+		String krameriusZcm = "kramerius.zcm.cz";
 
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
-		result.add(new MonographExample(
-				"https://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",
-				"Atlas de l'Amerique Consistant en 46. Cartes hollandoises et angloises", "HTTPS", dockerMzk));
-		result.add(new MonographExample("http://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",
-				"Atlas de l'Amerique Consistant en 46. Cartes hollandoises et angloises", "HTTP -> HTTPS redirection",
-				dockerMzk));
 		result.add(new MonographExample(
 				"http://krameriusndktest.mzk.cz/search/handle/uuid:0d8192f0-320f-11e2-824c-005056827e51",
 				"Powinnosti manželů, rodičů, hospodářů a poddaných křesťanských", "tiles problem", krameriusNdkMzk));
@@ -75,16 +72,16 @@ public class KrameriusExamplesFactory {
 				"Když slunéčko svítí", "working tiles", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:4873e8c7-5967-4003-8544-96f64ca55da7",
-				"Symbiotické zemědělství", "no tiles, no image, just pdf", krameriusMzk));
+				"Symbiotické zemědělství", "no tiles, no jpegs, just single pdf", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:a980edb0-a1e3-11dd-b501-000d606f5dc6",
-				"Mladá fronta (1949)", "no tiles, just images, no rights", krameriusMzk));
+				"Mladá fronta (1949)", "no tiles, just jpegs, no rights", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:f5a09c95-2fd8-11e0-83a8-0050569d679d", "Máj",
-				"no tiles, images in datastreams, working (book)", krameriusMzk));
+				"no tiles, just jpegs, working (book)", krameriusMzk));
 		result.add(new MonographExample(
 				"http://kramerius.mzk.cz/search/handle/uuid:4689b175-f1e1-11e1-a3c6-0050569d679d", "Divadelní šepty",
-				"no tiles, image in datastream, working (newspaper)", krameriusMzk));
+				"no tiles, just jpegs, working (newspaper)", krameriusMzk));
 		result.add(new MonographExample(
 				"http://krameriustest.mzk.cz/search/handle/uuid:8069c22a-0ab2-41c3-b7a5-5dcca16ce089",
 				"Chrudimský kancionál", "no tiles", krameriusTestMzk));
@@ -122,6 +119,25 @@ public class KrameriusExamplesFactory {
 				"http://kramerius.mzk.cz/search/handle/uuid:e256d5f7-4d86-4324-90f5-4f398b9427c4",
 				"Anti-Alkoran : To gest: Mocnj a nepřemoženj důvodové toho, že Alkorán Turecký z ďábla possel, a to půwodem Aryánů s wědomým proti Duchu Swatému rauhánjm",
 				"", krameriusMzk));
+		// https
+		result.add(new MonographExample(
+				"https://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",
+				"Atlas de l'Amerique Consistant en 46. Cartes hollandoises et angloises", "HTTPS - working", dockerMzk));
+		result.add(new MonographExample("http://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",
+				"Atlas de l'Amerique Consistant en 46. Cartes hollandoises et angloises", "HTTP -> HTTPS redirection",
+				dockerMzk));
+		result.add(new MonographExample(
+				"https://kramerius.lib.cas.cz/search/handle/uuid:4240f893-7853-4088-9a07-a6cdb81f3631",
+				"Biblia latina", "HTTPS - no tiles, just jpegs", krameriusLibCas));
+		result.add(new MonographExample(
+				"https://kramerius.fsv.cuni.cz/search/handle/uuid:9711c868-2fd1-11e0-a23a-0050569d679d",
+				"Jan Amos Komenský, vínek z pomněnek", "HTTPS - invalid date", krameriusFsvCuni));
+		result.add(new MonographExample(
+				"https://krameriusndktest.mzk.cz/search/handle/uuid:70680130-01ff-11e4-9789-005056827e52",
+				"Veselé čtení z desíti let", "HTTPS - invalid certificate (common name wrong)", krameriusNdkMzk));
+		result.add(new MonographExample(
+				"https://kramerius.zcm.cz/search/handle/uuid:981c2b8d-2042-11e3-88f5-001b63bd97ba", "Stavba",
+				"HTTPS - invalid certificate (common name wrong)", krameriusZcm));
 
 		// result.add(new MonographExample(
 		// "http://krameriusndktest.mzk.cz/search/handle/uuid:efd23340-c9da-11e2-b6da-005056827e52",

@@ -203,6 +203,8 @@ public class SingleImageExamplesFactory {
 
 	public static List<ImageExample> getWorkingExamples() {
 		List<ImageExample> result = new ArrayList<ImageExample>();
+		result.add(new ImageExample("https",
+				"https://docker.mzk.cz/search/zoomify/uuid:c254e63a-82da-11e0-bc9f-0050569d679d/"));
 		result.add(new ImageExample("tiles problem 1", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles/"));
 		result.add(new ImageExample("tiles problem 2", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles2/"));
 		result.add(new ImageExample("tiles problem 3",

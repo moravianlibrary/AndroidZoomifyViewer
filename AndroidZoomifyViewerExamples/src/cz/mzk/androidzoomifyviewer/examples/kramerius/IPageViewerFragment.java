@@ -16,13 +16,14 @@ public interface IPageViewerFragment {
 	/**
 	 * Populates fragment with page data.
 	 * 
+	 * @param protocol
+	 *            "http" or "https"
 	 * @param domain
-	 *            Domain of the Kramerius web server, for example
-	 *            "kramerius.mzk.cz".
+	 *            Domain of the Kramerius web server, for example "kramerius.mzk.cz".
 	 * @param pagePids
 	 *            List of pids of pages to show.
 	 */
-	public abstract void populate(String domain, List<String> pagePids);
+	public abstract void populate(String protocol, String domain, List<String> pagePids);
 
 	/**
 	 * 
@@ -82,8 +83,7 @@ public interface IPageViewerFragment {
 		public void onReady();
 
 		/**
-		 * Called after single tap that has not been used internally by
-		 * fragment.
+		 * Called after single tap that has not been used internally by fragment.
 		 * 
 		 * @param x
 		 *            X coordinates of tap.

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity;
+import cz.mzk.androidzoomifyviewer.examples.tmp.SslTestActivity;
 
 /**
  * @author Martin Řehánek
@@ -21,6 +22,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Button mBtnImagePropertiesInvalidContent;
 	private Button mBtnImagePropertiesOtherErrors;
 	private Button mBtnKrameriusMultiplePageExamples;
+	private Button mBtnSslTest;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		mBtnImagePropertiesOtherErrors.setOnClickListener(this);
 		mBtnKrameriusMultiplePageExamples = (Button) findViewById(R.id.btnKrameriusMultiplePageExamples);
 		mBtnKrameriusMultiplePageExamples.setOnClickListener(this);
+		mBtnSslTest = (Button) findViewById(R.id.btnSslTest);
+		mBtnSslTest.setOnClickListener(this);
 	}
 
 	@Override
@@ -54,6 +58,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			startActivity(new Intent(this, ImagePropertiesOtherErrorsExamplesActivity.class));
 		} else if (v == mBtnKrameriusMultiplePageExamples) {
 			startActivity(new Intent(this, KrameriusMultiplePageExamplesActivity.class));
+		} else if (v == mBtnSslTest) {
+			startActivity(new Intent(this, SslTestActivity.class));
 		}
 	}
 

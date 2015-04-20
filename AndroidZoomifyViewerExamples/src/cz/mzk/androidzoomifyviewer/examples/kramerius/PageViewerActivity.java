@@ -24,10 +24,10 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 
 	private static final String TAG = PageViewerActivity.class.getSimpleName();
 
+	public static final String EXTRA_PROTOCOL = "protocol";
 	public static final String EXTRA_DOMAIN = "domain";
 	public static final String EXTRA_TOP_LEVEL_PID = "topLevelPid";
 	public static final String EXTRA_PAGE_PIDS = "pagePids";
-	public static final String EXTRA_PROTOCOL = "protocol";
 
 	private String mProtocol;
 	private String mDomain;
@@ -72,28 +72,29 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 		if (savedInstanceState != null) {
 			Log.d(TAG, "restoring data");
 			mProtocol = savedInstanceState.getString(EXTRA_PROTOCOL);
-			mTopLevelPid = savedInstanceState.getString(EXTRA_TOP_LEVEL_PID);
 			mDomain = savedInstanceState.getString(EXTRA_DOMAIN);
+			mTopLevelPid = savedInstanceState.getString(EXTRA_TOP_LEVEL_PID);
 			if (savedInstanceState.containsKey(EXTRA_PAGE_PIDS)) {
 				mPagePids = Arrays.asList(savedInstanceState.getStringArray(EXTRA_PAGE_PIDS));
 				initPageViewerFragment();
 			} else {
-				new DownloadPageListTask(mProtocol, mDomain, mTopLevelPid, new DownloadPidListResultHandler() {
+				new DownloadPageListTask(PageViewerActivity.this, mProtocol, mDomain, mTopLevelPid,
+						new DownloadPidListResultHandler() {
 
-					@Override
-					public void onSuccess(List<String> pidList) {
-						mPagePids = pidList;
-						initPageViewerFragment();
-					}
+							@Override
+							public void onSuccess(List<String> pidList) {
+								mPagePids = pidList;
+								initPageViewerFragment();
+							}
 
-					@Override
-					public void onError(String errorMessage) {
-						mViewProgressBar.setVisibility(View.INVISIBLE);
-						Toast.makeText(PageViewerActivity.this, "error getting pages: " + errorMessage,
-								Toast.LENGTH_LONG).show();
-					}
+							@Override
+							public void onError(String errorMessage) {
+								mViewProgressBar.setVisibility(View.INVISIBLE);
+								Toast.makeText(PageViewerActivity.this, "error getting pages: " + errorMessage,
+										Toast.LENGTH_LONG).show();
+							}
 
-				}).executeConcurrentIfPossible();
+						}).executeConcurrentIfPossible();
 			}
 		} else {
 			Log.d(TAG, "bundle is null");
@@ -104,7 +105,7 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 		Log.d(TAG, "initializing PageViewerFragment");
 		mViewProgressBar.setVisibility(View.INVISIBLE);
 		if (!mPageViewerFragment.isPopulated()) {
-			mPageViewerFragment.populate(mDomain, mPagePids);
+			mPageViewerFragment.populate(mProtocol, mDomain, mPagePids);
 		} else {
 			int currentPageIndex = mPageViewerFragment.getCurrentPageIndex();
 			Log.d(TAG, "current page: " + currentPageIndex);

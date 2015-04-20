@@ -89,7 +89,7 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 			intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
 			startActivity(intent);
 		} catch (ParseException e) {
-			Log.e(TAG, "error parsing url '" + urlStr + "'");
+			Log.e(TAG, "error parsing url", e);
 			Toast.makeText(this, "error parsing url '" + urlStr + "'", Toast.LENGTH_LONG).show();
 		}
 	}

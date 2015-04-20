@@ -10,6 +10,12 @@
 		android:targetSdkVersion="22" />
 
 	<uses-permission android:name="android.permission.INTERNET" />
+
+	<!-- because of https, see http://stackoverflow.com/questions/9475024/httpresponse-using-android-issue-execute-always-causes-exception -->
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+
 	<!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" 
 		/> -->
 
@@ -55,6 +61,15 @@
 			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
 		<activity
 			android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
+		<activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.SslTestActivity">
+			<!-- <intent-filter> -->
+			<!-- <action android:name="android.intent.action.MAIN" /> -->
+
+			<!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+			<!-- </intent-filter> -->
+		</activity>
+
+
 	</application>
 
 </manifest>

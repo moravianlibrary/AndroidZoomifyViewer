@@ -1,8 +1,14 @@
 package cz.mzk.androidzoomifyviewer.examples;
 
+import java.net.HttpURLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import android.app.Application;
-import cz.mzk.androidzoomifyviewer.CacheManager;
+import android.content.Context;
+import android.util.Log;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.VolleyRequestManager;
+import cz.mzk.androidzoomifyviewer.examples.ssl.SSLProvider;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
@@ -11,13 +17,28 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
  */
 public class AndroidZoomifyViewerExamplesApp extends Application {
 
+	private static final String TAG = AndroidZoomifyViewerExamplesApp.class.getSimpleName();
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		// TODO: tohle taky hodit do resource
 		// boolean clearCache = AppConfig.DEV_MODE && AppConfig.DEV_MODE_CLEAR_CACHE_ON_STARTUP;
+		setupHttpUrlConnection(this);
 		TiledImageView.initialize(this);
 		VolleyRequestManager.initialize(this);
 		// TiledImageView.DEV_MODE = AppConfig.DEV_MODE;
+	}
+
+	private void setupHttpUrlConnection(Context context) {
+		// must handle redirect myself
+		// because some things don't allways work properly. For instance http://something -> https://something.
+		HttpURLConnection.setFollowRedirects(false);
+		HttpsURLConnection.setFollowRedirects(false);
+		try {
+			HttpsURLConnection.setDefaultSSLSocketFactory(SSLProvider.instanceOf(context).getSslSocketFactory());
+		} catch (Exception e) {
+			Log.e(TAG, "error initializing SSL Socket factory", e);
+		}
 	}
 }

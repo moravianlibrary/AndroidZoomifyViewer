@@ -38,6 +38,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	private static final String TAG = PageViewerFragment.class.getSimpleName();
 
+	public static final String KEY_PROTOCOL = PageViewerFragment.class.getSimpleName() + "_protocol";
 	public static final String KEY_DOMAIN = PageViewerFragment.class.getSimpleName() + "_domain";
 	public static final String KEY_PAGE_PIDS = PageViewerFragment.class.getSimpleName() + "_pagePids";
 	public static final String KEY_CURRENT_PAGE_INDEX = PageViewerFragment.class.getSimpleName() + "_pageIndex";
@@ -45,6 +46,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	private static final int MAX_IMG_FULL_HEIGHT = 1000;
 	private static final int IMG_FULL_SCALE_QUOTIENT = 100;
 
+	private String mProtocol;
 	private String mDomain;
 	private List<String> mPagePids;
 	private int mCurrentPageIndex;
@@ -70,6 +72,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState != null) {
+			mProtocol = savedInstanceState.getString(KEY_PROTOCOL);
 			mDomain = savedInstanceState.getString(KEY_DOMAIN);
 			mPopulated = savedInstanceState.getBoolean(KEY_POPULATED);
 			mCurrentPageIndex = savedInstanceState.getInt(KEY_CURRENT_PAGE_INDEX, 0);
@@ -119,6 +122,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
+		outState.putString(KEY_PROTOCOL, mProtocol);
 		outState.putString(KEY_DOMAIN, mDomain);
 		outState.putInt(KEY_CURRENT_PAGE_INDEX, mCurrentPageIndex);
 		outState.putBoolean(KEY_POPULATED, mPopulated);
@@ -143,8 +147,9 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 	}
 
 	@Override
-	public void populate(String domain, List<String> pagePids) {
+	public void populate(String protocol, String domain, List<String> pagePids) {
 		Log.d(TAG, "populating");
+		this.mProtocol = protocol;
 		this.mDomain = domain;
 		this.mPagePids = pagePids;
 		this.mCurrentPageIndex = 0;
@@ -189,7 +194,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 			mCurrentPageIndex = pageIndex;
 			String pid = mPagePids.get(pageIndex);
 			String url = buildZoomifyBaseUrl(pid);
-			// Log.d(TAG, "base url:" + url);
+			Log.d(TAG, "base url: " + url);
 			mTiledImageView.loadImage(url.toString());
 		} else {
 			Log.w(TAG, "Page index out of range: " + pageIndex);
@@ -198,9 +203,10 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	private String buildZoomifyBaseUrl(String pid) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("http://");
-		builder.append(mDomain).append('/');
-		builder.append("search/zoomify/");
+		// builder.append("http://");
+		builder.append(mProtocol).append("://");
+		builder.append(mDomain);
+		builder.append("/search/zoomify/");
 		builder.append(pid).append('/');
 		return builder.toString();
 	}
@@ -269,7 +275,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
 	private String buildScaledImageDatastreamUrl(String pid) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("http://").append(mDomain);
+		builder.append(mProtocol).append("://");
+		builder.append(mDomain);
 		builder.append("/search/img?pid=").append(pid);
 		builder.append("&stream=IMG_FULL&action=SCALE");
 		builder.append("&scaledHeight=").append(determineHeightForScaledImageFromDatastream());
