@@ -919,4 +919,8 @@ public class TiledImageView extends View {
 		return mVisibleImageInCanvas;
 	}
 
+	public double getInitialScaleFactor() {
+		return mInitialScaleFactor;
+	}
+
 }
