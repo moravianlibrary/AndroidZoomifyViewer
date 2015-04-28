@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples.tmp;
+package cz.mzk.androidzoomifyviewer.examples.ssl;
 
 import java.util.List;
 
@@ -12,17 +12,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.examples.R;
-import cz.mzk.androidzoomifyviewer.examples.tmp.HttpRequestTask.ResultHandler;
-import cz.mzk.androidzoomifyviewer.examples.tmp.UrlItemAdapter.UrlViewHolder;
+import cz.mzk.androidzoomifyviewer.examples.ssl.HttpRequestTask.ResultHandler;
+import cz.mzk.androidzoomifyviewer.examples.ssl.UrlItemAdapter.UrlViewHolder;
 
 public class UrlItemAdapter extends Adapter<UrlViewHolder> {
-
-	private final Context context;
-	private Toast toast;
-
-	public UrlItemAdapter(Context context) {
-		this.context = context;
-	}
 
 	class UrlViewHolder extends ViewHolder implements OnClickListener {
 
@@ -65,6 +58,13 @@ public class UrlItemAdapter extends Adapter<UrlViewHolder> {
 				}
 			}).execute(url.getText().toString());
 		}
+	}
+
+	private final Context context;
+	private Toast toast;
+
+	public UrlItemAdapter(Context context) {
+		this.context = context;
 	}
 
 	private final List<UrlItem> data = UrlItem.getTestData();

@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples.tmp;
+package cz.mzk.androidzoomifyviewer.examples.ssl;
 
 import android.app.Activity;
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples.tmp;
+package cz.mzk.androidzoomifyviewer.examples.ssl;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -9,7 +9,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;

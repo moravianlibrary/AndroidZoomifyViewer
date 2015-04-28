@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples.tmp;
+package cz.mzk.androidzoomifyviewer.examples.ssl;
 
 import java.util.ArrayList;
 import java.util.List;

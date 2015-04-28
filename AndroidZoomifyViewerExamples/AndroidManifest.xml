@@ -61,7 +61,7 @@
 			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
 		<activity
 			android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
-		<activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.SslTestActivity">
+		<activity android:name="cz.mzk.androidzoomifyviewer.examples.ssl.SslTestActivity">
 			<!-- <intent-filter> -->
 			<!-- <action android:name="android.intent.action.MAIN" /> -->
 

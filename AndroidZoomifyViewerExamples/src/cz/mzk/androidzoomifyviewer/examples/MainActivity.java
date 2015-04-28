@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity;
-import cz.mzk.androidzoomifyviewer.examples.tmp.SslTestActivity;
+import cz.mzk.androidzoomifyviewer.examples.ssl.SslTestActivity;
 
 /**
  * @author Martin Řehánek

@@ -211,6 +211,8 @@ public class SingleImageExamplesFactory {
 				"http://kramerius.mzk.cz/search/zoomify/uuid:a7ed9c10-4726-4b5b-a5c6-9449bb45c4b7/"));
 		result.add(new ImageExample("tiles problem 4",
 				"http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"));
+		result.add(new ImageExample("tiles problem 5",
+				"http://kramerius.mzk.cz/search/zoomify/uuid:66061a92-8299-4f36-bd23-e119d73a8c7e/"));
 		result.add(new ImageExample("mapy.mzk.cz 1", "http://mapy.mzk.cz/AA22/0103/"));
 		result.add(new ImageExample("mapy.mzk.cz 2", "http://mapy.mzk.cz/AA22/0104/"));
 		result.add(new ImageExample("mapy.mzk.cz 3", "http://mapy.mzk.cz/AA22/0105/"));
