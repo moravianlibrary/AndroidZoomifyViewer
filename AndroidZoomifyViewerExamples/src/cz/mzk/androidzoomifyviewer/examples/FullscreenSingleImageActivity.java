@@ -3,7 +3,7 @@ package cz.mzk.androidzoomifyviewer.examples;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +26,7 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
  * @author Martin Řehánek
  * 
  */
-public class FullscreenSingleImageActivity extends ActionBarActivity implements ImageInitializationHandler,
+public class FullscreenSingleImageActivity extends AppCompatActivity implements ImageInitializationHandler,
 		TileDownloadHandler, SingleTapListener {
 
 	private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
@@ -34,8 +34,8 @@ public class FullscreenSingleImageActivity extends ActionBarActivity implements 
 
 	// data
 	private String mBaseUrl;
-	// toolbar
-	private Toolbar mToolbar;
+	// action bar
+	private Toolbar mActionBar;
 	private Spinner mViewModeSpinner;
 	// tiled image
 	private TiledImageView mImageView;
@@ -51,7 +51,7 @@ public class FullscreenSingleImageActivity extends ActionBarActivity implements 
 		super.onCreate(savedInstanceState);
 		Log.v(TAG, "onCreate");
 		setContentView(R.layout.activity_fullscreen_single_image);
-		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		mActionBar = (Toolbar) findViewById(R.id.action_bar);
 		mViewModeSpinner = (Spinner) findViewById(R.id.viewModeSpinner);
 		mProgressView = findViewById(R.id.progressView);
 		mErrorView = findViewById(R.id.errorView);
@@ -65,7 +65,7 @@ public class FullscreenSingleImageActivity extends ActionBarActivity implements 
 		mImageView.setViewMode(AppConfig.VIEW_MODE);
 
 		loadActivityData(savedInstanceState, getIntent());
-		createToolbar();
+		initActionBar();
 		showImage();
 	}
 
@@ -89,15 +89,14 @@ public class FullscreenSingleImageActivity extends ActionBarActivity implements 
 		}
 	}
 
-	private void createToolbar() {
-		if (mToolbar != null) {
-			setSupportActionBar(mToolbar);
+	private void initActionBar() {
+		if (mActionBar != null) {
+			setSupportActionBar(mActionBar);
 			getSupportActionBar().setDisplayShowTitleEnabled(false);
 			getSupportActionBar().setDisplayUseLogoEnabled(false);
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-			mToolbar.setTitleTextColor(getResources().getColor(R.color.white));
-			mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-			mToolbar.setNavigationOnClickListener(new OnClickListener() {
+			mActionBar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+			mActionBar.setNavigationOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {

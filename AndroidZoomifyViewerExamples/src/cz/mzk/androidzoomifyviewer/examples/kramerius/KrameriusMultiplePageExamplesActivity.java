@@ -3,7 +3,6 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,9 +13,9 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import cz.mzk.androidzoomifyviewer.examples.ExamplesListActivity;
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusExamplesFactory.MonographExample;
 
@@ -24,20 +23,13 @@ import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusExamplesFactory.M
  * @author Martin Řehánek
  * 
  */
-public class KrameriusMultiplePageExamplesActivity extends Activity {
+public class KrameriusMultiplePageExamplesActivity extends ExamplesListActivity {
 	private static final String TAG = KrameriusMultiplePageExamplesActivity.class.getSimpleName();
-
-	private ListView mListExamples;
-	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_examples);
-		mTitle = (TextView) findViewById(R.id.title);
-		mTitle.setText("Kramerius multiple page examples");
-		mListExamples = (ListView) findViewById(R.id.listExamples);
-		mListExamples.setAdapter(new MyAdapter(this, KrameriusExamplesFactory.getTestTopLevelUrls()));
+		super.onCreate(savedInstanceState, "Kramerius digital library", "multiple page examples", new MyAdapter(this,
+				KrameriusExamplesFactory.getTestTopLevelUrls()));
 	}
 
 	class MyAdapter extends ArrayAdapter<MonographExample> {
@@ -59,7 +51,7 @@ public class KrameriusMultiplePageExamplesActivity extends Activity {
 			((TextView) rowView.findViewById(R.id.note)).setText(itemsArrayList.get(position).getNote());
 			((TextView) rowView.findViewById(R.id.src)).setText(itemsArrayList.get(position).getSource());
 
-			rowView.setOnClickListener(new OnClickListener() {
+			rowView.findViewById(R.id.container).setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {

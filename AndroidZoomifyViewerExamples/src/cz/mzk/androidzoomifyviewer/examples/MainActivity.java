@@ -1,8 +1,9 @@
 package cz.mzk.androidzoomifyviewer.examples;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -13,9 +14,10 @@ import cz.mzk.androidzoomifyviewer.examples.ssl.SslTestActivity;
  * @author Martin Řehánek
  * 
  */
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends AppCompatActivity implements OnClickListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 
+	private Toolbar mActionBar;
 	private Button mBtnSingleImageWorkingExamples;
 	private Button mBtnImagePropertiesHttpResponseCodes;
 	private Button mBtnImagePropertiesRedirectionLoops;
@@ -28,6 +30,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		mActionBar = (Toolbar) findViewById(R.id.action_bar);
 		mBtnSingleImageWorkingExamples = (Button) findViewById(R.id.btnSingleImageWorkingExamples);
 		mBtnSingleImageWorkingExamples.setOnClickListener(this);
 		mBtnImagePropertiesHttpResponseCodes = (Button) findViewById(R.id.btnImagePropertiesHttpResponseCodes);
@@ -42,6 +45,18 @@ public class MainActivity extends Activity implements OnClickListener {
 		mBtnKrameriusMultiplePageExamples.setOnClickListener(this);
 		mBtnSslTest = (Button) findViewById(R.id.btnSslTest);
 		mBtnSslTest.setOnClickListener(this);
+
+		initActionBar();
+	}
+
+	private void initActionBar() {
+		if (mActionBar != null) {
+			setSupportActionBar(mActionBar);
+			getSupportActionBar().setDisplayShowTitleEnabled(true);
+			getSupportActionBar().setTitle(R.string.actionbar_title);
+			getSupportActionBar().setDisplayUseLogoEnabled(false);
+			getSupportActionBar().setDisplayShowHomeEnabled(false);
+		}
 	}
 
 	@Override

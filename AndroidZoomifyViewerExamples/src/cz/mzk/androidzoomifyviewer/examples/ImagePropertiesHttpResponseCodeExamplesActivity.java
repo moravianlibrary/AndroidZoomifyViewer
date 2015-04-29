@@ -2,7 +2,6 @@ package cz.mzk.androidzoomifyviewer.examples;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExampleWithHttpResponseCode;
 
@@ -20,21 +18,13 @@ import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExam
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesHttpResponseCodeExamplesActivity extends Activity {
+public class ImagePropertiesHttpResponseCodeExamplesActivity extends ExamplesListActivity {
 	private static final String TAG = ImagePropertiesHttpResponseCodeExamplesActivity.class.getSimpleName();
-
-	private ListView mListViewWithExamples;
-	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_examples);
-		mTitle = (TextView) findViewById(R.id.title);
-		mTitle.setText("ImageProperties.xml HTTP response codes");
-		mListViewWithExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewWithExamples.setAdapter(new MyAdapter(this, SingleImageExamplesFactory
-				.getImagePropertiesResponseExamples()));
+		super.onCreate(savedInstanceState, "ImageProperties.xml", "HTTP response codes", new MyAdapter(this,
+				SingleImageExamplesFactory.getImagePropertiesResponseExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
@@ -58,7 +48,7 @@ public class ImagePropertiesHttpResponseCodeExamplesActivity extends Activity {
 			((TextView) rowView.findViewById(R.id.errorName)).setText(itemsArrayList.get(position).getErrorName());
 			((TextView) rowView.findViewById(R.id.url)).setText(itemsArrayList.get(position).getUrl());
 
-			rowView.setOnClickListener(new OnClickListener() {
+			rowView.findViewById(R.id.container).setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {

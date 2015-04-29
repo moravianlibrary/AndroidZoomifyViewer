@@ -5,14 +5,16 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:gravity="center"
-	android:orientation="vertical"
-	android:padding="5dp">
+	android:orientation="vertical">
 
 	<android.support.v7.widget.Toolbar
-		android:id="@+id/toolbar"
+		android:id="@+id/action_bar"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="?attr/colorPrimaryDark">
+		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+		android:minHeight="?attr/actionBarSize"
+		android:background="?attr/colorPrimary"
+		android:elevation="@dimen/action_bar_elevation">
 
 		<Spinner
 			android:gravity="end"
@@ -25,7 +27,8 @@
 	<FrameLayout
 		android:id="@+id/container"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_height="match_parent"
+		android:padding="5dp">
 
 		<RelativeLayout
 			android:id="@+id/progressView"

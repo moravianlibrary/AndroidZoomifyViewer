@@ -20,6 +20,8 @@
 	<color name="theme_primary_light">#E8EAF6</color>
 	<color name="theme_accent">#f50057</color>
 	<color name="fab">@color/theme_accent</color>
+	
+	
 
 
 </resources>

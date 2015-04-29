@@ -21,12 +21,15 @@ public class UrlItemAdapter extends Adapter<UrlViewHolder> {
 
 		private final TextView url;
 		private final TextView info;
+		private final View container;
 
 		public UrlViewHolder(View itemView) {
 			super(itemView);
 			itemView.setOnClickListener(this);
 			url = (TextView) itemView.findViewById(R.id.url);
 			info = (TextView) itemView.findViewById(R.id.info);
+			container = itemView.findViewById(R.id.container);
+			container.setOnClickListener(this);
 		}
 
 		public void bind(UrlItem item) {

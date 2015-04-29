@@ -2,7 +2,6 @@ package cz.mzk.androidzoomifyviewer.examples;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExampleWithHttpResponseCode;
 
@@ -20,20 +18,13 @@ import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExam
  * @author Martin Řehánek
  * 
  */
-public class ImagePropertiesRedirectionLoopExamplesActivity extends Activity {
+public class ImagePropertiesRedirectionLoopExamplesActivity extends ExamplesListActivity {
 	private static final String TAG = ImagePropertiesRedirectionLoopExamplesActivity.class.getSimpleName();
-
-	private ListView mListViewExamples;
-	private TextView mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_examples);
-		mTitle = (TextView) findViewById(R.id.title);
-		mTitle.setText("ImageProperties.xml redirection loop examples");
-		mListViewExamples = (ListView) findViewById(R.id.listExamples);
-		mListViewExamples.setAdapter(new MyAdapter(this, SingleImageExamplesFactory.getErrorsExamples()));
+		super.onCreate(savedInstanceState, "ImageProperties.xml", "redirection loops", new MyAdapter(this,
+				SingleImageExamplesFactory.getErrorsExamples()));
 	}
 
 	class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
@@ -52,12 +43,12 @@ public class ImagePropertiesRedirectionLoopExamplesActivity extends Activity {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View rowView = inflater.inflate(R.layout.item_image_with_error_code, parent, false);
 
-			((TextView) rowView.findViewById(R.id.errorCode)).setText(String.valueOf(items.get(position)
-					.getErrorCode()));
+			((TextView) rowView.findViewById(R.id.errorCode)).setText(String
+					.valueOf(items.get(position).getErrorCode()));
 			((TextView) rowView.findViewById(R.id.errorName)).setText(items.get(position).getErrorName());
 			((TextView) rowView.findViewById(R.id.url)).setText(items.get(position).getUrl());
 
-			rowView.setOnClickListener(new OnClickListener() {
+			rowView.findViewById(R.id.container).setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
