@@ -62,6 +62,9 @@ public class KrameriusExamplesFactory {
 		ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
 		result.add(new MonographExample(
+				"http://kramerius.mzk.cz/search/handle/uuid:44e2293b-6409-43dc-92af-f661c0369533", "Varujeme!",
+				"white rectangle problem", krameriusMzk));
+		result.add(new MonographExample(
 				"http://krameriusndktest.mzk.cz/search/handle/uuid:0d8192f0-320f-11e2-824c-005056827e51",
 				"Powinnosti manželů, rodičů, hospodářů a poddaných křesťanských", "tiles problem", krameriusNdkMzk));
 		result.add(new MonographExample(

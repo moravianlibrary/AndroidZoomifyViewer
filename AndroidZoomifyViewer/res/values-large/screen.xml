@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
 	<string name="androidzoomifyviewer_screen_type">large</string>
-
+	<!-- out of 100 -->
+	<integer name="androidzoomifyviewer_pxRatio">50</integer>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="androidzoomifyviewer_screen_type">default</string>
 	<!-- out of 100 -->
 	<integer name="androidzoomifyviewer_pxRatio">100</integer>
-	<integer name="androidzoomifyviewer_disk_cache_size_kb">51200</integer>
 </resources>

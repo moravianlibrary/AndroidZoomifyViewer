@@ -30,8 +30,8 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
  * 
  */
 public class TiledImageView extends View {
-	public static final boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS = false;
-	public static final boolean DEV_MODE = false;
+	public static final boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING = false;
+	public static final boolean DEV_MODE = true;
 
 	private static final Logger logger = new Logger(TiledImageView.class);
 
@@ -415,7 +415,7 @@ public class TiledImageView extends View {
 		boolean allTilesAvailable = true;
 		for (int[] visibleTile : visibleTiles) {
 			TileId visibleTileId = new TileId(layerId, visibleTile[0], visibleTile[1]);
-			boolean tileAccessible = FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS ? CacheManager.getTilesCache()
+			boolean tileAccessible = FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING ? CacheManager.getTilesCache()
 					.containsTile(mZoomifyBaseUrl, visibleTileId) : CacheManager.getTilesCache().containsTileInMemory(
 					mZoomifyBaseUrl, visibleTileId);
 			if (!tileAccessible) {
@@ -433,7 +433,7 @@ public class TiledImageView extends View {
 		// draw visible tiles if available, start downloading otherwise
 		for (int[] visibleTile : visibleTiles) {
 			TileId visibleTileId = new TileId(layerId, visibleTile[0], visibleTile[1]);
-			if (FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKS) {
+			if (FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING) {
 				fetchTileBlocking(canv, visibleTileId);
 			} else {
 				fetchTileNonblocking(canv, visibleTileId);

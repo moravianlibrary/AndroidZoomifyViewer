@@ -9,6 +9,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.StrictMode;
 import android.support.v4.util.LruCache;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
@@ -375,6 +376,9 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	@Override
 	public void updateMemoryCacheSizeInItems(int minSize) {
 		synchronized (mMemoryCache) {
+			// https://www.youtube.com/watch?v=oGrXdxpWgyY&list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&index=11
+			// TODO: StrictMode.setThreadPolicy(policy);
+			//StrictMode.noteSlowCall("updateMemoryCacheSizeInItems lock");
 			int currentSize = mMemoryCache.maxSize();
 			if (currentSize < minSize) {
 				logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");
