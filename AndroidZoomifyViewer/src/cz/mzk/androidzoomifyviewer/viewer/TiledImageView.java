@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -31,7 +32,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
  */
 public class TiledImageView extends View {
 	public static final boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING = false;
-	public static final boolean DEV_MODE = true;
+	public static final boolean DEV_MODE = false;
 
 	private static final Logger logger = new Logger(TiledImageView.class);
 
@@ -84,10 +85,11 @@ public class TiledImageView extends View {
 		if (initialized) {
 			logger.w("initialized already");
 		} else {
-			long diskCacheBytes = context.getResources().getInteger(R.integer.androidzoomifyviewer_disk_cache_size_kb) * 1024;
-			boolean clearDiskCacheOnStart = context.getResources().getBoolean(
-					R.bool.androidzoomifyviewer_disk_cache_clear_on_startup);
-			CacheManager.initialize(context, clearDiskCacheOnStart, diskCacheBytes);
+			Resources res = context.getResources();
+			boolean diskCacheEnabled = res.getBoolean(R.bool.androidzoomifyviewer_disk_cache_enabled);
+			boolean clearDiskCacheOnStart = res.getBoolean(R.bool.androidzoomifyviewer_disk_cache_clear_on_startup);
+			long tileDiskCacheBytes = res.getInteger(R.integer.androidzoomifyviewer_tile_disk_cache_size_kb) * 1024;
+			CacheManager.initialize(context, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes);
 			initialized = true;
 		}
 	}

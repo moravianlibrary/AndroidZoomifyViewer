@@ -25,11 +25,14 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	private final LruCache<String, String> mMemoryCache;
 	private final Object mDiskCacheInitializationLock = new Object();
 	private DiskLruCache mDiskCache = null;
-	private boolean mDiskCacheDisabled = false;
+	private boolean mDiskCacheEnabled;
 
-	public MemoryAndDiskImagePropertiesCache(Context context, boolean clearCache) {
+	public MemoryAndDiskImagePropertiesCache(Context context, boolean diskCacheEnabled, boolean clearCache) {
+		mDiskCacheEnabled = diskCacheEnabled;
 		mMemoryCache = initMemoryCache();
-		initDiskCacheAsync(context, clearCache);
+		if (mDiskCacheEnabled) {
+			initDiskCacheAsync(context, clearCache);
+		}
 	}
 
 	private LruCache<String, String> initMemoryCache() {
@@ -108,7 +111,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 					return null;
 				} catch (DiskLruCacheException e) {
 					logger.w("error initializing disk cache, disabling");
-					mDiskCacheDisabled = true;
+					disableDiskCache();
 					mDiskCacheInitializationLock.notifyAll();
 					return null;
 				} finally {
@@ -121,7 +124,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 
 	private void disableDiskCache() {
 		logger.i("disabling disk cache");
-		mDiskCacheDisabled = true;
+		mDiskCacheEnabled = false;
 	}
 
 	@Override
@@ -149,7 +152,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 			synchronized (mDiskCacheInitializationLock) {
 				logger.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
 				// Wait until disk cache is initialized or disabled
-				while (mDiskCache == null && !mDiskCacheDisabled) {
+				while (mDiskCache == null && mDiskCacheEnabled) {
 					try {
 						mDiskCacheInitializationLock.wait();
 					} catch (InterruptedException e) {
@@ -165,7 +168,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	private void storeXmlToDiskCache(String key, String xml) {
 		waitUntilDiskCacheInitializedOrDisabled();
 		try {
-			if (!mDiskCacheDisabled) {
+			if (mDiskCacheEnabled) {
 				Snapshot fromDiskCache = mDiskCache.get(key);
 				if (fromDiskCache != null) {
 					logger.d("already in disk cache: " + key);
@@ -204,7 +207,7 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
 	private String getXmlFromDiskCache(String key) {
 		waitUntilDiskCacheInitializedOrDisabled();
 		try {
-			if (!mDiskCacheDisabled) {
+			if (mDiskCacheEnabled) {
 				Snapshot snapshot = mDiskCache.get(key);
 				if (snapshot != null) {
 					String result = snapshot.getString(0);

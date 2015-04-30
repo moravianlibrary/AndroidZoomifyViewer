@@ -9,7 +9,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.StrictMode;
 import android.support.v4.util.LruCache;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
@@ -35,17 +34,20 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 	private final LruCache<String, Bitmap> mMemoryCache;
 	private final BitmapFetchTaskRegistry mBitmapFetchManager;
 	private final Object mDiskCacheInitializationLock = new Object();
-
+	private boolean mDiskCacheEnabled;
 	private DiskLruCache mDiskCache = null;
-	private boolean mDiskCacheEnabled = true;
 
-	public MemoryAndDiskTilesCache(Context context, boolean clearCache, int memoryCacheMaxItems, long diskCacheBytes) {
+	public MemoryAndDiskTilesCache(Context context, int memoryCacheMaxItems, boolean diskCacheEnabled,
+			boolean clearDiskCache, long diskCacheBytes) {
 		super();
+		mDiskCacheEnabled = diskCacheEnabled;
 		// mMemoryCache = initMemoryCacheFixedSize();
 		mMemoryCache = new LruCache<String, Bitmap>(memoryCacheMaxItems);
 		logger.i("memory cache initialized; max items: " + memoryCacheMaxItems);
 		mBitmapFetchManager = new BitmapFetchTaskRegistry(this);
-		initDiskCacheAsync(context, clearCache, diskCacheBytes);
+		if (mDiskCacheEnabled) {
+			initDiskCacheAsync(context, clearDiskCache, diskCacheBytes);
+		}
 	}
 
 	private LruCache<String, Bitmap> initMemoryCacheFixedSize() {
@@ -336,15 +338,19 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 			return new TileBitmap(State.IN_MEMORY, inMemoryCache);
 		} else {
 			// Log.v(TAG, "memory cache miss: " + key);
-			try {
-				if (mDiskCache.containsReadable(key)) {
-					mBitmapFetchManager.registerTask(key, listener);
-					return new TileBitmap(State.IN_DISK, null);
-				} else {
+			if (mDiskCacheEnabled) {
+				try {
+					if (mDiskCache.containsReadable(key)) {
+						mBitmapFetchManager.registerTask(key, listener);
+						return new TileBitmap(State.IN_DISK, null);
+					} else {
+						return new TileBitmap(State.NOT_FOUND, null);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 					return new TileBitmap(State.NOT_FOUND, null);
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			} else {
 				return new TileBitmap(State.NOT_FOUND, null);
 			}
 		}
@@ -378,7 +384,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 		synchronized (mMemoryCache) {
 			// https://www.youtube.com/watch?v=oGrXdxpWgyY&list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&index=11
 			// TODO: StrictMode.setThreadPolicy(policy);
-			//StrictMode.noteSlowCall("updateMemoryCacheSizeInItems lock");
+			// StrictMode.noteSlowCall("updateMemoryCacheSizeInItems lock");
 			int currentSize = mMemoryCache.maxSize();
 			if (currentSize < minSize) {
 				logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");

@@ -30,16 +30,18 @@ public class CacheManager {
 	 * @param clearDiskCacheOnStart
 	 *            whether disk cache should be cleared when application starts
 	 */
-	public static void initialize(Context context, boolean clearDiskCacheOnStart, long diskCacheBytes) {
+	public static void initialize(Context context, boolean diskCacheEnabled, boolean clearDiskCacheOnStart,
+			long tileDiskCacheBytes) {
 		if (initialized) {
 			throw new IllegalStateException(CacheManager.class.getSimpleName() + " has been initialized already");
 		}
 		logger.i("initializing");
 		int memoryCacheMaxItems = computeMaxTilesOnScreen(context);
-		tilesCache = new MemoryAndDiskTilesCache(context, clearDiskCacheOnStart, memoryCacheMaxItems, diskCacheBytes);
+		tilesCache = new MemoryAndDiskTilesCache(context, memoryCacheMaxItems, diskCacheEnabled, clearDiskCacheOnStart,
+				tileDiskCacheBytes);
 		// tilesCache = new MemoryAndDiskTilesMulticache(context, clearDiskCache);
 		// tilesCache = new MemoryTilesCache();
-		imagePropertiesCache = new MemoryAndDiskImagePropertiesCache(context, clearDiskCacheOnStart);
+		imagePropertiesCache = new MemoryAndDiskImagePropertiesCache(context, diskCacheEnabled, clearDiskCacheOnStart);
 		initialized = true;
 	}
 
