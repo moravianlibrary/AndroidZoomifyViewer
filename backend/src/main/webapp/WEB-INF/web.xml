@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee">
+
+    <!--endpoinst system servlet-->
+    <!--Even though endpoints are not being used right now, it is easier to define no endpoint class, than trying to disable
+    endpoints related taks from gradle-appengine-plugin-->
+    <servlet>
+        <servlet-name>SystemServiceServlet</servlet-name>
+        <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+        <init-param>
+            <param-name>services</param-name>
+            <param-value></param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SystemServiceServlet</servlet-name>
+        <url-pattern>/_ah/spi/*</url-pattern>
+    </servlet-mapping>
+
+    <!--servlet with error examples-->
+    <servlet>
+        <servlet-name>AndroidZoomifyViewerExamplesBackend</servlet-name>
+        <servlet-class>
+            cz.mzk.androidzoomifyviewer.backend.AndroidZoomifyViewerExamplesBackendServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AndroidZoomifyViewerExamplesBackend</servlet-name>
+        <url-pattern>/androidzoomifyviewerexamplesbackend/*</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
