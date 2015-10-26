@@ -16,9 +16,18 @@ Minimal SDK version is 9 (Android 2.3) for both library itself and example proje
 Library project needs android-support-v4.jar so that LruCache works in API < 12.
 Examples App project depends on appcompat-v7 (from SDK 21) in order to enable Fragments, ActionBar/ToolBar in older versions.
 
-## Using the library in your app
-The library project is located in AndroidZoomifyViewer directory. Project depends only on android-support-v4.
+## Adding the library to your app
+### Android studio / Gradle
+Just add this dependency to your app module's build.gradle:
+```
+compile 'cz.mzk.androidzoomifyviewer:android-zoomify-viewer:1.0'
+```
+### Eclipse / ADT / Other
+You can either clone this whole repository, which consisted of multiple Eclipse projects. You need to checkout tag 'eclipse'. Eclipse version will no longer be supported though.
+Next option is to download necessary files from here:
+https://bintray.com/rzeh4n/maven/android-zoomify-viewer/view#files
 
+## Using the library
 Required permissions:
 ```
 <uses-permission android:name="android.permission.INTERNET" />
@@ -37,7 +46,7 @@ public class MyApp extends Application {
 }
 
 ```
-This initializes memory and disk cache. Disk cache sice can be configured through resource as well as whether disk cache will be cleared on startup.
+This initializes memory and disk cache. You can configure disk cache size and enable disk cache clean on startup through resouces.
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -46,18 +55,19 @@ This initializes memory and disk cache. Disk cache sice can be configured throug
 </resources>
 ```
 ## Logging and dev mode
-For production most of the logs are not created. Only level Log.WARN and higher. If you want more logs, set Logger.PRODUCTION_LOG_LEVEL to lower level.
+In production, most of logs are not being created at all. Only those in level Log.WARN and higher. 
+If you can edit library's source coude, you can enable more logs even in production by setting cz.mzk.androidzoomifyviewer.Logger.PRODUCTION_LOG_LEVEL to lower level.
 ```
 PRODUCTION_LOG_LEVEL = Log.INFO;
 ```
 Or you can enable all logs in TiledImageView by setting TiledImageView.DEV_MODE to true. This will also enable other developer features like visualization of tiles being drawn.
 
 ## Example Application
-Directory AndroidZoomifyViewerExamples contains Android App project that shows how to use the library. There are some examples of publicly available images in zoomify format as well as possible error situations. 
-Backend project to simulate errors is deployed at AppEngine but no specific AppEngine APIs are used here so it can be deploy into any Servlet container. Backend project for example App project is in directory AndroidZoomifyViewerExamplesBackend.
+Module app contains example android application project, that shows how to use the library. There are some examples of publicly available images in zoomify format as well as possible error situations. 
+Module backand contains web project to simulate errors and is deployed in Google AppEngine. But no specific AppEngine APIs are used here so it can be easily deploy into any Servlet container. Example android app uses among other data from backend web app.
 
 ## HTTPS
-Both Library and Example project can handle https requests. But if you need to access web resources with X.509 certificate, that can't be validated with android pre-installed issuers (for example self-signed or without whole certificate chain packed), you need to add required certificate as a resource and load it within SSL context provider.
+Both Library and Example project can handle https requests. But if you need to access web resources with X.509 certificate, that can't be validated with android pre-installed issuers (for example self-signed or without whole certificate chain packed), you need to add required certificate as a resource and load it in SSL context provider.
 
 1. put DER encoded certifiate(s) in /res/raw
 2. add certificate(s) resource id(s) into CERT_RES_IDS array in class cz.mzk.androidzoomifyviewer.examples.ssl.SSLProvider
