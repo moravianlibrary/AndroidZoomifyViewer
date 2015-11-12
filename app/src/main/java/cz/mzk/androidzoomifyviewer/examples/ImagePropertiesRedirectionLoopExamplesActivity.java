@@ -12,59 +12,59 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
 import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExampleWithHttpResponseCode;
 
 /**
  * @author Martin Řehánek
- * 
  */
 public class ImagePropertiesRedirectionLoopExamplesActivity extends ExamplesListActivity {
-	private static final String TAG = ImagePropertiesRedirectionLoopExamplesActivity.class.getSimpleName();
+    private static final String TAG = ImagePropertiesRedirectionLoopExamplesActivity.class.getSimpleName();
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState, "ImageProperties.xml", "redirection loops", new MyAdapter(this,
-				SingleImageExamplesFactory.getErrorsExamples()));
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState, "ImageProperties.xml", "redirection loops", new MyAdapter(this,
+                SingleImageExamplesFactory.getErrorsExamples()));
+    }
 
-	class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
+    class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
 
-		private final Context context;
-		private final List<ImageExampleWithHttpResponseCode> items;
+        private final Context context;
+        private final List<ImageExampleWithHttpResponseCode> items;
 
-		public MyAdapter(Context context, List<ImageExampleWithHttpResponseCode> items) {
-			super(context, R.layout.item_image_with_error_code, items);
-			this.context = context;
-			this.items = items;
-		}
+        public MyAdapter(Context context, List<ImageExampleWithHttpResponseCode> items) {
+            super(context, R.layout.item_image_with_error_code, items);
+            this.context = context;
+            this.items = items;
+        }
 
-		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
-			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View rowView = inflater.inflate(R.layout.item_image_with_error_code, parent, false);
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inflater.inflate(R.layout.item_image_with_error_code, parent, false);
 
-			((TextView) rowView.findViewById(R.id.errorCode)).setText(String
-					.valueOf(items.get(position).getErrorCode()));
-			((TextView) rowView.findViewById(R.id.errorName)).setText(items.get(position).getErrorName());
-			((TextView) rowView.findViewById(R.id.url)).setText(items.get(position).getUrl());
+            ((TextView) rowView.findViewById(R.id.errorCode)).setText(String
+                    .valueOf(items.get(position).getErrorCode()));
+            ((TextView) rowView.findViewById(R.id.errorName)).setText(items.get(position).getErrorName());
+            ((TextView) rowView.findViewById(R.id.url)).setText(items.get(position).getUrl());
 
-			rowView.findViewById(R.id.container).setOnClickListener(new OnClickListener() {
+            rowView.findViewById(R.id.container).setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View v) {
-					String url = items.get(position).getUrl();
-					startFullscreenSingleImageActivity(url);
-				}
-			});
-			return rowView;
-		}
-	}
+                @Override
+                public void onClick(View v) {
+                    String url = items.get(position).getUrl();
+                    startFullscreenSingleImageActivity(url);
+                }
+            });
+            return rowView;
+        }
+    }
 
-	private void startFullscreenSingleImageActivity(String zoomifyBaseUrl) {
-		Log.d(TAG, "opening '" + zoomifyBaseUrl + "'");
-		Intent intent = new Intent(this, FullscreenSingleImageActivity.class);
-		intent.putExtra(FullscreenSingleImageActivity.EXTRA_BASE_URL, zoomifyBaseUrl);
-		startActivity(intent);
-	}
+    private void startFullscreenSingleImageActivity(String zoomifyBaseUrl) {
+        Log.d(TAG, "opening '" + zoomifyBaseUrl + "'");
+        Intent intent = new Intent(this, FullscreenSingleImageActivity.class);
+        intent.putExtra(FullscreenSingleImageActivity.EXTRA_BASE_URL, zoomifyBaseUrl);
+        startActivity(intent);
+    }
 
 }
