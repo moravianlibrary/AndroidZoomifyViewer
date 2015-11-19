@@ -1,8 +1,5 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -14,6 +11,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.R;
@@ -21,6 +21,8 @@ import cz.mzk.androidzoomifyviewer.cache.TileBitmap;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandler;
 import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;
+import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
+import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
 import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask.TileDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
@@ -81,6 +83,8 @@ public class TiledImageView extends View {
     private TileDownloadHandler mTileDownloadHandler;
     private MyGestureListener mGestureListener;
 
+    private FramingRectangleDrawer mFramingRectDrawer;
+
     public static void initialize(Context context) {
         if (initialized) {
             logger.w("initialized already");
@@ -112,6 +116,7 @@ public class TiledImageView extends View {
         }
         mTilesCache = CacheManager.getTilesCache();
         mGestureListener = new MyGestureListener(this);
+        mFramingRectDrawer = new FramingRectangleDrawer(context);
     }
 
     private void logDeviceScreenCategory() {
@@ -173,6 +178,10 @@ public class TiledImageView extends View {
         cancelAllTasks();
         mGestureListener.reset();
         initTilesDownloaderAsync();
+    }
+
+    public void setFramingRectangles(List<FramingRectangle> framingRectangles) {
+        mFramingRectDrawer.setFrameRectangles(framingRectangles);
     }
 
     private void initTilesDownloaderAsync() {
@@ -289,6 +298,11 @@ public class TiledImageView extends View {
             // Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
             drawLayers(canv, bestLayerId, true);
+
+            if (mFramingRectDrawer != null) {
+                mFramingRectDrawer.setCanvas(canv);
+                mFramingRectDrawer.draw(getTotalScaleFactor(), getTotalShift());
+            }
 
             if (DEV_MODE) {
                 if (devTools != null) {

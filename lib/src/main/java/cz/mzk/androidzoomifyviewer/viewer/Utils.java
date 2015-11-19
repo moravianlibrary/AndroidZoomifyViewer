@@ -42,6 +42,15 @@ public class Utils {
         return result;
     }
 
+    public static RectD toCanvasCoords(Rect inImageCoords, double imageScaleFactor, VectorD imageShiftInCanvas) {
+        double left = (inImageCoords.left * imageScaleFactor + imageShiftInCanvas.x);
+        double top = (inImageCoords.top * imageScaleFactor + imageShiftInCanvas.y);
+        double right = (inImageCoords.right * imageScaleFactor + imageShiftInCanvas.x);
+        double bottom = (inImageCoords.bottom * imageScaleFactor + imageShiftInCanvas.y);
+        return new RectD(left, top, right, bottom);
+    }
+
+
     public static PointD computeShift(PointD inImageCoords, PointD inCanvasCoords, double imageToCanvasScaleFactor) {
         double shiftX = inCanvasCoords.x - inImageCoords.x * imageToCanvasScaleFactor;
         double shiftY = inCanvasCoords.y - inImageCoords.y * imageToCanvasScaleFactor;

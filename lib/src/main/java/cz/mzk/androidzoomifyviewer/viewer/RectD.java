@@ -1,5 +1,7 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
+import android.graphics.Rect;
+
 import java.util.Locale;
 
 /**
@@ -30,6 +32,10 @@ public class RectD {
     @Override
     public String toString() {
         return String.format(Locale.US, "[%.3f;%.3f - %.3f;%.3f]", left, top, right, bottom);
+    }
+
+    public Rect toRect() {
+        return new Rect((int) left, (int) top, (int) right, (int) bottom);
     }
 
 }
