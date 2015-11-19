@@ -129,7 +129,7 @@ public class DevTools {
         mCanv.drawLine(rect.right, rect.top, rect.right, rect.bottom, paint);
         // horizontal borders
         mCanv.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
-        mCanv.drawLine(rect.left, rect.bottom, rect.left, rect.bottom, paint);
+        mCanv.drawLine(rect.left, rect.bottom, rect.right, rect.bottom, paint);
         // diagonals
         mCanv.drawLine(rect.left, rect.top, rect.right, rect.bottom, paint);
         mCanv.drawLine(rect.right, rect.top, rect.left, rect.bottom, paint);
