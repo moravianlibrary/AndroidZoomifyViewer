@@ -1,15 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cz.mzk.androidzoomifyviewer"
-    android:versionCode="1"
-    android:versionName="1.0">
-
-    <!--<application
-        android:allowBackup="false"
-        android:label="@string/app_name"
-        android:supportsRtl="true"/>-->
+    package="cz.mzk.androidzoomifyviewer">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
 
 </manifest>
