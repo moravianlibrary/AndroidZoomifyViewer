@@ -2,6 +2,9 @@ package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -10,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -29,6 +33,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
     private Button mBtnNextPage;
     private TextView mPageCounter;
     private Spinner mSpinnerViewMode;
+    private EditText mEditTextSearch;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,6 +47,23 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
         mSpinnerViewMode = (Spinner) mRoot.findViewById(R.id.spinnerViewMode);
         mSpinnerViewMode.setOnItemSelectedListener(this);
         mSpinnerViewMode.setAdapter(getSpinnerAdapter());
+        mEditTextSearch = (EditText) mRoot.findViewById(R.id.editTextSearch);
+        mEditTextSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Log.v(TAG, String.format("query: '%s'", s));
+                PageViewerActivity activity = (PageViewerActivity) getActivity();
+                activity.searchWords(s.toString());
+            }
+        });
         return mRoot;
     }
 
@@ -102,4 +124,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
+    public void clearSearch() {
+        mEditTextSearch.setText("");
+    }
 }

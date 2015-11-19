@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "cz.mzk.androidzoomifyviewer"
-        minSdkVersion 9
+        minSdkVersion 12
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode 110
+        versionName "1.1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     //compile project(path: ':backend', configuration: 'android-endpoints')
     compile project(':lib')
@@ -38,5 +38,12 @@ dependencies {
     //https://github.com/mcxiaoke/android-volley (unofficial Volley distribution)
     compile 'com.mcxiaoke.volley:library:1.0.19'
 
+    //Dom4j
+    //artefakt z mavenu nefunguje, dostupna verze dom4j-1.6.1.jar pribaluje konfliktni tridy
+    //compile 'dom4j:dom4j:1.6.1'
+    compile files('libs/dom4j-1.6.1.jar')
 
+    //compile files('libs/jaxen-1.1.6.jar')
+    compile 'jaxen:jaxen:1.1.4'
+   
 }

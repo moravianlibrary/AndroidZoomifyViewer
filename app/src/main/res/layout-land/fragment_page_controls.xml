@@ -6,10 +6,10 @@
     android:background="#fff2aa"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="5dp" >
+    android:padding="5dp">
 
     <TextView
-    	android:layout_width="wrap_content"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:background="#d4c46a"
@@ -22,13 +22,13 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="10dp" >
+            android:padding="10dp">
 
             <Button
                 android:id="@+id/btnPreviousPage"
@@ -53,10 +53,20 @@
             android:layout_height="wrap_content"
             android:textSize="25dp" />
 
+        <EditText
+            android:id="@+id/editTextSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:hint="search"
+            android:inputType="text"
+            android:singleLine="true" />
+
         <Spinner
             android:id="@+id/spinnerViewMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
+
 
 </LinearLayout>

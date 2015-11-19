@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.graphics.Rect;
 
+import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
@@ -66,6 +67,15 @@ public interface IPageViewerFragment {
      * @param mode
      */
     public void setViewMode(ViewMode mode);
+
+
+    /**
+     * Sets rectangles, that will be drawn over image (e.g. for boxing text search results).
+     *
+     * @param rectangles Rectangle list or null.
+     */
+    public void setFramingRectangles(List<FramingRectangle> rectangles);
+
 
     public interface EventListener {
         /**

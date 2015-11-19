@@ -1,10 +1,8 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
-import java.util.Arrays;
-import java.util.List;
-
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -12,9 +10,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.DownloadPageListTask.DownloadPidListResultHandler;
 import cz.mzk.androidzoomifyviewer.examples.kramerius.IPageViewerFragment.EventListener;
+import cz.mzk.androidzoomifyviewer.examples.kramerius.api.AltoParser;
+import cz.mzk.androidzoomifyviewer.examples.kramerius.api.K5Connector;
+import cz.mzk.androidzoomifyviewer.examples.kramerius.api.K5ConnectorImpl;
+import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
@@ -38,6 +45,7 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
     private View mViewProgressBar;
     private IPageViewerFragment mPageViewerFragment;
     private PageControlsFragment mControlFragment;
+    private AsyncTask mSearchTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,13 +161,56 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
         mControlFragment.setBtnPreviousPageEnabled(index > 0);
         mControlFragment.setBtnNextPageEnabled(index < (mPageViewerFragment.getPageNumber() - 1));
         mControlFragment.setPageCounterContent(mPageViewerFragment.getPageNumber(), index + 1);
+        mControlFragment.clearSearch();
         mPageViewerFragment.showPage(index);
+        mPageViewerFragment.setFramingRectangles(null);
     }
 
     public void setViewMode(ViewMode mode) {
         mPageViewerFragment.setViewMode(mode);
         if (mPageViewerFragment.isPopulated()) {
             mPageViewerFragment.showPage(mPageViewerFragment.getCurrentPageIndex());
+        }
+    }
+
+    public void searchWords(final String queryString) {
+        if (mSearchTask != null && mSearchTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mSearchTask.cancel(false);
+        }
+        mSearchTask = new AsyncTask<String, Void, List<FramingRectangle>>() {
+
+            @Override
+            protected List<FramingRectangle> doInBackground(String... params) {
+                K5Connector con = new K5ConnectorImpl();
+                String currentPagePid = mPagePids.get(mPageViewerFragment.getCurrentPageIndex());
+                Set<AltoParser.TextBox> blocks = con.getBoxes(mProtocol, mDomain, currentPagePid, params[0]);
+                if (isCancelled()) {
+                    return null;
+                }
+                List<FramingRectangle> rectangles = new ArrayList<>();
+                for (AltoParser.TextBox block : blocks) {
+                    rectangles.add(new FramingRectangle(block.getRectangle(), new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
+                }
+                return rectangles;
+            }
+
+            @Override
+            protected void onPostExecute(List<FramingRectangle> framingRectangles) {
+                if (framingRectangles != null) {
+                    Log.d(TAG, "results for '" + queryString + "': " + framingRectangles.size());
+                    mPageViewerFragment.setFramingRectangles(framingRectangles);
+                }
+                mSearchTask = null;
+            }
+        }.execute(queryString);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mSearchTask != null && mSearchTask.getStatus() != AsyncTask.Status.FINISHED) {
+            mSearchTask.cancel(false);
         }
     }
 

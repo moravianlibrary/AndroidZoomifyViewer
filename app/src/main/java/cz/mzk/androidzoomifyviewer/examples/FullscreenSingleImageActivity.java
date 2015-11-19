@@ -134,6 +134,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         mImageView.loadImage(mBaseUrl);
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();

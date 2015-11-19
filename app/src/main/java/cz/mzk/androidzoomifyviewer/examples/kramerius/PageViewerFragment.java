@@ -1,5 +1,6 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
 import cz.mzk.androidzoomifyviewer.examples.R;
+import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
@@ -195,9 +197,18 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
             String url = buildZoomifyBaseUrl(pid);
             Log.d(TAG, "base url: " + url);
             mTiledImageView.loadImage(url.toString());
+            //mTiledImageView.setFramingRectangles(getTestRectangles(getContext()));
         } else {
             Log.w(TAG, "Page index out of range: " + pageIndex);
         }
+    }
+
+
+    public static List<FramingRectangle> getTestRectangles(Context context) {
+        List<FramingRectangle> result = new ArrayList<>();
+        result.add(new FramingRectangle(1111, 775, 1204, 821, new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
+        result.add(new FramingRectangle(1120, 1293, 1216, 1340, new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
+        return result;
     }
 
     private String buildZoomifyBaseUrl(String pid) {
@@ -347,6 +358,14 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     @Override
     public void setViewMode(ViewMode mode) {
         mTiledImageView.setViewMode(mode);
+    }
+
+    @Override
+    public void setFramingRectangles(List<FramingRectangle> rectangles) {
+        if (mTiledImageView != null) {
+            mTiledImageView.setFramingRectangles(rectangles);
+            mTiledImageView.requestLayout();
+        }
     }
 
 }
