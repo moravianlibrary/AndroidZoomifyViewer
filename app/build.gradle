@@ -8,8 +8,8 @@ android {
         applicationId "cz.mzk.androidzoomifyviewer"
         minSdkVersion 12
         targetSdkVersion 23
-        versionCode 110
-        versionName "1.1.0"
+        versionCode 200
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -45,5 +45,5 @@ dependencies {
 
     //compile files('libs/jaxen-1.1.6.jar')
     compile 'jaxen:jaxen:1.1.4'
-   
+
 }

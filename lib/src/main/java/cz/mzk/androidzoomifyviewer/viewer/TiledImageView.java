@@ -182,6 +182,7 @@ public class TiledImageView extends View {
 
     public void setFramingRectangles(List<FramingRectangle> framingRectangles) {
         mFramingRectDrawer.setFrameRectangles(framingRectangles);
+        invalidate();
     }
 
     private void initTilesDownloaderAsync() {
