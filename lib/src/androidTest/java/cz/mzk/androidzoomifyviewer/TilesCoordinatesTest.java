@@ -130,16 +130,18 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         testCornerTilesCoords("http://www.tricedesigns.com/panoramas/office-outside/office-outside/");
     }
 
-    @Test
+    //url no longer available
+    /*@Test
     public void testCornerTilesCoordsTricedesigns3() {
         testCornerTilesCoords("http://www.tricedesigns.com/panoramas/Pemberton-Park-4/Pemberton-Park-3/");
-    }
+    }*/
 
 
-    @Test
+    //url no longer available
+    /*@Test
     public void testCornerTilesCoordsFookes1() {
         testCornerTilesCoords("http://www.fookes.com/ezimager/zoomify/105_0532/");
-    }
+    }*/
 
     public void testCornerTilesCoords(String baseUrl) {
         Log.d(TAG, "testing corner tiles coords for: " + baseUrl);
