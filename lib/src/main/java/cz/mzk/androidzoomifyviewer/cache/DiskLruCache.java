@@ -484,7 +484,7 @@ public final class DiskLruCache implements Closeable {
             }
 
 			/*
-			 * Open all streams eagerly to guarantee that we see a single published snapshot. If we opened streams lazily then the
+             * Open all streams eagerly to guarantee that we see a single published snapshot. If we opened streams lazily then the
 			 * streams could come from different edits.
 			 */
             InputStream[] ins = new InputStream[valueCount];
