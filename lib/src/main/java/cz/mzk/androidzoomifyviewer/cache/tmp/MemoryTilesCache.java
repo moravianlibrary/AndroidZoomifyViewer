@@ -1,7 +1,7 @@
 package cz.mzk.androidzoomifyviewer.cache.tmp;
 
 import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 import android.util.Log;
 
 import cz.mzk.androidzoomifyviewer.tiles.TileId;

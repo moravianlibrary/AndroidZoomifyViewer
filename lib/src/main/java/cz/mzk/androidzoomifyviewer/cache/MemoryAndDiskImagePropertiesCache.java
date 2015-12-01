@@ -5,8 +5,7 @@ import java.io.File;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
-// TODO: 1.12.15 Probably use android.util.LruCache after upgrading to minSdkVersion=12
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;

@@ -8,7 +8,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 import android.util.Log;
 
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;

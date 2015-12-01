@@ -1,6 +1,6 @@
 package cz.mzk.androidzoomifyviewer.gestures;
 
-import android.support.v4.view.GestureDetectorCompat;
+import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
@@ -19,7 +19,7 @@ public class MyGestureListener implements OnGestureListener, OnDoubleTapListener
 
     // detectors
     private final PinchGestureDetector scaleGestureDetector;
-    private final GestureDetectorCompat gestureDetector;
+    private final GestureDetector gestureDetector;
     // handlers
     private final TiledImageView imageView;
     private final PinchZoomHandler pinchZoomHandler;
@@ -29,7 +29,7 @@ public class MyGestureListener implements OnGestureListener, OnDoubleTapListener
 
     public MyGestureListener(TiledImageView imageView) {
         this.imageView = imageView;
-        gestureDetector = new GestureDetectorCompat(imageView.getContext(), this);
+        gestureDetector = new GestureDetector(imageView.getContext(), this);
         gestureDetector.setOnDoubleTapListener(this);
         scaleGestureDetector = new PinchGestureDetector(this);
 
