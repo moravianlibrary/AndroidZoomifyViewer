@@ -2,8 +2,8 @@ package cz.mzk.androidzoomifyviewer.cache.tmp;
 
 import android.graphics.Bitmap;
 import android.util.LruCache;
-import android.util.Log;
 
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 /**
@@ -15,9 +15,10 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
  */
 public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
 
-    private static final String TAG = MemoryTilesCache.class.getSimpleName();
+    private static final Logger logger = new Logger(MemoryTilesCache.class);
 
-    private LruCache<String, Bitmap> mMemoryCache;
+    private final LruCache<String, Bitmap> mMemoryCache;
+    private final Object mMemoryCacheLock = new Object();
     private State state = State.INITIALIZING;
 
     public MemoryTilesCache() {
@@ -27,6 +28,7 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
     public MemoryTilesCache(int cacheSizeKB) {
         if (cacheSizeKB == 0) {
             state = State.DISABLED;
+            mMemoryCache = null;
         } else {
             mMemoryCache = new LruCache<String, Bitmap>(cacheSizeKB) {
                 @Override
@@ -35,7 +37,7 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
                     return getBitmapSizeInKB(bitmap);
                 }
             };
-            Log.d(TAG, "Lru cache allocated with " + cacheSizeKB + " kB");
+            logger.d("Lru cache allocated with " + cacheSizeKB + " kB");
             state = State.READY;
         }
     }
@@ -48,9 +50,9 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
     @Override
     public void storeTile(Bitmap bmp, String zoomifyBaseUrl, TileId tileId) {
         String key = buildKey(zoomifyBaseUrl, tileId);
-        synchronized (mMemoryCache) {
+        synchronized (mMemoryCacheLock) {
             if (mMemoryCache.get(key) == null) {
-                Log.d(TAG, "storing " + key);
+                logger.d("storing " + key);
                 mMemoryCache.put(key, bmp);
                 logStatistics();
             }
@@ -61,7 +63,7 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
         int hitCount = mMemoryCache.hitCount();
         int missCount = mMemoryCache.missCount();
         float hitRatio = (float) hitCount / (float) (hitCount + missCount) * 100f;
-        Log.d(TAG, String.format("hit ratio: %,.2f %%", hitRatio));
+        logger.d(String.format("hit ratio: %,.2f %%", hitRatio));
     }
 
     @Override

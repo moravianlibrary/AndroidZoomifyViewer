@@ -309,7 +309,7 @@ public class TilesDownloader {
             // ai = Math.ceil(ai / 2.0);
             // // ai = ai / 2.0;
             // }
-            tilesInLayer = (float) (maxDimension / (tileSize * Utils.pow(2, i)));
+            tilesInLayer = (maxDimension / (tileSize * Utils.pow(2, i)));
             // Log.d("blabla", "a" + i + " : b" + i + " = " + ai + " : " + bi);
             // Log.d("blabla", "testI: " + tilesInLayer);
             i++;

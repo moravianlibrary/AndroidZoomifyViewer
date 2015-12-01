@@ -259,7 +259,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                 }
             }
         } finally {
-            // Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
+            logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
         }
     }
 

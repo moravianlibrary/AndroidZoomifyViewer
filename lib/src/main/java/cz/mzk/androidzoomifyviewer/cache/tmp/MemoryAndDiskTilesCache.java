@@ -9,8 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.LruCache;
-import android.util.Log;
 
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
@@ -22,12 +22,12 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
  */
 public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesCache {
 
-    private static final String TAG = MemoryAndDiskTilesCache.class.getSimpleName();
+    private static final Logger logger = new Logger(MemoryAndDiskTilesCache.class);
 
     private static final int DEFAULT_DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
     private static final String DEFAULT_DISK_CACHE_SUBDIR = "tiles";
     private final Object mDiskCacheInitializationLock = new Object();
-    private LruCache<String, Bitmap> mMemoryCache;
+    private final LruCache<String, Bitmap> mMemoryCache;
     private DiskLruCache mDiskCache = null;
     private boolean mDiskCacheDisabled = false;
 
@@ -48,7 +48,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
         // TODO
         int maxItems = 50;
         mMemoryCache = new LruCache<String, Bitmap>(maxItems);
-        Log.d(TAG, "Lru cache allocated, max items: " + maxItems);
+        logger.d("Lru cache allocated, max items: " + maxItems);
         // TODO: no need to do it asynchronously
         initDiskCacheAsync(context, diskCacheSize, diskCacheDir, clearCache);
     }
@@ -71,7 +71,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
                 @Override
                 public void onError() {
-                    Log.i(TAG, "disabling disk cache");
+                    logger.i("disabling disk cache");
                     mDiskCacheDisabled = true;
                     state = mMemoryCache != null ? State.READY : State.DISABLED;
                 }
@@ -174,12 +174,12 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                     try {
                         mDiskCacheInitializationLock.wait();
                     } catch (InterruptedException e) {
-                        Log.e(TAG, "waiting for disk cache lock interrupted", e);
+                        logger.e("waiting for disk cache lock interrupted", e);
                     }
                 }
             }
         } finally {
-            // Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
+            logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
         }
     }
 
@@ -209,7 +209,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            Log.e(TAG, "error loading tile from disk cache: " + key, e);
+            logger.e("error loading tile from disk cache: " + key, e);
             return null;
         }
     }

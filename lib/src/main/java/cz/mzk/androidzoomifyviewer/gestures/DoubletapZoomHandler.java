@@ -24,6 +24,8 @@ public class DoubletapZoomHandler extends Handler {
     public static final double MAX_ANIMATION_SCALE_FACTOR = 3.0;
     public static final int ANIM_STEPS = 10;
     public static final long ANIM_STEP_MS = ANIM_LENGTH_MS / ANIM_STEPS;
+    private static final double SCALE_DIFF = MAX_ANIMATION_SCALE_FACTOR - MIN_ANIMATION_SCALE_FACTOR;
+    private static final double SCALE_STEP = SCALE_DIFF / ANIM_STEPS;
 
     private static final Logger logger = new Logger(DoubletapZoomHandler.class);
     // private static final Logger logger = new Logger("GST: double tap zoom");
@@ -47,9 +49,6 @@ public class DoubletapZoomHandler extends Handler {
     private double accumulatedScaleFactor = 1.0;
     private double activeScaleFactor = 1.0;
 
-    // for animation
-    private final double scaleDiff = MAX_ANIMATION_SCALE_FACTOR - MIN_ANIMATION_SCALE_FACTOR;
-    private final double scaleStep = scaleDiff / ANIM_STEPS;
 
     public DoubletapZoomHandler(TiledImageView imageView) {
         this.imageView = imageView;
@@ -116,7 +115,7 @@ public class DoubletapZoomHandler extends Handler {
                 if (workerId == correctWorkerId) {
                     int i = msg.arg2;
                     if (i <= ANIM_STEPS) {
-                        double ratio = MIN_ANIMATION_SCALE_FACTOR + i * scaleStep;
+                        double ratio = MIN_ANIMATION_SCALE_FACTOR + i * SCALE_STEP;
                         // logger.v(String.format("ui thread: message from thread %d: %d - processing", workerId, i));
                         boolean maxZoomLevelReached = zoomIn(ratio);
                         if (maxZoomLevelReached) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.tmp.TilesCache.State;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
@@ -14,7 +15,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
  */
 public class MemoryAndDiskTilesMulticache extends AbstractTileCache implements TilesCache {
 
-    private static final String TAG = MemoryAndDiskTilesMulticache.class.getSimpleName();
+    private static final Logger logger = new Logger(MemoryAndDiskTilesMulticache.class);
     private static final int MIN_MEMORY_CACHE_SIZE_KB = 2 * 1024;// 2MB
     private static final int MIN_DISK_CACHE_SIZE_KB = 1024;// 1MB
 
@@ -46,7 +47,7 @@ public class MemoryAndDiskTilesMulticache extends AbstractTileCache implements T
 
     private TilesCache initCache(Context context, String diskCachDir, int memoryCacheSize, int diskCacheSize,
                                  boolean clearCache) {
-        Log.d(TAG, "initializing cache: memory: " + memoryCacheSize + " KB, disk: " + diskCacheSize + " KB ("
+        logger.d("initializing cache: memory: " + memoryCacheSize + " KB, disk: " + diskCacheSize + " KB ("
                 + diskCachDir + ")");
         if (diskCacheSize != 0 && memoryCacheSize != 0) {// memory+disk
             return new MemoryAndDiskTilesCache(context, memoryCacheSize, diskCacheSize, diskCachDir, clearCache);

@@ -3,7 +3,6 @@ package cz.mzk.androidzoomifyviewer;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
-import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,20 +25,19 @@ import static org.junit.Assert.assertThat;
 @RunWith(AndroidJUnit4.class)
 public class TilesCoordinatesTest extends AndroidTestCase {
 
-
-    private static final String TAG = TilesCoordinatesTest.class.getSimpleName();
+    private static final Logger logger = new Logger(TilesCoordinatesTest.class);
 
     @Before
     public void init() throws Exception {
-        Log.d(TAG, "init");
+        logger.d("init");
         if (getContext() == null) {
-            Log.d(TAG, "initializing mock context");
+            logger.d("initializing mock context");
             setContext(new MockContext());
         }
         assertNotNull(getContext());
 
         if (!CacheManager.isInitialized()) {
-            Log.d(TAG, "initializing " + CacheManager.class.getSimpleName());
+            logger.d("initializing " + CacheManager.class.getSimpleName());
             CacheManager.initialize(getContext(), false, false, 0);
         }
     }
@@ -56,7 +54,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
             @Override
             public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
-                Log.e(TAG, "unexpected response code: " + responseCode);
+                logger.e("unexpected response code: " + responseCode);
                 result.finished = true;
             }
 
@@ -64,24 +62,24 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             public void onSuccess(TilesDownloader downloader) {
                 result.finished = true;
                 result.downloader = downloader;
-                Log.d(TAG, TilesDownloader.class.getSimpleName() + " initialized");
+                logger.d(TilesDownloader.class.getSimpleName() + " initialized");
             }
 
             @Override
             public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
-                Log.e(TAG, "redirection loop for " + imagePropertiesUrl);
+                logger.e("redirection loop for " + imagePropertiesUrl);
                 result.finished = true;
             }
 
             @Override
             public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
-                Log.e(TAG, String.format("invalid data for %s: %s", imagePropertiesUrl, errorMessage));
+                logger.e(String.format("invalid data for %s: %s", imagePropertiesUrl, errorMessage));
                 result.finished = true;
             }
 
             @Override
             public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
-                Log.e(TAG, String.format("data transfer error for %s: %s", imagePropertiesUrl, errorMessage));
+                logger.e(String.format("data transfer error for %s: %s", imagePropertiesUrl, errorMessage));
                 result.finished = true;
             }
         }).execute();
@@ -144,7 +142,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
     }*/
 
     public void testCornerTilesCoords(String baseUrl) {
-        Log.d(TAG, "testing corner tiles coords for: " + baseUrl);
+        logger.d("testing corner tiles coords for: " + baseUrl);
         TilesDownloader mTilesDownloader = initTilesDownloader(baseUrl);
         assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, mTilesDownloader);
         int width = mTilesDownloader.getImageProperties().getWidth();
@@ -156,7 +154,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         int[] bottomRightCorner = {width - 1, height - 1};
 
         for (int layer = 0; layer < layers.size(); layer++) {
-            Log.d(TAG, "layer: " + layer);
+            logger.d("layer: " + layer);
             int horizontal = layers.get(layer).getTilesHorizontal();
             int vertical = layers.get(layer).getTilesVertical();
             assertTileCoords(mTilesDownloader, layer, topLeftCorner, new int[]{0, 0});

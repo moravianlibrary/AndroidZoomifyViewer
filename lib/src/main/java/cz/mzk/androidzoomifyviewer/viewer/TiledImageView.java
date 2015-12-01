@@ -422,7 +422,7 @@ public class TiledImageView extends View {
         if (bestLayer) {
             // possibly increase memory cache
             if (CacheManager.getTilesCache() != null) {
-                int minCacheSize = (int) (visibleTiles.size() * 2);
+                int minCacheSize = (visibleTiles.size() * 2);
                 // int maxCacheSize = (int) (visibleTiles.size() * 5.5);
                 // CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize, maxCacheSize);
                 CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize);

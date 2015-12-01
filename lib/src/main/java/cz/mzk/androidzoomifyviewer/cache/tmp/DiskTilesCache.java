@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 
+import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
@@ -18,7 +18,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 
-    private static final String TAG = DiskTilesCache.class.getSimpleName();
+    private static final Logger logger = new Logger(DiskTilesCache.class);
 
     private DiskLruCache mCache = null;
     private State state = State.INITIALIZING;
@@ -41,7 +41,7 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 
                 @Override
                 public void onError() {
-                    Log.i(TAG, "disabling cache");
+                    logger.i("disabling cache");
                     state = State.DISABLED;
                 }
             }).execute(cacheDir);
@@ -88,7 +88,7 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            Log.i(TAG, "error loading tile from disk cache: " + key, e);
+            logger.i("error loading tile from disk cache: " + key, e);
             return null;
         }
     }

@@ -85,7 +85,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         // invalidXmlException = e;
         // }
         finally {
-            // Log.d(TAG, "tile processing task finished");
+            logger.v("tile processing task finished");
         }
         return null;
     }

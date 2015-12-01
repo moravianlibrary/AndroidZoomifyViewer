@@ -2,7 +2,6 @@ package cz.mzk.androidzoomifyviewer;
 
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
-import android.R.anim;
 import android.util.Log;
 
 /**
