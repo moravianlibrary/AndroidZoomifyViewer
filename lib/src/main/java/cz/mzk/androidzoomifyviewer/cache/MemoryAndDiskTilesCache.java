@@ -3,12 +3,14 @@ package cz.mzk.androidzoomifyviewer.cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.LruCache;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
@@ -30,7 +32,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
     private static final Logger logger = new Logger(MemoryAndDiskTilesCache.class);
 
-    private final LruCache<String, Bitmap> mMemoryCache;
+    private LruCache<String, Bitmap> mMemoryCache;
+    private final Object mMemoryCacheLock = new Object();
     private final BitmapFetchTaskRegistry mBitmapFetchManager;
     private final Object mDiskCacheInitializationLock = new Object();
     private boolean mDiskCacheEnabled;
@@ -163,7 +166,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     protected void storeTileToMemoryCache(String key, Bitmap bmp) {
-        synchronized (mMemoryCache) {
+        synchronized (mMemoryCacheLock) {
             // Log.v(TAG, "assuming mMemoryCache lock: " + Thread.currentThread().toString());
             if (mMemoryCache.get(key) == null) {
                 // logger.d("storing to memory cache: " + key);
@@ -217,7 +220,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     private Bitmap getTileFromMemoryCache(String key) {
-        synchronized (mMemoryCache) {
+        synchronized (mMemoryCacheLock) {
             return mMemoryCache.get(key);
         }
     }
@@ -380,14 +383,22 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
     @Override
     public void updateMemoryCacheSizeInItems(int minSize) {
-        synchronized (mMemoryCache) {
+        synchronized (mMemoryCacheLock) {
             // https://www.youtube.com/watch?v=oGrXdxpWgyY&list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&index=11
             // TODO: StrictMode.setThreadPolicy(policy);
             // StrictMode.noteSlowCall("updateMemoryCacheSizeInItems lock");
             int currentSize = mMemoryCache.maxSize();
             if (currentSize < minSize) {
                 logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");
-                mMemoryCache.resize(minSize);
+                if (Build.VERSION.SDK_INT >= 21) {
+                    mMemoryCache.resize(minSize);
+                } else {//resize manually by creating new cache instance
+                    Map<String, Bitmap> snapshot = mMemoryCache.snapshot();
+                    mMemoryCache = new LruCache<>(minSize);
+                    for (String key : snapshot.keySet()) {
+                        mMemoryCache.put(key, snapshot.get(key));
+                    }
+                }
             } else {
                 // Log.v(TAG, "" + currentSize + " >= " + minSize);
             }
