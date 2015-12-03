@@ -15,15 +15,52 @@ public class Utils {
 
     private static final Logger logger = new Logger(Utils.class);
 
-    public static String toString(Rect rect, String unit) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("horizontal: ").append(rect.left).append("-").append(rect.right).append(" (")
-                .append(rect.width()).append(' ').append(unit).append(')');
-        builder.append(", ");
-        builder.append("vertical: ").append(rect.top).append("-").append(rect.bottom).append(" (")
-                .append(rect.height()).append(' ').append(unit).append(')');
-        return builder.toString();
+    //SHITFT & SCALE COMPUTATIONS
+
+    //shift
+
+    // TODO: 3.12.15 actually use
+    public static PointD computeShift(PointD pointInImageCoords, PointD pointInCanvasCoords, double imageToCanvasScaleFactor) {
+        double shiftX = pointInCanvasCoords.x - pointInImageCoords.x * imageToCanvasScaleFactor;
+        double shiftY = pointInCanvasCoords.y - pointInImageCoords.y * imageToCanvasScaleFactor;
+        return new PointD(shiftX, shiftY);
     }
+
+    // TODO: 3.12.15 actually use
+    public static double computeShiftX(double xInImageCoords, double xInCanvasCoords, double imageToCanvasScaleFactor) {
+        return xInCanvasCoords - xInImageCoords * imageToCanvasScaleFactor;
+    }
+
+    // TODO: 3.12.15 actually use
+    public static double computeShiftY(double yInImageCoords, double yInCanvasCoords, double imageToCanvasScaleFactor) {
+        return yInCanvasCoords - yInImageCoords * imageToCanvasScaleFactor;
+    }
+
+    //scale
+    // TODO: 3.12.15
+
+
+    //COORDINATES TRANSFORMATIONS (IMAGE <-> CANVAS)
+
+    //single dimension
+
+    public static double toXInImageCoords(double xInCanvasCoords, double imageToCanvasScaleFactor, double imageShiftInCanvasX) {
+        return (xInCanvasCoords - imageShiftInCanvasX) / imageToCanvasScaleFactor;
+    }
+
+    public static double toYInImageCoords(double yInCanvasCoords, double imageToCanvasScaleFactor, double imageShiftInCanvasY) {
+        return (yInCanvasCoords - imageShiftInCanvasY) / imageToCanvasScaleFactor;
+    }
+
+    public static double toXInCanvasCoords(double xInImageCoords, double imageToCanvasScaleFactor, double imageShiftInCanvasX) {
+        return xInImageCoords * imageToCanvasScaleFactor + imageShiftInCanvasX;
+    }
+
+    public static double toYInCanvasCoords(double yInImageCoords, double imageToCanvasScaleFactor, double imageShiftInCanvasY) {
+        return yInImageCoords * imageToCanvasScaleFactor + imageShiftInCanvasY;
+    }
+
+    //point
 
     public static PointD toImageCoords(PointD pointInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
         double imageX = (pointInCanvasCoords.x - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
@@ -31,55 +68,32 @@ public class Utils {
         return new PointD(imageX, imageY);
     }
 
-    public static PointD toCanvasCoords(PointD pointInImageCoords, double imageScaleFactor, VectorD imageShiftInCanvas) {
-        double canvasX = (pointInImageCoords.x * imageScaleFactor + imageShiftInCanvas.x);
-        double canvasY = (pointInImageCoords.y * imageScaleFactor + imageShiftInCanvas.y);
+    public static PointD toCanvasCoords(PointD pointInImageCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+        double canvasX = pointInImageCoords.x * imageToCanvasScaleFactor + imageShiftInCanvas.x;
+        double canvasY = pointInImageCoords.y * imageToCanvasScaleFactor + imageShiftInCanvas.y;
         PointD result = new PointD(canvasX, canvasY);
-        // Log.d(TAG,
-        // inImageCoords.toString() + "->" + result.toString() +
-        // String.format(" SCALE: %.4f", imageScaleFactor)
-        // + " shift: " + imageShiftInCanvas);
         return result;
     }
 
-    public static RectD toCanvasCoords(Rect inImageCoords, double imageScaleFactor, VectorD imageShiftInCanvas) {
-        double left = (inImageCoords.left * imageScaleFactor + imageShiftInCanvas.x);
-        double top = (inImageCoords.top * imageScaleFactor + imageShiftInCanvas.y);
-        double right = (inImageCoords.right * imageScaleFactor + imageShiftInCanvas.x);
-        double bottom = (inImageCoords.bottom * imageScaleFactor + imageShiftInCanvas.y);
+    //rectangle
+
+    public static RectD toImageCoords(Rect rectInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+        double left = rectInCanvasCoords.left * imageToCanvasScaleFactor + imageShiftInCanvas.x;
+        double top = rectInCanvasCoords.top * imageToCanvasScaleFactor + imageShiftInCanvas.y;
+        double right = rectInCanvasCoords.right * imageToCanvasScaleFactor + imageShiftInCanvas.x;
+        double bottom = rectInCanvasCoords.bottom * imageToCanvasScaleFactor + imageShiftInCanvas.y;
         return new RectD(left, top, right, bottom);
     }
 
-
-    public static PointD computeShift(PointD inImageCoords, PointD inCanvasCoords, double imageToCanvasScaleFactor) {
-        double shiftX = inCanvasCoords.x - inImageCoords.x * imageToCanvasScaleFactor;
-        double shiftY = inCanvasCoords.y - inImageCoords.y * imageToCanvasScaleFactor;
-        return new PointD(shiftX, shiftY);
+    public static RectD toCanvasCoords(Rect rectInImageCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+        double left = rectInImageCoords.left * imageToCanvasScaleFactor + imageShiftInCanvas.x;
+        double top = rectInImageCoords.top * imageToCanvasScaleFactor + imageShiftInCanvas.y;
+        double right = rectInImageCoords.right * imageToCanvasScaleFactor + imageShiftInCanvas.x;
+        double bottom = rectInImageCoords.bottom * imageToCanvasScaleFactor + imageShiftInCanvas.y;
+        return new RectD(left, top, right, bottom);
     }
 
-    public static double computeShiftX(double xInImageCoords, double xInCanvasCoords, double imageToCanvasScaleFactor) {
-        return xInCanvasCoords - xInImageCoords * imageToCanvasScaleFactor;
-    }
-
-    public static double computeShiftY(double yInImageCoords, double yInCanvasCoords, double imageToCanvasScaleFactor) {
-        return yInCanvasCoords - yInImageCoords * imageToCanvasScaleFactor;
-    }
-
-    public static double toImageX(double canvasX, double imageToCanvasResizeFactor, double imageShiftInCanvasX) {
-        return (canvasX - imageShiftInCanvasX) / imageToCanvasResizeFactor;
-    }
-
-    public static double toImageY(double canvasY, double imageToCanvasResizeFactor, double imageShiftInCanvasY) {
-        return (canvasY - imageShiftInCanvasY) / imageToCanvasResizeFactor;
-    }
-
-    public static double toCanvasX(double imageX, double imageScaleFactor, double imageShiftInCanvasX) {
-        return imageX * imageScaleFactor + imageShiftInCanvasX;
-    }
-
-    public static double toCanvasY(double imageY, double imageScaleFactor, double imageShiftInCanvasY) {
-        return imageY * imageScaleFactor + imageShiftInCanvasY;
-    }
+    //DP <-> PX CONVERSIONS
 
     public static String toString(Rect rect) {
         return toString(rect, "px");
@@ -101,9 +115,7 @@ public class Utils {
         return px / Resources.getSystem().getDisplayMetrics().density;
     }
 
-    public static String coordsToString(int[] coords) {
-        return "[" + coords[0] + ',' + coords[1] + ']';
-    }
+    //OTHER CALCULATIONS
 
     /**
      * Should not be used for big number, use Math.pow(double, double) instead.
@@ -144,6 +156,8 @@ public class Utils {
         return bd.floatValue();
     }
 
+    //STRING builders
+
     public static String formatBytes(long cacheSizeBytes) {
         if (cacheSizeBytes < 1024) {
             return String.format(Locale.US, "%d B", cacheSizeBytes);
@@ -157,6 +171,20 @@ public class Utils {
             long GB = cacheSizeBytes / (1024 * 1024 * 1024);
             return String.format(Locale.US, "%d GB", GB);
         }
+    }
+
+    public static String toString(Rect rect, String unit) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("horizontal: ").append(rect.left).append("-").append(rect.right).append(" (")
+                .append(rect.width()).append(' ').append(unit).append(')');
+        builder.append(", ");
+        builder.append("vertical: ").append(rect.top).append("-").append(rect.bottom).append(" (")
+                .append(rect.height()).append(' ').append(unit).append(')');
+        return builder.toString();
+    }
+
+    public static String coordsToString(int[] coords) {
+        return "[" + coords[0] + ',' + coords[1] + ']';
     }
 
 }

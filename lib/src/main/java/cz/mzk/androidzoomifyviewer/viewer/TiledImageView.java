@@ -549,13 +549,13 @@ public class TiledImageView extends View {
         int imageHeightMinusOne = mActiveImageDownloader.getImageProperties().getHeight() - 1;
 
         int topLeftVisibleX = collapseToInterval(
-                (int) Utils.toImageX(mVisibleImageInCanvas.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
+                (int) Utils.toXInImageCoords(mVisibleImageInCanvas.left, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
         int topLeftVisibleY = collapseToInterval(
-                (int) Utils.toImageY(mVisibleImageInCanvas.top, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
+                (int) Utils.toYInImageCoords(mVisibleImageInCanvas.top, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
         int bottomRightVisibleX = collapseToInterval(
-                (int) Utils.toImageX(mVisibleImageInCanvas.right, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
+                (int) Utils.toXInImageCoords(mVisibleImageInCanvas.right, resizeFactor, totalShift.x), 0, imageWidthMinusOne);
         int bottomRightVisibleY = collapseToInterval(
-                (int) Utils.toImageY(mVisibleImageInCanvas.bottom, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
+                (int) Utils.toYInImageCoords(mVisibleImageInCanvas.bottom, resizeFactor, totalShift.y), 0, imageHeightMinusOne);
         // TestTags.TILES.d( "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
         // TestTags.TILES.d( "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
 
@@ -720,8 +720,8 @@ public class TiledImageView extends View {
         PointD imgInCanvasBottomRight = Utils.toCanvasCoords(imgBottomRight, mMinScaleFactor, VectorD.ZERO_VECTOR);
         double freeWidth = (canv.getWidth() - imgInCanvasBottomRight.x) * 0.5;
         double freeHeight = (canv.getHeight() - imgInCanvasBottomRight.y) * 0.5;
-        mCanvasImagePaddingHorizontal = Utils.toImageX(freeWidth, mMinScaleFactor, 0);
-        mCanvasImagePaddingVertical = Utils.toImageY(freeHeight, mMinScaleFactor, 0);
+        mCanvasImagePaddingHorizontal = Utils.toXInImageCoords(freeWidth, mMinScaleFactor, 0);
+        mCanvasImagePaddingVertical = Utils.toYInImageCoords(freeHeight, mMinScaleFactor, 0);
         // Log.d(TestTags.CORNERS, "initMinZoomBorders: width: " +
         // mCanvasImagePaddingHorizontal + ", height: "
         // + mCanvasImagePaddingVertical);
