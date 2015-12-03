@@ -21,6 +21,10 @@ public class RectD {
         this.bottom = bottom;
     }
 
+    public RectD(Rect rect) {
+        this(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
     public double height() {
         return bottom - top;
     }
