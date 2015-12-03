@@ -10,10 +10,10 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
-import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
-import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler;
-import cz.mzk.androidzoomifyviewer.tiles.Layer;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -42,7 +42,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
-    private ZoomifyTilesDownloader initTilesDownloader(String baseUrl) {
+    private TilesDownloader initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
         new InitTilesDownloaderTask(baseUrl, pxRatio, new ImagePropertiesDownloadResultHandler() {
@@ -54,7 +54,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             }
 
             @Override
-            public void onSuccess(ZoomifyTilesDownloader downloader) {
+            public void onSuccess(TilesDownloader downloader) {
                 result.finished = true;
                 result.downloader = downloader;
                 logger.d(downloader.getClass().getSimpleName() + " initialized");
@@ -123,11 +123,11 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     public void testCornerTilesCoords(String baseUrl) {
         logger.d("testing corner tiles coords for: " + baseUrl);
-        ZoomifyTilesDownloader zoomifyTilesDownloader = initTilesDownloader(baseUrl);
-        assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, zoomifyTilesDownloader);
-        int width = zoomifyTilesDownloader.getImageProperties().getWidth();
-        int height = zoomifyTilesDownloader.getImageProperties().getHeight();
-        List<Layer> layers = zoomifyTilesDownloader.getLayers();
+        TilesDownloader tilesDownloader = initTilesDownloader(baseUrl);
+        assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, tilesDownloader);
+        int width = tilesDownloader.getImageProperties().getWidth();
+        int height = tilesDownloader.getImageProperties().getHeight();
+        List<Layer> layers = tilesDownloader.getLayers();
         int[] topLeftCorner = {0, 0};
         int[] topRightCorner = {width - 1, 0};
         int[] bottomLeftCorner = {0, height - 1};
@@ -137,10 +137,10 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             logger.d("layer: " + layer);
             int horizontal = layers.get(layer).getTilesHorizontal();
             int vertical = layers.get(layer).getTilesVertical();
-            assertTileCoords(zoomifyTilesDownloader, layer, topLeftCorner, new int[]{0, 0});
-            assertTileCoords(zoomifyTilesDownloader, layer, topRightCorner, new int[]{horizontal - 1, 0});
-            assertTileCoords(zoomifyTilesDownloader, layer, bottomLeftCorner, new int[]{0, vertical - 1});
-            assertTileCoords(zoomifyTilesDownloader, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
+            assertTileCoords(tilesDownloader, layer, topLeftCorner, new int[]{0, 0});
+            assertTileCoords(tilesDownloader, layer, topRightCorner, new int[]{horizontal - 1, 0});
+            assertTileCoords(tilesDownloader, layer, bottomLeftCorner, new int[]{0, vertical - 1});
+            assertTileCoords(tilesDownloader, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
         }
     }
 
@@ -157,15 +157,15 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         testCornerTilesCoords("http://www.fookes.com/ezimager/zoomify/105_0532/");
     }*/
 
-    private void assertTileCoords(ZoomifyTilesDownloader mZoomifyTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
-        int[] actualCoords = mZoomifyTilesDownloader.getTileCoordsFromPointCoords(layerId, pixel[0], pixel[1]);
+    private void assertTileCoords(TilesDownloader mTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
+        int[] actualCoords = mTilesDownloader.getTileCoordsFromPointCoords(layerId, pixel[0], pixel[1]);
         assertEquals(expectedCoords[0], actualCoords[0]);
         assertEquals(expectedCoords[1], actualCoords[1]);
     }
 
     class TilesDownloaderInitializationResult {
         public boolean finished = false;
-        public ZoomifyTilesDownloader downloader;
+        public TilesDownloader downloader;
     }
 
 

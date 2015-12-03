@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 /**
  * This LRU cache stores tiles only in memory as bitmaps. Raw bitmaps occupy significant amount of memory (megabytes), so tiles

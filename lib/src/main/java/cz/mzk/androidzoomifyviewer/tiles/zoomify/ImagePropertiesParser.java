@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

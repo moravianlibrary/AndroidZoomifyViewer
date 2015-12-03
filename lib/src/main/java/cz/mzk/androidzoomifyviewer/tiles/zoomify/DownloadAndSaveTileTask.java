@@ -1,10 +1,11 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import android.graphics.Bitmap;
 
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
@@ -18,7 +19,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     // private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 1);
     private static final Logger logger = new Logger(DownloadAndSaveTileTask.class);
 
-    private final ZoomifyTilesDownloader downloader;
+    private final TilesDownloader downloader;
     private final String zoomifyBaseUrl;
     private final ZoomifyTileId zoomifyTileId;
     private final TileDownloadResultHandler handler;
@@ -34,7 +35,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
      * @param zoomifyTileId  Tile id, not null
      * @param handler        Tile download result handler, not null
      */
-    public DownloadAndSaveTileTask(ZoomifyTilesDownloader downloader, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId,
+    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId,
                                    TileDownloadResultHandler handler) {
         this.downloader = downloader;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
@@ -91,7 +92,8 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
 
     @Override
     protected void onPostExecute(Bitmap bitmap) {
-        downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
+        downloader.unregisterFinishedOrCanceledTask(zoomifyTileId);
+        //downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
         if (tooManyRedirectionsException != null) {
             handler.onRedirectionLoop(zoomifyTileId, tooManyRedirectionsException.getUrl(),
                     tooManyRedirectionsException.getRedirections());
@@ -110,7 +112,8 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
+        //downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
+        downloader.unregisterFinishedOrCanceledTask(zoomifyTileId);
     }
 
     public interface TileDownloadResultHandler {

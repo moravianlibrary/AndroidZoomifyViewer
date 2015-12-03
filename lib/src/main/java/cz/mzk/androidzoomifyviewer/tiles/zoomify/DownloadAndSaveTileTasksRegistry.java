@@ -1,11 +1,12 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask.TileDownloadResultHandler;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
 
 /**
  * This class registers running AsynctTasks in which tiles for single image are downloaded and saved to cache. Purpose of this
@@ -21,9 +22,9 @@ public class DownloadAndSaveTileTasksRegistry {
     private static final Logger logger = new Logger(DownloadAndSaveTileTasksRegistry.class);
 
     private final Map<ZoomifyTileId, DownloadAndSaveTileTask> tasks = new HashMap<ZoomifyTileId, DownloadAndSaveTileTask>();
-    private final ZoomifyTilesDownloader downloader;
+    private final TilesDownloader downloader;
 
-    public DownloadAndSaveTileTasksRegistry(ZoomifyTilesDownloader downloader) {
+    public DownloadAndSaveTileTasksRegistry(TilesDownloader downloader) {
         this.downloader = downloader;
     }
 

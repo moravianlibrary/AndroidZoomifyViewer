@@ -2,7 +2,7 @@ package cz.mzk.androidzoomifyviewer.cache;
 
 import android.graphics.Bitmap;
 
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 /**
  * @author Martin Řehánek

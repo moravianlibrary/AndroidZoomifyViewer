@@ -15,7 +15,7 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 /**
  * @author Martin Řehánek

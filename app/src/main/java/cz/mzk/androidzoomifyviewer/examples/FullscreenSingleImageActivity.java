@@ -15,7 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;

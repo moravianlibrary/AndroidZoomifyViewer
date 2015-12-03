@@ -1,9 +1,13 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
+
+import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 /**
  * @author Martin Řehánek
  */
-public class ZoomifyTileId {
+public class ZoomifyTileId implements TileId {
+
+    public static final String PREFIX = "zoomify";
 
     private final int layer;
     private final int x;
@@ -18,10 +22,24 @@ public class ZoomifyTileId {
 
     public static ZoomifyTileId valueOf(String string) {
         String[] tokens = string.split(":");
-        int layer = Integer.valueOf(tokens[0]);
-        int x = Integer.valueOf(tokens[1]);
-        int y = Integer.valueOf(tokens[2]);
+        String zoomifyPrefix = tokens[0];
+        if (!zoomifyPrefix.equals(PREFIX)) {
+            throw new IllegalArgumentException(String.format("'%s' is not zoomify tile id", string));
+        }
+        int layer = Integer.valueOf(tokens[1]);
+        int x = Integer.valueOf(tokens[2]);
+        int y = Integer.valueOf(tokens[3]);
         return new ZoomifyTileId(layer, x, y);
+    }
+
+    @Override
+    public String toSerializableString() {
+        return PREFIX + ':' + layer + ':' + x + ':' + y;
+    }
+
+    @Override
+    public String toString() {
+        return "" + layer + ':' + x + ':' + y;
     }
 
     public int getLayer() {
@@ -36,9 +54,6 @@ public class ZoomifyTileId {
         return y;
     }
 
-    public String toString() {
-        return "" + layer + ':' + x + ':' + y;
-    }
 
     @Override
     public int hashCode() {

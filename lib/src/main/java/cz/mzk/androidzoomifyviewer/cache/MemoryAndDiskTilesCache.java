@@ -18,7 +18,7 @@ import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.TileBitmap.State;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**

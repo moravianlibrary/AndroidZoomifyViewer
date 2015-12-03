@@ -23,11 +23,11 @@ import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandle
 import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
-import cz.mzk.androidzoomifyviewer.tiles.DownloadAndSaveTileTask.TileDownloadResultHandler;
-import cz.mzk.androidzoomifyviewer.tiles.ImageProperties;
-import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 /**
  * @author Martin Řehánek
@@ -50,7 +50,7 @@ public class TiledImageView extends View {
     private double mInitialScaleFactor = -1.0;
     private double mMinScaleFactor = -1.0;
     private double mMaxScaleFactor = -1.0;
-    private String mZoomifyBaseUrl;
+    private String mZoomifyBaseUrl; //todo: vyhledove odstranit, tady to nepatri
     private SingleTapListener mSingleTapListener;
     private boolean pageInitialized = false;
     // SHIFTS
@@ -63,7 +63,7 @@ public class TiledImageView extends View {
     // ViewMode.NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP;
 
     private TilesCache mTilesCache;
-    private ZoomifyTilesDownloader mActiveImageDownloader;
+    private TilesDownloader mActiveImageDownloader;
 
     // za hranice canvas cela oblast s obrazkem
     private Rect mImageInCanvas = null;
@@ -150,7 +150,8 @@ public class TiledImageView extends View {
 
     public void cancelAllTasks() {
         if (mActiveImageDownloader != null) {
-            mActiveImageDownloader.getTaskRegistry().cancelAllTasks();
+            //mActiveImageDownloader.getTaskRegistry().cancelAllTasks();
+            mActiveImageDownloader.cancelAllTasks();
         }
         if (CacheManager.getTilesCache() != null) {
             CacheManager.getTilesCache().cancelAllTasks();
@@ -182,7 +183,7 @@ public class TiledImageView extends View {
                 new InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler() {
 
                     @Override
-                    public void onSuccess(ZoomifyTilesDownloader downloader) {
+                    public void onSuccess(TilesDownloader downloader) {
                         logger.d("downloader initialized");
                         mActiveImageDownloader = downloader;
                         if (DEV_MODE) {
@@ -482,45 +483,45 @@ public class TiledImageView extends View {
     }
 
     private void downloadTileAsync(ZoomifyTileId visibleTileId) {
-        mActiveImageDownloader.getTaskRegistry().registerTask(visibleTileId, mZoomifyBaseUrl,
-                new TileDownloadResultHandler() {
+        //mActiveImageDownloader.getTaskRegistry().registerTask(visibleTileId, mZoomifyBaseUrl,
+        mActiveImageDownloader.enqueTileFetching(visibleTileId, new TileDownloadResultHandler() {
 
-                    @Override
-                    public void onUnhandableResponseCode(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode) {
-                        if (mTileDownloadHandler != null) {
-                            mTileDownloadHandler.onTileUnhandableResponseError(zoomifyTileId, tileUrl, responseCode);
-                        }
-                    }
+            @Override
+            public void onUnhandableResponseCode(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode) {
+                if (mTileDownloadHandler != null) {
+                    mTileDownloadHandler.onTileUnhandableResponseError(zoomifyTileId, tileUrl, responseCode);
+                }
+            }
 
-                    @Override
-                    public void onSuccess(ZoomifyTileId zoomifyTileId, Bitmap bitmap) {
-                        invalidate();
-                        if (mTileDownloadHandler != null) {
-                            mTileDownloadHandler.onTileProcessed(zoomifyTileId);
-                        }
-                    }
+            @Override
+            public void onSuccess(ZoomifyTileId zoomifyTileId, Bitmap bitmap) {
+                invalidate();
+                if (mTileDownloadHandler != null) {
+                    mTileDownloadHandler.onTileProcessed(zoomifyTileId);
+                }
+            }
 
-                    @Override
-                    public void onRedirectionLoop(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections) {
-                        if (mTileDownloadHandler != null) {
-                            mTileDownloadHandler.onTileRedirectionLoopError(zoomifyTileId, tileUrl, redirections);
-                        }
-                    }
+            @Override
+            public void onRedirectionLoop(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections) {
+                if (mTileDownloadHandler != null) {
+                    mTileDownloadHandler.onTileRedirectionLoopError(zoomifyTileId, tileUrl, redirections);
+                }
+            }
 
-                    @Override
-                    public void onInvalidData(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
-                        if (mTileDownloadHandler != null) {
-                            mTileDownloadHandler.onTileInvalidDataError(zoomifyTileId, tileUrl, errorMessage);
-                        }
-                    }
+            @Override
+            public void onInvalidData(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
+                if (mTileDownloadHandler != null) {
+                    mTileDownloadHandler.onTileInvalidDataError(zoomifyTileId, tileUrl, errorMessage);
+                }
+            }
 
-                    @Override
-                    public void onDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
-                        if (mTileDownloadHandler != null) {
-                            mTileDownloadHandler.onTileDataTransferError(zoomifyTileId, tileUrl, errorMessage);
-                        }
-                    }
-                });
+            @Override
+            public void onDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
+                if (mTileDownloadHandler != null) {
+                    mTileDownloadHandler.onTileDataTransferError(zoomifyTileId, tileUrl, errorMessage);
+                }
+            }
+        });
     }
 
     private void drawTile(Canvas canv, ZoomifyTileId visibleTileId, Bitmap tileBmp) {
@@ -573,7 +574,9 @@ public class TiledImageView extends View {
         // No longer visible pics (within this layer) but still running.
         // Will be stopped (perhpas except of those closest to screen)
         // int canceled = 0;
-        for (ZoomifyTileId runningZoomifyTileId : mActiveImageDownloader.getTaskRegistry().getAllTaskTileIds()) {
+        mActiveImageDownloader.cancelFetchingTilesOutOfSight(layerId, bottomRightVisibleTileCoords, topLeftVisibleTileCoords);
+
+        /*for (ZoomifyTileId runningZoomifyTileId : mActiveImageDownloader.getTaskRegistry().getAllTaskTileIds()) {
             if (runningZoomifyTileId.getLayer() == layerId) {
                 if (runningZoomifyTileId.getX() < topLeftVisibleTileCoords[0]
                         || runningZoomifyTileId.getX() > bottomRightVisibleTileCoords[0]
@@ -585,7 +588,7 @@ public class TiledImageView extends View {
                     // }
                 }
             }
-        }
+        }*/
         // logger.d( "canceled: " + canceled);
     }
 
@@ -878,7 +881,7 @@ public class TiledImageView extends View {
          *
          * @param zoomifyTileId Tile id.
          * @param tileUrl       Tile jpeg url.
-         * @param errorMessage  Error message.
+         * @param responseCode  Http response code recieved.
          */
 
         public void onTileUnhandableResponseError(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode);
@@ -888,7 +891,7 @@ public class TiledImageView extends View {
          *
          * @param zoomifyTileId Tile id.
          * @param tileUrl       Tile jpeg url.
-         * @param errorMessage  Error message.
+         * @param redirections  Total redirections.
          */
         public void onTileRedirectionLoopError(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections);
 

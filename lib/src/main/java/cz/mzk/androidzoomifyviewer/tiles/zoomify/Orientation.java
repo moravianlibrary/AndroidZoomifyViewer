@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 /**
  * @author Martin Řehánek

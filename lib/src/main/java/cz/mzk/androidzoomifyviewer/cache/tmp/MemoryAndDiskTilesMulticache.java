@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 /**
  * This implementation contains different caches for different layers.

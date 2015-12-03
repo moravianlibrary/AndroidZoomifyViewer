@@ -1,7 +1,8 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
@@ -10,7 +11,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException
 /**
  * @author Martin Řehánek
  */
-public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, ZoomifyTilesDownloader> {
+public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, TilesDownloader> {
 
     private static final Logger logger = new Logger(InitTilesDownloaderTask.class);
 
@@ -35,10 +36,10 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Zoo
     }
 
     @Override
-    protected ZoomifyTilesDownloader doInBackground(Void... params) {
+    protected TilesDownloader doInBackground(Void... params) {
         try {
             //logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
-            ZoomifyTilesDownloader downloader = new ZoomifyTilesDownloaderImp(zoomifyBaseUrl, pxRatio);
+            TilesDownloader downloader = new ZoomifyTilesDownloader(zoomifyBaseUrl, pxRatio);
             if (!isCancelled()) {
                 downloader.initializeWithImageProperties();
                 return downloader;
@@ -56,7 +57,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Zoo
     }
 
     @Override
-    protected void onPostExecute(ZoomifyTilesDownloader downloader) {
+    protected void onPostExecute(TilesDownloader downloader) {
         if (tooManyRedirectionsException != null) {
             handler.onRedirectionLoop(tooManyRedirectionsException.getUrl(),
                     tooManyRedirectionsException.getRedirections());
@@ -74,7 +75,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Zoo
 
     public interface ImagePropertiesDownloadResultHandler {
 
-        public void onSuccess(ZoomifyTilesDownloader downloader);
+        public void onSuccess(TilesDownloader downloader);
 
         public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
 

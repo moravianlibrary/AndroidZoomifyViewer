@@ -14,7 +14,7 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask;
 import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask.Listener;
-import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 

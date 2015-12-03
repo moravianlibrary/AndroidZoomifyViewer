@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +15,7 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
@@ -27,7 +28,7 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
  *
  * @author Martin Řehánek
  */
-public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
+public class ZoomifyTilesDownloader implements TilesDownloader {
 
     /**
      * @link https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
@@ -37,7 +38,7 @@ public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
     public static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
     public static final int TILES_TIMEOUT = 5000;
 
-    private static final Logger logger = new Logger(ZoomifyTilesDownloaderImp.class);
+    private static final Logger logger = new Logger(ZoomifyTilesDownloader.class);
 
     private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
 
@@ -55,7 +56,7 @@ public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
      * @param pxRatio Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
      *                dpRatio = (1-pxRatio)
      */
-    public ZoomifyTilesDownloaderImp(String baseUrl, double pxRatio) {
+    public ZoomifyTilesDownloader(String baseUrl, double pxRatio) {
         if (pxRatio < 0 || pxRatio > 1) {
             throw new IllegalArgumentException("pxRation not in <0;1> interval");
         } else {
@@ -82,7 +83,7 @@ public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
     }
 
     /**
-     * Initializes ZoomifyTilesDownloaderImp by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
+     * Initializes ZoomifyTilesDownloader by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
      * may be loaded from cache. Also ImageProperties.xml is saved to cache after being downloaded.
      *
      * @throws IllegalStateException        If this method had already been called
@@ -109,6 +110,7 @@ public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
         layers = initLayers();
         initialized = true;
     }
+
 
     private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
@@ -229,11 +231,11 @@ public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
         return i;
     }
 
-    @Override
-    public DownloadAndSaveTileTasksRegistry getTaskRegistry() {
+    //@Override
+    /*private DownloadAndSaveTileTasksRegistry getTaskRegistry() {
         checkInitialized();
         return taskRegistry;
-    }
+    }*/
 
     /**
      * Downloads tile from zoomify server. TODO: InvalidDataException
@@ -549,5 +551,47 @@ public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
         checkInitialized();
         return layers;
     }
+
+
+    @Override
+    public void cancelAllTasks() {
+        checkInitialized();
+        taskRegistry.cancelAllTasks();
+    }
+
+    @Override
+    public void destroy() {
+        //TODO: zabit vsechny procesy, pripadne i ten, co inicializuje metadata
+    }
+
+    @Override
+    public void enqueTileFetching(ZoomifyTileId zoomifyTileId, DownloadAndSaveTileTask.TileDownloadResultHandler handler) {
+        taskRegistry.registerTask(zoomifyTileId, mBaseUrl, handler);
+    }
+
+    @Override
+    public void cancelFetchingTilesOutOfSight(int layerId, int[] bottomRightVisibleTileCoords, int[] topLeftVisibleTileCoords) {
+        checkInitialized();
+        for (ZoomifyTileId runningZoomifyTileId : taskRegistry.getAllTaskTileIds()) {
+            if (runningZoomifyTileId.getLayer() == layerId) {
+                if (runningZoomifyTileId.getX() < topLeftVisibleTileCoords[0]
+                        || runningZoomifyTileId.getX() > bottomRightVisibleTileCoords[0]
+                        || runningZoomifyTileId.getY() < topLeftVisibleTileCoords[1]
+                        || runningZoomifyTileId.getY() > bottomRightVisibleTileCoords[1]) {
+                    //boolean wasCanceled = taskRegistry.cancel(runningZoomifyTileId);
+                    // if (wasCanceled) {
+                    // canceled++;
+                    // }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId) {
+        checkInitialized();
+        taskRegistry.unregisterTask(zoomifyTileId);
+    }
+
 
 }
