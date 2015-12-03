@@ -93,7 +93,7 @@ public class TilesDownloader {
      *                                      etc.
      * @throws OtherIOException             In case of other error (invalid URL, error transfering data, ...)
      */
-    public void init() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
+    void init() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
             InvalidDataException {
         if (initialized) {
             throw new IllegalStateException("already initialized (" + mBaseUrl + ")");
@@ -101,27 +101,27 @@ public class TilesDownloader {
             logger.d("initializing: " + mBaseUrl);
         }
         HttpURLConnection.setFollowRedirects(false);
-        String propertiesXml = getImagePropertiesXml();
+        String propertiesXml = fetchImagePropertiesXml();
         imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
         logger.d(imageProperties.toString());
         layers = initLayers();
         initialized = true;
     }
 
-    private String getImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
+    private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         ImagePropertiesCache cache = CacheManager.getImagePropertiesCache();
         String fromCache = cache.getXml(mBaseUrl);
         if (fromCache != null) {
             return fromCache;
         } else {
-            String downloaded = downloadPropertiesXml(mImagePropertiesUrl, MAX_REDIRECTIONS);
+            String downloaded = downloadImagePropertiesXml(mImagePropertiesUrl, MAX_REDIRECTIONS);
             cache.storeXml(downloaded, mBaseUrl);
             return downloaded;
         }
     }
 
-    private String downloadPropertiesXml(String urlString, int remainingRedirections)
+    private String downloadImagePropertiesXml(String urlString, int remainingRedirections)
             throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
         logger.d("downloading metadata from " + urlString);
         if (remainingRedirections == 0) {
@@ -145,14 +145,14 @@ public class TilesDownloader {
                         throw new ImageServerResponseException(urlString, responseCode);
                     }
                     urlConnection.disconnect();
-                    return downloadPropertiesXml(location, remainingRedirections - 1);
+                    return downloadImagePropertiesXml(location, remainingRedirections - 1);
                 case 301:
                     if (location == null || location.isEmpty()) {
                         throw new ImageServerResponseException(urlString, responseCode);
                     }
                     mImagePropertiesUrl = location;
                     urlConnection.disconnect();
-                    return downloadPropertiesXml(location, remainingRedirections - 1);
+                    return downloadImagePropertiesXml(location, remainingRedirections - 1);
                 case 302:
                 case 303:
                 case 305:
@@ -161,7 +161,7 @@ public class TilesDownloader {
                         throw new ImageServerResponseException(urlString, responseCode);
                     }
                     urlConnection.disconnect();
-                    return downloadPropertiesXml(location, remainingRedirections - 1);
+                    return downloadImagePropertiesXml(location, remainingRedirections - 1);
                 default:
                     throw new ImageServerResponseException(urlString, responseCode);
             }
@@ -213,34 +213,17 @@ public class TilesDownloader {
     }
 
     private int computeNumberOfLayers() {
-        // double ai = -1;
         float tilesInLayer = -1f;
         int tilesInLayerInt = -1;
-        // Log.d("blabla", "width: " + imageProperties.getWidth() + ", height: " + imageProperties.getHeight());
         float maxDimension = Math.max(imageProperties.getWidth(), imageProperties.getHeight());
         float tileSize = imageProperties.getTileSize();
         int i = 0;
         do {
-            // if (i == 0) {
-            // ai = Math.ceil(maxDimension / tileSize);
-            // // ai = maxDimension / tileSize;
-            // } else {
-            // ai = Math.ceil(ai / 2.0);
-            // // ai = ai / 2.0;
-            // }
             tilesInLayer = (maxDimension / (tileSize * Utils.pow(2, i)));
-            // Log.d("blabla", "a" + i + " : b" + i + " = " + ai + " : " + bi);
-            // Log.d("blabla", "testI: " + tilesInLayer);
             i++;
             tilesInLayerInt = (int) Math.ceil(COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION ? Utils.round(tilesInLayer, 3)
                     : tilesInLayer);
         } while (tilesInLayerInt != 1);
-        // } while (ai != 1);
-        // float diff = tilesInLayer - 1.0f;
-        // Log.d("blabla", "diff: " + diff);
-        // Log.d("blabla", "layers: " + i);
-        // double testD = Math.ceil(Utils.logarithm(maxMeasurement, 2) / ((double) imageProperties.getTileSize()));
-        // Log.d("blabla", "d!=" + testD);
         return i;
     }
 
@@ -268,6 +251,41 @@ public class TilesDownloader {
         String tileUrl = buildTileUrl(tileGroup, tileId);
         logger.v("TILE URL: " + tileUrl);
         return downloadTile(tileUrl, MAX_REDIRECTIONS);
+    }
+
+    /**
+     * @link http://www.staremapy.cz/zoomify-analyza/
+     */
+    private int computeTileGroup(TileId tileId) {
+        int x = tileId.getX();
+        int y = tileId.getY();
+        int level = tileId.getLayer();
+        double tileSize = imageProperties.getTileSize();
+        double width = imageProperties.getWidth();
+        double height = imageProperties.getHeight();
+        double depth = layers.size();
+        // logger.d( tileId.toString());
+        // logger.d( "x: " + x + ", y: " + y + ", d: " + depth + ", l: " + level);
+        // logger.d( "width: " + width + ", height: " + height + ", tileSize: " + tileSize);
+
+        double first = Math.ceil(Math.floor(width / Math.pow(2, depth - level - 1)) / tileSize);
+        double index = x + y * first;
+        for (int i = 1; i <= level; i++) {
+            index += Math.ceil(Math.floor(width / Math.pow(2, depth - i)) / tileSize)
+                    * Math.ceil(Math.floor(height / Math.pow(2, depth - i)) / tileSize);
+        }
+        // logger.d( "index: " + index);
+        int result = (int) (index / tileSize);
+        // logger.d( "tile group: " + result);
+        return result;
+    }
+
+    private String buildTileUrl(int tileGroup, TileId tileId) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(mBaseUrl).append("TileGroup").append(tileGroup).append('/');
+        builder.append(tileId.getLayer()).append('-').append(tileId.getX()).append('-').append(tileId.getY())
+                .append(".jpg");
+        return builder.toString();
     }
 
     private Bitmap downloadTile(String tileUrl, int remainingRedirections) throws TooManyRedirectionsException,
@@ -324,48 +342,6 @@ public class TilesDownloader {
         }
     }
 
-    /**
-     * @link http://www.staremapy.cz/zoomify-analyza/
-     */
-    private int computeTileGroup(TileId tileId) {
-        int x = tileId.getX();
-        int y = tileId.getY();
-        int level = tileId.getLayer();
-        double tileSize = imageProperties.getTileSize();
-        double width = imageProperties.getWidth();
-        double height = imageProperties.getHeight();
-        double depth = layers.size();
-
-        // logger.d( tileId.toString());
-        // logger.d( "x: " + x + ", y: " + y + ", d: " + depth + ", l: " +
-        // level);
-        // logger.d( "width: " + width + ", height: " + height + ", tileSize: "
-        // + tileSize);
-
-        double first = Math.ceil(Math.floor(width / Math.pow(2, depth - level - 1)) / tileSize);
-        double index = x + y * first;
-        for (int i = 1; i <= level; i++) {
-            index += Math.ceil(Math.floor(width / Math.pow(2, depth - i)) / tileSize)
-                    * Math.ceil(Math.floor(height / Math.pow(2, depth - i)) / tileSize);
-        }
-        // logger.d( "index: " + index);
-        int result = (int) (index / tileSize);
-        // logger.d( "tile group: " + result);
-        return result;
-    }
-
-    private String buildTileUrl(int tileGroup, TileId tileId) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(mBaseUrl).append("TileGroup").append(tileGroup).append('/');
-        builder.append(tileId.getLayer()).append('-').append(tileId.getX()).append('-').append(tileId.getY())
-                .append(".jpg");
-        return builder.toString();
-    }
-
-    public List<Layer> getLayers() {
-        checkInitialized();
-        return layers;
-    }
 
     public int[] getTileCoords(int layerId, int pixelX, int pixelY) {
         checkInitialized();
@@ -403,7 +379,7 @@ public class TilesDownloader {
     }
 
     /**
-     * Selects highest layer, tiles of which whould all fit into the image area in canvas (with exception of border tiles
+     * Selects highest layer, tiles of which would all fit into the image area in canvas (with exception of border tiles
      * partially overflowing).
      * <p/>
      * For determining this, canvas width/height can be taken into account either in pixels or density independent pixels or
@@ -427,6 +403,7 @@ public class TilesDownloader {
      * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
      */
     public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
+        // TODO: 3.12.15 Asi prejmenovat parametry
         checkInitialized();
         double dpRatio = 1.0 - mPxRatio;
         if (mPxRatio < 0.0) {
@@ -558,9 +535,15 @@ public class TilesDownloader {
         return imageProperties.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
     }
 
-    public String getImagePropertiesUrl() {
+    /*public String getImagePropertiesUrl() {
         checkInitialized();
         return mImagePropertiesUrl;
+    }*/
+
+
+    public List<Layer> getLayers() {
+        checkInitialized();
+        return layers;
     }
 
 }
