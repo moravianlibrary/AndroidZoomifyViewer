@@ -1,8 +1,8 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
-import java.util.List;
-
 import android.graphics.Rect;
+
+import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;

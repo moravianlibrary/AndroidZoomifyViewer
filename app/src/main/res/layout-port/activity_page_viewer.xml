@@ -1,64 +1,63 @@
-<FrameLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/root"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-	<RelativeLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:background="@color/white">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
-		<fragment
-			android:id="@+id/fragmentControls"
-			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true" />
+        <fragment
+            android:id="@+id/fragmentControls"
+            android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" />
 
-		<fragment
-			android:id="@+id/fragmentViewer"
-			android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_above="@id/fragmentControls"
-			android:layout_margin="5dp" />
-	</RelativeLayout>
+        <fragment
+            android:id="@+id/fragmentViewer"
+            android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/fragmentControls"
+            android:layout_margin="5dp" />
+    </RelativeLayout>
 
-	<!-- <LinearLayout -->
-	<!-- android:layout_width="match_parent" -->
-	<!-- android:layout_height="match_parent" -->
-	<!-- android:orientation="vertical" -->
-	<!-- android:background="@color/white"> -->
+    <!-- <LinearLayout -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="match_parent" -->
+    <!-- android:orientation="vertical" -->
+    <!-- android:background="@color/white"> -->
 
-	<!-- <fragment -->
-	<!-- android:id="@+id/fragmentControls" -->
-	<!-- android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment" -->
-	<!-- android:layout_width="match_parent" -->
-	<!-- android:layout_height="wrap_content" /> -->
+    <!-- <fragment -->
+    <!-- android:id="@+id/fragmentControls" -->
+    <!-- android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment" -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="wrap_content" /> -->
 
-	<!-- <fragment -->
-	<!-- android:id="@+id/fragmentViewer" -->
-	<!-- android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment" -->
-	<!-- android:layout_width="match_parent" -->
-	<!-- android:layout_height="match_parent" -->
-	<!-- android:layout_margin="5dp" /> -->
-	<!-- </LinearLayout> -->
+    <!-- <fragment -->
+    <!-- android:id="@+id/fragmentViewer" -->
+    <!-- android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment" -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="match_parent" -->
+    <!-- android:layout_margin="5dp" /> -->
+    <!-- </LinearLayout> -->
 
-	<LinearLayout
-		android:id="@+id/viewProgressBar"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:alpha="0.8"
-		android:background="@color/black"
-		android:gravity="center"
-		android:orientation="vertical"
-		android:visibility="visible">
+    <LinearLayout
+        android:id="@+id/viewProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.8"
+        android:background="@color/black"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
 
-		<ProgressBar
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:indeterminate="true" />
-	</LinearLayout>
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </LinearLayout>
 
 </FrameLayout>

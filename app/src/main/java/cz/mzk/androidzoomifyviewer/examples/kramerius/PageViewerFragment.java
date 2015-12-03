@@ -1,9 +1,5 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -23,6 +19,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
@@ -37,13 +37,12 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
 public class PageViewerFragment extends Fragment implements IPageViewerFragment, OnTouchListener,
         ImageInitializationHandler, SingleTapListener {
 
-    private static final String TAG = PageViewerFragment.class.getSimpleName();
-
     public static final String KEY_PROTOCOL = PageViewerFragment.class.getSimpleName() + "_protocol";
     public static final String KEY_DOMAIN = PageViewerFragment.class.getSimpleName() + "_domain";
     public static final String KEY_PAGE_PIDS = PageViewerFragment.class.getSimpleName() + "_pagePids";
     public static final String KEY_CURRENT_PAGE_INDEX = PageViewerFragment.class.getSimpleName() + "_pageIndex";
     public static final String KEY_POPULATED = PageViewerFragment.class.getSimpleName() + ":_populated";
+    private static final String TAG = PageViewerFragment.class.getSimpleName();
     private static final int MAX_IMG_FULL_HEIGHT = 1000;
     private static final int IMG_FULL_SCALE_QUOTIENT = 100;
 
@@ -68,6 +67,13 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
 
     private boolean mPopulated = false;
     private ImageRequest mImageRequest;
+
+    public static List<FramingRectangle> getTestRectangles(Context context) {
+        List<FramingRectangle> result = new ArrayList<>();
+        result.add(new FramingRectangle(1111, 775, 1204, 821, new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
+        result.add(new FramingRectangle(1120, 1293, 1216, 1340, new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
+        return result;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -201,14 +207,6 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
         } else {
             Log.w(TAG, "Page index out of range: " + pageIndex);
         }
-    }
-
-
-    public static List<FramingRectangle> getTestRectangles(Context context) {
-        List<FramingRectangle> result = new ArrayList<>();
-        result.add(new FramingRectangle(1111, 775, 1204, 821, new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
-        result.add(new FramingRectangle(1120, 1293, 1216, 1340, new FramingRectangle.Border(R.color.framing_rect_border, 1), R.color.framing_rect_filling));
-        return result;
     }
 
     private String buildZoomifyBaseUrl(String pid) {

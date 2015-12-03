@@ -1,5 +1,12 @@
 package cz.mzk.androidzoomifyviewer.tiles;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,13 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
@@ -641,6 +641,11 @@ public class TilesDownloader {
         return imageProperties.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
     }
 
+    public String getImagePropertiesUrl() {
+        checkInitialized();
+        return imagePropertiesUrl;
+    }
+
     public class TooManyRedirectionsException extends Exception {
         private static final long serialVersionUID = -6653657291115225081L;
         private final String url;
@@ -693,11 +698,6 @@ public class TilesDownloader {
         public String getUrl() {
             return url;
         }
-    }
-
-    public String getImagePropertiesUrl() {
-        checkInitialized();
-        return imagePropertiesUrl;
     }
 
     public class OtherIOException extends Exception {

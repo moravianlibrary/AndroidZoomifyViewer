@@ -1,8 +1,8 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
-import java.io.File;
-
 import android.os.AsyncTask;
+
+import java.io.File;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;

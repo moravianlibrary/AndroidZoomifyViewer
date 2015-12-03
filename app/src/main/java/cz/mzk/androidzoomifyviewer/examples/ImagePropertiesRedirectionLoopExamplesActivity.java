@@ -1,7 +1,5 @@
 package cz.mzk.androidzoomifyviewer.examples;
 
-import java.util.List;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +10,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.examples.SingleImageExamplesFactory.ImageExampleWithHttpResponseCode;
 
@@ -25,6 +25,13 @@ public class ImagePropertiesRedirectionLoopExamplesActivity extends ExamplesList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState, "ImageProperties.xml", "redirection loops", new MyAdapter(this,
                 SingleImageExamplesFactory.getErrorsExamples()));
+    }
+
+    private void startFullscreenSingleImageActivity(String zoomifyBaseUrl) {
+        Log.d(TAG, "opening '" + zoomifyBaseUrl + "'");
+        Intent intent = new Intent(this, FullscreenSingleImageActivity.class);
+        intent.putExtra(FullscreenSingleImageActivity.EXTRA_BASE_URL, zoomifyBaseUrl);
+        startActivity(intent);
     }
 
     class MyAdapter extends ArrayAdapter<ImageExampleWithHttpResponseCode> {
@@ -58,13 +65,6 @@ public class ImagePropertiesRedirectionLoopExamplesActivity extends ExamplesList
             });
             return rowView;
         }
-    }
-
-    private void startFullscreenSingleImageActivity(String zoomifyBaseUrl) {
-        Log.d(TAG, "opening '" + zoomifyBaseUrl + "'");
-        Intent intent = new Intent(this, FullscreenSingleImageActivity.class);
-        intent.putExtra(FullscreenSingleImageActivity.EXTRA_BASE_URL, zoomifyBaseUrl);
-        startActivity(intent);
     }
 
 }

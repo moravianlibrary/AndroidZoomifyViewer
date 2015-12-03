@@ -1,12 +1,12 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Build;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
@@ -15,9 +15,9 @@ import cz.mzk.androidzoomifyviewer.tiles.TileId;
  */
 public abstract class AbstractTileCache {
 
-    private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
     private static final char SEPARATOR = '-';
     private static final char ESCAPE_CHAR = '-';
+    private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
 
     // TODO: exception if file name to long (probably over 127 chars)
     protected String buildKey(String zoomifyBaseUrl, TileId tileId) {

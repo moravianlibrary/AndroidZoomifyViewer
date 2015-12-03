@@ -39,32 +39,23 @@ public class TiledImageView extends View {
     private static final Logger logger = new Logger(TiledImageView.class);
 
     private static boolean initialized = false;
-
+    boolean mMinZoomCanvasImagePaddingInitialized = false;
+    double mCanvasImagePaddingHorizontal = -1;
+    double mCanvasImagePaddingVertical = -1;
+    int mCanvWidth;
+    int mCanvHeight;
     private DevTools devTools = null;
     private ImageCoordsPoints testPoints = null;
-
     private boolean mViewmodeScaleFactorsInitialized = false;
     private double mInitialScaleFactor = -1.0;
     private double mMinScaleFactor = -1.0;
     private double mMaxScaleFactor = -1.0;
-
-    boolean mMinZoomCanvasImagePaddingInitialized = false;
-    double mCanvasImagePaddingHorizontal = -1;
-    double mCanvasImagePaddingVertical = -1;
-
     private String mZoomifyBaseUrl;
-
     private SingleTapListener mSingleTapListener;
-
     private boolean pageInitialized = false;
-
     // SHIFTS
     private boolean mViewmodeShiftInitialized = false;
     private VectorD mViewmodeShift = VectorD.ZERO_VECTOR;
-
-    int mCanvWidth;
-    int mCanvHeight;
-
     private boolean mDrawLayerWithWorseResolution = true;
 
     private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
@@ -85,6 +76,16 @@ public class TiledImageView extends View {
 
     private FramingRectangleDrawer mFramingRectDrawer;
 
+    public TiledImageView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public TiledImageView(Context context) {
+        super(context);
+        init(context);
+    }
+
     public static void initialize(Context context) {
         if (initialized) {
             logger.w("initialized already");
@@ -96,16 +97,6 @@ public class TiledImageView extends View {
             CacheManager.initialize(context, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes);
             initialized = true;
         }
-    }
-
-    public TiledImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
-
-    public TiledImageView(Context context) {
-        super(context);
-        init(context);
     }
 
     private void init(Context context) {
@@ -142,19 +133,19 @@ public class TiledImageView extends View {
         return mViewMode;
     }
 
+    public void setViewMode(ViewMode viewMode) {
+        if (viewMode == null) {
+            throw new NullPointerException();
+        }
+        this.mViewMode = viewMode;
+    }
+
     public void setImageInitializationHandler(ImageInitializationHandler imageInitializationHandler) {
         this.mImageInitializationHandler = imageInitializationHandler;
     }
 
     public void setTileDownloadHandler(TileDownloadHandler tileDownloadHandler) {
         this.mTileDownloadHandler = tileDownloadHandler;
-    }
-
-    public void setViewMode(ViewMode viewMode) {
-        if (viewMode == null) {
-            throw new NullPointerException();
-        }
-        this.mViewMode = viewMode;
     }
 
     public void cancelAllTasks() {
@@ -775,6 +766,22 @@ public class TiledImageView extends View {
         return mGestureListener.onTouchEvent(event);
     }
 
+    public SingleTapListener getSingleTapListener() {
+        return mSingleTapListener;
+    }
+
+    public void setSingleTapListener(SingleTapListener singleTapListener) {
+        this.mSingleTapListener = singleTapListener;
+    }
+
+    public Rect getVisibleImageInCanvas() {
+        return mVisibleImageInCanvas;
+    }
+
+    public double getInitialScaleFactor() {
+        return mInitialScaleFactor;
+    }
+
     public enum ViewMode {
         FIT_TO_SCREEN, //
 
@@ -789,10 +796,6 @@ public class TiledImageView extends View {
         NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP, //
         NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER, //
         NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM, //
-    }
-
-    public void setSingleTapListener(SingleTapListener singleTapListener) {
-        this.mSingleTapListener = singleTapListener;
     }
 
     public interface SingleTapListener {
@@ -906,18 +909,6 @@ public class TiledImageView extends View {
          * @param errorMessage Error message.
          */
         public void onTileInvalidDataError(TileId tileId, String tileUrl, String errorMessage);
-    }
-
-    public SingleTapListener getSingleTapListener() {
-        return mSingleTapListener;
-    }
-
-    public Rect getVisibleImageInCanvas() {
-        return mVisibleImageInCanvas;
-    }
-
-    public double getInitialScaleFactor() {
-        return mInitialScaleFactor;
     }
 
 }

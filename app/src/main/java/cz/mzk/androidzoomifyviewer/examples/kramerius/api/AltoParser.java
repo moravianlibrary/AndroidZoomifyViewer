@@ -28,11 +28,20 @@ public class AltoParser extends XmlParser {
     private static final Namespace ALTO_V2 = new Namespace("alto_v2", "http://www.loc.gov/standards/alto/ns-v2#");
     //characters filtered from alto_example Strings (or searched queries): \-?!;)(.|,
     private static final char[] FILTERED_CHARS = {'\\', '-', '?', '!', ';', ')', '(', '.', '|', ','};
-
+    private static LruCache<String, AltoParser> processorCache = new LruCache<>(10);
     // TODO: 18.11.15 If eventually only exact matches will be needed:
     //private final Map<String, Rect> mRectMap;
     private final List<TextBox> mTextBoxes;
-    private static LruCache<String, AltoParser> processorCache = new LruCache<>(10);
+
+    public AltoParser(String url) {
+        Log.v(TAG, "initalizing alto parser from: " + url);
+        Document document = getDocument(url);
+        if (document != null) {
+            mTextBoxes = extractTextBlocks(document);
+        } else {
+            mTextBoxes = Collections.emptyList();
+        }
+    }
 
     public static Set<TextBox> getTextBlocks(String altoUrl, String[] tokens) {
         if (tokens.length == 0 || tokens[0].isEmpty()) {
@@ -44,16 +53,6 @@ public class AltoParser extends XmlParser {
                 processorCache.put(altoUrl, instance);
             }
             return instance.getTextBlocks(tokens);
-        }
-    }
-
-    public AltoParser(String url) {
-        Log.v(TAG, "initalizing alto parser from: " + url);
-        Document document = getDocument(url);
-        if (document != null) {
-            mTextBoxes = extractTextBlocks(document);
-        } else {
-            mTextBoxes = Collections.emptyList();
         }
     }
 

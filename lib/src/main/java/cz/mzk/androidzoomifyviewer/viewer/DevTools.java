@@ -1,12 +1,12 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.R;
@@ -32,12 +32,10 @@ public class DevTools {
     private final Paint paintBlackTrans = new Paint();
     private final Paint paintGreenTrans = new Paint();
     private final Paint paintBlueTrans = new Paint();
-
+    private final List<RectWithPaint> rectStackAfterPrimaryDraws = new ArrayList<RectWithPaint>();
     private Canvas mCanv;
-
     private PointD pinchZoomCenterInCanvas;
     private PointD pinchZoomCenterInImage;
-
     private PointD doubletapZoomCenterInCanvas;
     private PointD doubletapZoomCenterInImage;
 
@@ -186,8 +184,6 @@ public class DevTools {
     public Paint getPaintBlueTrans() {
         return paintBlueTrans;
     }
-
-    private final List<RectWithPaint> rectStackAfterPrimaryDraws = new ArrayList<RectWithPaint>();
 
     public void clearRectStack() {
         rectStackAfterPrimaryDraws.clear();

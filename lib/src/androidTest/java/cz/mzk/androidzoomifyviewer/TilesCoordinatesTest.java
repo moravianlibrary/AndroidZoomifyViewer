@@ -42,11 +42,6 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
-    class TilesDownloaderInitializationResult {
-        public boolean finished = false;
-        public TilesDownloader downloader;
-    }
-
     private TilesDownloader initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
@@ -95,13 +90,11 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         return result.downloader;
     }
 
-
     @Test
     public void testZero() {
         assertTrue("problem with Junit configuration", true);
         assertThat(1, is(1));
     }
-
 
     @Test
     public void testCornerTilesCoordsMapyMzk1() {
@@ -128,19 +121,6 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         testCornerTilesCoords("http://www.tricedesigns.com/panoramas/office-outside/office-outside/");
     }
 
-    //url no longer available
-    /*@Test
-    public void testCornerTilesCoordsTricedesigns3() {
-        testCornerTilesCoords("http://www.tricedesigns.com/panoramas/Pemberton-Park-4/Pemberton-Park-3/");
-    }*/
-
-
-    //url no longer available
-    /*@Test
-    public void testCornerTilesCoordsFookes1() {
-        testCornerTilesCoords("http://www.fookes.com/ezimager/zoomify/105_0532/");
-    }*/
-
     public void testCornerTilesCoords(String baseUrl) {
         logger.d("testing corner tiles coords for: " + baseUrl);
         TilesDownloader mTilesDownloader = initTilesDownloader(baseUrl);
@@ -164,10 +144,28 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
+    //url no longer available
+    /*@Test
+    public void testCornerTilesCoordsTricedesigns3() {
+        testCornerTilesCoords("http://www.tricedesigns.com/panoramas/Pemberton-Park-4/Pemberton-Park-3/");
+    }*/
+
+
+    //url no longer available
+    /*@Test
+    public void testCornerTilesCoordsFookes1() {
+        testCornerTilesCoords("http://www.fookes.com/ezimager/zoomify/105_0532/");
+    }*/
+
     private void assertTileCoords(TilesDownloader mTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
         int[] actualCoords = mTilesDownloader.getTileCoords(layerId, pixel[0], pixel[1]);
         assertEquals(expectedCoords[0], actualCoords[0]);
         assertEquals(expectedCoords[1], actualCoords[1]);
+    }
+
+    class TilesDownloaderInitializationResult {
+        public boolean finished = false;
+        public TilesDownloader downloader;
     }
 
 

@@ -15,8 +15,6 @@ import cz.mzk.androidzoomifyviewer.examples.R;
  */
 public class PageMetadataActivity extends Activity implements OnClickListener {
 
-    private static final String TAG = PageMetadataActivity.class.getSimpleName();
-
     public static final String EXTRA_TOP_LEVEL_PID = "topLevelPid";
     public static final String EXTRA_PAGE_PID = "pagePid";
     public static final String EXTRA_PAGE_INDEX = "pageIndex";
@@ -24,7 +22,7 @@ public class PageMetadataActivity extends Activity implements OnClickListener {
     public static final String EXTRA_BOUNDING_BOX_BOTTOM = "boundingBoxBottom";
     public static final String EXTRA_BOUNDING_BOX_RIGHT = "boundingBoxRight";
     public static final String EXTRA_BOUNDING_BOX_LEFT = "boundingBoxLeft";
-
+    private static final String TAG = PageMetadataActivity.class.getSimpleName();
     private String mTopLevelPid;
     private String mPagePid;
     private int mPageIndex = -1;

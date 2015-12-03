@@ -11,30 +11,22 @@ import cz.mzk.androidzoomifyviewer.viewer.VectorD;
 
 public class FlingShiftHandler extends Handler {
 
-    public enum State {
-        IDLE, SHIFTING;
-    }
-
     public static final long ANIM_STEP_MS = 30;
     public static final float MIN_VELOCITY_PX_P_S = 10f;
     public static final float VELOCITY_PRESERVATION_FACTOR = 0.9f;
-
     private static final Logger logger = new Logger(FlingShiftHandler.class);
-    // private static final Logger logger = new Logger("GST: fling shift");
-
     // persistent data
     private final TiledImageView imageView;
+    // private static final Logger logger = new Logger("GST: fling shift");
     private final GestureHandler abstractGestureHandler; // since no multiple inheritance in java
     private State state = State.IDLE;
     private VectorD accumulatedShift = VectorD.ZERO_VECTOR;
     private Thread workerThread;
     private int correctWorkerId = 0;
-
     // data of running animation
     private PointD initialFocusInImg;
     private float velocityX;
     private float velocityY;
-
     public FlingShiftHandler(TiledImageView imageView) {
         this.imageView = imageView;
         this.abstractGestureHandler = new GestureHandler(imageView);
@@ -53,33 +45,6 @@ public class FlingShiftHandler extends Handler {
                 imageView.getTotalShift());
         workerThread = new Thread(new AnimationRunnable(this, correctWorkerId));
         workerThread.start();
-    }
-
-    private class AnimationRunnable implements Runnable {
-        private final Handler handler;
-        private final int workerId;
-
-        public AnimationRunnable(Handler handler, int workerId) {
-            this.handler = handler;
-            this.workerId = workerId;
-        }
-
-        @Override
-        public void run() {
-            // TestLoggers.THREADS.d("fling worker: " + Thread.currentThread().getPriority());
-            while (true) {
-                Message msg = Message.obtain();
-                msg.arg1 = workerId;
-                handler.sendMessage(msg);
-                // logger.v(String.format("worker thread %d:  sending message", workerId));
-                try {
-                    Thread.sleep(ANIM_STEP_MS);
-                } catch (InterruptedException e) {
-                    // logger.v(String.format("worker thread %d:  killed in sleep", workerId));
-                    return;
-                }
-            }
-        }
     }
 
     @Override
@@ -165,6 +130,37 @@ public class FlingShiftHandler extends Handler {
             logger.v("correct worker id: " + correctWorkerId);
             this.state = State.IDLE;
             logger.i(state.name());
+        }
+    }
+
+    public enum State {
+        IDLE, SHIFTING;
+    }
+
+    private class AnimationRunnable implements Runnable {
+        private final Handler handler;
+        private final int workerId;
+
+        public AnimationRunnable(Handler handler, int workerId) {
+            this.handler = handler;
+            this.workerId = workerId;
+        }
+
+        @Override
+        public void run() {
+            // TestLoggers.THREADS.d("fling worker: " + Thread.currentThread().getPriority());
+            while (true) {
+                Message msg = Message.obtain();
+                msg.arg1 = workerId;
+                handler.sendMessage(msg);
+                // logger.v(String.format("worker thread %d:  sending message", workerId));
+                try {
+                    Thread.sleep(ANIM_STEP_MS);
+                } catch (InterruptedException e) {
+                    // logger.v(String.format("worker thread %d:  killed in sleep", workerId));
+                    return;
+                }
+            }
         }
     }
 }

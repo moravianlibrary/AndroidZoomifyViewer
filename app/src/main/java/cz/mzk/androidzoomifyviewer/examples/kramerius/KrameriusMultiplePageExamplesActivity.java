@@ -1,8 +1,5 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.ParseException;
+import java.util.ArrayList;
 
 import cz.mzk.androidzoomifyviewer.examples.ExamplesListActivity;
 import cz.mzk.androidzoomifyviewer.examples.R;
@@ -30,6 +30,20 @@ public class KrameriusMultiplePageExamplesActivity extends ExamplesListActivity 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState, "Kramerius digital library", "multiple page examples", new MyAdapter(this,
                 KrameriusExamplesFactory.getTestTopLevelUrls()));
+    }
+
+    void startFullscreenPagesActivity(String urlStr) {
+        try {
+            Intent intent = new Intent(this, PageViewerActivity.class);
+            KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);
+            intent.putExtra(PageViewerActivity.EXTRA_PROTOCOL, url.getProtocol());
+            intent.putExtra(PageViewerActivity.EXTRA_DOMAIN, url.getDomain());
+            intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
+            startActivity(intent);
+        } catch (ParseException e) {
+            Log.e(TAG, "error parsing url", e);
+            Toast.makeText(this, "error parsing url '" + urlStr + "'", Toast.LENGTH_LONG).show();
+        }
     }
 
     class MyAdapter extends ArrayAdapter<MonographExample> {
@@ -69,20 +83,6 @@ public class KrameriusMultiplePageExamplesActivity extends ExamplesListActivity 
                 }
             });
             return rowView;
-        }
-    }
-
-    void startFullscreenPagesActivity(String urlStr) {
-        try {
-            Intent intent = new Intent(this, PageViewerActivity.class);
-            KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);
-            intent.putExtra(PageViewerActivity.EXTRA_PROTOCOL, url.getProtocol());
-            intent.putExtra(PageViewerActivity.EXTRA_DOMAIN, url.getDomain());
-            intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
-            startActivity(intent);
-        } catch (ParseException e) {
-            Log.e(TAG, "error parsing url", e);
-            Toast.makeText(this, "error parsing url '" + urlStr + "'", Toast.LENGTH_LONG).show();
         }
     }
 

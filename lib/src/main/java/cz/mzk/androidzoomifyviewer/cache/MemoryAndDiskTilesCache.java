@@ -1,10 +1,5 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
@@ -12,6 +7,11 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.LruCache;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
@@ -31,11 +31,10 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     public static final String DISK_CACHE_SUBDIR = "tiles";
 
     private static final Logger logger = new Logger(MemoryAndDiskTilesCache.class);
-
-    private LruCache<String, Bitmap> mMemoryCache;
     private final Object mMemoryCacheLock = new Object();
     private final BitmapFetchTaskRegistry mBitmapFetchManager;
     private final Object mDiskCacheInitializationLock = new Object();
+    private LruCache<String, Bitmap> mMemoryCache;
     private boolean mDiskCacheEnabled;
     private DiskLruCache mDiskCache = null;
 
@@ -100,57 +99,6 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
         // .getCacheDir().getPath();
         String cacheDirPath = context.getCacheDir().getPath();
         return new File(cacheDirPath + File.separator + DISK_CACHE_SUBDIR);
-    }
-
-    private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
-        private final int appVersion;
-        private final boolean clearCache;
-        private final long cacheSizeBytes;
-
-        public InitDiskCacheTask(int appVersion, boolean clearCache, long diskCacheBytes) {
-            this.appVersion = appVersion;
-            this.clearCache = clearCache;
-            this.cacheSizeBytes = diskCacheBytes;
-        }
-
-        @Override
-        protected Void doInBackground(File... params) {
-            synchronized (mDiskCacheInitializationLock) {
-                // Log.v(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
-                try {
-                    File cacheDir = params[0];
-                    if (cacheDir.exists()) {
-                        if (clearCache) {
-                            logger.i("clearing disk cache");
-                            boolean cleared = DiskUtils.deleteDirContent(cacheDir);
-                            if (!cleared) {
-                                logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
-                                disableDiskCache();
-                                return null;
-                            }
-                        }
-                    } else {
-                        // logger.i("creating cache dir " + cacheDir);
-                        boolean created = cacheDir.mkdir();
-                        if (!created) {
-                            logger.w("failed to create cache dir " + cacheDir.getAbsolutePath());
-                            disableDiskCache();
-                            return null;
-                        }
-                    }
-                    mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, cacheSizeBytes);
-                    logger.i("disk cache initialized; size: " + Utils.formatBytes(cacheSizeBytes));
-                    return null;
-                } catch (DiskLruCacheException e) {
-                    logger.w("error opening disk cache, disabling");
-                    disableDiskCache();
-                    return null;
-                } finally {
-                    // Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
-                    mDiskCacheInitializationLock.notifyAll();
-                }
-            }
-        }
     }
 
     private void disableDiskCache() {
@@ -312,20 +260,6 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
         }
     }
 
-    private class StoreTileToMemoryCacheTask extends ConcurrentAsyncTask<Bitmap, Void, Void> {
-        private final String key;
-
-        public StoreTileToMemoryCacheTask(String key) {
-            this.key = key;
-        }
-
-        @Override
-        protected Void doInBackground(Bitmap... params) {
-            storeTileToMemoryCache(key, params[0]);
-            return null;
-        }
-    }
-
     @Override
     public TileBitmap getTileAsync(String zoomifyBaseUrl, TileId tileId, FetchingBitmapFromDiskHandler listener) {
         // Debug.startMethodTracing();
@@ -363,24 +297,6 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
         mBitmapFetchManager.cancelAllTasks();
     }
 
-    // @Override
-    // public void updateMemoryCacheSizeInItems(int minSize, int maxSize) {
-    // synchronized (mMemoryCache) {
-    // int currentSize = mMemoryCache.maxSize();
-    // if (currentSize < minSize) {
-    // // logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");
-    // Log.d("blabla", "Increasing cache size " + currentSize + " -> " + minSize + " items");
-    // mMemoryCache.resize(minSize);
-    // } else if (currentSize > maxSize) {
-    // Log.d("blabla", "Decreasing cache size " + currentSize + " -> " + maxSize + " items");
-    // mMemoryCache.trimToSize(maxSize);
-    // mMemoryCache.resize(maxSize);
-    // } else {
-    // Log.d("blabla", "" + currentSize + " in <" + minSize + ", " + maxSize + ">");
-    // }
-    // }
-    // }
-
     @Override
     public void updateMemoryCacheSizeInItems(int minSize) {
         synchronized (mMemoryCacheLock) {
@@ -417,6 +333,89 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
             } catch (IOException e) {
                 logger.e("Error closing disk cache");
             }
+        }
+    }
+
+    // @Override
+    // public void updateMemoryCacheSizeInItems(int minSize, int maxSize) {
+    // synchronized (mMemoryCache) {
+    // int currentSize = mMemoryCache.maxSize();
+    // if (currentSize < minSize) {
+    // // logger.d("Increasing cache size " + currentSize + " -> " + minSize + " items");
+    // Log.d("blabla", "Increasing cache size " + currentSize + " -> " + minSize + " items");
+    // mMemoryCache.resize(minSize);
+    // } else if (currentSize > maxSize) {
+    // Log.d("blabla", "Decreasing cache size " + currentSize + " -> " + maxSize + " items");
+    // mMemoryCache.trimToSize(maxSize);
+    // mMemoryCache.resize(maxSize);
+    // } else {
+    // Log.d("blabla", "" + currentSize + " in <" + minSize + ", " + maxSize + ">");
+    // }
+    // }
+    // }
+
+    private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
+        private final int appVersion;
+        private final boolean clearCache;
+        private final long cacheSizeBytes;
+
+        public InitDiskCacheTask(int appVersion, boolean clearCache, long diskCacheBytes) {
+            this.appVersion = appVersion;
+            this.clearCache = clearCache;
+            this.cacheSizeBytes = diskCacheBytes;
+        }
+
+        @Override
+        protected Void doInBackground(File... params) {
+            synchronized (mDiskCacheInitializationLock) {
+                // Log.v(TAG, "assuming mDiskCacheLock: " + Thread.currentThread().toString());
+                try {
+                    File cacheDir = params[0];
+                    if (cacheDir.exists()) {
+                        if (clearCache) {
+                            logger.i("clearing disk cache");
+                            boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+                            if (!cleared) {
+                                logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
+                                disableDiskCache();
+                                return null;
+                            }
+                        }
+                    } else {
+                        // logger.i("creating cache dir " + cacheDir);
+                        boolean created = cacheDir.mkdir();
+                        if (!created) {
+                            logger.w("failed to create cache dir " + cacheDir.getAbsolutePath());
+                            disableDiskCache();
+                            return null;
+                        }
+                    }
+                    mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, cacheSizeBytes);
+                    logger.i("disk cache initialized; size: " + Utils.formatBytes(cacheSizeBytes));
+                    return null;
+                } catch (DiskLruCacheException e) {
+                    logger.w("error opening disk cache, disabling");
+                    disableDiskCache();
+                    return null;
+                } finally {
+                    // Log.v(TAG, "releasing disk cache initialization lock: " + Thread.currentThread().toString());
+                    mDiskCacheInitializationLock.notifyAll();
+                }
+            }
+        }
+    }
+
+    private class StoreTileToMemoryCacheTask extends ConcurrentAsyncTask<Bitmap, Void, Void> {
+        private final String key;
+
+        public StoreTileToMemoryCacheTask(String key) {
+            this.key = key;
+        }
+
+        @Override
+        protected Void doInBackground(Bitmap... params) {
+            storeTileToMemoryCache(key, params[0]);
+            return null;
         }
     }
 

@@ -1,10 +1,10 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
+import android.annotation.SuppressLint;
+
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.annotation.SuppressLint;
 
 /**
  * @author Martin Řehánek
@@ -25,6 +25,19 @@ public class KrameriusObjectPersistentUrl {
         this.protocol = protocol.toLowerCase();
         this.domain = domain;
         this.pid = pid;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public static KrameriusObjectPersistentUrl valueOf(String url) throws ParseException {
+        Matcher matcher = URL_PATTERN.matcher(url.toLowerCase());
+        if (!matcher.matches()) {
+            throw new ParseException("\"" + url + "\" doesn't match \"" + URL_PATTERN.pattern() + "\"", -1);
+        }
+        String[] tokens = url.toLowerCase().split("/");
+        String protocol = tokens[0].substring(0, tokens[0].length() - 1);
+        String domain = tokens[2];
+        String pid = tokens[5];
+        return new KrameriusObjectPersistentUrl(protocol, domain, pid);
     }
 
     public String getProtocol() {
@@ -50,19 +63,6 @@ public class KrameriusObjectPersistentUrl {
             stringValue = builder.toString();
         }
         return stringValue;
-    }
-
-    @SuppressLint("DefaultLocale")
-    public static KrameriusObjectPersistentUrl valueOf(String url) throws ParseException {
-        Matcher matcher = URL_PATTERN.matcher(url.toLowerCase());
-        if (!matcher.matches()) {
-            throw new ParseException("\"" + url + "\" doesn't match \"" + URL_PATTERN.pattern() + "\"", -1);
-        }
-        String[] tokens = url.toLowerCase().split("/");
-        String protocol = tokens[0].substring(0, tokens[0].length() - 1);
-        String domain = tokens[2];
-        String pid = tokens[5];
-        return new KrameriusObjectPersistentUrl(protocol, domain, pid);
     }
 
 }

@@ -1,12 +1,12 @@
 package cz.mzk.androidzoomifyviewer.examples;
 
-import java.net.HttpURLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
-
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
+
+import java.net.HttpURLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import cz.mzk.androidzoomifyviewer.examples.kramerius.VolleyRequestManager;
 import cz.mzk.androidzoomifyviewer.examples.ssl.SSLSocketFactoryProvider;

@@ -2,10 +2,8 @@ package cz.mzk.androidzoomifyviewer.cache.tmp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.cache.tmp.TilesCache.State;
 import cz.mzk.androidzoomifyviewer.tiles.TileId;
 
 /**

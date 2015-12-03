@@ -1,5 +1,9 @@
 package cz.mzk.androidzoomifyviewer.examples.ssl;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,18 +17,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
-
 public class HttpRequestTask extends AsyncTask<String, Void, Throwable> {
-    public static interface ResultHandler {
-        public void onSuccess();
-
-        public void onError(String message);
-
-    }
-
     private static final String TAG = HttpRequestTask.class.getSimpleName();
     private static final int MAX_REDIRECTS = 5;
     private static final List<Integer> REDIRECTION_HTTP_CODES = new ArrayList<Integer>() {
@@ -36,7 +29,6 @@ public class HttpRequestTask extends AsyncTask<String, Void, Throwable> {
             add(307);
         }
     };
-
     private final Context context;
     private final ResultHandler handler;
 
@@ -122,6 +114,13 @@ public class HttpRequestTask extends AsyncTask<String, Void, Throwable> {
             // result.printStackTrace();
             handler.onError(result.getMessage());
         }
+    }
+
+    public static interface ResultHandler {
+        public void onSuccess();
+
+        public void onError(String message);
+
     }
 
 }

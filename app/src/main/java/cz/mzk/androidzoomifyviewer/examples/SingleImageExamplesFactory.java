@@ -8,39 +8,6 @@ import java.util.List;
  */
 public class SingleImageExamplesFactory {
 
-    public static class ImageExample {
-        private final String description;
-        private final String url;
-
-        public ImageExample(String description, String url) {
-            super();
-            this.description = description;
-            this.url = url;
-        }
-
-        public String getErrorName() {
-            return description;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-    }
-
-    public static class ImageExampleWithHttpResponseCode extends ImageExample {
-
-        private final int errorCode;
-
-        public ImageExampleWithHttpResponseCode(int errorCode, String errorName, String url) {
-            super(errorName, url);
-            this.errorCode = errorCode;
-        }
-
-        public int getErrorCode() {
-            return errorCode;
-        }
-    }
-
     public static List<ImageExampleWithHttpResponseCode> getErrorsExamples() {
         List<ImageExampleWithHttpResponseCode> result = new ArrayList<ImageExampleWithHttpResponseCode>();
         result.add(new ImageExampleWithHttpResponseCode(300, "Multiple chocies (loop)",
@@ -237,5 +204,38 @@ public class SingleImageExamplesFactory {
         // result.add(new ImageExample("localhost test",
         // "http://10.0.0.2:8888/preview/07AED/"));
         return result;
+    }
+
+    public static class ImageExample {
+        private final String description;
+        private final String url;
+
+        public ImageExample(String description, String url) {
+            super();
+            this.description = description;
+            this.url = url;
+        }
+
+        public String getErrorName() {
+            return description;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+    }
+
+    public static class ImageExampleWithHttpResponseCode extends ImageExample {
+
+        private final int errorCode;
+
+        public ImageExampleWithHttpResponseCode(int errorCode, String errorName, String url) {
+            super(errorName, url);
+            this.errorCode = errorCode;
+        }
+
+        public int getErrorCode() {
+            return errorCode;
+        }
     }
 }

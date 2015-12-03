@@ -7,25 +7,12 @@ import cz.mzk.androidzoomifyviewer.Logger;
 
 public class PinchGestureDetector {
 
-    public interface OnScaleGestureListener {
-
-        boolean onScale(PinchGestureDetector detector);
-
-        boolean onScaleBegin(PinchGestureDetector detector);
-
-        void onScaleEnd(PinchGestureDetector detector);
-
-    }
-
     // private static final Logger logger = new Logger("GST: pinch detector");
     private static final Logger logger = new Logger(PinchGestureDetector.class);
-
     private final OnScaleGestureListener listener;
-
     private double focusX;
     private double focusY;
     private double span;
-
     public PinchGestureDetector(OnScaleGestureListener listener) {
         this.listener = listener;
     }
@@ -77,6 +64,16 @@ public class PinchGestureDetector {
         double diffX = firstX - secondX;
         double diffY = firstY - secondY;
         return Math.sqrt(diffX * diffX + diffY * diffY);
+    }
+
+    public interface OnScaleGestureListener {
+
+        boolean onScale(PinchGestureDetector detector);
+
+        boolean onScaleBegin(PinchGestureDetector detector);
+
+        void onScaleEnd(PinchGestureDetector detector);
+
     }
 
 }

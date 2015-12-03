@@ -1,7 +1,5 @@
 package cz.mzk.androidzoomifyviewer.examples.ssl;
 
-import java.util.List;
-
 import android.content.Context;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -12,11 +10,37 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.examples.ssl.HttpRequestTask.ResultHandler;
 import cz.mzk.androidzoomifyviewer.examples.ssl.UrlItemAdapter.UrlViewHolder;
 
 public class UrlItemAdapter extends Adapter<UrlViewHolder> {
+
+    private final Context context;
+    private final List<UrlItem> data = UrlItem.getTestData();
+    private Toast toast;
+
+    public UrlItemAdapter(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public int getItemCount() {
+        return data.size();
+    }
+
+    @Override
+    public void onBindViewHolder(UrlViewHolder holder, int position) {
+        holder.bind(data.get(position));
+    }
+
+    @Override
+    public UrlViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View root = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ssl_test, parent, false);
+        return new UrlViewHolder(root);
+    }
 
     class UrlViewHolder extends ViewHolder implements OnClickListener {
 
@@ -62,31 +86,6 @@ public class UrlItemAdapter extends Adapter<UrlViewHolder> {
                 }
             }).execute(url.getText().toString());
         }
-    }
-
-    private final Context context;
-    private Toast toast;
-
-    public UrlItemAdapter(Context context) {
-        this.context = context;
-    }
-
-    private final List<UrlItem> data = UrlItem.getTestData();
-
-    @Override
-    public int getItemCount() {
-        return data.size();
-    }
-
-    @Override
-    public void onBindViewHolder(UrlViewHolder holder, int position) {
-        holder.bind(data.get(position));
-    }
-
-    @Override
-    public UrlViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View root = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ssl_test, parent, false);
-        return new UrlViewHolder(root);
     }
 
 }

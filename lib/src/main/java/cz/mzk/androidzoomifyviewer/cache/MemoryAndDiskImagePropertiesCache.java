@@ -1,11 +1,11 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
-import java.io.File;
-
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
 import android.util.LruCache;
+
+import java.io.File;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
@@ -71,55 +71,6 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
         // .getCacheDir().getPath();
         String cacheDirPath = context.getCacheDir().getPath();
         return new File(cacheDirPath + File.separator + DISK_CACHE_SUBDIR);
-    }
-
-    private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
-        private final int appVersion;
-        private final boolean clearCache;
-
-        public InitDiskCacheTask(int appVersion, boolean clearCache) {
-            this.appVersion = appVersion;
-            this.clearCache = clearCache;
-        }
-
-        @Override
-        protected Void doInBackground(File... params) {
-            synchronized (mDiskCacheInitializationLock) {
-                logger.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
-                try {
-                    File cacheDir = params[0];
-                    if (cacheDir.exists()) {
-                        if (clearCache) {
-                            logger.i("clearing image-properties disk cache");
-                            boolean cleared = DiskUtils.deleteDirContent(cacheDir);
-                            if (!cleared) {
-                                logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
-                                disableDiskCache();
-                                return null;
-                            }
-                        }
-                    } else {
-                        logger.i("creating cache dir " + cacheDir);
-                        boolean created = cacheDir.mkdir();
-                        if (!created) {
-                            logger.w("failed to create cache dir " + cacheDir.getAbsolutePath());
-                            disableDiskCache();
-                            return null;
-                        }
-                    }
-                    mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
-                    return null;
-                } catch (DiskLruCacheException e) {
-                    logger.w("error initializing disk cache, disabling");
-                    disableDiskCache();
-                    mDiskCacheInitializationLock.notifyAll();
-                    return null;
-                } finally {
-                    mDiskCacheInitializationLock.notifyAll();
-                    logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
-                }
-            }
-        }
     }
 
     private void disableDiskCache() {
@@ -221,6 +172,55 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
         } catch (DiskLruCacheException e) {
             logger.i("error loading xml from disk cache: " + key, e);
             return null;
+        }
+    }
+
+    private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
+        private final int appVersion;
+        private final boolean clearCache;
+
+        public InitDiskCacheTask(int appVersion, boolean clearCache) {
+            this.appVersion = appVersion;
+            this.clearCache = clearCache;
+        }
+
+        @Override
+        protected Void doInBackground(File... params) {
+            synchronized (mDiskCacheInitializationLock) {
+                logger.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
+                try {
+                    File cacheDir = params[0];
+                    if (cacheDir.exists()) {
+                        if (clearCache) {
+                            logger.i("clearing image-properties disk cache");
+                            boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+                            if (!cleared) {
+                                logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
+                                disableDiskCache();
+                                return null;
+                            }
+                        }
+                    } else {
+                        logger.i("creating cache dir " + cacheDir);
+                        boolean created = cacheDir.mkdir();
+                        if (!created) {
+                            logger.w("failed to create cache dir " + cacheDir.getAbsolutePath());
+                            disableDiskCache();
+                            return null;
+                        }
+                    }
+                    mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
+                    return null;
+                } catch (DiskLruCacheException e) {
+                    logger.w("error initializing disk cache, disabling");
+                    disableDiskCache();
+                    mDiskCacheInitializationLock.notifyAll();
+                    return null;
+                } finally {
+                    mDiskCacheInitializationLock.notifyAll();
+                    logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
+                }
+            }
         }
     }
 

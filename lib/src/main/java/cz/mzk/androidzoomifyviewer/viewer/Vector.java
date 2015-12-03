@@ -14,6 +14,16 @@ public class Vector {
         this.y = y;
     }
 
+    public static Vector sum(Vector... vectors) {
+        int x = 0;
+        int y = 0;
+        for (Vector vector : vectors) {
+            x += vector.x;
+            y += vector.y;
+        }
+        return new Vector(x, y);
+    }
+
     public Vector plus(int x, int y) {
         return new Vector(this.x + x, this.y + y);
     }
@@ -24,16 +34,6 @@ public class Vector {
 
     public Vector plusY(int y) {
         return new Vector(this.x, this.y + y);
-    }
-
-    public static Vector sum(Vector... vectors) {
-        int x = 0;
-        int y = 0;
-        for (Vector vector : vectors) {
-            x += vector.x;
-            y += vector.y;
-        }
-        return new Vector(x, y);
     }
 
     public String toString() {

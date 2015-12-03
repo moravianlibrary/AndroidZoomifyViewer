@@ -15,10 +15,6 @@ import cz.mzk.androidzoomifyviewer.viewer.VectorD;
  */
 public class DoubletapZoomHandler extends Handler {
 
-    public enum State {
-        IDLE, ZOOMING;
-    }
-
     public static final long ANIM_LENGTH_MS = 300;
     public static final double MIN_ANIMATION_SCALE_FACTOR = 1.0;
     public static final double MAX_ANIMATION_SCALE_FACTOR = 3.0;
@@ -26,30 +22,22 @@ public class DoubletapZoomHandler extends Handler {
     public static final long ANIM_STEP_MS = ANIM_LENGTH_MS / ANIM_STEPS;
     private static final double SCALE_DIFF = MAX_ANIMATION_SCALE_FACTOR - MIN_ANIMATION_SCALE_FACTOR;
     private static final double SCALE_STEP = SCALE_DIFF / ANIM_STEPS;
-
     private static final Logger logger = new Logger(DoubletapZoomHandler.class);
-    // private static final Logger logger = new Logger("GST: double tap zoom");
-
     private final TiledImageView imageView;
+    // private static final Logger logger = new Logger("GST: double tap zoom");
     private final GestureHandler abstractGestureHandler; // since no multiple inheritance in java
-
     private State state = State.IDLE;
     private Thread workerThread;
     private int correctWorkerId = 0;
-
     // centers
     private PointD initialFocusInImageCoords;
     private PointD currentFocusInCanvas;
-
     // shift
     private VectorD accumulatedShift = VectorD.ZERO_VECTOR;
     private VectorD activeShift = VectorD.ZERO_VECTOR;
-
     // scale
     private double accumulatedScaleFactor = 1.0;
     private double activeScaleFactor = 1.0;
-
-
     public DoubletapZoomHandler(TiledImageView imageView) {
         this.imageView = imageView;
         this.abstractGestureHandler = new GestureHandler(imageView);
@@ -71,38 +59,6 @@ public class DoubletapZoomHandler extends Handler {
             DevTools devTools = imageView.getDevTools();
             if (devTools != null) {
                 devTools.setDoubletapZoomCenters(currentFocusInCanvas, initialFocusInImageCoords);
-            }
-        }
-    }
-
-    private class AnimationRunnable implements Runnable {
-        private final Handler handler;
-        private final int workerId;
-
-        public AnimationRunnable(Handler handler, int workerId) {
-            this.handler = handler;
-            this.workerId = workerId;
-        }
-
-        @Override
-        public void run() {
-            // ThreadGroup group = Thread.currentThread().getThreadGroup();
-            // int threadPriority = Thread.currentThread().getPriority();
-            // TestLoggers.THREADS.d(String.format(
-            // "double-tap worker: priority: %d, TG: name: %s, active: %d, max priority: %d, ", threadPriority,
-            // group.getName(), group.activeCount(), group.getMaxPriority()));
-            for (int i = 0; true; i++) {
-                Message msg = Message.obtain();
-                msg.arg1 = workerId;
-                msg.arg2 = i;
-                handler.sendMessage(msg);
-                // logger.v(String.format("worker thread %d:  sending message: %d", workerId, i));
-                try {
-                    Thread.sleep(ANIM_STEP_MS);
-                } catch (InterruptedException e) {
-                    // logger.v(String.format("worker thread %d:  killed in sleep", workerId));
-                    return;
-                }
             }
         }
     }
@@ -206,6 +162,42 @@ public class DoubletapZoomHandler extends Handler {
             activeShift = VectorD.ZERO_VECTOR;
             state = State.ZOOMING;
             logger.i(state.name());
+        }
+    }
+
+    public enum State {
+        IDLE, ZOOMING;
+    }
+
+    private class AnimationRunnable implements Runnable {
+        private final Handler handler;
+        private final int workerId;
+
+        public AnimationRunnable(Handler handler, int workerId) {
+            this.handler = handler;
+            this.workerId = workerId;
+        }
+
+        @Override
+        public void run() {
+            // ThreadGroup group = Thread.currentThread().getThreadGroup();
+            // int threadPriority = Thread.currentThread().getPriority();
+            // TestLoggers.THREADS.d(String.format(
+            // "double-tap worker: priority: %d, TG: name: %s, active: %d, max priority: %d, ", threadPriority,
+            // group.getName(), group.activeCount(), group.getMaxPriority()));
+            for (int i = 0; true; i++) {
+                Message msg = Message.obtain();
+                msg.arg1 = workerId;
+                msg.arg2 = i;
+                handler.sendMessage(msg);
+                // logger.v(String.format("worker thread %d:  sending message: %d", workerId, i));
+                try {
+                    Thread.sleep(ANIM_STEP_MS);
+                } catch (InterruptedException e) {
+                    // logger.v(String.format("worker thread %d:  killed in sleep", workerId));
+                    return;
+                }
+            }
         }
     }
 

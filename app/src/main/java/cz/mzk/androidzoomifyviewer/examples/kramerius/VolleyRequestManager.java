@@ -23,10 +23,9 @@ import cz.mzk.androidzoomifyviewer.examples.ssl.SSLSocketFactoryProvider;
  */
 public class VolleyRequestManager {
 
-    private static final String TAG = VolleyRequestManager.class.getSimpleName();
     public static final int DISK_CACHE_SIZE_B = 1024 * 1024 * 2;// 2MB
     public static final String DEFAULT_CACHE_DIR = "volley";
-
+    private static final String TAG = VolleyRequestManager.class.getSimpleName();
     private static RequestQueue requestQueue = null;
 
     public static void initialize(Context context) {

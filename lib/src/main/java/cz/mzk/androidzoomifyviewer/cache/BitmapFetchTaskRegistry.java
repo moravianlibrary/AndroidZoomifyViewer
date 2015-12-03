@@ -1,9 +1,9 @@
 package cz.mzk.androidzoomifyviewer.cache;
 
+import android.graphics.Bitmap;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import android.graphics.Bitmap;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;

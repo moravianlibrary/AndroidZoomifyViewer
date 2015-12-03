@@ -1,15 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" -->
-<!-- xmlns:tools="http://schemas.android.com/tools" -->
-<!-- android:id="@+id/container" -->
-<!-- android:layout_width="match_parent" -->
-<!-- android:layout_height="match_parent" -->
-<!-- tools:context="cz.rzeh4n.kramerius_android.MainActivity" -->
-<!-- tools:ignore="MergeRootFrame" /> -->
+<?xml version="1.0" encoding="utf-8"?><!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" --><!-- xmlns:tools="http://schemas.android.com/tools" --><!-- android:id="@+id/container" --><!-- android:layout_width="match_parent" --><!-- android:layout_height="match_parent" --><!-- tools:context="cz.rzeh4n.kramerius_android.MainActivity" --><!-- tools:ignore="MergeRootFrame" /> -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="fill_parent"
@@ -21,12 +14,12 @@
         android:id="@+id/view_flipper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_margin="6dip" >
+        android:layout_margin="6dip">
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="center" >
+            android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -34,14 +27,13 @@
                 android:text="A dog limps into a saloon and says..."
                 android:textColor="#00ff00"
                 android:textSize="14sp"
-                android:textStyle="bold" >
-            </TextView>
+                android:textStyle="bold"></TextView>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:gravity="center" >
+            android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -49,8 +41,7 @@
                 android:text="I&apos;m looking for the man who shot my paw!"
                 android:textColor="#00ff00"
                 android:textSize="14sp"
-                android:textStyle="bold" >
-            </TextView>
+                android:textStyle="bold"></TextView>
         </LinearLayout>
     </ViewFlipper>
 

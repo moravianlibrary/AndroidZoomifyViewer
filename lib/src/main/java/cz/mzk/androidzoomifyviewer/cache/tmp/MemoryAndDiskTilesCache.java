@@ -1,14 +1,14 @@
 package cz.mzk.androidzoomifyviewer.cache.tmp;
 
-import java.io.File;
-import java.io.InputStream;
-
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.LruCache;
+
+import java.io.File;
+import java.io.InputStream;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;
@@ -214,6 +214,11 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
         }
     }
 
+    @Override
+    public State getState() {
+        return state;
+    }
+
     private class StoreTileToMemoryCacheTask extends AsyncTask<Bitmap, Void, Void> {
         private final String key;
 
@@ -226,11 +231,6 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
             storeTileToMemoryCache(key, params[0]);
             return null;
         }
-    }
-
-    @Override
-    public State getState() {
-        return state;
     }
 
 }

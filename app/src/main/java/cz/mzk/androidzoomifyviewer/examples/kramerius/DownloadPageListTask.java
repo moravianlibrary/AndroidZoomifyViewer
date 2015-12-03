@@ -1,5 +1,12 @@
 package cz.mzk.androidzoomifyviewer.examples.kramerius;
 
+import android.content.Context;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,13 +19,6 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.content.Context;
-import android.util.Log;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 

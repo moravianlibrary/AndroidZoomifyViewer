@@ -29,13 +29,11 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
  */
 public class PageViewerActivity extends FragmentActivity implements EventListener {
 
-    private static final String TAG = PageViewerActivity.class.getSimpleName();
-
     public static final String EXTRA_PROTOCOL = "protocol";
     public static final String EXTRA_DOMAIN = "domain";
     public static final String EXTRA_TOP_LEVEL_PID = "topLevelPid";
     public static final String EXTRA_PAGE_PIDS = "pagePids";
-
+    private static final String TAG = PageViewerActivity.class.getSimpleName();
     private String mProtocol;
     private String mDomain;
     private String mTopLevelPid;

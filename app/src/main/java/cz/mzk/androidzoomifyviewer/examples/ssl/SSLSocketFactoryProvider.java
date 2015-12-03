@@ -1,5 +1,8 @@
 package cz.mzk.androidzoomifyviewer.examples.ssl;
 
+import android.content.Context;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -17,9 +20,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import android.content.Context;
-import android.util.Log;
-
 import cz.mzk.androidzoomifyviewer.examples.R;
 
 public class SSLSocketFactoryProvider {
@@ -31,15 +31,6 @@ public class SSLSocketFactoryProvider {
     private static SSLSocketFactoryProvider instance;
     private final SSLContext sslContext;
 
-    public static SSLSocketFactoryProvider instanceOf(Context context) throws KeyManagementException, CertificateException,
-            KeyStoreException, NoSuchAlgorithmException, IOException {
-        if (instance == null) {
-            // throw new RuntimeException("SSL Provider temporarily disabled");
-            instance = new SSLSocketFactoryProvider(context);
-        }
-        return instance;
-    }
-
     private SSLSocketFactoryProvider(Context context) throws KeyManagementException, CertificateException, KeyStoreException,
             NoSuchAlgorithmException, IOException {
         KeyStore localKeyStore = initLocalKeyStore(context);
@@ -50,6 +41,15 @@ public class SSLSocketFactoryProvider {
         sslContext = SSLContext.getInstance("TLS");
         sslContext.init(null, tms, null);
         logTrustManager(myTrustManager);
+    }
+
+    public static SSLSocketFactoryProvider instanceOf(Context context) throws KeyManagementException, CertificateException,
+            KeyStoreException, NoSuchAlgorithmException, IOException {
+        if (instance == null) {
+            // throw new RuntimeException("SSL Provider temporarily disabled");
+            instance = new SSLSocketFactoryProvider(context);
+        }
+        return instance;
     }
 
     private KeyStore initLocalKeyStore(Context context) throws KeyStoreException, NoSuchAlgorithmException,

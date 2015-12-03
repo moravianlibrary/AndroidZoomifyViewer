@@ -1,8 +1,8 @@
 package cz.mzk.androidzoomifyviewer;
 
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
-
 import android.util.Log;
+
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * @author Martin Řehánek

@@ -14,14 +14,6 @@ public class UrlItem {
         this.info = info;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
     public static List<UrlItem> getTestData() {
         List<UrlItem> result = new ArrayList<UrlItem>();
         result.add(new UrlItem("https://google.com", "Google"));
@@ -47,6 +39,14 @@ public class UrlItem {
         // result.add(new UrlItem("", ""));
 
         return result;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getInfo() {
+        return info;
     }
 
 }

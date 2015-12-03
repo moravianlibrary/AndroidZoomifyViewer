@@ -12,26 +12,17 @@ import cz.mzk.androidzoomifyviewer.viewer.VectorD;
  */
 public class PinchZoomHandler extends GestureHandler {
 
-    public enum State {
-        IDLE, READY_TO_PINCH, PINCHING
-    }
-
     // private static final Logger logger = new Logger(PinchZoomManager.class);
     private static final Logger logger = new Logger("GST: pinch zoom");
-
     private State state = State.IDLE;
-
     private double initialSpan;
     private PointD initialFocusInImageCoords;
-
     // shift
     private VectorD accumalatedShift = VectorD.ZERO_VECTOR;
     private VectorD activeShift = VectorD.ZERO_VECTOR;
-
     // scale
     private double accumulatedScaleFactor = 1.0;
     private double activeScaleFactor = 1.0;
-
     public PinchZoomHandler(TiledImageView imageView) {
         super(imageView);
     }
@@ -117,6 +108,10 @@ public class PinchZoomHandler extends GestureHandler {
         activeShift = VectorD.ZERO_VECTOR;
         accumulatedScaleFactor = 1.0;
         activeScaleFactor = 1.0;
+    }
+
+    public enum State {
+        IDLE, READY_TO_PINCH, PINCHING
     }
 
 }

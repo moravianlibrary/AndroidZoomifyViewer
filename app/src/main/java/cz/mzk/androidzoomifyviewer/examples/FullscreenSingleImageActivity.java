@@ -29,9 +29,8 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 public class FullscreenSingleImageActivity extends AppCompatActivity implements ImageInitializationHandler,
         TileDownloadHandler, SingleTapListener {
 
-    private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
     public static final String EXTRA_BASE_URL = "baseUrl";
-
+    private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
     // data
     private String mBaseUrl;
     // action bar

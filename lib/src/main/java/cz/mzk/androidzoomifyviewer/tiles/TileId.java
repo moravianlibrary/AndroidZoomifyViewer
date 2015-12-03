@@ -16,6 +16,14 @@ public class TileId {
         this.y = y;
     }
 
+    public static TileId valueOf(String string) {
+        String[] tokens = string.split(":");
+        int layer = Integer.valueOf(tokens[0]);
+        int x = Integer.valueOf(tokens[1]);
+        int y = Integer.valueOf(tokens[2]);
+        return new TileId(layer, x, y);
+    }
+
     public int getLayer() {
         return layer;
     }
@@ -30,14 +38,6 @@ public class TileId {
 
     public String toString() {
         return "" + layer + ':' + x + ':' + y;
-    }
-
-    public static TileId valueOf(String string) {
-        String[] tokens = string.split(":");
-        int layer = Integer.valueOf(tokens[0]);
-        int x = Integer.valueOf(tokens[1]);
-        int y = Integer.valueOf(tokens[2]);
-        return new TileId(layer, x, y);
     }
 
     @Override

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="fill_parent"
@@ -17,7 +17,7 @@
         android:id="@+id/view_flipper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_margin="6dip" >
+        android:layout_margin="6dip">
 
         <!-- The child Views/Layout to flip -->
 
@@ -28,7 +28,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -37,8 +37,7 @@
                 android:text="This Is Screen 1"
                 android:textColor="#191975"
                 android:textSize="25dp"
-                android:textStyle="bold" >
-            </TextView>
+                android:textStyle="bold"></TextView>
 
             <ImageView
                 android:id="@+id/imageView1"
@@ -54,7 +53,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:gravity="center"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -63,8 +62,7 @@
                 android:text="This Is Screen 2"
                 android:textColor="#191975"
                 android:textSize="25dp"
-                android:textStyle="bold" >
-            </TextView>
+                android:textStyle="bold"></TextView>
 
             <ImageView
                 android:id="@+id/imageView1"

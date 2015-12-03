@@ -1,5 +1,7 @@
 package cz.mzk.androidzoomifyviewer.examples.ssl;
 
+import android.util.Log;
+
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -8,8 +10,6 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-
-import android.util.Log;
 
 public class TrustManagerWithSystemAndLocalKeystores implements X509TrustManager {
 

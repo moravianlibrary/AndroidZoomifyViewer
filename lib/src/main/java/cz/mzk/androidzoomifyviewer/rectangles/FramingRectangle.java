@@ -41,6 +41,17 @@ public class FramingRectangle {
         this(new Rect(left, top, right, bottom), border, fillingColorRes);
     }
 
+    public static List<FramingRectangle> getTestRectangles(Context context) {
+        List<FramingRectangle> result = new ArrayList<>();
+        result.add(new FramingRectangle(500, 1000, 3000, 5000, new Border(R.color.androidzoomifyviewer_black_trans, 3), R.color.androidzoomifyviewer_blue_trans));
+        result.add(new FramingRectangle(3300, 5500, 4000, 6000, new Border(R.color.androidzoomifyviewer_blue_trans, 5), R.color.androidzoomifyviewer_green_trans));
+        result.add(new FramingRectangle(2500, 300, 3500, 500, new Border(R.color.androidzoomifyviewer_blue, 2), R.color.androidzoomifyviewer_blue_trans));
+        //search
+        result.add(new FramingRectangle(1111, 775, 1204, 821, new Border(R.color.androidzoomifyviewer_blue, 1), R.color.androidzoomifyviewer_blue_trans));
+        result.add(new FramingRectangle(1120, 1293, 1216, 1340, new Border(R.color.androidzoomifyviewer_blue, 1), R.color.androidzoomifyviewer_blue_trans));
+        return result;
+    }
+
     public Rect getRect() {
         return rect;
     }
@@ -79,17 +90,6 @@ public class FramingRectangle {
         public int getThicknessDp() {
             return thicknessDp;
         }
-    }
-
-    public static List<FramingRectangle> getTestRectangles(Context context) {
-        List<FramingRectangle> result = new ArrayList<>();
-        result.add(new FramingRectangle(500, 1000, 3000, 5000, new Border(R.color.androidzoomifyviewer_black_trans, 3), R.color.androidzoomifyviewer_blue_trans));
-        result.add(new FramingRectangle(3300, 5500, 4000, 6000, new Border(R.color.androidzoomifyviewer_blue_trans, 5), R.color.androidzoomifyviewer_green_trans));
-        result.add(new FramingRectangle(2500, 300, 3500, 500, new Border(R.color.androidzoomifyviewer_blue, 2), R.color.androidzoomifyviewer_blue_trans));
-        //search
-        result.add(new FramingRectangle(1111, 775, 1204, 821, new Border(R.color.androidzoomifyviewer_blue, 1), R.color.androidzoomifyviewer_blue_trans));
-        result.add(new FramingRectangle(1120, 1293, 1216, 1340, new Border(R.color.androidzoomifyviewer_blue, 1), R.color.androidzoomifyviewer_blue_trans));
-        return result;
     }
 
 

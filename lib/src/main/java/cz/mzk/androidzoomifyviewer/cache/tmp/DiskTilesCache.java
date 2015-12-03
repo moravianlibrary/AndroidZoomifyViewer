@@ -1,12 +1,12 @@
 package cz.mzk.androidzoomifyviewer.cache.tmp;
 
-import java.io.File;
-import java.io.InputStream;
-
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
+import java.io.File;
+import java.io.InputStream;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache;

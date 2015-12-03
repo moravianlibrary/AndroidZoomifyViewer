@@ -1,10 +1,10 @@
 package cz.mzk.androidzoomifyviewer.viewer;
 
-import java.math.BigDecimal;
-import java.util.Locale;
-
 import android.content.res.Resources;
 import android.graphics.Rect;
+
+import java.math.BigDecimal;
+import java.util.Locale;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 
@@ -25,15 +25,15 @@ public class Utils {
         return builder.toString();
     }
 
-    public static PointD toImageCoords(PointD canvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
-        double imageX = (canvasCoords.x - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
-        double imageY = (canvasCoords.y - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
+    public static PointD toImageCoords(PointD pointInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+        double imageX = (pointInCanvasCoords.x - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
+        double imageY = (pointInCanvasCoords.y - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
         return new PointD(imageX, imageY);
     }
 
-    public static PointD toCanvasCoords(PointD inImageCoords, double imageScaleFactor, VectorD imageShiftInCanvas) {
-        double canvasX = (inImageCoords.x * imageScaleFactor + imageShiftInCanvas.x);
-        double canvasY = (inImageCoords.y * imageScaleFactor + imageShiftInCanvas.y);
+    public static PointD toCanvasCoords(PointD pointInImageCoords, double imageScaleFactor, VectorD imageShiftInCanvas) {
+        double canvasX = (pointInImageCoords.x * imageScaleFactor + imageShiftInCanvas.x);
+        double canvasY = (pointInImageCoords.y * imageScaleFactor + imageShiftInCanvas.y);
         PointD result = new PointD(canvasX, canvasY);
         // Log.d(TAG,
         // inImageCoords.toString() + "->" + result.toString() +

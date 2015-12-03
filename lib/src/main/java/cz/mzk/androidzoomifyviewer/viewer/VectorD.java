@@ -14,6 +14,16 @@ public class VectorD {
         this.y = y;
     }
 
+    public static VectorD sum(VectorD... vectors) {
+        double x = 0.0;
+        double y = 0.0;
+        for (VectorD vector : vectors) {
+            x += vector.x;
+            y += vector.y;
+        }
+        return new VectorD(x, y);
+    }
+
     public VectorD plus(double x, double y) {
         return new VectorD(this.x + x, this.y + y);
     }
@@ -32,16 +42,6 @@ public class VectorD {
 
     public VectorD plusY(double y) {
         return new VectorD(this.x, this.y + y);
-    }
-
-    public static VectorD sum(VectorD... vectors) {
-        double x = 0.0;
-        double y = 0.0;
-        for (VectorD vector : vectors) {
-            x += vector.x;
-            y += vector.y;
-        }
-        return new VectorD(x, y);
     }
 
     public String toString() {

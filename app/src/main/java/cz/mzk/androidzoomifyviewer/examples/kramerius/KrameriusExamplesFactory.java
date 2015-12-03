@@ -11,44 +11,6 @@ public class KrameriusExamplesFactory {
 
     private static final String TAG = KrameriusExamplesFactory.class.getSimpleName();
 
-    public static class MonographExample {
-        private static final int MAX_TITLE_LENGTH = 30;
-        private static final String TITLE_SUFFIX = " ... ";
-
-        private final String url;
-        private final String title;
-        private final String note;
-        private final String source;
-
-        public MonographExample(String url, String title, String note, String source) {
-            this.url = url;
-            if (title.length() > MAX_TITLE_LENGTH) {
-                int titleSubstringLength = Math.min(title.length(), MAX_TITLE_LENGTH - TITLE_SUFFIX.length());
-                this.title = title.substring(0, titleSubstringLength) + TITLE_SUFFIX;
-            } else {
-                this.title = title;
-            }
-            this.note = note;
-            this.source = source;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getSource() {
-            return source;
-        }
-
-        public CharSequence getNote() {
-            return note;
-        }
-    }
-
     public static ArrayList<MonographExample> getTestTopLevelUrls() {
         String krameriusMzk = "kramerius.mzk.cz";
         String krameriusNdkMzk = "krameriusndktest.mzk.cz";
@@ -315,6 +277,44 @@ public class KrameriusExamplesFactory {
         result.add("uuid:5a0c2010-0c18-11e4-8c14-5ef3fc9bb22f");
         result.add("uuid:5a2637c0-0c18-11e4-8c14-5ef3fc9bb22f");
         return result;
+    }
+
+    public static class MonographExample {
+        private static final int MAX_TITLE_LENGTH = 30;
+        private static final String TITLE_SUFFIX = " ... ";
+
+        private final String url;
+        private final String title;
+        private final String note;
+        private final String source;
+
+        public MonographExample(String url, String title, String note, String source) {
+            this.url = url;
+            if (title.length() > MAX_TITLE_LENGTH) {
+                int titleSubstringLength = Math.min(title.length(), MAX_TITLE_LENGTH - TITLE_SUFFIX.length());
+                this.title = title.substring(0, titleSubstringLength) + TITLE_SUFFIX;
+            } else {
+                this.title = title;
+            }
+            this.note = note;
+            this.source = source;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public CharSequence getNote() {
+            return note;
+        }
     }
 
 }
