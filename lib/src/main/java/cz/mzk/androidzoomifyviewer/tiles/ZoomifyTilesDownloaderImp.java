@@ -27,7 +27,7 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
  *
  * @author Martin Řehánek
  */
-public class TilesDownloader {
+public class ZoomifyTilesDownloaderImp implements ZoomifyTilesDownloader {
 
     /**
      * @link https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
@@ -37,7 +37,7 @@ public class TilesDownloader {
     public static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
     public static final int TILES_TIMEOUT = 5000;
 
-    private static final Logger logger = new Logger(TilesDownloader.class);
+    private static final Logger logger = new Logger(ZoomifyTilesDownloaderImp.class);
 
     private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
 
@@ -55,7 +55,7 @@ public class TilesDownloader {
      * @param pxRatio Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
      *                dpRatio = (1-pxRatio)
      */
-    public TilesDownloader(String baseUrl, double pxRatio) {
+    public ZoomifyTilesDownloaderImp(String baseUrl, double pxRatio) {
         if (pxRatio < 0 || pxRatio > 1) {
             throw new IllegalArgumentException("pxRation not in <0;1> interval");
         } else {
@@ -75,13 +75,14 @@ public class TilesDownloader {
         }
     }
 
+    @Override
     public ImageProperties getImageProperties() {
         checkInitialized();
         return imageProperties;
     }
 
     /**
-     * Initializes TilesDownloader by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
+     * Initializes ZoomifyTilesDownloaderImp by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
      * may be loaded from cache. Also ImageProperties.xml is saved to cache after being downloaded.
      *
      * @throws IllegalStateException        If this method had already been called
@@ -93,12 +94,13 @@ public class TilesDownloader {
      *                                      etc.
      * @throws OtherIOException             In case of other error (invalid URL, error transfering data, ...)
      */
-    void init() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
+    @Override
+    public void initializeWithImageProperties() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
             InvalidDataException {
         if (initialized) {
-            throw new IllegalStateException("already initialized (" + mBaseUrl + ")");
+            throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
         } else {
-            logger.d("initializing: " + mBaseUrl);
+            logger.d("initializeWithImageProperties: " + mImagePropertiesUrl);
         }
         HttpURLConnection.setFollowRedirects(false);
         String propertiesXml = fetchImagePropertiesXml();
@@ -227,6 +229,7 @@ public class TilesDownloader {
         return i;
     }
 
+    @Override
     public DownloadAndSaveTileTasksRegistry getTaskRegistry() {
         checkInitialized();
         return taskRegistry;
@@ -235,20 +238,21 @@ public class TilesDownloader {
     /**
      * Downloads tile from zoomify server. TODO: InvalidDataException
      *
-     * @param tileId Tile id.
+     * @param zoomifyTileId Tile id.
      * @return
-     * @throws IllegalStateException        If methodi init had not been called yet.
+     * @throws IllegalStateException        If methodi initializeWithImageProperties had not been called yet.
      * @throws TooManyRedirectionsException If max. number of redirections exceeded before downloading tile. This probably means redirection loop.
      * @throws ImageServerResponseException If zoomify server response code for tile cannot be handled here (everything apart from OK and 3xx
      *                                      redirections).
      * @throws InvalidDataException         If tile contains invalid data.
      * @throws OtherIOException             In case of other IO error (invalid URL, error transfering data, ...)
      */
-    public Bitmap downloadTile(TileId tileId) throws OtherIOException, TooManyRedirectionsException,
+    @Override
+    public Bitmap downloadTile(ZoomifyTileId zoomifyTileId) throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         checkInitialized();
-        int tileGroup = computeTileGroup(tileId);
-        String tileUrl = buildTileUrl(tileGroup, tileId);
+        int tileGroup = computeTileGroup(zoomifyTileId);
+        String tileUrl = buildTileUrl(tileGroup, zoomifyTileId);
         logger.v("TILE URL: " + tileUrl);
         return downloadTile(tileUrl, MAX_REDIRECTIONS);
     }
@@ -256,15 +260,15 @@ public class TilesDownloader {
     /**
      * @link http://www.staremapy.cz/zoomify-analyza/
      */
-    private int computeTileGroup(TileId tileId) {
-        int x = tileId.getX();
-        int y = tileId.getY();
-        int level = tileId.getLayer();
+    private int computeTileGroup(ZoomifyTileId zoomifyTileId) {
+        int x = zoomifyTileId.getX();
+        int y = zoomifyTileId.getY();
+        int level = zoomifyTileId.getLayer();
         double tileSize = imageProperties.getTileSize();
         double width = imageProperties.getWidth();
         double height = imageProperties.getHeight();
         double depth = layers.size();
-        // logger.d( tileId.toString());
+        // logger.d( zoomifyTileId.toString());
         // logger.d( "x: " + x + ", y: " + y + ", d: " + depth + ", l: " + level);
         // logger.d( "width: " + width + ", height: " + height + ", tileSize: " + tileSize);
 
@@ -280,10 +284,10 @@ public class TilesDownloader {
         return result;
     }
 
-    private String buildTileUrl(int tileGroup, TileId tileId) {
+    private String buildTileUrl(int tileGroup, ZoomifyTileId zoomifyTileId) {
         StringBuilder builder = new StringBuilder();
         builder.append(mBaseUrl).append("TileGroup").append(tileGroup).append('/');
-        builder.append(tileId.getLayer()).append('-').append(tileId.getX()).append('-').append(tileId.getY())
+        builder.append(zoomifyTileId.getLayer()).append('-').append(zoomifyTileId.getX()).append('-').append(zoomifyTileId.getY())
                 .append(".jpg");
         return builder.toString();
     }
@@ -343,7 +347,8 @@ public class TilesDownloader {
     }
 
 
-    public int[] getTileCoords(int layerId, int pixelX, int pixelY) {
+    @Override
+    public int[] getTileCoordsFromPointCoords(int layerId, int pixelX, int pixelY) {
         checkInitialized();
         if (layerId < 0 || layerId >= layers.size()) {
             throw new IllegalArgumentException("layer out of range: " + layerId);
@@ -402,6 +407,7 @@ public class TilesDownloader {
      * @param imageInCanvasHeightPx
      * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
      */
+    @Override
     public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
         // TODO: 3.12.15 Asi prejmenovat parametry
         checkInitialized();
@@ -480,16 +486,17 @@ public class TilesDownloader {
     }
 
     /**
-     * @param tileId
+     * @param zoomifyTileId
      * @return int array of size 3 containing dimensions in image coordinates for given tile. First item is basic size, that is
      * width/hight of typical tile (i.e. every tile except the border ones - unless there are only border ones). Second
      * item is tile's width, third is it's height.
      */
-    public int[] getTileSizesInImageCoords(TileId tileId) {
+    @Override
+    public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId) {
         checkInitialized();
-        int basicSize = getTilesBasicSizeInImageCoords(tileId.getLayer());
-        int width = getTileWidthInImageCoords(tileId.getLayer(), tileId.getX(), basicSize);
-        int height = getTileHeightInImageCoords(tileId.getLayer(), tileId.getY(), basicSize);
+        int basicSize = getTilesBasicSizeInImageCoords(zoomifyTileId.getLayer());
+        int width = getTileWidthInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getX(), basicSize);
+        int height = getTileHeightInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getY(), basicSize);
         return new int[]{basicSize, width, height};
     }
 
@@ -523,6 +530,7 @@ public class TilesDownloader {
         }
     }
 
+    @Override
     public double getLayerWidth(int layerId) {
         checkInitialized();
         double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
@@ -530,17 +538,13 @@ public class TilesDownloader {
         return result;
     }
 
+    @Override
     public double getLayerHeight(int layerId) {
         checkInitialized();
         return imageProperties.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
     }
 
-    /*public String getImagePropertiesUrl() {
-        checkInitialized();
-        return mImagePropertiesUrl;
-    }*/
-
-
+    @Override
     public List<Layer> getLayers() {
         checkInitialized();
         return layers;

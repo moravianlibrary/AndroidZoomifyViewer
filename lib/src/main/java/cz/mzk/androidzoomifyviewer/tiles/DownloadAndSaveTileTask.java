@@ -18,9 +18,9 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     // private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 1);
     private static final Logger logger = new Logger(DownloadAndSaveTileTask.class);
 
-    private final TilesDownloader downloader;
+    private final ZoomifyTilesDownloader downloader;
     private final String zoomifyBaseUrl;
-    private final TileId tileId;
+    private final ZoomifyTileId zoomifyTileId;
     private final TileDownloadResultHandler handler;
 
     private OtherIOException otherIoException;
@@ -31,14 +31,14 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     /**
      * @param downloader     initialized Tiles downloader, not null
      * @param zoomifyBaseUrl Zoomify base url, not null
-     * @param tileId         Tile id, not null
+     * @param zoomifyTileId  Tile id, not null
      * @param handler        Tile download result handler, not null
      */
-    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TileId tileId,
+    public DownloadAndSaveTileTask(ZoomifyTilesDownloader downloader, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId,
                                    TileDownloadResultHandler handler) {
         this.downloader = downloader;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
-        this.tileId = tileId;
+        this.zoomifyTileId = zoomifyTileId;
         this.handler = handler;
     }
 
@@ -52,12 +52,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         // threadPriority, group.getName(), group.activeCount(), group.getMaxPriority()));
         try {
             if (!isCancelled()) {
-                Bitmap tile = downloader.downloadTile(tileId);
+                Bitmap tile = downloader.downloadTile(zoomifyTileId);
                 if (!isCancelled()) {
                     if (tile != null) {
-                        CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tileId);
+                        CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, zoomifyTileId);
                         logger.v(String.format("tile downloaded and saved to disk cache: base url: '%s', tile: '%s'",
-                                zoomifyBaseUrl, tileId));
+                                zoomifyBaseUrl, zoomifyTileId));
                     } else {
                         // TODO: examine this
                         logger.w("tile is null");
@@ -65,12 +65,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
                 } else {
                     logger.v(String
                             .format("tile processing canceled task after downloading and before saving data: base url: '%s', tile: '%s'",
-                                    zoomifyBaseUrl, tileId));
+                                    zoomifyBaseUrl, zoomifyTileId));
                 }
             } else {
                 logger.v(String.format(
                         "tile processing task canceled before download started: base url: '%s', tile: '%s'",
-                        zoomifyBaseUrl, tileId));
+                        zoomifyBaseUrl, zoomifyTileId));
             }
         } catch (TooManyRedirectionsException e) {
             tooManyRedirectionsException = e;
@@ -91,39 +91,39 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
 
     @Override
     protected void onPostExecute(Bitmap bitmap) {
-        downloader.getTaskRegistry().unregisterTask(tileId);
+        downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
         if (tooManyRedirectionsException != null) {
-            handler.onRedirectionLoop(tileId, tooManyRedirectionsException.getUrl(),
+            handler.onRedirectionLoop(zoomifyTileId, tooManyRedirectionsException.getUrl(),
                     tooManyRedirectionsException.getRedirections());
         } else if (imageServerResponseException != null) {
-            handler.onUnhandableResponseCode(tileId, imageServerResponseException.getUrl(),
+            handler.onUnhandableResponseCode(zoomifyTileId, imageServerResponseException.getUrl(),
                     imageServerResponseException.getErrorCode());
         } else if (invalidXmlException != null) {
-            handler.onInvalidData(tileId, invalidXmlException.getUrl(), invalidXmlException.getMessage());
+            handler.onInvalidData(zoomifyTileId, invalidXmlException.getUrl(), invalidXmlException.getMessage());
         } else if (otherIoException != null) {
-            handler.onDataTransferError(tileId, otherIoException.getUrl(), otherIoException.getMessage());
+            handler.onDataTransferError(zoomifyTileId, otherIoException.getUrl(), otherIoException.getMessage());
         } else {
-            handler.onSuccess(tileId, bitmap);
+            handler.onSuccess(zoomifyTileId, bitmap);
         }
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        downloader.getTaskRegistry().unregisterTask(tileId);
+        downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
     }
 
     public interface TileDownloadResultHandler {
 
-        public void onSuccess(TileId tileId, Bitmap bitmap);
+        public void onSuccess(ZoomifyTileId zoomifyTileId, Bitmap bitmap);
 
-        public void onUnhandableResponseCode(TileId tileId, String tileUrl, int responseCode);
+        public void onUnhandableResponseCode(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode);
 
-        public void onRedirectionLoop(TileId tileId, String tileUrl, int redirections);
+        public void onRedirectionLoop(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections);
 
-        public void onDataTransferError(TileId tileId, String tileUrl, String errorMessage);
+        public void onDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage);
 
-        public void onInvalidData(TileId tileId, String tileUrl, String errorMessage);
+        public void onInvalidData(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage);
 
     }
 

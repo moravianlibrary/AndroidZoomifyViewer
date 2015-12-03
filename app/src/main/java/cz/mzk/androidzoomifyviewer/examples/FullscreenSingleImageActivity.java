@@ -15,7 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
@@ -195,36 +195,36 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onTileProcessed(TileId tileId) {
+    public void onTileProcessed(ZoomifyTileId zoomifyTileId) {
         // nothing
     }
 
     @Override
-    public void onTileUnhandableResponseError(TileId tileId, String tileUrl, int responseCode) {
+    public void onTileUnhandableResponseError(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode) {
         Toast.makeText(this,
-                "Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': HTTP error " + responseCode,
+                "Failed to download tile " + zoomifyTileId.toString() + " from '" + tileUrl + "': HTTP error " + responseCode,
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onTileRedirectionLoopError(TileId tileId, String tileUrl, int redirections) {
+    public void onTileRedirectionLoopError(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections) {
         Toast.makeText(this,
-                "Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': redirection loop",
+                "Failed to download tile " + zoomifyTileId.toString() + " from '" + tileUrl + "': redirection loop",
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onTileDataTransferError(TileId tileId, String tileUrl, String errorMessage) {
+    public void onTileDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
         Toast.makeText(this,
-                "Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': " + errorMessage,
+                "Failed to download tile " + zoomifyTileId.toString() + " from '" + tileUrl + "': " + errorMessage,
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onTileInvalidDataError(TileId tileId, String tileUrl, String errorMessage) {
+    public void onTileInvalidDataError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
         Toast.makeText(
                 this,
-                "Failed to download tile " + tileId.toString() + " from '" + tileUrl + "': invalid data: "
+                "Failed to download tile " + zoomifyTileId.toString() + " from '" + tileUrl + "': invalid data: "
                         + errorMessage, Toast.LENGTH_SHORT).show();
     }
 

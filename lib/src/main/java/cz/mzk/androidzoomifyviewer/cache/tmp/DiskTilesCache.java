@@ -14,7 +14,7 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask;
 import cz.mzk.androidzoomifyviewer.cache.InitDiskCacheTask.Listener;
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 
 public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 
@@ -60,9 +60,9 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
     // }
 
     @Override
-    public Bitmap getTile(String zoomifyBaseUrl, TileId tileId) {
+    public Bitmap getTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
         // checkState();
-        String key = buildKey(zoomifyBaseUrl, tileId);
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         return getTileFromDiskCache(key);
     }
 
@@ -94,9 +94,9 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
     }
 
     @Override
-    public void storeTile(Bitmap tile, String zoomifyBaseUrl, TileId tileId) {
+    public void storeTile(Bitmap tile, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
         // checkState();
-        String key = buildKey(zoomifyBaseUrl, tileId);
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         storeTileToDiskCache(key, tile);
     }
 

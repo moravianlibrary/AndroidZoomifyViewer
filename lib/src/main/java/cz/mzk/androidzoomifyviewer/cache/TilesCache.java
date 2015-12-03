@@ -2,7 +2,7 @@ package cz.mzk.androidzoomifyviewer.cache;
 
 import android.graphics.Bitmap;
 
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 
 /**
  * @author Martin Řehánek
@@ -14,10 +14,10 @@ public interface TilesCache {
      * null if bitmap was not found in either cache.
      *
      * @param zoomifyBaseUrl
-     * @param tileId
+     * @param zoomifyTileId
      * @return
      */
-    public Bitmap getTile(String zoomifyBaseUrl, TileId tileId);
+    public Bitmap getTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
 
     /**
      * Returns tile's bitmap if it has been found in memory cache. Or if the bitmap is not in memory but in disk cache, tries to
@@ -25,17 +25,17 @@ public interface TilesCache {
      * either cache.
      *
      * @param zoomifyBaseUrl
-     * @param tileId
+     * @param zoomifyTileId
      * @param handler
      * @return TileBitmap object that contains bitmap it self (or null) and tile's bitmap state.
      */
-    public TileBitmap getTileAsync(String zoomifyBaseUrl, TileId tileId, FetchingBitmapFromDiskHandler handler);
+    public TileBitmap getTileAsync(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId, FetchingBitmapFromDiskHandler handler);
 
-    public boolean containsTile(String zoomifyBaseUrl, TileId tileId);
+    public boolean containsTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
 
-    public boolean containsTileInMemory(String zoomifyBaseUrl, TileId tileId);
+    public boolean containsTileInMemory(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
 
-    public void storeTile(Bitmap tile, String zoomifyBaseUrl, TileId tileId);
+    public void storeTile(Bitmap tile, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
 
     public void cancelAllTasks();
 

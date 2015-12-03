@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 
 /**
  * This LRU cache stores tiles only in memory as bitmaps. Raw bitmaps occupy significant amount of memory (megabytes), so tiles
@@ -43,13 +43,13 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
     }
 
     @Override
-    public Bitmap getTile(String zoomifyBaseUrl, TileId tileId) {
-        return mMemoryCache.get(buildKey(zoomifyBaseUrl, tileId));
+    public Bitmap getTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        return mMemoryCache.get(buildKey(zoomifyBaseUrl, zoomifyTileId));
     }
 
     @Override
-    public void storeTile(Bitmap bmp, String zoomifyBaseUrl, TileId tileId) {
-        String key = buildKey(zoomifyBaseUrl, tileId);
+    public void storeTile(Bitmap bmp, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         synchronized (mMemoryCacheLock) {
             if (mMemoryCache.get(key) == null) {
                 logger.d("storing " + key);

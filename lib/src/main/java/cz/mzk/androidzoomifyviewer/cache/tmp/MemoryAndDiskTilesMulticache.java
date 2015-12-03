@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 
 /**
  * This implementation contains different caches for different layers.
@@ -128,41 +128,41 @@ public class MemoryAndDiskTilesMulticache extends AbstractTileCache implements T
     }
 
     @Override
-    public Bitmap getTile(String zoomifyBaseUrl, TileId tileId) {
-        switch (tileId.getLayer()) {
+    public Bitmap getTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        switch (zoomifyTileId.getLayer()) {
             case 0:
-                return level0 != null && level0.getState() == State.READY ? level0.getTile(zoomifyBaseUrl, tileId) : null;
+                return level0 != null && level0.getState() == State.READY ? level0.getTile(zoomifyBaseUrl, zoomifyTileId) : null;
             case 1:
-                return level1 != null && level1.getState() == State.READY ? level1.getTile(zoomifyBaseUrl, tileId) : null;
+                return level1 != null && level1.getState() == State.READY ? level1.getTile(zoomifyBaseUrl, zoomifyTileId) : null;
             case 2:
-                return level2 != null && level2.getState() == State.READY ? level2.getTile(zoomifyBaseUrl, tileId) : null;
+                return level2 != null && level2.getState() == State.READY ? level2.getTile(zoomifyBaseUrl, zoomifyTileId) : null;
             default:
                 return levelOther != null && levelOther.getState() == State.READY ? levelOther.getTile(zoomifyBaseUrl,
-                        tileId) : null;
+                        zoomifyTileId) : null;
         }
     }
 
     @Override
-    public void storeTile(Bitmap tile, String zoomifyBaseUrl, TileId tileId) {
-        switch (tileId.getLayer()) {
+    public void storeTile(Bitmap tile, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        switch (zoomifyTileId.getLayer()) {
             case 0:
                 if (level0 != null && level0.getState() == State.READY) {
-                    level0.storeTile(tile, zoomifyBaseUrl, tileId);
+                    level0.storeTile(tile, zoomifyBaseUrl, zoomifyTileId);
                 }
                 break;
             case 1:
                 if (level1 != null && level1.getState() == State.READY) {
-                    level1.storeTile(tile, zoomifyBaseUrl, tileId);
+                    level1.storeTile(tile, zoomifyBaseUrl, zoomifyTileId);
                 }
                 break;
             case 2:
                 if (level2 != null && level2.getState() == State.READY) {
-                    level2.storeTile(tile, zoomifyBaseUrl, tileId);
+                    level2.storeTile(tile, zoomifyBaseUrl, zoomifyTileId);
                 }
                 break;
             default:
                 if (levelOther != null && levelOther.getState() == State.READY) {
-                    levelOther.storeTile(tile, zoomifyBaseUrl, tileId);
+                    levelOther.storeTile(tile, zoomifyBaseUrl, zoomifyTileId);
                 }
                 break;
         }

@@ -18,7 +18,7 @@ import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 import cz.mzk.androidzoomifyviewer.cache.TileBitmap.State;
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
@@ -107,8 +107,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     @Override
-    public void storeTile(Bitmap bmp, String zoomifyBaseUrl, TileId tileId) {
-        String key = buildKey(zoomifyBaseUrl, tileId);
+    public void storeTile(Bitmap bmp, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         storeTileToMemoryCache(key, bmp);
         storeTileToDiskCache(key, bmp);
     }
@@ -144,8 +144,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     @Override
-    public Bitmap getTile(String zoomifyBaseUrl, TileId tileId) {
-        String key = buildKey(zoomifyBaseUrl, tileId);
+    public Bitmap getTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         // long start = System.currentTimeMillis();
         // Bitmap inMemoryCache = mMemoryCache.get(key);
         Bitmap inMemoryCache = getTileFromMemoryCache(key);
@@ -174,8 +174,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     @Override
-    public boolean containsTile(String zoomifyBaseUrl, TileId tileId) {
-        String key = buildKey(zoomifyBaseUrl, tileId);
+    public boolean containsTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         // Bitmap inMemory = mMemoryCache.get(key);
         Bitmap inMemory = getTileFromMemoryCache(key);
         if (inMemory != null) {
@@ -186,8 +186,8 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     @Override
-    public boolean containsTileInMemory(String zoomifyBaseUrl, TileId tileId) {
-        String key = buildKey(zoomifyBaseUrl, tileId);
+    public boolean containsTileInMemory(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         // Bitmap inMemory = mMemoryCache.get(key);
         Bitmap inMemory = getTileFromMemoryCache(key);
         return inMemory != null;
@@ -261,9 +261,9 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     }
 
     @Override
-    public TileBitmap getTileAsync(String zoomifyBaseUrl, TileId tileId, FetchingBitmapFromDiskHandler listener) {
+    public TileBitmap getTileAsync(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId, FetchingBitmapFromDiskHandler listener) {
         // Debug.startMethodTracing();
-        String key = buildKey(zoomifyBaseUrl, tileId);
+        String key = buildKey(zoomifyBaseUrl, zoomifyTileId);
         // long start = System.currentTimeMillis();
         // Bitmap inMemoryCache = mMemoryCache.get(key);
         Bitmap inMemoryCache = getTileFromMemoryCache(key);

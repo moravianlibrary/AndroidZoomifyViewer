@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cz.mzk.androidzoomifyviewer.tiles.TileId;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTileId;
 
 /**
  * @author Martin Řehánek
@@ -57,12 +57,12 @@ public abstract class AbstractTileCache {
     }
 
     // TODO: exception if file name to long (probably over 127 chars)
-    protected String buildKey(String zoomifyBaseUrl, TileId tileId) {
+    protected String buildKey(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
         StringBuilder builder = new StringBuilder();
         builder.append(escapeSpecialChars(zoomifyBaseUrl)).append(SEPARATOR);
-        builder.append(tileId.getLayer()).append(SEPARATOR);
-        builder.append(tileId.getX()).append(SEPARATOR);
-        builder.append(tileId.getY());
+        builder.append(zoomifyTileId.getLayer()).append(SEPARATOR);
+        builder.append(zoomifyTileId.getX()).append(SEPARATOR);
+        builder.append(zoomifyTileId.getY());
         return builder.toString();
     }
 

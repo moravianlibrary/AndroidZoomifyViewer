@@ -10,7 +10,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException
 /**
  * @author Martin Řehánek
  */
-public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, TilesDownloader> {
+public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, ZoomifyTilesDownloader> {
 
     private static final Logger logger = new Logger(InitTilesDownloaderTask.class);
 
@@ -35,12 +35,12 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
     }
 
     @Override
-    protected TilesDownloader doInBackground(Void... params) {
+    protected ZoomifyTilesDownloader doInBackground(Void... params) {
         try {
             //logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
-            TilesDownloader downloader = new TilesDownloader(zoomifyBaseUrl, pxRatio);
+            ZoomifyTilesDownloader downloader = new ZoomifyTilesDownloaderImp(zoomifyBaseUrl, pxRatio);
             if (!isCancelled()) {
-                downloader.init();
+                downloader.initializeWithImageProperties();
                 return downloader;
             }
         } catch (TooManyRedirectionsException e) {
@@ -56,7 +56,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
     }
 
     @Override
-    protected void onPostExecute(TilesDownloader downloader) {
+    protected void onPostExecute(ZoomifyTilesDownloader downloader) {
         if (tooManyRedirectionsException != null) {
             handler.onRedirectionLoop(tooManyRedirectionsException.getUrl(),
                     tooManyRedirectionsException.getRedirections());
@@ -74,7 +74,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
 
     public interface ImagePropertiesDownloadResultHandler {
 
-        public void onSuccess(TilesDownloader downloader);
+        public void onSuccess(ZoomifyTilesDownloader downloader);
 
         public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
 

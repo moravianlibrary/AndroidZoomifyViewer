@@ -13,7 +13,7 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask;
 import cz.mzk.androidzoomifyviewer.tiles.InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.Layer;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.ZoomifyTilesDownloader;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -29,7 +29,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     @Before
     public void init() throws Exception {
-        logger.d("init");
+        logger.d("initializeWithImageProperties");
         if (getContext() == null) {
             logger.d("initializing mock context");
             setContext(new MockContext());
@@ -42,7 +42,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
-    private TilesDownloader initTilesDownloader(String baseUrl) {
+    private ZoomifyTilesDownloader initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
         new InitTilesDownloaderTask(baseUrl, pxRatio, new ImagePropertiesDownloadResultHandler() {
@@ -54,10 +54,10 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             }
 
             @Override
-            public void onSuccess(TilesDownloader downloader) {
+            public void onSuccess(ZoomifyTilesDownloader downloader) {
                 result.finished = true;
                 result.downloader = downloader;
-                logger.d(TilesDownloader.class.getSimpleName() + " initialized");
+                logger.d(downloader.getClass().getSimpleName() + " initialized");
             }
 
             @Override
@@ -123,11 +123,11 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     public void testCornerTilesCoords(String baseUrl) {
         logger.d("testing corner tiles coords for: " + baseUrl);
-        TilesDownloader mTilesDownloader = initTilesDownloader(baseUrl);
-        assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, mTilesDownloader);
-        int width = mTilesDownloader.getImageProperties().getWidth();
-        int height = mTilesDownloader.getImageProperties().getHeight();
-        List<Layer> layers = mTilesDownloader.getLayers();
+        ZoomifyTilesDownloader zoomifyTilesDownloader = initTilesDownloader(baseUrl);
+        assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, zoomifyTilesDownloader);
+        int width = zoomifyTilesDownloader.getImageProperties().getWidth();
+        int height = zoomifyTilesDownloader.getImageProperties().getHeight();
+        List<Layer> layers = zoomifyTilesDownloader.getLayers();
         int[] topLeftCorner = {0, 0};
         int[] topRightCorner = {width - 1, 0};
         int[] bottomLeftCorner = {0, height - 1};
@@ -137,10 +137,10 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             logger.d("layer: " + layer);
             int horizontal = layers.get(layer).getTilesHorizontal();
             int vertical = layers.get(layer).getTilesVertical();
-            assertTileCoords(mTilesDownloader, layer, topLeftCorner, new int[]{0, 0});
-            assertTileCoords(mTilesDownloader, layer, topRightCorner, new int[]{horizontal - 1, 0});
-            assertTileCoords(mTilesDownloader, layer, bottomLeftCorner, new int[]{0, vertical - 1});
-            assertTileCoords(mTilesDownloader, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
+            assertTileCoords(zoomifyTilesDownloader, layer, topLeftCorner, new int[]{0, 0});
+            assertTileCoords(zoomifyTilesDownloader, layer, topRightCorner, new int[]{horizontal - 1, 0});
+            assertTileCoords(zoomifyTilesDownloader, layer, bottomLeftCorner, new int[]{0, vertical - 1});
+            assertTileCoords(zoomifyTilesDownloader, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
         }
     }
 
@@ -157,15 +157,15 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         testCornerTilesCoords("http://www.fookes.com/ezimager/zoomify/105_0532/");
     }*/
 
-    private void assertTileCoords(TilesDownloader mTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
-        int[] actualCoords = mTilesDownloader.getTileCoords(layerId, pixel[0], pixel[1]);
+    private void assertTileCoords(ZoomifyTilesDownloader mZoomifyTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
+        int[] actualCoords = mZoomifyTilesDownloader.getTileCoordsFromPointCoords(layerId, pixel[0], pixel[1]);
         assertEquals(expectedCoords[0], actualCoords[0]);
         assertEquals(expectedCoords[1], actualCoords[1]);
     }
 
     class TilesDownloaderInitializationResult {
         public boolean finished = false;
-        public TilesDownloader downloader;
+        public ZoomifyTilesDownloader downloader;
     }
 
 
