@@ -77,11 +77,11 @@ public class Utils {
 
     //rectangle
 
-    public static RectD toImageCoords(Rect rectInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
-        double left = rectInCanvasCoords.left * imageToCanvasScaleFactor + imageShiftInCanvas.x;
-        double top = rectInCanvasCoords.top * imageToCanvasScaleFactor + imageShiftInCanvas.y;
-        double right = rectInCanvasCoords.right * imageToCanvasScaleFactor + imageShiftInCanvas.x;
-        double bottom = rectInCanvasCoords.bottom * imageToCanvasScaleFactor + imageShiftInCanvas.y;
+    public static RectD toImageCoords(RectD rectInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+        double left = (rectInCanvasCoords.left - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
+        double top = (rectInCanvasCoords.top - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
+        double right = (rectInCanvasCoords.right - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
+        double bottom = (rectInCanvasCoords.bottom - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
         return new RectD(left, top, right, bottom);
     }
 
