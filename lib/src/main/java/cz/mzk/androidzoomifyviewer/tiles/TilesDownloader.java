@@ -3,15 +3,10 @@ package cz.mzk.androidzoomifyviewer.tiles;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,12 +41,14 @@ public class TilesDownloader {
 
     private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
 
-    private String baseUrl;
-    private String imagePropertiesUrl;
+    private final String mBaseUrl;
+    private final double mPxRatio;
+
+    private String mImagePropertiesUrl;
     private boolean initialized = false;
     private ImageProperties imageProperties;
     private List<Layer> layers;
-    private double pxRatio;
+
 
     /**
      * @param baseUrl Zoomify base url.
@@ -59,18 +56,22 @@ public class TilesDownloader {
      *                dpRatio = (1-pxRatio)
      */
     public TilesDownloader(String baseUrl, double pxRatio) {
-        this.baseUrl = baseUrl;
-        this.imagePropertiesUrl = toImagePropertiesUrl(baseUrl);
-        this.pxRatio = pxRatio;
-    }
-
-    private String toImagePropertiesUrl(String baseUrl) {
-        return baseUrl + "ImageProperties.xml";
+        if (pxRatio < 0 || pxRatio > 1) {
+            throw new IllegalArgumentException("pxRation not in <0;1> interval");
+        } else {
+            mPxRatio = pxRatio;
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            throw new IllegalArgumentException("baseUrl is null or empty");
+        } else {
+            mBaseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + '/';
+        }
+        mImagePropertiesUrl = mBaseUrl + "ImageProperties.xml";
     }
 
     private void checkInitialized() {
         if (!initialized) {
-            throw new IllegalStateException("not initialized (" + baseUrl + ")");
+            throw new IllegalStateException("not initialized (" + mBaseUrl + ")");
         }
     }
 
@@ -95,13 +96,13 @@ public class TilesDownloader {
     public void init() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
             InvalidDataException {
         if (initialized) {
-            throw new IllegalStateException("already initialized (" + baseUrl + ")");
+            throw new IllegalStateException("already initialized (" + mBaseUrl + ")");
         } else {
-            logger.d("initializing: " + baseUrl);
+            logger.d("initializing: " + mBaseUrl);
         }
         HttpURLConnection.setFollowRedirects(false);
         String propertiesXml = getImagePropertiesXml();
-        imageProperties = loadFromXml(propertiesXml);
+        imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
         logger.d(imageProperties.toString());
         layers = initLayers();
         initialized = true;
@@ -110,12 +111,12 @@ public class TilesDownloader {
     private String getImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         ImagePropertiesCache cache = CacheManager.getImagePropertiesCache();
-        String fromCache = cache.getXml(baseUrl);
+        String fromCache = cache.getXml(mBaseUrl);
         if (fromCache != null) {
             return fromCache;
         } else {
-            String downloaded = downloadPropertiesXml(imagePropertiesUrl, MAX_REDIRECTIONS);
-            cache.storeXml(downloaded, baseUrl);
+            String downloaded = downloadPropertiesXml(mImagePropertiesUrl, MAX_REDIRECTIONS);
+            cache.storeXml(downloaded, mBaseUrl);
             return downloaded;
         }
     }
@@ -149,7 +150,7 @@ public class TilesDownloader {
                     if (location == null || location.isEmpty()) {
                         throw new ImageServerResponseException(urlString, responseCode);
                     }
-                    imagePropertiesUrl = toImagePropertiesUrl(location);
+                    mImagePropertiesUrl = location;
                     urlConnection.disconnect();
                     return downloadPropertiesXml(location, remainingRedirections - 1);
                 case 302:
@@ -165,7 +166,7 @@ public class TilesDownloader {
                     throw new ImageServerResponseException(urlString, responseCode);
             }
         } catch (IOException e) {
-            throw new OtherIOException(e.getMessage(), imagePropertiesUrl);
+            throw new OtherIOException(e.getMessage(), mImagePropertiesUrl);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -193,95 +194,6 @@ public class TilesDownloader {
                 out.close();
             }
         }
-    }
-
-    private ImageProperties loadFromXml(String propertiesXml) throws InvalidDataException, OtherIOException {
-        try {
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(false);
-            XmlPullParser xpp = factory.newPullParser();
-            xpp.setInput(new StringReader(propertiesXml));
-            boolean elementImagePropertiesStarted = false;
-            boolean elementImagePropertiesEnded = false;
-            int width = -1;
-            int height = -1;
-            int numtiles = -1; // pro kontrolu
-            int numimages = -1;
-            double version = 0.0;
-            int tileSize = -1;
-            int eventType = xpp.getEventType();
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG) {
-                    if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
-                        throw new InvalidDataException(imagePropertiesUrl, "Unexpected element " + xpp.getName());
-                    } else {
-                        elementImagePropertiesStarted = true;
-                        width = getAttributeIntegerValue(xpp, "WIDTH");
-                        height = getAttributeIntegerValue(xpp, "HEIGHT");
-                        numtiles = getAttributeIntegerValue(xpp, "NUMTILES");
-                        numimages = getAttributeIntegerValue(xpp, "NUMIMAGES");
-                        tileSize = getAttributeIntegerValue(xpp, "TILESIZE");
-                        version = getAttributeDoubleValue(xpp, "VERSION");
-                    }
-                } else if (eventType == XmlPullParser.END_TAG) {
-                    if (!xpp.getName().equals("IMAGE_PROPERTIES")) {
-                        throw new InvalidDataException(imagePropertiesUrl, "Unexpected element " + xpp.getName());
-                    } else {
-                        elementImagePropertiesEnded = true;
-                    }
-                }
-                eventType = xpp.next();
-            }
-            if (!elementImagePropertiesStarted) {
-                throw new InvalidDataException(imagePropertiesUrl, "Element IMAGE_PROPERTIES not found");
-            }
-            if (!elementImagePropertiesEnded) {
-                throw new InvalidDataException(imagePropertiesUrl, "Element IMAGE_PROPERTIES not closed");
-            }
-            if (version != 1.8) {
-                throw new InvalidDataException(imagePropertiesUrl, "Unsupported tiles version: " + version);
-            }
-            if (numimages != 1) {
-                throw new InvalidDataException(imagePropertiesUrl, "Unsupported number of images: " + numimages);
-            }
-            // TODO: check numTiles
-            return new ImageProperties(width, height, numtiles, tileSize);
-        } catch (XmlPullParserException e1) {
-            throw new InvalidDataException(imagePropertiesUrl, e1.getMessage());
-        } catch (IOException e) {
-            throw new OtherIOException(e.getMessage(), imagePropertiesUrl);
-        }
-    }
-
-    private Double getAttributeDoubleValue(XmlPullParser xpp, String attrName) throws InvalidDataException {
-        String attrValue = getAttributeStringValue(xpp, attrName);
-        try {
-            return Double.valueOf(attrValue);
-        } catch (NumberFormatException e) {
-            throw new InvalidDataException(imagePropertiesUrl, "invalid content of attribute " + attrName + ": '"
-                    + attrValue + "'");
-        }
-    }
-
-    private int getAttributeIntegerValue(XmlPullParser xpp, String attrName) throws InvalidDataException {
-        String attrValue = getAttributeStringValue(xpp, attrName);
-        try {
-            return Integer.valueOf(attrValue);
-        } catch (NumberFormatException e) {
-            throw new InvalidDataException(imagePropertiesUrl, "invalid content of attribute " + attrName + ": '"
-                    + attrValue + "'");
-        }
-    }
-
-    private String getAttributeStringValue(XmlPullParser xpp, String attrName) throws InvalidDataException {
-        String attrValue = xpp.getAttributeValue(null, attrName);
-        if (attrValue == null) {
-            throw new InvalidDataException(imagePropertiesUrl, "missing attribute " + attrName);
-        }
-        if (attrValue.isEmpty()) {
-            throw new InvalidDataException(imagePropertiesUrl, "empty attribute " + attrName);
-        }
-        return attrValue;
     }
 
     private List<Layer> initLayers() {
@@ -444,7 +356,7 @@ public class TilesDownloader {
 
     private String buildTileUrl(int tileGroup, TileId tileId) {
         StringBuilder builder = new StringBuilder();
-        builder.append(baseUrl).append("TileGroup").append(tileGroup).append('/');
+        builder.append(mBaseUrl).append("TileGroup").append(tileGroup).append('/');
         builder.append(tileId.getLayer()).append('-').append(tileId.getX()).append('-').append(tileId.getY())
                 .append(".jpg");
         return builder.toString();
@@ -495,12 +407,12 @@ public class TilesDownloader {
      * partially overflowing).
      * <p/>
      * For determining this, canvas width/height can be taken into account either in pixels or density independent pixels or
-     * combination of both (weighted arithemtic mean). Parameter pxRatio is used for this. For example height of image area in
+     * combination of both (weighted arithemtic mean). Parameter mPxRatio is used for this. For example height of image area in
      * canvas is being computed this way:
      * <p/>
-     * height = pxRatio heightPx + (1-pxRatio) * heightDp
+     * height = mPxRatio heightPx + (1-mPxRatio) * heightDp
      * <p/>
-     * So to use px only, pxRatio should be 1.0. To use dp, pxRatio should be 0.0.
+     * So to use px only, mPxRatio should be 1.0. To use dp, mPxRatio should be 0.0.
      * <p/>
      * Be aware that for devices with big displays and high display density putting big weight to px might caus extensive number
      * of tiles needed. That would lead to lots of parallel tasks for fetching tiles and hence decreased ui responsivness due to
@@ -516,21 +428,21 @@ public class TilesDownloader {
      */
     public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
         checkInitialized();
-        double dpRatio = 1.0 - pxRatio;
-        if (pxRatio < 0.0) {
+        double dpRatio = 1.0 - mPxRatio;
+        if (mPxRatio < 0.0) {
             throw new IllegalArgumentException("px ratio must be >= 0");
-        } else if (pxRatio > 1.0) {
+        } else if (mPxRatio > 1.0) {
             throw new IllegalArgumentException("px ratio must be <= 1");
         }
 
         int imageInCanvasWidthDp = 0;
         int imageInCanvasHeightDp = 0;
-        if (pxRatio < 1.0) {// optimization: initialize only if will be used
+        if (mPxRatio < 1.0) {// optimization: initialize only if will be used
             imageInCanvasWidthDp = Utils.pxToDp(imageInCanvasWidthPx);
             imageInCanvasHeightDp = Utils.pxToDp(imageInCanvasHeightPx);
         }
-        int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * pxRatio);
-        int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * pxRatio);
+        int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * mPxRatio);
+        int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * mPxRatio);
         // int layersNum = layers.size();
         // if (true) {
         // // if (layersNum>=3){
@@ -648,7 +560,7 @@ public class TilesDownloader {
 
     public String getImagePropertiesUrl() {
         checkInitialized();
-        return imagePropertiesUrl;
+        return mImagePropertiesUrl;
     }
 
 }
