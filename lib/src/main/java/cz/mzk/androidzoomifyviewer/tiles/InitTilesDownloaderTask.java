@@ -2,10 +2,10 @@ package cz.mzk.androidzoomifyviewer.tiles;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.ImageServerResponseException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.InvalidDataException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.OtherIOException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 
 /**
  * @author Martin Řehánek

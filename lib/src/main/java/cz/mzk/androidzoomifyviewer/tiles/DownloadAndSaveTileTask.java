@@ -5,10 +5,10 @@ import android.graphics.Bitmap;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.ImageServerResponseException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.InvalidDataException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.OtherIOException;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 
 /**
  * @author Martin Řehánek
@@ -33,7 +33,6 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
      * @param zoomifyBaseUrl Zoomify base url, not null
      * @param tileId         Tile id, not null
      * @param handler        Tile download result handler, not null
-     * @param tilesCache
      */
     public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TileId tileId,
                                    TileDownloadResultHandler handler) {

@@ -20,6 +20,10 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
+import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
@@ -31,7 +35,7 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
 public class TilesDownloader {
 
     /**
-     * @see https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
+     * @link https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
      */
     public static final boolean COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION = true;
     public static final int MAX_REDIRECTIONS = 5;
@@ -49,13 +53,16 @@ public class TilesDownloader {
     private List<Layer> layers;
     private double pxRatio;
 
+    /**
+     * @param baseUrl Zoomify base url.
+     * @param pxRatio Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
+     *                dpRatio = (1-pxRatio)
+     */
     public TilesDownloader(String baseUrl, double pxRatio) {
         this.baseUrl = baseUrl;
         this.imagePropertiesUrl = toImagePropertiesUrl(baseUrl);
         this.pxRatio = pxRatio;
     }
-
-    ;
 
     private String toImagePropertiesUrl(String baseUrl) {
         return baseUrl + "ImageProperties.xml";
@@ -406,7 +413,7 @@ public class TilesDownloader {
     }
 
     /**
-     * @see http://www.staremapy.cz/zoomify-analyza/
+     * @link http://www.staremapy.cz/zoomify-analyza/
      */
     private int computeTileGroup(TileId tileId) {
         int x = tileId.getX();
@@ -505,8 +512,6 @@ public class TilesDownloader {
      *
      * @param imageInCanvasWidthPx
      * @param imageInCanvasHeightPx
-     * @param pxRatio               Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
-     *                              dpRatio = (1-pxRatio)
      * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
      */
     public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
@@ -644,74 +649,6 @@ public class TilesDownloader {
     public String getImagePropertiesUrl() {
         checkInitialized();
         return imagePropertiesUrl;
-    }
-
-    public class TooManyRedirectionsException extends Exception {
-        private static final long serialVersionUID = -6653657291115225081L;
-        private final String url;
-        private final int redirections;
-
-        public TooManyRedirectionsException(String url, int redirections) {
-            super();
-            this.url = url;
-            this.redirections = redirections;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public int getRedirections() {
-            return redirections;
-        }
-    }
-
-    public class ImageServerResponseException extends Exception {
-        private static final long serialVersionUID = -9136216127329035507L;
-        private final int errorCode;
-        private final String url;
-
-        public ImageServerResponseException(String url, int errorCode) {
-            super();
-            this.url = url;
-            this.errorCode = errorCode;
-        }
-
-        public int getErrorCode() {
-            return errorCode;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-    }
-
-    public class InvalidDataException extends Exception {
-        private static final long serialVersionUID = -6344968475737321154L;
-        private final String url;
-
-        public InvalidDataException(String url, String message) {
-            super(message);
-            this.url = url;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-    }
-
-    public class OtherIOException extends Exception {
-        private static final long serialVersionUID = 8890317963393224790L;
-        private final String url;
-
-        public OtherIOException(String message, String url) {
-            super(message);
-            this.url = url;
-        }
-
-        public String getUrl() {
-            return url;
-        }
     }
 
 }
