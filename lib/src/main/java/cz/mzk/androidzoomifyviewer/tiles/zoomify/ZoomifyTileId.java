@@ -10,14 +10,15 @@ public class ZoomifyTileId implements TileId {
     public static final String PREFIX = "zoomify";
 
     private final int layer;
-    private final int x;
-    private final int y;
+    private final TileCoords coords;
 
     public ZoomifyTileId(int layer, int x, int y) {
-        super();
+        this(layer, new TileCoords(x, y));
+    }
+
+    public ZoomifyTileId(int layer, TileCoords coords) {
         this.layer = layer;
-        this.x = x;
-        this.y = y;
+        this.coords = coords;
     }
 
     public static ZoomifyTileId valueOf(String string) {
@@ -34,24 +35,31 @@ public class ZoomifyTileId implements TileId {
 
     @Override
     public String toSerializableString() {
-        return PREFIX + ':' + layer + ':' + x + ':' + y;
+        return PREFIX + ':' + layer + ':' + getX() + ':' + getY();
     }
 
     @Override
     public String toString() {
-        return "" + layer + ':' + x + ':' + y;
+        return "" + layer + ':' + getX() + ':' + getY();
     }
 
     public int getLayer() {
         return layer;
     }
 
+    @Deprecated
     public int getX() {
-        return x;
+        return coords.x;
     }
 
+    @Deprecated
     public int getY() {
-        return y;
+
+        return coords.y;
+    }
+
+    public TileCoords getCoords() {
+        return coords;
     }
 
 
@@ -60,8 +68,8 @@ public class ZoomifyTileId implements TileId {
         final int prime = 31;
         int result = 1;
         result = prime * result + layer;
-        result = prime * result + x;
-        result = prime * result + y;
+        result = prime * result + getX();
+        result = prime * result + getY();
         return result;
     }
 
@@ -76,11 +84,25 @@ public class ZoomifyTileId implements TileId {
         ZoomifyTileId other = (ZoomifyTileId) obj;
         if (layer != other.layer)
             return false;
-        if (x != other.x)
+        if (getX() != other.getX())
             return false;
-        if (y != other.y)
+        if (getY() != other.getY())
             return false;
         return true;
+    }
+
+    /**
+     * Tile coordinates as specified by Zoomify. For example the only image in layer 0 has coordinates 0,0.
+     * If there are 6 pictures in level 1 (portrait picture), they have coordinates 0,0 0,1 1,0 1,1 2,0 and 2,1.
+     */
+    public static class TileCoords {
+        public final int x;
+        public final int y;
+
+        public TileCoords(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 
 }

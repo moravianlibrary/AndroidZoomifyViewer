@@ -20,6 +20,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.viewer.Point;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
@@ -350,7 +351,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
 
 
     @Override
-    public int[] getTileCoordsFromPointCoords(int layerId, int pixelX, int pixelY) {
+    public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY) {
         checkInitialized();
         if (layerId < 0 || layerId >= layers.size()) {
             throw new IllegalArgumentException("layer out of range: " + layerId);
@@ -383,6 +384,43 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         int[] result = new int[]{x, y};
         // Log.d(TestTags.TILES, "px: [" + pixelX + "," + pixelY + "] -> " + Utils.toString(result));
         return result;
+    }
+
+    @Override
+    public ZoomifyTileId.TileCoords calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords) {
+        checkInitialized();
+        if (layerId < 0 || layerId >= layers.size()) {
+            throw new IllegalArgumentException("layer out of range: " + layerId);
+        }
+
+        if (pointInMageCoords.x < 0 || pointInMageCoords.x >= imageProperties.getWidth()) {
+            throw new IllegalArgumentException("x coord out of range: " + pointInMageCoords.x);
+        }
+        if (pointInMageCoords.y < 0 || pointInMageCoords.y >= imageProperties.getHeight()) {
+            throw new IllegalArgumentException("y coord out of range: " + pointInMageCoords.y);
+        }
+
+        // optimization, zero layer is whole image with coords 0,0
+        if (layerId == 0) {
+            return new ZoomifyTileId.TileCoords(0, 0);
+        }
+        // logger.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
+        // ", y=" + pixelY);
+        // Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
+        double step = imageProperties.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
+        // Log.d(TestTags.TILES, "step: " + step);
+        // x
+        double cx_step = pointInMageCoords.x / step;
+        // Log.d(TestTags.TILES, (cx_step - 1) + " < x <= " + cx_step);
+        int x = (int) Math.floor(cx_step);
+        // y
+        double cy_step = pointInMageCoords.y / step;
+        // Log.d(TestTags.TILES, (cy_step - 1) + " < y <= " + cy_step);
+        int y = (int) Math.floor(cy_step);
+        ZoomifyTileId.TileCoords result = new ZoomifyTileId.TileCoords(x, y);
+        // Log.d(TestTags.TILES, "px: [" + pixelX + "," + pixelY + "] -> " + Utils.toString(result));
+        return result;
+
     }
 
     /**
@@ -502,6 +540,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         return new int[]{basicSize, width, height};
     }
 
+
     private int getTilesBasicSizeInImageCoords(int layerId) {
         return imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
     }
@@ -570,14 +609,14 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     }
 
     @Override
-    public void cancelFetchingTilesOutOfSight(int layerId, int[] bottomRightVisibleTileCoords, int[] topLeftVisibleTileCoords) {
+    public void cancelFetchingTilesOutOfSight(int layerId, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords, ZoomifyTileId.TileCoords topLeftVisibleTileCoords) {
         checkInitialized();
         for (ZoomifyTileId runningZoomifyTileId : taskRegistry.getAllTaskTileIds()) {
             if (runningZoomifyTileId.getLayer() == layerId) {
-                if (runningZoomifyTileId.getX() < topLeftVisibleTileCoords[0]
-                        || runningZoomifyTileId.getX() > bottomRightVisibleTileCoords[0]
-                        || runningZoomifyTileId.getY() < topLeftVisibleTileCoords[1]
-                        || runningZoomifyTileId.getY() > bottomRightVisibleTileCoords[1]) {
+                if (runningZoomifyTileId.getX() < topLeftVisibleTileCoords.x
+                        || runningZoomifyTileId.getX() > bottomRightVisibleTileCoords.x
+                        || runningZoomifyTileId.getY() < topLeftVisibleTileCoords.y
+                        || runningZoomifyTileId.getY() > bottomRightVisibleTileCoords.y) {
                     //boolean wasCanceled = taskRegistry.cancel(runningZoomifyTileId);
                     // if (wasCanceled) {
                     // canceled++;
@@ -585,7 +624,9 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
                 }
             }
         }
+
     }
+
 
     @Override
     public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId) {

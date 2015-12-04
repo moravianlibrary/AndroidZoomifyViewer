@@ -158,7 +158,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
     }*/
 
     private void assertTileCoords(TilesDownloader mTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
-        int[] actualCoords = mTilesDownloader.getTileCoordsFromPointCoords(layerId, pixel[0], pixel[1]);
+        int[] actualCoords = mTilesDownloader.calculateTileCoordsFromPointInImageCoords(layerId, pixel[0], pixel[1]);
         assertEquals(expectedCoords[0], actualCoords[0]);
         assertEquals(expectedCoords[1], actualCoords[1]);
     }

@@ -8,7 +8,7 @@ import android.os.Build;
  * AsyncTask that uses thread pool if available. Android (since Honeycomb) executes all AsyncTask on single thread.
  *
  * @author Martin Řehánek
- * @see http ://www.jayway.com/2012/11/28/is-androids-asynctask-executing-tasks-serially -or-concurrently/
+ * @link http ://www.jayway.com/2012/11/28/is-androids-asynctask-executing-tasks-serially -or-concurrently/
  */
 
 public abstract class ConcurrentAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {

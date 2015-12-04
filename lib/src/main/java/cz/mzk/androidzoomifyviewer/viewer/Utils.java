@@ -187,4 +187,20 @@ public class Utils {
         return "[" + coords[0] + ',' + coords[1] + ']';
     }
 
+    /**
+     * @param x
+     * @param min start of interval
+     * @param max end of interval
+     * @return x if x is in <min;max>, min if x < min, or max if x > max
+     */
+    public static int collapseToInterval(int x, int min, int max) {
+        if (x < min) {
+            return min;
+        } else if (x > max) {
+            return max;
+        } else {
+            return x;
+        }
+    }
+
 }

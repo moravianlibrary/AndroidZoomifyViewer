@@ -12,6 +12,7 @@ import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.viewer.Point;
 
 /**
  * Created by Martin Řehánek on 3.12.15.
@@ -29,8 +30,7 @@ public interface TilesDownloader {
 
     public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId);
 
-    //TODO: zmenit datovy typy, resp. pocitat dlazdicove souradnice v implementaci
-    public void cancelFetchingTilesOutOfSight(int layerId, int[] bottomRightVisibleTileCoords, int[] topLeftVisibleTileCoords);
+    public void cancelFetchingTilesOutOfSight(int layerId, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords, ZoomifyTileId.TileCoords topLeftVisibleTileCoords);
 
     //vsechno, krome samotne inicializace metadat
 
@@ -47,11 +47,15 @@ public interface TilesDownloader {
     public ImageProperties getImageProperties();
 
     // TODO: 3.12.15 to patri do pravomoci downloaderu
-    public int[] getTileCoordsFromPointCoords(int layerId, int pixelX, int pixelY);
+    //public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
+
+    public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
 
     public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx);
 
     public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId);
+
+    public ZoomifyTileId.TileCoords calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords);
 
     public double getLayerWidth(int layerId);
 

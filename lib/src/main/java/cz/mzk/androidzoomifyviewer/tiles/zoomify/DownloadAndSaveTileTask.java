@@ -35,8 +35,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
      * @param zoomifyTileId  Tile id, not null
      * @param handler        Tile download result handler, not null
      */
-    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId,
-                                   TileDownloadResultHandler handler) {
+    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId, TileDownloadResultHandler handler) {
         this.downloader = downloader;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
         this.zoomifyTileId = zoomifyTileId;
