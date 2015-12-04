@@ -16,6 +16,7 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
@@ -580,23 +581,27 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         return layers.size() - 1;
     }
 
-    /**
-     * @param zoomifyTileId
-     * @return int array of size 3 containing dimensions in image coordinates for given tile. First item is basic size, that is
-     * width/hight of typical tile (i.e. every tile except the border ones - unless there are only border ones). Second
-     * item is tile's width, third is it's height.
-     */
+
     @Override
-    public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId) {
-        checkInitialized();
-        int basicSize = getTilesBasicSizeInImageCoords(zoomifyTileId.getLayer());
-        int width = getTileWidthInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getX(), basicSize);
-        int height = getTileHeightInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getY(), basicSize);
-        return new int[]{basicSize, width, height};
+    public Rect getTileAreaInImageCoords(ZoomifyTileId zoomifyTileId) {
+        TileDimensionsInImage tileSizesInImage = calculateTileDimensionsInImageCoords(zoomifyTileId);
+        int left = tileSizesInImage.basicSize * zoomifyTileId.getX();
+        int right = left + tileSizesInImage.actualWidth;
+        int top = tileSizesInImage.basicSize * zoomifyTileId.getY();
+        int bottom = top + tileSizesInImage.actualHeight;
+        return new Rect(left, top, right, bottom);
     }
 
+    private TileDimensionsInImage calculateTileDimensionsInImageCoords(ZoomifyTileId zoomifyTileId) {
+        checkInitialized();
+        int basicSize = getTilesBasicSizeInImageCoordsForGivenLayer(zoomifyTileId.getLayer());
+        int width = getTileWidthInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getX(), basicSize);
+        int height = getTileHeightInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getY(), basicSize);
+        return new TileDimensionsInImage(basicSize, width, height);
+    }
 
-    private int getTilesBasicSizeInImageCoords(int layerId) {
+    private int getTilesBasicSizeInImageCoordsForGivenLayer(int layerId) {
+        // TODO: 4.12.15 cachovat
         return imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
     }
 

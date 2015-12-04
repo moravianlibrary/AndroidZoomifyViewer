@@ -505,9 +505,9 @@ public class TiledImageView extends View {
         });
     }
 
-    private void drawTile(Canvas canv, ZoomifyTileId visibleTileId, Bitmap tileBmp) {
-        Rect tileInCanvas = toTileAreaInCanvas(visibleTileId, tileBmp);
-        // Log.d(TestTags.TEST, "drawing tile: " + visibleTileId + " to: " + tileInCanvas.toShortString());
+    private void drawTile(Canvas canv, ZoomifyTileId tileId, Bitmap tileBmp) {
+        Rect tileInCanvas = toTileAreaInCanvas(tileId, tileBmp).toRect();
+        // Log.d(TestTags.TEST, "drawing tile: " + tileId + " to: " + tileInCanvas.toShortString());
         canv.drawBitmap(tileBmp, null, tileInCanvas, null);
         if (devTools != null) {
             // devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
@@ -536,23 +536,9 @@ public class TiledImageView extends View {
     }
 
 
-    private Rect toTileAreaInCanvas(ZoomifyTileId zoomifyTileId, Bitmap tile) {
-        double scaleFactor = getTotalScaleFactor();
-        int[] tileSizesInImage = mActiveImageDownloader.getTileSizesInImageCoords(zoomifyTileId);
-
-        double tileBasicSize = scaleFactor * tileSizesInImage[0];
-        double tileWidth = scaleFactor * tileSizesInImage[1];
-        double tileHeight = scaleFactor * tileSizesInImage[2];
-        // Log.d(TestTags.TEST, "tileInCanvas " + zoomifyTileId.toString() + ": basic: " + tileBasicSize + ", width: " + tileWidth +
-        // ", height:" + tileHeight);
-
-        double left = tileBasicSize * zoomifyTileId.getX() + mWholeImageInCanvasCoords.left;
-        double right = left + tileWidth;
-        double top = zoomifyTileId.getY() * tileBasicSize + mWholeImageInCanvasCoords.top;
-        double bottom = top + tileHeight;
-
-        Rect result = new Rect((int) left, (int) top, (int) right, (int) bottom);
-        return result;
+    private RectD toTileAreaInCanvas(ZoomifyTileId zoomifyTileId, Bitmap tile) {
+        Rect tileAreaInImageCoords = mActiveImageDownloader.getTileAreaInImageCoords(zoomifyTileId);
+        return Utils.toCanvasCoords(tileAreaInImageCoords, getTotalScaleFactor(), getTotalShift());
     }
 
     private double computeScaleFactorFitToScreen(double canvasWidth, double canvasHeight, double imgOriginalWidth,

@@ -56,17 +56,12 @@ public interface TilesDownloader {
 
     public List<ZoomifyTileId> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
 
-
-    public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId);
-
+    // TODO: 4.12.15 mozna parametr layerId
+    public Rect getTileAreaInImageCoords(ZoomifyTileId zoomifyTileId);
 
     //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
 
     public Bitmap downloadTile(ZoomifyTileId zoomifyTileId) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
-
-
-
-
 
     //TMP
 
