@@ -12,7 +12,7 @@ import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
-import cz.mzk.androidzoomifyviewer.viewer.Point;
+import cz.mzk.androidzoomifyviewer.viewer.RectD;
 
 /**
  * Created by Martin Řehánek on 3.12.15.
@@ -30,7 +30,10 @@ public interface TilesDownloader {
 
     public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId);
 
+    @Deprecated
     public void cancelFetchingTilesOutOfSight(int layerId, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords, ZoomifyTileId.TileCoords topLeftVisibleTileCoords);
+
+    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<ZoomifyTileId> visibleTiles);
 
     //vsechno, krome samotne inicializace metadat
 
@@ -44,10 +47,9 @@ public interface TilesDownloader {
     //GETTING METADATA
     //todo: spoutu veci nebude asi potreba, vybery vrstev apod by se mely delat v implementaci downloaderu, pro iif to bude absolutne jinak
 
+    @Deprecated
     public ImageProperties getImageProperties();
 
-    // TODO: 3.12.15 to patri do pravomoci downloaderu
-    //public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
 
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
 
@@ -55,7 +57,7 @@ public interface TilesDownloader {
 
     public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId);
 
-    public ZoomifyTileId.TileCoords calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords);
+    //public ZoomifyTileId.TileCoords calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords);
 
     public double getLayerWidth(int layerId);
 
@@ -67,6 +69,9 @@ public interface TilesDownloader {
     //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
 
     public Bitmap downloadTile(ZoomifyTileId zoomifyTileId) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
+
+
+    public List<ZoomifyTileId> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
 
 
 }

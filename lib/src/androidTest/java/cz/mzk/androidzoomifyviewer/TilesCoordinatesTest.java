@@ -10,10 +10,11 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTilesDownloader;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -42,7 +43,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
-    private TilesDownloader initTilesDownloader(String baseUrl) {
+    private ZoomifyTilesDownloader initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
         new InitTilesDownloaderTask(baseUrl, pxRatio, new ImagePropertiesDownloadResultHandler() {
@@ -123,7 +124,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     public void testCornerTilesCoords(String baseUrl) {
         logger.d("testing corner tiles coords for: " + baseUrl);
-        TilesDownloader tilesDownloader = initTilesDownloader(baseUrl);
+        ZoomifyTilesDownloader tilesDownloader = initTilesDownloader(baseUrl);
         assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, tilesDownloader);
         int width = tilesDownloader.getImageProperties().getWidth();
         int height = tilesDownloader.getImageProperties().getHeight();

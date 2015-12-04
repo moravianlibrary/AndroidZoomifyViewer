@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.CacheManager;
@@ -289,7 +288,7 @@ public class TiledImageView extends View {
             int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
             // Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
-            drawLayers(canv, bestLayerId, true);
+            drawLayers(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
 
             if (mFramingRectDrawer != null) {
                 mFramingRectDrawer.setCanvas(canv);
@@ -393,23 +392,16 @@ public class TiledImageView extends View {
         return mMaxScaleFactor;
     }
 
-    private void drawLayers(Canvas canv, int layerId, boolean bestLayer) {
+    private void drawLayers(Canvas canv, int layerId, boolean isIdealLayer, RectD visibleAreaInImageCoords) {
         // long start = System.currentTimeMillis();
-        ZoomifyTileId.TileCoords[] corners = getCornerVisibleTilesCoords(layerId);
-        ZoomifyTileId.TileCoords topLeftVisibleTileCoords = corners[0];
-        ZoomifyTileId.TileCoords bottomRightVisibleTileCoords = corners[1];
-
-        // find visible tiles
-        List<ZoomifyTileId> visibleTiles = getVisibleTiles(layerId, topLeftVisibleTileCoords, bottomRightVisibleTileCoords);
-
-
-        // cancel downloading/saving of not visible tiles
-        // TODO: 3.12.15 Spis zrusit stahovani vsech dlazdic krome tech z visibleTiles
-        cancelDownloadingTilesOutOfScreen(layerId, bottomRightVisibleTileCoords, topLeftVisibleTileCoords);
-
-        if (bestLayer) {
+        List<ZoomifyTileId> visibleTiles = mActiveImageDownloader.getVisibleTilesForLayer(layerId, visibleAreaInImageCoords);
+        // cancel downloading/saving of not visible tiles within layer
+        mActiveImageDownloader.cancelFetchingATilesForLayerExeptForThese(layerId, visibleTiles);
+        // TODO: 4.12.15 Vyresit zruseni stahovani pro ty vrstvy, ktere uz nejsou relevantni. Treba kdyz rychle odzumuju
+        if (isIdealLayer) {
             // possibly increase memory cache
             if (CacheManager.getTilesCache() != null) {
+                // TODO: 4.12.15 jeste projit zvetsovani cache. Nemela by se treba zmensovat a i nad tim faktorem pouvazovat
                 int minCacheSize = (visibleTiles.size() * 2);
                 // int maxCacheSize = (int) (visibleTiles.size() * 5.5);
                 // CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize, maxCacheSize);
@@ -426,12 +418,11 @@ public class TiledImageView extends View {
                 break;
             }
         }
-        // if not all visible tiles available,
-        // draw under layer with worse resolution
+        // if not all visible tiles available, draw smaller layer with worse resolution under it
         // TODO: disable, just for testing
         // mDrawLayerWithWorseResolution = false;
         if (!allTilesAvailable && layerId != 0 && mDrawLayerWithWorseResolution) {
-            drawLayers(canv, layerId - 1, false);
+            drawLayers(canv, layerId - 1, false, visibleAreaInImageCoords);
         }
         // draw visible tiles if available, start downloading otherwise
         for (ZoomifyTileId visibleTile : visibleTiles) {
@@ -445,18 +436,6 @@ public class TiledImageView extends View {
         // logger.d( "drawLayers (layer=" + layerId + "): " + (end - start) +
         // " ms");
     }
-
-    // TODO: 3.12.15 Tohle asi presunout jinam, je to tiles-specific
-    private List<ZoomifyTileId> getVisibleTiles(int layerId, ZoomifyTileId.TileCoords topLeftVisibleTileCoords, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords) {
-        List<ZoomifyTileId> visibleTiles = new ArrayList<>();
-        for (int y = topLeftVisibleTileCoords.y; y <= bottomRightVisibleTileCoords.y; y++) {
-            for (int x = topLeftVisibleTileCoords.x; x <= bottomRightVisibleTileCoords.x; x++) {
-                visibleTiles.add(new ZoomifyTileId(layerId, x, y));
-            }
-        }
-        return visibleTiles;
-    }
-
 
     private void fetchTileBlocking(Canvas canv, ZoomifyTileId visibleTileId) {
         Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
@@ -548,54 +527,14 @@ public class TiledImageView extends View {
         return mCanvHeight;
     }
 
-    // TODO: 4.12.15 zase zoomify specificka vec
-    private ZoomifyTileId.TileCoords[] getCornerVisibleTilesCoords(int layerId) {
-        int imageWidthMinusOne = mActiveImageDownloader.getImageProperties().getWidth() - 1;
-        int imageHeightMinusOne = mActiveImageDownloader.getImageProperties().getHeight() - 1;
-
-        RectD visibleAreaInImageCoords = getVisibleAreaInImageCoords();
-        int topLeftVisibleX = Utils.collapseToInterval((int) visibleAreaInImageCoords.left, 0, imageWidthMinusOne);
-        int topLeftVisibleY = Utils.collapseToInterval((int) visibleAreaInImageCoords.top, 0, imageHeightMinusOne);
-        int bottomRightVisibleX = Utils.collapseToInterval((int) visibleAreaInImageCoords.right, 0, imageWidthMinusOne);
-        int bottomRightVisibleY = Utils.collapseToInterval((int) visibleAreaInImageCoords.bottom, 0, imageHeightMinusOne);
-
-        Point topLeftVisible = new Point(topLeftVisibleX, topLeftVisibleY);
-        Point bottomRightVisible = new Point(bottomRightVisibleX, bottomRightVisibleY);
-
-        // TestTags.TILES.d( "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
-        // TestTags.TILES.d( "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
-
-        /*int[] topLeftVisibleTileCoords = mActiveImageDownloader
-                .calculateTileCoordsFromPointInImageCoords(layerId, topLeftVisibleX, topLeftVisibleY);
-        int[] bottomRightVisibleTileCoords = mActiveImageDownloader.calculateTileCoordsFromPointInImageCoords(layerId, bottomRightVisibleX, bottomRightVisibleY);*/
-
-        /*int[] topLeftVisibleTileCoords = mActiveImageDownloader.calculateTileCoordsFromPointInImageCoords(layerId, topLeftVisible);
-        int[] bottomRightVisibleTileCoords = mActiveImageDownloader.calculateTileCoordsFromPointInImageCoords(layerId, bottomRightVisible);*/
-
-        ZoomifyTileId.TileCoords topLeftVisibleTileCoords = mActiveImageDownloader.calculateTileCoordsFromPointInImageCoords(layerId, topLeftVisible);
-        ZoomifyTileId.TileCoords bottomRightVisibleTileCoords = mActiveImageDownloader.calculateTileCoordsFromPointInImageCoords(layerId, bottomRightVisible);
-
-
-        // TestTags.TILES.d( "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
-        // TestTags.TILES.d( "bottom_right: " + Utils.toString(bottomRightVisibleTileCoords));
-        return new ZoomifyTileId.TileCoords[]{topLeftVisibleTileCoords, bottomRightVisibleTileCoords};
-    }
-
-    private RectD getVisibleAreaInImageCoords() {
+    private RectD calculateVisibleAreaInImageCoords() {
         double resizeFactor = getTotalScaleFactor();
         VectorD totalShift = getTotalShift();
         return Utils.toImageCoords(new RectD(mVisibleImageInCanvas), resizeFactor, totalShift);
     }
 
 
-    private void cancelDownloadingTilesOutOfScreen(int layerId, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords, ZoomifyTileId.TileCoords topLeftVisibleTileCoords) {
-        // No longer visible pics (within this layer) but still running.
-        // Will be stopped (perhpas except of those closest to screen)
-        // int canceled = 0;
-        mActiveImageDownloader.cancelFetchingTilesOutOfSight(layerId, bottomRightVisibleTileCoords, topLeftVisibleTileCoords);
-    }
-
-    public void setDrawLayerWithWorseResolution(boolean show) {
+    private void setDrawLayerWithWorseResolution(boolean show) {
         mDrawLayerWithWorseResolution = show;
     }
 
