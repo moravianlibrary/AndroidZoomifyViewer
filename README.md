@@ -46,12 +46,13 @@ public class MyApp extends Application {
 }
 
 ```
-This initializes memory and disk cache. You can configure disk cache size and enable disk cache clean on startup through resouces.
+This configures disk cache through resouces. You can disable disk cache or set its size or enable that disk cache is cleared on application startup .
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<bool name="androidzoomifyviewer_disk_cache_clear_on_startup">false</bool>
-	<integer name="androidzoomifyviewer_disk_cache_size_kb">51200</integer>
+    <bool name="androidzoomifyviewer_disk_cache_enabled">true</bool>
+    <bool name="androidzoomifyviewer_disk_cache_clear_on_startup">false</bool>
+    <integer name="androidzoomifyviewer_tile_disk_cache_size_kb">51200</integer>
 </resources>
 ```
 ## Logging and dev mode
