@@ -40,7 +40,7 @@ public class DevTools {
     private PointD doubletapZoomCenterInImage;
 
     public DevTools(Context context) {
-        // initializeWithImageProperties paints
+        // initImageMetadata paints
         paintBlue.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_blue));
         paintRed.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_red));
         paintYellow.setColor(context.getResources().getColor(R.color.androidzoomifyviewer_yellow));

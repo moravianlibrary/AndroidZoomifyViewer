@@ -1,6 +1,7 @@
 package cz.mzk.androidzoomifyviewer.tiles;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 
 import java.util.List;
 
@@ -9,7 +10,6 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
@@ -21,7 +21,7 @@ public interface TilesDownloader {
 
     //METADATA INITIALIZATION
 
-    public void initializeWithImageProperties() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
+    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
 
 
     //TASK MANAGEMENT
@@ -29,9 +29,6 @@ public interface TilesDownloader {
     public void enqueTileFetching(ZoomifyTileId zoomifyTileId, DownloadAndSaveTileTask.TileDownloadResultHandler handler);
 
     public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId);
-
-    @Deprecated
-    public void cancelFetchingTilesOutOfSight(int layerId, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords, ZoomifyTileId.TileCoords topLeftVisibleTileCoords);
 
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<ZoomifyTileId> visibleTiles);
 
@@ -44,26 +41,23 @@ public interface TilesDownloader {
     public void destroy();
 
 
-    //GETTING METADATA
-    //todo: spoutu veci nebude asi potreba, vybery vrstev apod by se mely delat v implementaci downloaderu, pro iif to bude absolutne jinak
+    //IMAGE METADATA
 
-    @Deprecated
-    public ImageProperties getImageProperties();
+    public int getImageWidth();
 
+    public int getImageHeight();
 
-    public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
-
-    public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx);
-
-    public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId);
-
-    //public ZoomifyTileId.TileCoords calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords);
-
-    public double getLayerWidth(int layerId);
-
-    public double getLayerHeight(int layerId);
+    public int getTileTypicalSize();
 
     public List<Layer> getLayers();
+
+
+    public int computeBestLayerId(Rect wholeImageInCanvasCoords);
+
+    public List<ZoomifyTileId> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
+
+
+    public int[] getTileSizesInImageCoords(ZoomifyTileId zoomifyTileId);
 
 
     //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
@@ -71,7 +65,14 @@ public interface TilesDownloader {
     public Bitmap downloadTile(ZoomifyTileId zoomifyTileId) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
 
 
-    public List<ZoomifyTileId> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
+
+
+
+    //TMP
+
+    //jenom na testy
+    @Deprecated
+    public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
 
 
 }

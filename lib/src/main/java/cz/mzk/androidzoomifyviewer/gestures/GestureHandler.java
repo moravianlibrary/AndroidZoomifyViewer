@@ -28,12 +28,12 @@ public class GestureHandler {
 
         RectD paddingRectImg = new RectD(0.0, 0.0, imageView.getCanvasImagePaddingHorizontal(),
                 imageView.getCanvasImagePaddingVertical());
-        Rect imageAreaInCanvasWithoutAnyShift = imageView.computeImageAreaInCanvas(scaleFactor, VectorD.ZERO_VECTOR);
+        Rect imageAreaInCanvasWithoutAnyShift = imageView.computeWholeImageAreaInCanvasCoords(scaleFactor, VectorD.ZERO_VECTOR);
         RectD paddingRectCanv = convertToPaddingInCanvas(paddingRectImg, imageAreaInCanvasWithoutAnyShift);
 
         VectorD totalShift = imageView.getTotalShift();
         VectorD totalPlusNewShift = totalShift.plus(newShift);
-        Rect imageAreaInCanvasWithNewShift = imageView.computeImageAreaInCanvas(scaleFactor, totalPlusNewShift);
+        Rect imageAreaInCanvasWithNewShift = imageView.computeWholeImageAreaInCanvasCoords(scaleFactor, totalPlusNewShift);
 
         // horizontal
         double extraSpaceHorizontalCanv = paddingRectCanv.height();

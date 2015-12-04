@@ -2,6 +2,7 @@ package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -78,10 +79,28 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         }
     }
 
-    @Override
+    /*@Override
     public ImageProperties getImageProperties() {
         checkInitialized();
         return imageProperties;
+    }*/
+
+    @Override
+    public int getImageWidth() {
+        checkInitialized();
+        return imageProperties.getWidth();
+    }
+
+    @Override
+    public int getImageHeight() {
+        checkInitialized();
+        return imageProperties.getHeight();
+    }
+
+    @Override
+    public int getTileTypicalSize() {
+        checkInitialized();
+        return imageProperties.getTileSize();
     }
 
     /**
@@ -98,12 +117,12 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
      * @throws OtherIOException             In case of other error (invalid URL, error transfering data, ...)
      */
     @Override
-    public void initializeWithImageProperties() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
+    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
             InvalidDataException {
         if (initialized) {
             throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
         } else {
-            logger.d("initializeWithImageProperties: " + mImagePropertiesUrl);
+            logger.d("initImageMetadata: " + mImagePropertiesUrl);
         }
         HttpURLConnection.setFollowRedirects(false);
         String propertiesXml = fetchImagePropertiesXml();
@@ -244,7 +263,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
      *
      * @param zoomifyTileId Tile id.
      * @return
-     * @throws IllegalStateException        If methodi initializeWithImageProperties had not been called yet.
+     * @throws IllegalStateException        If methodi initImageMetadata had not been called yet.
      * @throws TooManyRedirectionsException If max. number of redirections exceeded before downloading tile. This probably means redirection loop.
      * @throws ImageServerResponseException If zoomify server response code for tile cannot be handled here (everything apart from OK and 3xx
      *                                      redirections).
@@ -481,13 +500,11 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
      * seem blurry. Also devices with small displays and very high resolution would with great weight on px require unneccessary
      * number of tiles which most of people would not appreciate anyway because of limitations of human eyes.
      *
-     * @param imageInCanvasWidthPx
-     * @param imageInCanvasHeightPx
+     * @param wholeImageInCanvasCoords
      * @return id of layer, that would best fill image are in canvas with only border tiles overflowing that area
      */
     @Override
-    public int computeBestLayerId(int imageInCanvasWidthPx, int imageInCanvasHeightPx) {
-        // TODO: 3.12.15 Asi prejmenovat parametryf
+    public int computeBestLayerId(Rect wholeImageInCanvasCoords) {
         checkInitialized();
         double dpRatio = 1.0 - mPxRatio;
         if (mPxRatio < 0.0) {
@@ -499,11 +516,11 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         int imageInCanvasWidthDp = 0;
         int imageInCanvasHeightDp = 0;
         if (mPxRatio < 1.0) {// optimization: initialize only if will be used
-            imageInCanvasWidthDp = Utils.pxToDp(imageInCanvasWidthPx);
-            imageInCanvasHeightDp = Utils.pxToDp(imageInCanvasHeightPx);
+            imageInCanvasWidthDp = Utils.pxToDp(wholeImageInCanvasCoords.width());
+            imageInCanvasHeightDp = Utils.pxToDp(wholeImageInCanvasCoords.height());
         }
-        int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + imageInCanvasWidthPx * mPxRatio);
-        int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + imageInCanvasHeightPx * mPxRatio);
+        int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + wholeImageInCanvasCoords.width() * mPxRatio);
+        int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + wholeImageInCanvasCoords.height() * mPxRatio);
         // int layersNum = layers.size();
         // if (true) {
         // // if (layersNum>=3){
@@ -609,17 +626,17 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         }
     }
 
-    @Override
-    public double getLayerWidth(int layerId) {
+    private double getLayerWidth(int layerId) {
         checkInitialized();
+        // TODO: 4.12.15 possibly cache this if it's being called frequently
         double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
         // logger.d( "layer " + layerId + ", width=" + result + " px");
         return result;
     }
 
-    @Override
-    public double getLayerHeight(int layerId) {
+    private double getLayerHeight(int layerId) {
         checkInitialized();
+        // TODO: 4.12.15 possibly cache this if it's being called frequently
         return imageProperties.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
     }
 
@@ -644,25 +661,6 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     @Override
     public void enqueTileFetching(ZoomifyTileId zoomifyTileId, DownloadAndSaveTileTask.TileDownloadResultHandler handler) {
         taskRegistry.registerTask(zoomifyTileId, mBaseUrl, handler);
-    }
-
-    @Override
-    public void cancelFetchingTilesOutOfSight(int layerId, ZoomifyTileId.TileCoords bottomRightVisibleTileCoords, ZoomifyTileId.TileCoords topLeftVisibleTileCoords) {
-        checkInitialized();
-        for (ZoomifyTileId runningZoomifyTileId : taskRegistry.getAllTaskTileIds()) {
-            if (runningZoomifyTileId.getLayer() == layerId) {
-                if (runningZoomifyTileId.getX() < topLeftVisibleTileCoords.x
-                        || runningZoomifyTileId.getX() > bottomRightVisibleTileCoords.x
-                        || runningZoomifyTileId.getY() < topLeftVisibleTileCoords.y
-                        || runningZoomifyTileId.getY() > bottomRightVisibleTileCoords.y) {
-                    boolean wasCanceled = taskRegistry.cancel(runningZoomifyTileId);
-                    // if (wasCanceled) {
-                    // canceled++;
-                    // }
-                }
-            }
-        }
-
     }
 
     @Override

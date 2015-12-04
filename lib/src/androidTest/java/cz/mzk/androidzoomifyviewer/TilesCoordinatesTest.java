@@ -30,7 +30,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     @Before
     public void init() throws Exception {
-        logger.d("initializeWithImageProperties");
+        logger.d("initImageMetadata");
         if (getContext() == null) {
             logger.d("initializing mock context");
             setContext(new MockContext());
@@ -43,7 +43,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
-    private ZoomifyTilesDownloader initTilesDownloader(String baseUrl) {
+    private TilesDownloader initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
         new InitTilesDownloaderTask(baseUrl, pxRatio, new ImagePropertiesDownloadResultHandler() {
@@ -124,10 +124,10 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     public void testCornerTilesCoords(String baseUrl) {
         logger.d("testing corner tiles coords for: " + baseUrl);
-        ZoomifyTilesDownloader tilesDownloader = initTilesDownloader(baseUrl);
+        TilesDownloader tilesDownloader = initTilesDownloader(baseUrl);
         assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, tilesDownloader);
-        int width = tilesDownloader.getImageProperties().getWidth();
-        int height = tilesDownloader.getImageProperties().getHeight();
+        int width = tilesDownloader.getImageWidth();
+        int height = tilesDownloader.getImageHeight();
         List<Layer> layers = tilesDownloader.getLayers();
         int[] topLeftCorner = {0, 0};
         int[] topRightCorner = {width - 1, 0};

@@ -24,7 +24,6 @@ import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
@@ -65,7 +64,7 @@ public class TiledImageView extends View {
     private TilesDownloader mActiveImageDownloader;
 
     // za hranice canvas cela oblast s obrazkem
-    private Rect mImageInCanvas = null;
+    private Rect mWholeImageInCanvasCoords = null;
     // jen viditelna cast stranky
     private Rect mVisibleImageInCanvas = null;
 
@@ -186,8 +185,7 @@ public class TiledImageView extends View {
                         logger.d("downloader initialized");
                         mActiveImageDownloader = downloader;
                         if (DEV_MODE) {
-                            ImageProperties imageProperties = downloader.getImageProperties();
-                            testPoints = new ImageCoordsPoints(imageProperties.getWidth(), imageProperties.getHeight());
+                            testPoints = new ImageCoordsPoints(downloader.getImageWidth(), downloader.getImageHeight());
                         }
 
                         if (mImageInitializationHandler != null) {
@@ -268,16 +266,16 @@ public class TiledImageView extends View {
             }
 
             // za hranice canvas cela oblast s obrazkem
-            mImageInCanvas = computeImageAreaInCanvas(getTotalScaleFactor(), getTotalShift());
+            mWholeImageInCanvasCoords = computeWholeImageAreaInCanvasCoords(getTotalScaleFactor(), getTotalShift());
 
             if (devTools != null) {
-                devTools.fillRectAreaWithColor(mImageInCanvas, devTools.getPaintRedTrans());
+                devTools.fillRectAreaWithColor(mWholeImageInCanvasCoords, devTools.getPaintRedTrans());
             }
 
             mVisibleImageInCanvas = computeVisibleInCanvas(canv);
             // Log.d(TestTags.TEST, "canvas width: " + canv.getWidth() + ", height: " + canv.getHeight());
             // Log.d(TestTags.TEST, "canvas: width: " + canv.getWidth() + ", height: " + canv.getHeight());
-            // Log.d(TestTags.TEST, "whole   image in canvas: " + mImageInCanvas.toShortString());
+            // Log.d(TestTags.TEST, "whole   image in canvas: " + mWholeImageInCanvasCoords.toShortString());
             // Log.d(TestTags.TEST, "visible image in canvas: " + mVisibleImageInCanvas.toShortString());
             // Log.d(TestTags.TEST, "visible image in canvas: width: " + mVisibleImageInCanvas.width() + ", height: "
             // + mVisibleImageInCanvas.height());
@@ -285,7 +283,7 @@ public class TiledImageView extends View {
                 devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreenTrans());
             }
 
-            int bestLayerId = mActiveImageDownloader.computeBestLayerId(mImageInCanvas.width(), mImageInCanvas.height());
+            int bestLayerId = mActiveImageDownloader.computeBestLayerId(mWholeImageInCanvasCoords);
             // Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
             drawLayers(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
@@ -312,11 +310,10 @@ public class TiledImageView extends View {
     }
 
     private void initViewmodeScaleFactors(Canvas canv) {
-        ImageProperties imageProperties = mActiveImageDownloader.getImageProperties();
-        double scaleFactorFitToScreen = computeScaleFactorFitToScreen(canv.getWidth(), canv.getHeight(),
-                imageProperties.getWidth(), imageProperties.getHeight());
-        double scaleFactorNoFreeSpace = computeScaleFactorNoFreeSpace(canv.getWidth(), canv.getHeight(),
-                imageProperties.getWidth(), imageProperties.getHeight());
+        int imgWidth = mActiveImageDownloader.getImageWidth();
+        int imgHeight = mActiveImageDownloader.getImageHeight();
+        double scaleFactorFitToScreen = computeScaleFactorFitToScreen(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
+        double scaleFactorNoFreeSpace = computeScaleFactorNoFreeSpace(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         switch (mViewMode) {
             case FIT_TO_SCREEN:
                 mInitialScaleFactor = scaleFactorFitToScreen;
@@ -339,8 +336,8 @@ public class TiledImageView extends View {
         // int necoWidthPx = imageProperties.getWidth();
         // int necoHeightPx = imageProperties.getHeight();
 
-        int mustFitInCanvasObjectWidthPx = imageProperties.getTileSize();
-        int mustFitInCanvasObjectHeightPx = imageProperties.getTileSize();
+        int mustFitInCanvasObjectWidthPx = mActiveImageDownloader.getTileTypicalSize();
+        int mustFitInCanvasObjectHeightPx = mActiveImageDownloader.getTileTypicalSize();
 
         // TestLoggers.PINCH_ZOOM.d("canvas px: [" + canv.getWidth() + "," + canv.getHeight() + "]");
         // TestLoggers.PINCH_ZOOM.d("canvas dp: [" + Utils.pxToDp(canv.getWidth()) + "," + Utils.pxToDp(canv.getHeight())
@@ -549,9 +546,9 @@ public class TiledImageView extends View {
         // Log.d(TestTags.TEST, "tileInCanvas " + zoomifyTileId.toString() + ": basic: " + tileBasicSize + ", width: " + tileWidth +
         // ", height:" + tileHeight);
 
-        double left = tileBasicSize * zoomifyTileId.getX() + mImageInCanvas.left;
+        double left = tileBasicSize * zoomifyTileId.getX() + mWholeImageInCanvasCoords.left;
         double right = left + tileWidth;
-        double top = zoomifyTileId.getY() * tileBasicSize + mImageInCanvas.top;
+        double top = zoomifyTileId.getY() * tileBasicSize + mWholeImageInCanvasCoords.top;
         double bottom = top + tileHeight;
 
         Rect result = new Rect((int) left, (int) top, (int) right, (int) bottom);
@@ -602,8 +599,8 @@ public class TiledImageView extends View {
     private void initViewmodeShift(Canvas canv) {
         double canvasWidth = canv.getWidth();
         double canvasHeight = canv.getHeight();
-        double imageOriginalWidth = mActiveImageDownloader.getImageProperties().getWidth();
-        double imageOriginalHeight = mActiveImageDownloader.getImageProperties().getHeight();
+        double imageOriginalWidth = mActiveImageDownloader.getImageWidth();
+        double imageOriginalHeight = mActiveImageDownloader.getImageHeight();
         double actualWidth = imageOriginalWidth * mInitialScaleFactor;
         double actualHeight = imageOriginalHeight * mInitialScaleFactor;
         double extraSpaceWidthCanv = canvasWidth - actualWidth;
@@ -652,8 +649,7 @@ public class TiledImageView extends View {
     }
 
     private void initMinZoomPadding(Canvas canv) {
-        PointD imgBottomRight = new PointD(mActiveImageDownloader.getImageProperties().getWidth(),
-                mActiveImageDownloader.getImageProperties().getHeight());
+        PointD imgBottomRight = new PointD(mActiveImageDownloader.getImageWidth(), mActiveImageDownloader.getImageHeight());
         PointD imgInCanvasBottomRight = Utils.toCanvasCoords(imgBottomRight, mMinScaleFactor, VectorD.ZERO_VECTOR);
         double freeWidth = (canv.getWidth() - imgInCanvasBottomRight.x) * 0.5;
         double freeHeight = (canv.getHeight() - imgInCanvasBottomRight.y) * 0.5;
@@ -664,12 +660,9 @@ public class TiledImageView extends View {
         // + mCanvasImagePaddingVertical);
     }
 
-    public Rect computeImageAreaInCanvas(double scaleFactor, VectorD shift) {
-        // TODO: cache computations withing onDraw
-        double imgWidth = mActiveImageDownloader.getImageProperties().getWidth();
-        double imgHeight = mActiveImageDownloader.getImageProperties().getHeight();
-        // double scaleFactor = getCurrentScaleFactor();
-        // VectorD shift = getTotalShift();
+    public Rect computeWholeImageAreaInCanvasCoords(double scaleFactor, VectorD shift) {
+        double imgWidth = mActiveImageDownloader.getImageWidth();
+        double imgHeight = mActiveImageDownloader.getImageHeight();
         PointD imgTopLeft = new PointD(0, 0);
         PointD imgBottomRight = new PointD(imgWidth, imgHeight);
         PointD imgInCanvasTopLeft = Utils.toCanvasCoords(imgTopLeft, scaleFactor, shift);
@@ -681,10 +674,10 @@ public class TiledImageView extends View {
     }
 
     private Rect computeVisibleInCanvas(Canvas canv) {
-        int left = mapNumberToInterval(mImageInCanvas.left, 0, canv.getWidth());
-        int right = mapNumberToInterval(mImageInCanvas.right, 0, canv.getWidth());
-        int top = mapNumberToInterval(mImageInCanvas.top, 0, canv.getHeight());
-        int bottom = mapNumberToInterval(mImageInCanvas.bottom, 0, canv.getHeight());
+        int left = mapNumberToInterval(mWholeImageInCanvasCoords.left, 0, canv.getWidth());
+        int right = mapNumberToInterval(mWholeImageInCanvasCoords.right, 0, canv.getWidth());
+        int top = mapNumberToInterval(mWholeImageInCanvasCoords.top, 0, canv.getHeight());
+        int bottom = mapNumberToInterval(mWholeImageInCanvasCoords.bottom, 0, canv.getHeight());
         return new Rect(left, top, right, bottom);
     }
 

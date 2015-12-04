@@ -41,7 +41,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Til
             //logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
             TilesDownloader downloader = new ZoomifyTilesDownloader(zoomifyBaseUrl, pxRatio);
             if (!isCancelled()) {
-                downloader.initializeWithImageProperties();
+                downloader.initImageMetadata();
                 return downloader;
             }
         } catch (TooManyRedirectionsException e) {
