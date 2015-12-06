@@ -49,15 +49,12 @@ public class TiledImageView extends View {
     private double mMaxScaleFactor = -1.0;
     private String mZoomifyBaseUrl; //todo: vyhledove odstranit, tady to nepatri
     private SingleTapListener mSingleTapListener;
-    private boolean pageInitialized = false;
     // SHIFTS
     private boolean mViewmodeShiftInitialized = false;
     private VectorD mViewmodeShift = VectorD.ZERO_VECTOR;
     private boolean mDrawLayerWithWorseResolution = true;
 
     private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
-    // private ViewMode mViewMode =
-    // ViewMode.NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP;
 
     private TilesCache mTilesCache;
     private TilesDownloader mActiveImageDownloader;
