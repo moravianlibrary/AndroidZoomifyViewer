@@ -65,7 +65,7 @@ public interface TilesDownloader {
 
     //TMP
 
-    //jenom na testy
+    //jenom na testy, TODO: odstranit odsud
     @Deprecated
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
 

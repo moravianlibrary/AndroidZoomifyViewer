@@ -410,37 +410,10 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
 
     @Override
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY) {
-        checkInitialized();
-        if (layerId < 0 || layerId >= layers.size()) {
-            throw new IllegalArgumentException("layer out of range: " + layerId);
-        }
-
-        if (pixelX < 0 || pixelX >= imageProperties.getWidth()) {
-            throw new IllegalArgumentException("x coord out of range: " + pixelX);
-        }
-        if (pixelY < 0 || pixelY >= imageProperties.getHeight()) {
-            throw new IllegalArgumentException("y coord out of range: " + pixelY);
-        }
-
-        // optimization
-        if (layerId == 0) {
-            return new int[]{0, 0};
-        }
-        // logger.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
-        // ", y=" + pixelY);
-        // Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
-        double step = imageProperties.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
-        // Log.d(TestTags.TILES, "step: " + step);
-        // x
-        double cx_step = pixelX / step;
-        // Log.d(TestTags.TILES, (cx_step - 1) + " < x <= " + cx_step);
-        int x = (int) Math.floor(cx_step);
-        // y
-        double cy_step = pixelY / step;
-        // Log.d(TestTags.TILES, (cy_step - 1) + " < y <= " + cy_step);
-        int y = (int) Math.floor(cy_step);
-        int[] result = new int[]{x, y};
-        // Log.d(TestTags.TILES, "px: [" + pixelX + "," + pixelY + "] -> " + Utils.toString(result));
+        int[] result = new int[2];
+        ZoomifyTileId.TileCoords tileCoords = calculateTileCoordsFromPointInImageCoords(layerId, new Point(pixelX, pixelY));
+        result[0] = tileCoords.x;
+        result[1] = tileCoords.y;
         return result;
     }
 
