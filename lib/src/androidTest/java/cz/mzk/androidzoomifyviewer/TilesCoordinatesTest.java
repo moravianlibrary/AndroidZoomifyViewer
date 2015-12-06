@@ -10,8 +10,8 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 
@@ -42,7 +42,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         }
     }
 
-    private TilesDownloader initTilesDownloader(String baseUrl) {
+    private ImageManager initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
         new InitTilesDownloaderTask(baseUrl, pxRatio, new MetadataInitializationHandler() {
@@ -54,7 +54,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             }
 
             @Override
-            public void onSuccess(TilesDownloader downloader) {
+            public void onSuccess(ImageManager downloader) {
                 result.finished = true;
                 result.downloader = downloader;
                 logger.d(downloader.getClass().getSimpleName() + " initialized");
@@ -123,11 +123,11 @@ public class TilesCoordinatesTest extends AndroidTestCase {
 
     public void testCornerTilesCoords(String baseUrl) {
         logger.d("testing corner tiles coords for: " + baseUrl);
-        TilesDownloader tilesDownloader = initTilesDownloader(baseUrl);
-        assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, tilesDownloader);
-        int width = tilesDownloader.getImageWidth();
-        int height = tilesDownloader.getImageHeight();
-        List<Layer> layers = tilesDownloader.getLayers();
+        ImageManager imageManager = initTilesDownloader(baseUrl);
+        assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, imageManager);
+        int width = imageManager.getImageWidth();
+        int height = imageManager.getImageHeight();
+        List<Layer> layers = imageManager.getLayers();
         int[] topLeftCorner = {0, 0};
         int[] topRightCorner = {width - 1, 0};
         int[] bottomLeftCorner = {0, height - 1};
@@ -137,10 +137,10 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             logger.d("layer: " + layer);
             int horizontal = layers.get(layer).getTilesHorizontal();
             int vertical = layers.get(layer).getTilesVertical();
-            assertTileCoords(tilesDownloader, layer, topLeftCorner, new int[]{0, 0});
-            assertTileCoords(tilesDownloader, layer, topRightCorner, new int[]{horizontal - 1, 0});
-            assertTileCoords(tilesDownloader, layer, bottomLeftCorner, new int[]{0, vertical - 1});
-            assertTileCoords(tilesDownloader, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
+            assertTileCoords(imageManager, layer, topLeftCorner, new int[]{0, 0});
+            assertTileCoords(imageManager, layer, topRightCorner, new int[]{horizontal - 1, 0});
+            assertTileCoords(imageManager, layer, bottomLeftCorner, new int[]{0, vertical - 1});
+            assertTileCoords(imageManager, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
         }
     }
 
@@ -157,15 +157,15 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         testCornerTilesCoords("http://www.fookes.com/ezimager/zoomify/105_0532/");
     }*/
 
-    private void assertTileCoords(TilesDownloader mTilesDownloader, int layerId, int[] pixel, int[] expectedCoords) {
-        int[] actualCoords = mTilesDownloader.calculateTileCoordsFromPointInImageCoords(layerId, pixel[0], pixel[1]);
+    private void assertTileCoords(ImageManager mImageManager, int layerId, int[] pixel, int[] expectedCoords) {
+        int[] actualCoords = mImageManager.calculateTileCoordsFromPointInImageCoords(layerId, pixel[0], pixel[1]);
         assertEquals(expectedCoords[0], actualCoords[0]);
         assertEquals(expectedCoords[1], actualCoords[1]);
     }
 
     class TilesDownloaderInitializationResult {
         public boolean finished = false;
-        public TilesDownloader downloader;
+        public ImageManager downloader;
     }
 
 

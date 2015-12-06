@@ -5,9 +5,9 @@ import android.graphics.Bitmap;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
@@ -21,7 +21,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     // private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 1);
     private static final Logger logger = new Logger(DownloadAndSaveTileTask.class);
 
-    private final TilesDownloader downloader;
+    private final ImageManager downloader;
     private final String zoomifyBaseUrl;
     private final TilePositionInPyramid tilePositionInPyramid;
     private final TileDownloadHandler handler;
@@ -37,7 +37,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
      * @param tilePositionInPyramid Tile id, not null
      * @param handler               Tile download result handler, not null
      */
-    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
+    public DownloadAndSaveTileTask(ImageManager downloader, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
         this.downloader = downloader;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
         this.tilePositionInPyramid = tilePositionInPyramid;

@@ -15,7 +15,7 @@ import cz.mzk.androidzoomifyviewer.viewer.RectD;
 /**
  * Created by Martin Řehánek on 3.12.15.
  */
-public interface TilesDownloader {
+public interface ImageManager {
 
     //METADATA INITIALIZATION
 

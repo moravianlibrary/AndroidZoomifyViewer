@@ -16,11 +16,11 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
@@ -35,7 +35,7 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
  *
  * @author Martin Řehánek
  */
-public class ZoomifyTilesDownloader implements TilesDownloader {
+public class ZoomifyImageManager implements ImageManager {
 
     /**
      * @link https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
@@ -45,7 +45,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     public static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
     public static final int TILES_TIMEOUT = 5000;
 
-    private static final Logger logger = new Logger(ZoomifyTilesDownloader.class);
+    private static final Logger logger = new Logger(ZoomifyImageManager.class);
 
     private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
 
@@ -63,7 +63,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
      * @param pxRatio Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
      *                dpRatio = (1-pxRatio)
      */
-    public ZoomifyTilesDownloader(String baseUrl, double pxRatio) {
+    public ZoomifyImageManager(String baseUrl, double pxRatio) {
         if (pxRatio < 0 || pxRatio > 1) {
             throw new IllegalArgumentException("pxRation not in <0;1> interval");
         } else {
@@ -108,7 +108,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     }
 
     /**
-     * Initializes ZoomifyTilesDownloader by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
+     * Initializes ZoomifyImageManager by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
      * may be loaded from cache. Also ImageProperties.xml is saved to cache after being downloaded.
      *
      * @throws IllegalStateException        If this method had already been called

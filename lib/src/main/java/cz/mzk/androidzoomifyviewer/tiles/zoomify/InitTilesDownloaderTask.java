@@ -16,7 +16,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Voi
     private static final Logger logger = new Logger(InitTilesDownloaderTask.class);
 
 
-    private ZoomifyTilesDownloader mDownloader;
+    private ZoomifyImageManager mDownloader;
     private final MetadataInitializationHandler mHandler;
 
     private OtherIOException otherIoException;
@@ -27,7 +27,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Voi
     /**
      * @param handler
      */
-    public InitTilesDownloaderTask(ZoomifyTilesDownloader downloader, MetadataInitializationHandler handler) {
+    public InitTilesDownloaderTask(ZoomifyImageManager downloader, MetadataInitializationHandler handler) {
         mDownloader = downloader;
         mHandler = handler;
     }
@@ -36,7 +36,7 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Voi
     protected Void doInBackground(Void... params) {
         try {
             //logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
-            //TilesDownloader downloader = new ZoomifyTilesDownloader(zoomifyBaseUrl, pxRatio);
+            //ImageManager downloader = new ZoomifyImageManager(zoomifyBaseUrl, pxRatio);
             if (!isCancelled()) {
                 mDownloader.initImageMetadata();
                 //return downloader;

@@ -22,53 +22,65 @@ import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandle
 import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyImageManager;
 
 /**
  * @author Martin Řehánek
  */
 public class TiledImageView extends View {
+    private static final Logger LOGGER = new Logger(TiledImageView.class);
     public static final boolean DEV_MODE = true;
 
-    private static final Logger logger = new Logger(TiledImageView.class);
+    //CANVAS
+    private double mCanvasImagePaddingHorizontal = -1;
+    private double mCanvasImagePaddingVertical = -1;
+    private int mCanvWidth;
+    private int mCanvHeight;
+    private Rect mWholeImageInCanvasCoords = null; // za hranice canvas cela oblast s obrazkem
+    private Rect mVisibleImageInCanvas = null;     // jen viditelna cast stranky
 
-    private static boolean initialized = false;
+    //STATE
+    // TODO: 6.12.15 udelat poradek mezi mInitialized a pageInitialized
+    private static boolean mInitialized = false;
+    private boolean pageInitialized = false;
     boolean mMinZoomCanvasImagePaddingInitialized = false;
-    double mCanvasImagePaddingHorizontal = -1;
-    double mCanvasImagePaddingVertical = -1;
-    int mCanvWidth;
-    int mCanvHeight;
-    private DevTools devTools = null;
-    private ImageCoordsPoints testPoints = null;
     private boolean mViewmodeScaleFactorsInitialized = false;
-    private double mInitialScaleFactor = -1.0;
-    private double mMinScaleFactor = -1.0;
-    private double mMaxScaleFactor = -1.0;
-    private String mZoomifyBaseUrl; //todo: vyhledove odstranit, tady to nepatri
-    private SingleTapListener mSingleTapListener;
-    // SHIFTS
+
+    // SHIFT
     private boolean mViewmodeShiftInitialized = false;
     private VectorD mViewmodeShift = VectorD.ZERO_VECTOR;
     private boolean mDrawLayerWithWorseResolution = true;
 
+    //SCALE
+    private double mInitialScaleFactor = -1.0;
+    private double mMinScaleFactor = -1.0;
+    private double mMaxScaleFactor = -1.0;
+
+    //VIEW MODE
     private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
 
+    // TILES ACCESS
+    private String mZoomifyBaseUrl; //todo: vyhledove odstranit, tady to nepatri
+    private ImageManager mImageManager;
     private TilesCache mTilesCache;
-    private TilesDownloader mActiveImageDownloader;
 
-    // za hranice canvas cela oblast s obrazkem
-    private Rect mWholeImageInCanvasCoords = null;
-    // jen viditelna cast stranky
-    private Rect mVisibleImageInCanvas = null;
-
+    //EVENT HANDLERS
     private ImageInitializationHandler mImageInitializationHandler;
     private TileDownloadHandler mTileDownloadHandler;
-    private MyGestureListener mGestureListener;
 
+    //GESTURES
+    private MyGestureListener mGestureListener;
+    private SingleTapListener mSingleTapListener;
+
+    //FRAMING RECTANGLES
     private FramingRectangleDrawer mFramingRectDrawer;
+
+    //DEV
+    private DevTools mDevTools = null;
+    private ImageCoordsPoints mTestPoints = null;
 
     public TiledImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -81,21 +93,21 @@ public class TiledImageView extends View {
     }
 
     public static void initialize(Context context) {
-        if (initialized) {
-            logger.w("initialized already");
+        if (mInitialized) {
+            LOGGER.w("mInitialized already");
         } else {
             Resources res = context.getResources();
             boolean diskCacheEnabled = res.getBoolean(R.bool.androidzoomifyviewer_disk_cache_enabled);
             boolean clearDiskCacheOnStart = res.getBoolean(R.bool.androidzoomifyviewer_disk_cache_clear_on_startup);
             long tileDiskCacheBytes = res.getInteger(R.integer.androidzoomifyviewer_tile_disk_cache_size_kb) * 1024;
             CacheManager.initialize(context, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes);
-            initialized = true;
+            mInitialized = true;
         }
     }
 
     private void init(Context context) {
         if (DEV_MODE) {
-            devTools = new DevTools(context);
+            mDevTools = new DevTools(context);
             logDeviceScreenCategory();
             logHwAcceleration();
         }
@@ -143,9 +155,9 @@ public class TiledImageView extends View {
     }
 
     public void cancelAllTasks() {
-        if (mActiveImageDownloader != null) {
-            //mActiveImageDownloader.getTaskRegistry().cancelAllTasks();
-            mActiveImageDownloader.cancelAllTasks();
+        if (mImageManager != null) {
+            //mImageManager.getTaskRegistry().cancelAllTasks();
+            mImageManager.cancelAllTasks();
         }
         if (CacheManager.getTilesCache() != null) {
             CacheManager.getTilesCache().cancelAllTasks();
@@ -154,20 +166,20 @@ public class TiledImageView extends View {
     }
 
     public void loadImage(String zoomifyBaseUrl) {
-        logger.d("loading new image, base url: " + zoomifyBaseUrl);
+        LOGGER.d("loading new image, base url: " + zoomifyBaseUrl);
         pageInitialized = false;
         mViewmodeScaleFactorsInitialized = false;
         mViewmodeShiftInitialized = false;
         mMinZoomCanvasImagePaddingInitialized = false;
         mZoomifyBaseUrl = zoomifyBaseUrl;
-        //mActiveImageDownloader = null;
+        //mImageManager = null;
         cancelAllTasks();
         mGestureListener.reset();
-        if (mActiveImageDownloader != null) {
-            mActiveImageDownloader.destroy();
+        if (mImageManager != null) {
+            mImageManager.destroy();
         }
         double pxRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;
-        mActiveImageDownloader = new ZoomifyTilesDownloader(mZoomifyBaseUrl, pxRatio);
+        mImageManager = new ZoomifyImageManager(mZoomifyBaseUrl, pxRatio);
         initTilesDownloaderAsync();
     }
 
@@ -177,15 +189,15 @@ public class TiledImageView extends View {
     }
 
     private void initTilesDownloaderAsync() {
-        mActiveImageDownloader.initImageMetadataAsync(new MetadataInitializationHandler() {
+        mImageManager.initImageMetadataAsync(new MetadataInitializationHandler() {
 
             @Override
-            //public void onSuccess(TilesDownloader downloader) {
+            //public void onSuccess(ImageManager downloader) {
             public void onSuccess() {
-                logger.d("downloader initialized");
-                //mActiveImageDownloader = downloader;
+                LOGGER.d("downloader mInitialized");
+                //mImageManager = downloader;
                 if (DEV_MODE) {
-                    testPoints = new ImageCoordsPoints(mActiveImageDownloader.getImageWidth(), mActiveImageDownloader.getImageHeight());
+                    mTestPoints = new ImageCoordsPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
                 }
 
                 if (mImageInitializationHandler != null) {
@@ -238,19 +250,19 @@ public class TiledImageView extends View {
         mCanvWidth = canv.getWidth();
         mCanvHeight = canv.getHeight();
 
-        if (devTools != null) {
-            devTools.setCanvas(canv);
-            devTools.fillWholeCanvasWithColor(devTools.getPaintYellow());
+        if (mDevTools != null) {
+            mDevTools.setCanvas(canv);
+            mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintYellow());
             // Log.d(TestTags.CENTERS, "canvas(px): width=" + canvWidth +
             // ", height=" + canvHeight);
             // double canvWidthDp = pxToDp(canvWidth);
             // double canvHeightDp = pxToDp(canvHeight);
-            // logger.d( "canvas(dp): width=" + canvWidthDp + ", height=" +
+            // LOGGER.d( "canvas(dp): width=" + canvWidthDp + ", height=" +
             // canvHeightDp);
         }
-        if (mActiveImageDownloader.isInitialized()) {
-            if (devTools != null) {
-                devTools.fillWholeCanvasWithColor(devTools.getPaintBlue());
+        if (mImageManager.isInitialized()) {
+            if (mDevTools != null) {
+                mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintBlue());
             }
             if (!mViewmodeScaleFactorsInitialized) {
                 initViewmodeScaleFactors(canv);
@@ -268,8 +280,8 @@ public class TiledImageView extends View {
             // za hranice canvas cela oblast s obrazkem
             mWholeImageInCanvasCoords = computeWholeImageAreaInCanvasCoords(getTotalScaleFactor(), getTotalShift());
 
-            if (devTools != null) {
-                devTools.fillRectAreaWithColor(mWholeImageInCanvasCoords, devTools.getPaintRedTrans());
+            if (mDevTools != null) {
+                mDevTools.fillRectAreaWithColor(mWholeImageInCanvasCoords, mDevTools.getPaintRedTrans());
             }
 
             mVisibleImageInCanvas = computeVisibleInCanvas(canv);
@@ -279,11 +291,11 @@ public class TiledImageView extends View {
             // Log.d(TestTags.TEST, "visible image in canvas: " + mVisibleImageInCanvas.toShortString());
             // Log.d(TestTags.TEST, "visible image in canvas: width: " + mVisibleImageInCanvas.width() + ", height: "
             // + mVisibleImageInCanvas.height());
-            if (devTools != null) {
-                devTools.fillRectAreaWithColor(mVisibleImageInCanvas, devTools.getPaintGreenTrans());
+            if (mDevTools != null) {
+                mDevTools.fillRectAreaWithColor(mVisibleImageInCanvas, mDevTools.getPaintGreenTrans());
             }
 
-            int bestLayerId = mActiveImageDownloader.computeBestLayerId(mWholeImageInCanvasCoords);
+            int bestLayerId = mImageManager.computeBestLayerId(mWholeImageInCanvasCoords);
             // Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
             drawLayers(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
@@ -294,15 +306,15 @@ public class TiledImageView extends View {
             }
 
             if (DEV_MODE) {
-                if (devTools != null) {
+                if (mDevTools != null) {
                     double totalScaleFactor = getTotalScaleFactor();
                     VectorD totalShift = getTotalShift();
                     // test points
-                    devTools.drawImageCoordPoints(testPoints, totalScaleFactor, totalShift);
-                    devTools.drawTileRectStack();
+                    mDevTools.drawImageCoordPoints(mTestPoints, totalScaleFactor, totalShift);
+                    mDevTools.drawTileRectStack();
                     // zoom centers
-                    // devTools.drawDoubletapZoomCenters(getTotalScaleFactor(), getTotalShift());
-                    // devTools.drawPinchZoomCenters(getTotalScaleFactor(), getTotalShift());
+                    // mDevTools.drawDoubletapZoomCenters(getTotalScaleFactor(), getTotalShift());
+                    // mDevTools.drawPinchZoomCenters(getTotalScaleFactor(), getTotalShift());
                 }
             }
         }
@@ -310,8 +322,8 @@ public class TiledImageView extends View {
     }
 
     private void initViewmodeScaleFactors(Canvas canv) {
-        int imgWidth = mActiveImageDownloader.getImageWidth();
-        int imgHeight = mActiveImageDownloader.getImageHeight();
+        int imgWidth = mImageManager.getImageWidth();
+        int imgHeight = mImageManager.getImageHeight();
         double scaleFactorFitToScreen = computeScaleFactorFitToScreen(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         double scaleFactorNoFreeSpace = computeScaleFactorNoFreeSpace(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         switch (mViewMode) {
@@ -322,7 +334,7 @@ public class TiledImageView extends View {
                 mInitialScaleFactor = scaleFactorNoFreeSpace;
                 break;
         }
-        // logger.d( "fit to screen factor: " + mInitialResizeFactor);
+        // LOGGER.d( "fit to screen factor: " + mInitialResizeFactor);
         mMinScaleFactor = Math.min(scaleFactorFitToScreen, scaleFactorNoFreeSpace);
         // TestLoggers.PINCH_ZOOM.d("minScale: " + mMinScaleFactor);
         // TODO: spis DP, nez PX
@@ -336,8 +348,8 @@ public class TiledImageView extends View {
         // int necoWidthPx = imageProperties.getWidth();
         // int necoHeightPx = imageProperties.getHeight();
 
-        int mustFitInCanvasObjectWidthPx = mActiveImageDownloader.getTileTypicalSize();
-        int mustFitInCanvasObjectHeightPx = mActiveImageDownloader.getTileTypicalSize();
+        int mustFitInCanvasObjectWidthPx = mImageManager.getTileTypicalSize();
+        int mustFitInCanvasObjectHeightPx = mImageManager.getTileTypicalSize();
 
         // TestLoggers.PINCH_ZOOM.d("canvas px: [" + canv.getWidth() + "," + canv.getHeight() + "]");
         // TestLoggers.PINCH_ZOOM.d("canvas dp: [" + Utils.pxToDp(canv.getWidth()) + "," + Utils.pxToDp(canv.getHeight())
@@ -355,7 +367,7 @@ public class TiledImageView extends View {
     }
 
     public DevTools getDevTools() {
-        return devTools;
+        return mDevTools;
     }
 
     private PointD computeVisibleImageCenter() {
@@ -391,9 +403,9 @@ public class TiledImageView extends View {
 
     private void drawLayers(Canvas canv, int layerId, boolean isIdealLayer, RectD visibleAreaInImageCoords) {
         // long start = System.currentTimeMillis();
-        List<TilePositionInPyramid> visibleTiles = mActiveImageDownloader.getVisibleTilesForLayer(layerId, visibleAreaInImageCoords);
+        List<TilePositionInPyramid> visibleTiles = mImageManager.getVisibleTilesForLayer(layerId, visibleAreaInImageCoords);
         // cancel downloading/saving of not visible tiles within layer
-        mActiveImageDownloader.cancelFetchingATilesForLayerExeptForThese(layerId, visibleTiles);
+        mImageManager.cancelFetchingATilesForLayerExeptForThese(layerId, visibleTiles);
         // TODO: 4.12.15 Vyresit zruseni stahovani pro ty vrstvy, ktere uz nejsou relevantni. Treba kdyz rychle odzumuju
         if (isIdealLayer) {
             // possibly increase memory cache
@@ -425,7 +437,7 @@ public class TiledImageView extends View {
             fetchTileNonblocking(canv, visibleTile);
         }
         // long end = System.currentTimeMillis();
-        // logger.d( "drawLayers (layer=" + layerId + "): " + (end - start) +
+        // LOGGER.d( "drawLayers (layer=" + layerId + "): " + (end - start) +
         // " ms");
     }
 
@@ -450,7 +462,7 @@ public class TiledImageView extends View {
     }
 
     private void enqueTileDownload(TilePositionInPyramid visibleTileId) {
-        mActiveImageDownloader.enqueTileDownload(visibleTileId, new cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler() {
+        mImageManager.enqueTileDownload(visibleTileId, new cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler() {
 
             @Override
             public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
@@ -494,10 +506,10 @@ public class TiledImageView extends View {
         Rect tileInCanvas = toTileAreaInCanvas(tileId, tileBmp).toRect();
         // Log.d(TestTags.TEST, "drawing tile: " + tileId + " to: " + tileInCanvas.toShortString());
         canv.drawBitmap(tileBmp, null, tileInCanvas, null);
-        if (devTools != null) {
-            // devTools.highlightTile(tileInCanvas, devTools.getPaintBlack());
-            // devTools.highlightTile(tileInCanvas, devTools.getPaintWhiteTrans());
-            devTools.highlightTile(tileInCanvas, devTools.getPaintRed());
+        if (mDevTools != null) {
+            // mDevTools.highlightTile(tileInCanvas, mDevTools.getPaintBlack());
+            // mDevTools.highlightTile(tileInCanvas, mDevTools.getPaintWhiteTrans());
+            mDevTools.highlightTile(tileInCanvas, mDevTools.getPaintRed());
         }
     }
 
@@ -522,7 +534,7 @@ public class TiledImageView extends View {
 
 
     private RectD toTileAreaInCanvas(TilePositionInPyramid tilePositionInPyramid, Bitmap tile) {
-        Rect tileAreaInImageCoords = mActiveImageDownloader.getTileAreaInImageCoords(tilePositionInPyramid);
+        Rect tileAreaInImageCoords = mImageManager.getTileAreaInImageCoords(tilePositionInPyramid);
         return Utils.toCanvasCoords(tileAreaInImageCoords, getTotalScaleFactor(), getTotalShift());
     }
 
@@ -530,7 +542,7 @@ public class TiledImageView extends View {
                                                  double imgOriginalHeight) {
         double widthRatio = canvasWidth / imgOriginalWidth;
         double heightRatio = canvasHeight / imgOriginalHeight;
-        // logger.d( "widthRatio=" + widthRatio + ", heightRatio=" +
+        // LOGGER.d( "widthRatio=" + widthRatio + ", heightRatio=" +
         // heightRatio);
         // preferuj zmenseni
         if (widthRatio < 1 && heightRatio < 1) {
@@ -550,7 +562,7 @@ public class TiledImageView extends View {
                                                  double imgOriginalHeight) {
         double widthRatio = canvasWidth / imgOriginalWidth;
         double heightRatio = canvasHeight / imgOriginalHeight;
-        // logger.d( "widthRatio=" + widthRatio + ", heightRatio=" +
+        // LOGGER.d( "widthRatio=" + widthRatio + ", heightRatio=" +
         // heightRatio);
 
         // preferuj zmenseni
@@ -570,8 +582,8 @@ public class TiledImageView extends View {
     private void initViewmodeShift(Canvas canv) {
         double canvasWidth = canv.getWidth();
         double canvasHeight = canv.getHeight();
-        double imageOriginalWidth = mActiveImageDownloader.getImageWidth();
-        double imageOriginalHeight = mActiveImageDownloader.getImageHeight();
+        double imageOriginalWidth = mImageManager.getImageWidth();
+        double imageOriginalHeight = mImageManager.getImageHeight();
         double actualWidth = imageOriginalWidth * mInitialScaleFactor;
         double actualHeight = imageOriginalHeight * mInitialScaleFactor;
         double extraSpaceWidthCanv = canvasWidth - actualWidth;
@@ -620,7 +632,7 @@ public class TiledImageView extends View {
     }
 
     private void initMinZoomPadding(Canvas canv) {
-        PointD imgBottomRight = new PointD(mActiveImageDownloader.getImageWidth(), mActiveImageDownloader.getImageHeight());
+        PointD imgBottomRight = new PointD(mImageManager.getImageWidth(), mImageManager.getImageHeight());
         PointD imgInCanvasBottomRight = Utils.toCanvasCoords(imgBottomRight, mMinScaleFactor, VectorD.ZERO_VECTOR);
         double freeWidth = (canv.getWidth() - imgInCanvasBottomRight.x) * 0.5;
         double freeHeight = (canv.getHeight() - imgInCanvasBottomRight.y) * 0.5;
@@ -632,8 +644,8 @@ public class TiledImageView extends View {
     }
 
     public Rect computeWholeImageAreaInCanvasCoords(double scaleFactor, VectorD shift) {
-        double imgWidth = mActiveImageDownloader.getImageWidth();
-        double imgHeight = mActiveImageDownloader.getImageHeight();
+        double imgWidth = mImageManager.getImageWidth();
+        double imgHeight = mImageManager.getImageHeight();
         PointD imgTopLeft = new PointD(0, 0);
         PointD imgBottomRight = new PointD(imgWidth, imgHeight);
         PointD imgInCanvasTopLeft = Utils.toCanvasCoords(imgTopLeft, scaleFactor, shift);

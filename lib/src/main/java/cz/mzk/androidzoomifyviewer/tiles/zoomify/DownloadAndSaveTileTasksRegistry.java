@@ -7,7 +7,7 @@ import java.util.Set;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 
 /**
  * This class registers running AsynctTasks in which tiles for single image are downloaded and saved to cache. Purpose of this
@@ -23,9 +23,9 @@ public class DownloadAndSaveTileTasksRegistry {
     private static final Logger logger = new Logger(DownloadAndSaveTileTasksRegistry.class);
 
     private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> tasks = new HashMap<TilePositionInPyramid, DownloadAndSaveTileTask>();
-    private final TilesDownloader downloader;
+    private final ImageManager downloader;
 
-    public DownloadAndSaveTileTasksRegistry(TilesDownloader downloader) {
+    public DownloadAndSaveTileTasksRegistry(ImageManager downloader) {
         this.downloader = downloader;
     }
 
