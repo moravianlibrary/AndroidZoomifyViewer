@@ -16,6 +16,7 @@ public class DragShiftHandler extends GestureHandler {
     private VectorD accumulatedShift = VectorD.ZERO_VECTOR;
     // private static final Logger logger = new Logger("GST: drag shift");
     private State state = State.IDLE;
+
     public DragShiftHandler(TiledImageView imageView) {
         super(imageView);
     }

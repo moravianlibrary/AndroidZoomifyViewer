@@ -22,10 +22,10 @@ import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandle
 import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 
 /**
  * @author Martin Řehánek
@@ -391,7 +391,7 @@ public class TiledImageView extends View {
 
     private void drawLayers(Canvas canv, int layerId, boolean isIdealLayer, RectD visibleAreaInImageCoords) {
         // long start = System.currentTimeMillis();
-        List<ZoomifyTileId> visibleTiles = mActiveImageDownloader.getVisibleTilesForLayer(layerId, visibleAreaInImageCoords);
+        List<TilePositionInPyramid> visibleTiles = mActiveImageDownloader.getVisibleTilesForLayer(layerId, visibleAreaInImageCoords);
         // cancel downloading/saving of not visible tiles within layer
         mActiveImageDownloader.cancelFetchingATilesForLayerExeptForThese(layerId, visibleTiles);
         // TODO: 4.12.15 Vyresit zruseni stahovani pro ty vrstvy, ktere uz nejsou relevantni. Treba kdyz rychle odzumuju
@@ -407,7 +407,7 @@ public class TiledImageView extends View {
         }
         // check if all visible tiles within layer are available
         boolean allTilesAvailable = true;
-        for (ZoomifyTileId visibleTile : visibleTiles) {
+        for (TilePositionInPyramid visibleTile : visibleTiles) {
             boolean tileAccessible = FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING ? CacheManager.getTilesCache()
                     .containsTile(mZoomifyBaseUrl, visibleTile) : CacheManager.getTilesCache().containsTileInMemory(mZoomifyBaseUrl, visibleTile);
             if (!tileAccessible) {
@@ -422,7 +422,7 @@ public class TiledImageView extends View {
             drawLayers(canv, layerId - 1, false, visibleAreaInImageCoords);
         }
         // draw visible tiles if available, start downloading otherwise
-        for (ZoomifyTileId visibleTile : visibleTiles) {
+        for (TilePositionInPyramid visibleTile : visibleTiles) {
             if (FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING) {
                 fetchTileBlocking(canv, visibleTile);
             } else {
@@ -434,7 +434,7 @@ public class TiledImageView extends View {
         // " ms");
     }
 
-    private void fetchTileBlocking(Canvas canv, ZoomifyTileId visibleTileId) {
+    private void fetchTileBlocking(Canvas canv, TilePositionInPyramid visibleTileId) {
         Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
         if (tile != null) {
             drawTile(canv, visibleTileId, tile);
@@ -443,7 +443,7 @@ public class TiledImageView extends View {
         }
     }
 
-    private void fetchTileNonblocking(Canvas canv, ZoomifyTileId visibleTileId) {
+    private void fetchTileNonblocking(Canvas canv, TilePositionInPyramid visibleTileId) {
         TileBitmap tile = mTilesCache.getTileAsync(mZoomifyBaseUrl, visibleTileId, new FetchingBitmapFromDiskHandler() {
 
             @Override
@@ -463,49 +463,49 @@ public class TiledImageView extends View {
         }
     }
 
-    private void downloadTileAsync(ZoomifyTileId visibleTileId) {
+    private void downloadTileAsync(TilePositionInPyramid visibleTileId) {
         //mActiveImageDownloader.getTaskRegistry().registerTask(visibleTileId, mZoomifyBaseUrl,
         mActiveImageDownloader.enqueTileFetching(visibleTileId, new TileDownloadResultHandler() {
 
             @Override
-            public void onUnhandableResponseCode(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode) {
+            public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
                 if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileUnhandableResponseError(zoomifyTileId, tileUrl, responseCode);
+                    mTileDownloadHandler.onTileUnhandableResponseError(tilePositionInPyramid, tileUrl, responseCode);
                 }
             }
 
             @Override
-            public void onSuccess(ZoomifyTileId zoomifyTileId, Bitmap bitmap) {
+            public void onSuccess(TilePositionInPyramid tilePositionInPyramid, Bitmap bitmap) {
                 invalidate();
                 if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileProcessed(zoomifyTileId);
+                    mTileDownloadHandler.onTileProcessed(tilePositionInPyramid);
                 }
             }
 
             @Override
-            public void onRedirectionLoop(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections) {
+            public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections) {
                 if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileRedirectionLoopError(zoomifyTileId, tileUrl, redirections);
+                    mTileDownloadHandler.onTileRedirectionLoopError(tilePositionInPyramid, tileUrl, redirections);
                 }
             }
 
             @Override
-            public void onInvalidData(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
+            public void onInvalidData(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
                 if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileInvalidDataError(zoomifyTileId, tileUrl, errorMessage);
+                    mTileDownloadHandler.onTileInvalidDataError(tilePositionInPyramid, tileUrl, errorMessage);
                 }
             }
 
             @Override
-            public void onDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage) {
+            public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
                 if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileDataTransferError(zoomifyTileId, tileUrl, errorMessage);
+                    mTileDownloadHandler.onTileDataTransferError(tilePositionInPyramid, tileUrl, errorMessage);
                 }
             }
         });
     }
 
-    private void drawTile(Canvas canv, ZoomifyTileId tileId, Bitmap tileBmp) {
+    private void drawTile(Canvas canv, TilePositionInPyramid tileId, Bitmap tileBmp) {
         Rect tileInCanvas = toTileAreaInCanvas(tileId, tileBmp).toRect();
         // Log.d(TestTags.TEST, "drawing tile: " + tileId + " to: " + tileInCanvas.toShortString());
         canv.drawBitmap(tileBmp, null, tileInCanvas, null);
@@ -536,8 +536,8 @@ public class TiledImageView extends View {
     }
 
 
-    private RectD toTileAreaInCanvas(ZoomifyTileId zoomifyTileId, Bitmap tile) {
-        Rect tileAreaInImageCoords = mActiveImageDownloader.getTileAreaInImageCoords(zoomifyTileId);
+    private RectD toTileAreaInCanvas(TilePositionInPyramid tilePositionInPyramid, Bitmap tile) {
+        Rect tileAreaInImageCoords = mActiveImageDownloader.getTileAreaInImageCoords(tilePositionInPyramid);
         return Utils.toCanvasCoords(tileAreaInImageCoords, getTotalScaleFactor(), getTotalShift());
     }
 
@@ -784,47 +784,47 @@ public class TiledImageView extends View {
         /**
          * Tile downloaded and processed properly.
          *
-         * @param zoomifyTileId Tile id.
+         * @param tilePositionInPyramid Tile id.
          */
-        public void onTileProcessed(ZoomifyTileId zoomifyTileId);
+        public void onTileProcessed(TilePositionInPyramid tilePositionInPyramid);
 
         /**
          * Response to HTTP request for tile returned code that cannot be handled here. That means almost everything except for
          * some 2xx codes and some 3xx codes for which redirection is applied.
          *
-         * @param zoomifyTileId Tile id.
-         * @param tileUrl       Tile jpeg url.
-         * @param responseCode  Http response code recieved.
+         * @param tilePositionInPyramid Tile id.
+         * @param tileUrl               Tile jpeg url.
+         * @param responseCode          Http response code recieved.
          */
 
-        public void onTileUnhandableResponseError(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode);
+        public void onTileUnhandableResponseError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode);
 
         /**
          * Too many redirections for tile, probably loop.
          *
-         * @param zoomifyTileId Tile id.
-         * @param tileUrl       Tile jpeg url.
-         * @param redirections  Total redirections.
+         * @param tilePositionInPyramid Tile id.
+         * @param tileUrl               Tile jpeg url.
+         * @param redirections          Total redirections.
          */
-        public void onTileRedirectionLoopError(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections);
+        public void onTileRedirectionLoopError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections);
 
         /**
          * Other errors in transfering tile - timeouts etc.
          *
-         * @param zoomifyTileId Tile id.
-         * @param tileUrl       Tile jpeg url.
-         * @param errorMessage  Error message.
+         * @param tilePositionInPyramid Tile id.
+         * @param tileUrl               Tile jpeg url.
+         * @param errorMessage          Error message.
          */
-        public void onTileDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage);
+        public void onTileDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
 
         /**
          * Invalid tile content.
          *
-         * @param zoomifyTileId Tile id.
-         * @param tileUrl       Tile jpeg url.
-         * @param errorMessage  Error message.
+         * @param tilePositionInPyramid Tile id.
+         * @param tileUrl               Tile jpeg url.
+         * @param errorMessage          Error message.
          */
-        public void onTileInvalidDataError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage);
+        public void onTileInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
     }
 
 }

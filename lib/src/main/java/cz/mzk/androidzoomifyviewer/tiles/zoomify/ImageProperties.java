@@ -1,7 +1,5 @@
 package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.Orientation;
-
 /**
  * @author Martin Řehánek
  */

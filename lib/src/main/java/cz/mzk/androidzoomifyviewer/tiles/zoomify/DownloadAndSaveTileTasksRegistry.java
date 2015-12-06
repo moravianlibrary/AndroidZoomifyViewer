@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
 
@@ -21,26 +22,26 @@ public class DownloadAndSaveTileTasksRegistry {
 
     private static final Logger logger = new Logger(DownloadAndSaveTileTasksRegistry.class);
 
-    private final Map<ZoomifyTileId, DownloadAndSaveTileTask> tasks = new HashMap<ZoomifyTileId, DownloadAndSaveTileTask>();
+    private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> tasks = new HashMap<TilePositionInPyramid, DownloadAndSaveTileTask>();
     private final TilesDownloader downloader;
 
     public DownloadAndSaveTileTasksRegistry(TilesDownloader downloader) {
         this.downloader = downloader;
     }
 
-    public void registerTask(ZoomifyTileId zoomifyTileId, String mZoomifyBaseUrl, TileDownloadResultHandler handler) {
+    public void registerTask(TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TileDownloadResultHandler handler) {
         if (tasks.size() < MAX_TASKS_IN_POOL) {
-            boolean registered = tasks.containsKey(zoomifyTileId);
+            boolean registered = tasks.containsKey(tilePositionInPyramid);
             if (!registered) {
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(downloader, mZoomifyBaseUrl, zoomifyTileId, handler);
-                tasks.put(zoomifyTileId, task);
-                logger.v("  registered task for " + zoomifyTileId + ": (total " + tasks.size() + ")");
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(downloader, mZoomifyBaseUrl, tilePositionInPyramid, handler);
+                tasks.put(tilePositionInPyramid, task);
+                logger.v("  registered task for " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
                 task.executeConcurrentIfPossible();
             } else {
-                // logger.v( " ignored task registration task for " + zoomifyTileId + ": (total " + tasks.size() + ")");
+                // logger.v( " ignored task registration task for " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
             }
         } else {
-            // logger.v( "registration ignored: to many tasks: " + zoomifyTileId + ": (total " + tasks.size() + ")");
+            // logger.v( "registration ignored: to many tasks: " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
         }
     }
 
@@ -50,12 +51,12 @@ public class DownloadAndSaveTileTasksRegistry {
         }
     }
 
-    public void unregisterTask(ZoomifyTileId zoomifyTileId) {
-        tasks.remove(zoomifyTileId);
-        logger.v("unregistration performed: " + zoomifyTileId + ": (total " + tasks.size() + ")");
+    public void unregisterTask(TilePositionInPyramid tilePositionInPyramid) {
+        tasks.remove(tilePositionInPyramid);
+        logger.v("unregistration performed: " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
     }
 
-    public boolean cancel(ZoomifyTileId id) {
+    public boolean cancel(TilePositionInPyramid id) {
         DownloadAndSaveTileTask task = tasks.get(id);
         if (task != null) {
             task.cancel(false);
@@ -65,7 +66,7 @@ public class DownloadAndSaveTileTasksRegistry {
         }
     }
 
-    public Set<ZoomifyTileId> getAllTaskTileIds() {
+    public Set<TilePositionInPyramid> getAllTaskTileIds() {
         return tasks.keySet();
     }
 }

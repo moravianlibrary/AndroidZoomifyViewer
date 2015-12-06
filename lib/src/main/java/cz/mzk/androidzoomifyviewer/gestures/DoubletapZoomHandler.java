@@ -38,6 +38,7 @@ public class DoubletapZoomHandler extends Handler {
     // scale
     private double accumulatedScaleFactor = 1.0;
     private double activeScaleFactor = 1.0;
+
     public DoubletapZoomHandler(TiledImageView imageView) {
         this.imageView = imageView;
         this.abstractGestureHandler = new GestureHandler(imageView);

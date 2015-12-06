@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 
 /**
  * @author Martin Řehánek
@@ -30,7 +30,7 @@ public abstract class AbstractTileCache {
      * on internal storage.
      *
      * @param context
-     * @param diskCacheDir
+     * @param subdir
      * @return
      */
     protected static File getDiskCacheDir(Context context, String subdir) {
@@ -57,12 +57,12 @@ public abstract class AbstractTileCache {
     }
 
     // TODO: exception if file name to long (probably over 127 chars)
-    protected String buildKey(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId) {
+    protected String buildKey(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid) {
         StringBuilder builder = new StringBuilder();
         builder.append(escapeSpecialChars(zoomifyBaseUrl)).append(SEPARATOR);
-        builder.append(zoomifyTileId.getLayer()).append(SEPARATOR);
-        builder.append(zoomifyTileId.getX()).append(SEPARATOR);
-        builder.append(zoomifyTileId.getY());
+        builder.append(tilePositionInPyramid.getLayer()).append(SEPARATOR);
+        builder.append(tilePositionInPyramid.getPositionInLayer().column).append(SEPARATOR);
+        builder.append(tilePositionInPyramid.getPositionInLayer().row);
         return builder.toString();
     }
 

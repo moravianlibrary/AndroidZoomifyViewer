@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
@@ -21,7 +22,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
 
     private final TilesDownloader downloader;
     private final String zoomifyBaseUrl;
-    private final ZoomifyTileId zoomifyTileId;
+    private final TilePositionInPyramid tilePositionInPyramid;
     private final TileDownloadResultHandler handler;
 
     private OtherIOException otherIoException;
@@ -30,15 +31,15 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     private InvalidDataException invalidXmlException;
 
     /**
-     * @param downloader     initialized Tiles downloader, not null
-     * @param zoomifyBaseUrl Zoomify base url, not null
-     * @param zoomifyTileId  Tile id, not null
-     * @param handler        Tile download result handler, not null
+     * @param downloader            initialized Tiles downloader, not null
+     * @param zoomifyBaseUrl        Zoomify base url, not null
+     * @param tilePositionInPyramid Tile id, not null
+     * @param handler               Tile download result handler, not null
      */
-    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId, TileDownloadResultHandler handler) {
+    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TileDownloadResultHandler handler) {
         this.downloader = downloader;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
-        this.zoomifyTileId = zoomifyTileId;
+        this.tilePositionInPyramid = tilePositionInPyramid;
         this.handler = handler;
     }
 
@@ -52,12 +53,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         // threadPriority, group.getName(), group.activeCount(), group.getMaxPriority()));
         try {
             if (!isCancelled()) {
-                Bitmap tile = downloader.downloadTile(zoomifyTileId);
+                Bitmap tile = downloader.downloadTile(tilePositionInPyramid);
                 if (!isCancelled()) {
                     if (tile != null) {
-                        CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, zoomifyTileId);
+                        CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tilePositionInPyramid);
                         logger.v(String.format("tile downloaded and saved to disk cache: base url: '%s', tile: '%s'",
-                                zoomifyBaseUrl, zoomifyTileId));
+                                zoomifyBaseUrl, tilePositionInPyramid));
                     } else {
                         // TODO: examine this
                         logger.w("tile is null");
@@ -65,12 +66,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
                 } else {
                     logger.v(String
                             .format("tile processing canceled task after downloading and before saving data: base url: '%s', tile: '%s'",
-                                    zoomifyBaseUrl, zoomifyTileId));
+                                    zoomifyBaseUrl, tilePositionInPyramid));
                 }
             } else {
                 logger.v(String.format(
                         "tile processing task canceled before download started: base url: '%s', tile: '%s'",
-                        zoomifyBaseUrl, zoomifyTileId));
+                        zoomifyBaseUrl, tilePositionInPyramid));
             }
         } catch (TooManyRedirectionsException e) {
             tooManyRedirectionsException = e;
@@ -91,41 +92,41 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
 
     @Override
     protected void onPostExecute(Bitmap bitmap) {
-        downloader.unregisterFinishedOrCanceledTask(zoomifyTileId);
-        //downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
+        downloader.unregisterFinishedOrCanceledTask(tilePositionInPyramid);
+        //downloader.getTaskRegistry().unregisterTask(tilePositionInPyramid);
         if (tooManyRedirectionsException != null) {
-            handler.onRedirectionLoop(zoomifyTileId, tooManyRedirectionsException.getUrl(),
+            handler.onRedirectionLoop(tilePositionInPyramid, tooManyRedirectionsException.getUrl(),
                     tooManyRedirectionsException.getRedirections());
         } else if (imageServerResponseException != null) {
-            handler.onUnhandableResponseCode(zoomifyTileId, imageServerResponseException.getUrl(),
+            handler.onUnhandableResponseCode(tilePositionInPyramid, imageServerResponseException.getUrl(),
                     imageServerResponseException.getErrorCode());
         } else if (invalidXmlException != null) {
-            handler.onInvalidData(zoomifyTileId, invalidXmlException.getUrl(), invalidXmlException.getMessage());
+            handler.onInvalidData(tilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
         } else if (otherIoException != null) {
-            handler.onDataTransferError(zoomifyTileId, otherIoException.getUrl(), otherIoException.getMessage());
+            handler.onDataTransferError(tilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
         } else {
-            handler.onSuccess(zoomifyTileId, bitmap);
+            handler.onSuccess(tilePositionInPyramid, bitmap);
         }
     }
 
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        //downloader.getTaskRegistry().unregisterTask(zoomifyTileId);
-        downloader.unregisterFinishedOrCanceledTask(zoomifyTileId);
+        //downloader.getTaskRegistry().unregisterTask(tilePositionInPyramid);
+        downloader.unregisterFinishedOrCanceledTask(tilePositionInPyramid);
     }
 
     public interface TileDownloadResultHandler {
 
-        public void onSuccess(ZoomifyTileId zoomifyTileId, Bitmap bitmap);
+        public void onSuccess(TilePositionInPyramid tilePositionInPyramid, Bitmap bitmap);
 
-        public void onUnhandableResponseCode(ZoomifyTileId zoomifyTileId, String tileUrl, int responseCode);
+        public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode);
 
-        public void onRedirectionLoop(ZoomifyTileId zoomifyTileId, String tileUrl, int redirections);
+        public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections);
 
-        public void onDataTransferError(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage);
+        public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
 
-        public void onInvalidData(ZoomifyTileId zoomifyTileId, String tileUrl, String errorMessage);
+        public void onInvalidData(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
 
     }
 

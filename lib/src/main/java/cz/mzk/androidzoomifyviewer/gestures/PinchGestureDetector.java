@@ -13,6 +13,7 @@ public class PinchGestureDetector {
     private double focusX;
     private double focusY;
     private double span;
+
     public PinchGestureDetector(OnScaleGestureListener listener) {
         this.listener = listener;
     }

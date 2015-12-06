@@ -23,6 +23,7 @@ public class PinchZoomHandler extends GestureHandler {
     // scale
     private double accumulatedScaleFactor = 1.0;
     private double activeScaleFactor = 1.0;
+
     public PinchZoomHandler(TiledImageView imageView) {
         super(imageView);
     }

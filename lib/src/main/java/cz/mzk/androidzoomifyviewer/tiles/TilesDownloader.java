@@ -11,7 +11,6 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
 
 /**
@@ -26,11 +25,11 @@ public interface TilesDownloader {
 
     //TASK MANAGEMENT
 
-    public void enqueTileFetching(ZoomifyTileId zoomifyTileId, DownloadAndSaveTileTask.TileDownloadResultHandler handler);
+    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, DownloadAndSaveTileTask.TileDownloadResultHandler handler);
 
-    public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId);
+    public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid);
 
-    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<ZoomifyTileId> visibleTiles);
+    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
 
     //vsechno, krome samotne inicializace metadat
 
@@ -54,14 +53,13 @@ public interface TilesDownloader {
 
     public int computeBestLayerId(Rect wholeImageInCanvasCoords);
 
-    public List<ZoomifyTileId> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
+    public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
 
-    // TODO: 4.12.15 mozna parametr layerId
-    public Rect getTileAreaInImageCoords(ZoomifyTileId zoomifyTileId);
+    public Rect getTileAreaInImageCoords(TilePositionInPyramid tilePositionInPyramid);
 
     //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
 
-    public Bitmap downloadTile(ZoomifyTileId zoomifyTileId) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
+    public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
 
     //TMP
 

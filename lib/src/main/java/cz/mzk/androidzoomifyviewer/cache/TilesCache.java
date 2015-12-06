@@ -2,7 +2,7 @@ package cz.mzk.androidzoomifyviewer.cache;
 
 import android.graphics.Bitmap;
 
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTileId;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 
 /**
  * @author Martin Řehánek
@@ -14,10 +14,10 @@ public interface TilesCache {
      * null if bitmap was not found in either cache.
      *
      * @param zoomifyBaseUrl
-     * @param zoomifyTileId
+     * @param tilePositionInPyramid
      * @return
      */
-    public Bitmap getTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
+    public Bitmap getTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
     /**
      * Returns tile's bitmap if it has been found in memory cache. Or if the bitmap is not in memory but in disk cache, tries to
@@ -25,17 +25,17 @@ public interface TilesCache {
      * either cache.
      *
      * @param zoomifyBaseUrl
-     * @param zoomifyTileId
+     * @param tilePositionInPyramid
      * @param handler
      * @return TileBitmap object that contains bitmap it self (or null) and tile's bitmap state.
      */
-    public TileBitmap getTileAsync(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId, FetchingBitmapFromDiskHandler handler);
+    public TileBitmap getTileAsync(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, FetchingBitmapFromDiskHandler handler);
 
-    public boolean containsTile(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
+    public boolean containsTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
-    public boolean containsTileInMemory(String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
+    public boolean containsTileInMemory(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
-    public void storeTile(Bitmap tile, String zoomifyBaseUrl, ZoomifyTileId zoomifyTileId);
+    public void storeTile(Bitmap tile, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
     public void cancelAllTasks();
 

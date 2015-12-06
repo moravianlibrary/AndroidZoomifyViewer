@@ -17,6 +17,7 @@ import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
@@ -262,7 +263,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     /**
      * Downloads tile from zoomify server. TODO: InvalidDataException
      *
-     * @param zoomifyTileId Tile id.
+     * @param tilePositionInPyramid Tile id.
      * @return
      * @throws IllegalStateException        If methodi initImageMetadata had not been called yet.
      * @throws TooManyRedirectionsException If max. number of redirections exceeded before downloading tile. This probably means redirection loop.
@@ -272,32 +273,32 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
      * @throws OtherIOException             In case of other IO error (invalid URL, error transfering data, ...)
      */
     @Override
-    public Bitmap downloadTile(ZoomifyTileId zoomifyTileId) throws OtherIOException, TooManyRedirectionsException,
+    public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         checkInitialized();
-        int tileGroup = computeTileGroup(zoomifyTileId);
-        String tileUrl = buildTileUrl(tileGroup, zoomifyTileId);
+        int tileGroup = computeTileGroup(tilePositionInPyramid);
+        String tileUrl = buildTileUrl(tileGroup, tilePositionInPyramid);
         logger.v("TILE URL: " + tileUrl);
         return downloadTile(tileUrl, MAX_REDIRECTIONS);
     }
 
     @Override
-    public List<ZoomifyTileId> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords) {
-        ZoomifyTileId.TileCoords[] corners = getCornerVisibleTilesCoords(layerId, visibleAreaInImageCoords);
-        ZoomifyTileId.TileCoords topLeftVisibleTileCoords = corners[0];
-        ZoomifyTileId.TileCoords bottomRightVisibleTileCoords = corners[1];
+    public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords) {
+        TilePositionInPyramid.TilePositionInLayer[] corners = getCornerVisibleTilesCoords(layerId, visibleAreaInImageCoords);
+        TilePositionInPyramid.TilePositionInLayer topLeftVisibleTilePositionInLayer = corners[0];
+        TilePositionInPyramid.TilePositionInLayer bottomRightVisibleTilePositionInLayer = corners[1];
 
-        List<ZoomifyTileId> visibleTiles = new ArrayList<>();
-        for (int y = topLeftVisibleTileCoords.y; y <= bottomRightVisibleTileCoords.y; y++) {
-            for (int x = topLeftVisibleTileCoords.x; x <= bottomRightVisibleTileCoords.x; x++) {
-                visibleTiles.add(new ZoomifyTileId(layerId, x, y));
+        List<TilePositionInPyramid> visibleTiles = new ArrayList<>();
+        for (int y = topLeftVisibleTilePositionInLayer.row; y <= bottomRightVisibleTilePositionInLayer.row; y++) {
+            for (int x = topLeftVisibleTilePositionInLayer.column; x <= bottomRightVisibleTilePositionInLayer.column; x++) {
+                visibleTiles.add(new TilePositionInPyramid(layerId, x, y));
             }
         }
         return visibleTiles;
 
     }
 
-    private ZoomifyTileId.TileCoords[] getCornerVisibleTilesCoords(int layerId, RectD visibleAreaInImageCoords) {
+    private TilePositionInPyramid.TilePositionInLayer[] getCornerVisibleTilesCoords(int layerId, RectD visibleAreaInImageCoords) {
         int imageWidthMinusOne = imageProperties.getWidth() - 1;
         int imageHeightMinusOne = imageProperties.getHeight() - 1;
 
@@ -311,30 +312,30 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         // TestTags.TILES.d( "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
         // TestTags.TILES.d( "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
         // TODO: 4.12.15 udelat private metodu calculateTileCoordsFromPointInImageCoords, pokud se vola jen odsud
-        ZoomifyTileId.TileCoords topLeftVisibleTile = calculateTileCoordsFromPointInImageCoords(layerId, topLeftVisibleInImageCoords);
-        ZoomifyTileId.TileCoords bottomRightVisibleTile = calculateTileCoordsFromPointInImageCoords(layerId, bottomRightVisibleInImageCoords);
+        TilePositionInPyramid.TilePositionInLayer topLeftVisibleTile = calculateTileCoordsFromPointInImageCoords(layerId, topLeftVisibleInImageCoords);
+        TilePositionInPyramid.TilePositionInLayer bottomRightVisibleTile = calculateTileCoordsFromPointInImageCoords(layerId, bottomRightVisibleInImageCoords);
         // TestTags.TILES.d( "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
         // TestTags.TILES.d( "bottom_right: " + Utils.toString(bottomRightVisibleTileCoords));
-        return new ZoomifyTileId.TileCoords[]{topLeftVisibleTile, bottomRightVisibleTile};
+        return new TilePositionInPyramid.TilePositionInLayer[]{topLeftVisibleTile, bottomRightVisibleTile};
     }
 
     /**
      * @link http://www.staremapy.cz/zoomify-analyza/
      */
-    private int computeTileGroup(ZoomifyTileId zoomifyTileId) {
-        int x = zoomifyTileId.getX();
-        int y = zoomifyTileId.getY();
-        int level = zoomifyTileId.getLayer();
+    private int computeTileGroup(TilePositionInPyramid tilePositionInPyramid) {
+        int column = tilePositionInPyramid.getPositionInLayer().column;
+        int row = tilePositionInPyramid.getPositionInLayer().row;
+        int level = tilePositionInPyramid.getLayer();
         double tileSize = imageProperties.getTileSize();
         double width = imageProperties.getWidth();
         double height = imageProperties.getHeight();
         double depth = layers.size();
-        // logger.d( zoomifyTileId.toString());
-        // logger.d( "x: " + x + ", y: " + y + ", d: " + depth + ", l: " + level);
+        // logger.d( tilePositionInPyramid.toString());
+        // logger.d( "column: " + column + ", row: " + row + ", d: " + depth + ", l: " + level);
         // logger.d( "width: " + width + ", height: " + height + ", tileSize: " + tileSize);
 
         double first = Math.ceil(Math.floor(width / Math.pow(2, depth - level - 1)) / tileSize);
-        double index = x + y * first;
+        double index = column + row * first;
         for (int i = 1; i <= level; i++) {
             index += Math.ceil(Math.floor(width / Math.pow(2, depth - i)) / tileSize)
                     * Math.ceil(Math.floor(height / Math.pow(2, depth - i)) / tileSize);
@@ -345,10 +346,12 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         return result;
     }
 
-    private String buildTileUrl(int tileGroup, ZoomifyTileId zoomifyTileId) {
+    private String buildTileUrl(int tileGroup, TilePositionInPyramid tilePositionInPyramid) {
         StringBuilder builder = new StringBuilder();
         builder.append(mBaseUrl).append("TileGroup").append(tileGroup).append('/');
-        builder.append(zoomifyTileId.getLayer()).append('-').append(zoomifyTileId.getX()).append('-').append(zoomifyTileId.getY())
+        builder.append(tilePositionInPyramid.getLayer()).append('-')
+                .append(tilePositionInPyramid.getPositionInLayer().column).append('-')
+                .append(tilePositionInPyramid.getPositionInLayer().row)
                 .append(".jpg");
         return builder.toString();
     }
@@ -411,14 +414,14 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     @Override
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY) {
         int[] result = new int[2];
-        ZoomifyTileId.TileCoords tileCoords = calculateTileCoordsFromPointInImageCoords(layerId, new Point(pixelX, pixelY));
-        result[0] = tileCoords.x;
-        result[1] = tileCoords.y;
+        TilePositionInPyramid.TilePositionInLayer tilePositionInLayer = calculateTileCoordsFromPointInImageCoords(layerId, new Point(pixelX, pixelY));
+        result[0] = tilePositionInLayer.column;
+        result[1] = tilePositionInLayer.row;
         return result;
     }
 
     //@Override
-    private ZoomifyTileId.TileCoords calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords) {
+    private TilePositionInPyramid.TilePositionInLayer calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords) {
         checkInitialized();
         if (layerId < 0 || layerId >= layers.size()) {
             throw new IllegalArgumentException("layer out of range: " + layerId);
@@ -433,7 +436,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
 
         // optimization, zero layer is whole image with coords 0,0
         if (layerId == 0) {
-            return new ZoomifyTileId.TileCoords(0, 0);
+            return new TilePositionInPyramid.TilePositionInLayer(0, 0);
         }
         // logger.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
         // ", y=" + pixelY);
@@ -448,7 +451,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         double cy_step = pointInMageCoords.y / step;
         // Log.d(TestTags.TILES, (cy_step - 1) + " < y <= " + cy_step);
         int y = (int) Math.floor(cy_step);
-        ZoomifyTileId.TileCoords result = new ZoomifyTileId.TileCoords(x, y);
+        TilePositionInPyramid.TilePositionInLayer result = new TilePositionInPyramid.TilePositionInLayer(x, y);
         // Log.d(TestTags.TILES, "px: [" + pixelX + "," + pixelY + "] -> " + Utils.toString(result));
         return result;
 
@@ -556,20 +559,20 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
 
 
     @Override
-    public Rect getTileAreaInImageCoords(ZoomifyTileId zoomifyTileId) {
-        TileDimensionsInImage tileSizesInImage = calculateTileDimensionsInImageCoords(zoomifyTileId);
-        int left = tileSizesInImage.basicSize * zoomifyTileId.getX();
+    public Rect getTileAreaInImageCoords(TilePositionInPyramid tilePositionInPyramid) {
+        TileDimensionsInImage tileSizesInImage = calculateTileDimensionsInImageCoords(tilePositionInPyramid);
+        int left = tileSizesInImage.basicSize * tilePositionInPyramid.getPositionInLayer().column;
         int right = left + tileSizesInImage.actualWidth;
-        int top = tileSizesInImage.basicSize * zoomifyTileId.getY();
+        int top = tileSizesInImage.basicSize * tilePositionInPyramid.getPositionInLayer().row;
         int bottom = top + tileSizesInImage.actualHeight;
         return new Rect(left, top, right, bottom);
     }
 
-    private TileDimensionsInImage calculateTileDimensionsInImageCoords(ZoomifyTileId zoomifyTileId) {
+    private TileDimensionsInImage calculateTileDimensionsInImageCoords(TilePositionInPyramid tilePositionInPyramid) {
         checkInitialized();
-        int basicSize = getTilesBasicSizeInImageCoordsForGivenLayer(zoomifyTileId.getLayer());
-        int width = getTileWidthInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getX(), basicSize);
-        int height = getTileHeightInImageCoords(zoomifyTileId.getLayer(), zoomifyTileId.getY(), basicSize);
+        int basicSize = getTilesBasicSizeInImageCoordsForGivenLayer(tilePositionInPyramid.getLayer());
+        int width = getTileWidthInImageCoords(tilePositionInPyramid.getLayer(), tilePositionInPyramid.getPositionInLayer().column, basicSize);
+        int height = getTileHeightInImageCoords(tilePositionInPyramid.getLayer(), tilePositionInPyramid.getPositionInLayer().row, basicSize);
         return new TileDimensionsInImage(basicSize, width, height);
     }
 
@@ -637,17 +640,17 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     }
 
     @Override
-    public void enqueTileFetching(ZoomifyTileId zoomifyTileId, DownloadAndSaveTileTask.TileDownloadResultHandler handler) {
-        taskRegistry.registerTask(zoomifyTileId, mBaseUrl, handler);
+    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, DownloadAndSaveTileTask.TileDownloadResultHandler handler) {
+        taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, handler);
     }
 
     @Override
-    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<ZoomifyTileId> visibleTiles) {
+    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
         checkInitialized();
-        for (ZoomifyTileId runningZoomifyTileId : taskRegistry.getAllTaskTileIds()) {
-            if (runningZoomifyTileId.getLayer() == layerId) {
-                if (!visibleTiles.contains(runningZoomifyTileId)) {
-                    boolean wasCanceled = taskRegistry.cancel(runningZoomifyTileId);
+        for (TilePositionInPyramid runningTilePositionInPyramid : taskRegistry.getAllTaskTileIds()) {
+            if (runningTilePositionInPyramid.getLayer() == layerId) {
+                if (!visibleTiles.contains(runningTilePositionInPyramid)) {
+                    boolean wasCanceled = taskRegistry.cancel(runningTilePositionInPyramid);
                     // if (wasCanceled) {
                     // canceled++;
                     // }
@@ -658,9 +661,9 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
 
 
     @Override
-    public void unregisterFinishedOrCanceledTask(ZoomifyTileId zoomifyTileId) {
+    public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid) {
         checkInitialized();
-        taskRegistry.unregisterTask(zoomifyTileId);
+        taskRegistry.unregisterTask(tilePositionInPyramid);
     }
 
 
