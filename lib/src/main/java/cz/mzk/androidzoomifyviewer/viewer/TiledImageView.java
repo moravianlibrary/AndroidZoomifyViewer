@@ -25,7 +25,6 @@ import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTilesDownloader;
 
 /**
@@ -444,7 +443,7 @@ public class TiledImageView extends View {
         if (tile != null) {
             drawTile(canv, visibleTileId, tile);
         } else {
-            downloadTileAsync(visibleTileId);
+            enqueTileDownload(visibleTileId);
         }
     }
 
@@ -464,13 +463,12 @@ public class TiledImageView extends View {
                 // nothing, wait for fetch
                 break;
             case NOT_FOUND:
-                downloadTileAsync(visibleTileId);
+                enqueTileDownload(visibleTileId);
         }
     }
 
-    private void downloadTileAsync(TilePositionInPyramid visibleTileId) {
-        //mActiveImageDownloader.getTaskRegistry().registerTask(visibleTileId, mZoomifyBaseUrl,
-        mActiveImageDownloader.enqueTileFetching(visibleTileId, new TileDownloadResultHandler() {
+    private void enqueTileDownload(TilePositionInPyramid visibleTileId) {
+        mActiveImageDownloader.enqueTileFetching(visibleTileId, new cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler() {
 
             @Override
             public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {

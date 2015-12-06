@@ -18,6 +18,7 @@ import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
+import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
@@ -652,7 +653,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     }
 
     @Override
-    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, DownloadAndSaveTileTask.TileDownloadResultHandler handler) {
+    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
         taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, handler);
     }
 

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
@@ -23,7 +24,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     private final TilesDownloader downloader;
     private final String zoomifyBaseUrl;
     private final TilePositionInPyramid tilePositionInPyramid;
-    private final TileDownloadResultHandler handler;
+    private final TileDownloadHandler handler;
 
     private OtherIOException otherIoException;
     private TooManyRedirectionsException tooManyRedirectionsException;
@@ -36,7 +37,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
      * @param tilePositionInPyramid Tile id, not null
      * @param handler               Tile download result handler, not null
      */
-    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TileDownloadResultHandler handler) {
+    public DownloadAndSaveTileTask(TilesDownloader downloader, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
         this.downloader = downloader;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
         this.tilePositionInPyramid = tilePositionInPyramid;
@@ -94,18 +95,20 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     protected void onPostExecute(Bitmap bitmap) {
         downloader.unregisterFinishedOrCanceledTask(tilePositionInPyramid);
         //downloader.getTaskRegistry().unregisterTask(tilePositionInPyramid);
-        if (tooManyRedirectionsException != null) {
-            handler.onRedirectionLoop(tilePositionInPyramid, tooManyRedirectionsException.getUrl(),
-                    tooManyRedirectionsException.getRedirections());
-        } else if (imageServerResponseException != null) {
-            handler.onUnhandableResponseCode(tilePositionInPyramid, imageServerResponseException.getUrl(),
-                    imageServerResponseException.getErrorCode());
-        } else if (invalidXmlException != null) {
-            handler.onInvalidData(tilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
-        } else if (otherIoException != null) {
-            handler.onDataTransferError(tilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
-        } else {
-            handler.onSuccess(tilePositionInPyramid, bitmap);
+        if (handler != null) {
+            if (tooManyRedirectionsException != null) {
+                handler.onRedirectionLoop(tilePositionInPyramid, tooManyRedirectionsException.getUrl(),
+                        tooManyRedirectionsException.getRedirections());
+            } else if (imageServerResponseException != null) {
+                handler.onUnhandableResponseCode(tilePositionInPyramid, imageServerResponseException.getUrl(),
+                        imageServerResponseException.getErrorCode());
+            } else if (invalidXmlException != null) {
+                handler.onInvalidData(tilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
+            } else if (otherIoException != null) {
+                handler.onDataTransferError(tilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
+            } else {
+                handler.onSuccess(tilePositionInPyramid, bitmap);
+            }
         }
     }
 
@@ -114,20 +117,6 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         super.onCancelled();
         //downloader.getTaskRegistry().unregisterTask(tilePositionInPyramid);
         downloader.unregisterFinishedOrCanceledTask(tilePositionInPyramid);
-    }
-
-    public interface TileDownloadResultHandler {
-
-        public void onSuccess(TilePositionInPyramid tilePositionInPyramid, Bitmap bitmap);
-
-        public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode);
-
-        public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections);
-
-        public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
-
-        public void onInvalidData(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
-
     }
 
 }

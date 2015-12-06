@@ -9,7 +9,6 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
 
@@ -27,7 +26,7 @@ public interface TilesDownloader {
 
     //TASK MANAGEMENT
 
-    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, DownloadAndSaveTileTask.TileDownloadResultHandler handler);
+    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler);
 
     public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid);
 
