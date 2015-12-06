@@ -26,7 +26,7 @@ public interface TilesDownloader {
 
     //TASK MANAGEMENT
 
-    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler);
+    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler);
 
     public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid);
 

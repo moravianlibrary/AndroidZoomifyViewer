@@ -653,7 +653,7 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
     }
 
     @Override
-    public void enqueTileFetching(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
+    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
         taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, handler);
     }
 

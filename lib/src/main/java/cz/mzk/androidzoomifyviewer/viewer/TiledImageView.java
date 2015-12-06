@@ -31,7 +31,6 @@ import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTilesDownloader;
  * @author Martin Řehánek
  */
 public class TiledImageView extends View {
-    public static final boolean FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING = false;
     public static final boolean DEV_MODE = true;
 
     private static final Logger logger = new Logger(TiledImageView.class);
@@ -412,8 +411,7 @@ public class TiledImageView extends View {
         // check if all visible tiles within layer are available
         boolean allTilesAvailable = true;
         for (TilePositionInPyramid visibleTile : visibleTiles) {
-            boolean tileAccessible = FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING ? CacheManager.getTilesCache()
-                    .containsTile(mZoomifyBaseUrl, visibleTile) : CacheManager.getTilesCache().containsTileInMemory(mZoomifyBaseUrl, visibleTile);
+            boolean tileAccessible = CacheManager.getTilesCache().containsTileInMemory(mZoomifyBaseUrl, visibleTile);
             if (!tileAccessible) {
                 allTilesAvailable = false;
                 break;
@@ -427,24 +425,11 @@ public class TiledImageView extends View {
         }
         // draw visible tiles if available, start downloading otherwise
         for (TilePositionInPyramid visibleTile : visibleTiles) {
-            if (FETCHING_BITMAP_FROM_DISK_CACHE_BLOCKING) {
-                fetchTileBlocking(canv, visibleTile);
-            } else {
-                fetchTileNonblocking(canv, visibleTile);
-            }
+            fetchTileNonblocking(canv, visibleTile);
         }
         // long end = System.currentTimeMillis();
         // logger.d( "drawLayers (layer=" + layerId + "): " + (end - start) +
         // " ms");
-    }
-
-    private void fetchTileBlocking(Canvas canv, TilePositionInPyramid visibleTileId) {
-        Bitmap tile = mTilesCache.getTile(mZoomifyBaseUrl, visibleTileId);
-        if (tile != null) {
-            drawTile(canv, visibleTileId, tile);
-        } else {
-            enqueTileDownload(visibleTileId);
-        }
     }
 
     private void fetchTileNonblocking(Canvas canv, TilePositionInPyramid visibleTileId) {
@@ -460,7 +445,7 @@ public class TiledImageView extends View {
                 drawTile(canv, visibleTileId, tile.getBitmap());
                 break;
             case IN_DISK:
-                // nothing, wait for fetch
+                // nothing, wait for it to be fetched into memory
                 break;
             case NOT_FOUND:
                 enqueTileDownload(visibleTileId);
@@ -468,7 +453,7 @@ public class TiledImageView extends View {
     }
 
     private void enqueTileDownload(TilePositionInPyramid visibleTileId) {
-        mActiveImageDownloader.enqueTileFetching(visibleTileId, new cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler() {
+        mActiveImageDownloader.enqueTileDownload(visibleTileId, new cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler() {
 
             @Override
             public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
