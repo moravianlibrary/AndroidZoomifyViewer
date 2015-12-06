@@ -192,7 +192,6 @@ public class TiledImageView extends View {
         mImageManager.initImageMetadataAsync(new MetadataInitializationHandler() {
 
             @Override
-            //public void onSuccess(ImageManager downloader) {
             public void onSuccess() {
                 LOGGER.d("downloader mInitialized");
                 //mImageManager = downloader;
@@ -305,17 +304,15 @@ public class TiledImageView extends View {
                 mFramingRectDrawer.draw(getTotalScaleFactor(), getTotalShift());
             }
 
-            if (DEV_MODE) {
-                if (mDevTools != null) {
-                    double totalScaleFactor = getTotalScaleFactor();
-                    VectorD totalShift = getTotalShift();
-                    // test points
-                    mDevTools.drawImageCoordPoints(mTestPoints, totalScaleFactor, totalShift);
-                    mDevTools.drawTileRectStack();
-                    // zoom centers
-                    // mDevTools.drawDoubletapZoomCenters(getTotalScaleFactor(), getTotalShift());
-                    // mDevTools.drawPinchZoomCenters(getTotalScaleFactor(), getTotalShift());
-                }
+            if (mDevTools != null) {
+                double totalScaleFactor = getTotalScaleFactor();
+                VectorD totalShift = getTotalShift();
+                // test points
+                mDevTools.drawImageCoordPoints(mTestPoints, totalScaleFactor, totalShift);
+                mDevTools.drawTileRectStack();
+                // zoom centers
+                // mDevTools.drawDoubletapZoomCenters(getTotalScaleFactor(), getTotalShift());
+                // mDevTools.drawPinchZoomCenters(getTotalScaleFactor(), getTotalShift());
             }
         }
         // Debug.stopMethodTracing();
