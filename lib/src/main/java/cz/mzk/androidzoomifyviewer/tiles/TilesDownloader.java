@@ -20,7 +20,9 @@ public interface TilesDownloader {
 
     //METADATA INITIALIZATION
 
-    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
+    public void initImageMetadataAsync(MetadataInitializationHandler handler);
+
+    public boolean isInitialized();
 
 
     //TASK MANAGEMENT
@@ -51,15 +53,17 @@ public interface TilesDownloader {
     public List<Layer> getLayers();
 
 
+    //CORE - computations with tiles
+
     public int computeBestLayerId(Rect wholeImageInCanvasCoords);
 
     public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
 
     public Rect getTileAreaInImageCoords(TilePositionInPyramid tilePositionInPyramid);
 
+
     //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
 
-    public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
 
     //TMP
 
@@ -67,5 +71,10 @@ public interface TilesDownloader {
     @Deprecated
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
 
+    //TODO: presunout do budouciho Downloaderu
+
+    public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
+
+    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
 
 }

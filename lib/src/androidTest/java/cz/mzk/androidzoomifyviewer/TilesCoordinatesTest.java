@@ -10,11 +10,10 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTilesDownloader;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -46,7 +45,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
     private TilesDownloader initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
-        new InitTilesDownloaderTask(baseUrl, pxRatio, new ImagePropertiesDownloadResultHandler() {
+        new InitTilesDownloaderTask(baseUrl, pxRatio, new MetadataInitializationHandler() {
 
             @Override
             public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {

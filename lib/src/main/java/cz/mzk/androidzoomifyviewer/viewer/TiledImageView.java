@@ -22,10 +22,11 @@ import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandle
 import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
+import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.DownloadAndSaveTileTask.TileDownloadResultHandler;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyTilesDownloader;
 
 /**
  * @author Martin Řehánek
@@ -164,9 +165,14 @@ public class TiledImageView extends View {
         mViewmodeShiftInitialized = false;
         mMinZoomCanvasImagePaddingInitialized = false;
         mZoomifyBaseUrl = zoomifyBaseUrl;
-        mActiveImageDownloader = null;
+        //mActiveImageDownloader = null;
         cancelAllTasks();
         mGestureListener.reset();
+        if (mActiveImageDownloader != null) {
+            mActiveImageDownloader.destroy();
+        }
+        double pxRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;
+        mActiveImageDownloader = new ZoomifyTilesDownloader(mZoomifyBaseUrl, pxRatio);
         initTilesDownloaderAsync();
     }
 
@@ -176,57 +182,56 @@ public class TiledImageView extends View {
     }
 
     private void initTilesDownloaderAsync() {
-        double pxRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;
-        new InitTilesDownloaderTask(mZoomifyBaseUrl, pxRatio,
-                new InitTilesDownloaderTask.ImagePropertiesDownloadResultHandler() {
+        mActiveImageDownloader.initImageMetadataAsync(new MetadataInitializationHandler() {
 
-                    @Override
-                    public void onSuccess(TilesDownloader downloader) {
-                        logger.d("downloader initialized");
-                        mActiveImageDownloader = downloader;
-                        if (DEV_MODE) {
-                            testPoints = new ImageCoordsPoints(downloader.getImageWidth(), downloader.getImageHeight());
-                        }
+            @Override
+            //public void onSuccess(TilesDownloader downloader) {
+            public void onSuccess() {
+                logger.d("downloader initialized");
+                //mActiveImageDownloader = downloader;
+                if (DEV_MODE) {
+                    testPoints = new ImageCoordsPoints(mActiveImageDownloader.getImageWidth(), mActiveImageDownloader.getImageHeight());
+                }
 
-                        if (mImageInitializationHandler != null) {
-                            mImageInitializationHandler.onImagePropertiesProcessed();
-                        }
-                        pageInitialized = true;
-                        invalidate();
-                    }
+                if (mImageInitializationHandler != null) {
+                    mImageInitializationHandler.onImagePropertiesProcessed();
+                }
+                pageInitialized = true;
+                invalidate();
+            }
 
-                    @Override
-                    public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
-                        if (mImageInitializationHandler != null) {
-                            mImageInitializationHandler.onImagePropertiesUnhandableResponseCodeError(
-                                    imagePropertiesUrl, responseCode);
-                        }
-                    }
+            @Override
+            public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+                if (mImageInitializationHandler != null) {
+                    mImageInitializationHandler.onImagePropertiesUnhandableResponseCodeError(
+                            imagePropertiesUrl, responseCode);
+                }
+            }
 
-                    @Override
-                    public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
-                        if (mImageInitializationHandler != null) {
-                            mImageInitializationHandler.onImagePropertiesRedirectionLoopError(imagePropertiesUrl,
-                                    redirections);
-                        }
-                    }
+            @Override
+            public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
+                if (mImageInitializationHandler != null) {
+                    mImageInitializationHandler.onImagePropertiesRedirectionLoopError(imagePropertiesUrl,
+                            redirections);
+                }
+            }
 
-                    @Override
-                    public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
-                        if (mImageInitializationHandler != null) {
-                            mImageInitializationHandler.onImagePropertiesDataTransferError(imagePropertiesUrl,
-                                    errorMessage);
-                        }
-                    }
+            @Override
+            public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
+                if (mImageInitializationHandler != null) {
+                    mImageInitializationHandler.onImagePropertiesDataTransferError(imagePropertiesUrl,
+                            errorMessage);
+                }
+            }
 
-                    @Override
-                    public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
-                        if (mImageInitializationHandler != null) {
-                            mImageInitializationHandler.onImagePropertiesInvalidDataError(imagePropertiesUrl,
-                                    errorMessage);
-                        }
-                    }
-                }).executeConcurrentIfPossible();
+            @Override
+            public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
+                if (mImageInitializationHandler != null) {
+                    mImageInitializationHandler.onImagePropertiesInvalidDataError(imagePropertiesUrl,
+                            errorMessage);
+                }
+            }
+        });
     }
 
     @Override
@@ -248,7 +253,7 @@ public class TiledImageView extends View {
             // logger.d( "canvas(dp): width=" + canvWidthDp + ", height=" +
             // canvHeightDp);
         }
-        if (mActiveImageDownloader != null) {
+        if (mActiveImageDownloader.isInitialized()) {
             if (devTools != null) {
                 devTools.fillWholeCanvasWithColor(devTools.getPaintBlue());
             }

@@ -16,6 +16,7 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.TilesDownloader;
@@ -134,6 +135,17 @@ public class ZoomifyTilesDownloader implements TilesDownloader {
         initialized = true;
     }
 
+    @Override
+    public void initImageMetadataAsync(MetadataInitializationHandler handler) {
+        // TODO: 6.12.15 Uchovavat task a pripadne zabit v onDestroy
+        new InitTilesDownloaderTask(this, handler).executeConcurrentIfPossible();
+        //).executeConcurrentIfPossible();
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
 
     private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
