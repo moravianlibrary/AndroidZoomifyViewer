@@ -1,6 +1,5 @@
 package cz.mzk.androidzoomifyviewer.tiles;
 
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 import java.util.List;

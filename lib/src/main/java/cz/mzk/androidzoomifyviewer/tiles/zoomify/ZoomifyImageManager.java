@@ -118,7 +118,6 @@ public class ZoomifyImageManager implements ImageManager {
         } else {
             logger.d("initImageMetadata: " + mImagePropertiesUrl);
         }
-        HttpURLConnection.setFollowRedirects(false);//protoze presmerovani si resim sam?
         String propertiesXml = fetchImagePropertiesXml();
         imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
         logger.d(imageProperties.toString());
@@ -136,8 +135,7 @@ public class ZoomifyImageManager implements ImageManager {
         return initialized;
     }
 
-    private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
-            ImageServerResponseException {
+    private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
         MetadataCache cache = CacheManager.getMetadataCache();
         String fromCache = cache.getXml(mImagePropertiesUrl);
         if (fromCache != null) {
@@ -162,6 +160,7 @@ public class ZoomifyImageManager implements ImageManager {
             URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setReadTimeout(IMAGE_PROPERTIES_TIMEOUT);
+            urlConnection.setInstanceFollowRedirects(false); //because I handle following redirects manually to avoid redirection loop
             int responseCode = urlConnection.getResponseCode();
             // logger.d( "http code: " + responseCode);
             String location = urlConnection.getHeaderField("Location");

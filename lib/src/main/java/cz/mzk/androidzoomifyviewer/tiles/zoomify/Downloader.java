@@ -43,6 +43,7 @@ public class Downloader {
             URL url = new URL(tileUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setReadTimeout(TILES_TIMEOUT);
+            urlConnection.setInstanceFollowRedirects(false); //because I handle following redirects manually to avoid redirection loop
             int responseCode = urlConnection.getResponseCode();
             switch (responseCode) {
                 case 200:
