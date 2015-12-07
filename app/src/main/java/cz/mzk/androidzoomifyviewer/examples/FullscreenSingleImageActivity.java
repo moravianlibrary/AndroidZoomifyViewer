@@ -148,7 +148,6 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
 
     @Override
     protected void onStop() {
-        mImageView.cancelAllTasks();
         super.onStop();
     }
 

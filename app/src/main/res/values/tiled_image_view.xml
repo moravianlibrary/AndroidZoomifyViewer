@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="androidzoomifyviewer_disk_cache_enabled">true</bool>
+    <bool name="androidzoomifyviewer_disk_cache_clear_on_startup">false</bool>
+    <integer name="androidzoomifyviewer_tile_disk_cache_size_kb">51200</integer>
+</resources>
