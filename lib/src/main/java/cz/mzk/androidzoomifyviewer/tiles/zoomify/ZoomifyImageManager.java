@@ -2,12 +2,6 @@ package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
 import android.graphics.Rect;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +33,6 @@ public class ZoomifyImageManager implements ImageManager {
      * @link https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/25
      */
     public static final boolean COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION = true;
-    public static final int MAX_REDIRECTIONS = 5;
-    public static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
 
     private static final Logger logger = new Logger(ZoomifyImageManager.class);
 
@@ -141,87 +133,12 @@ public class ZoomifyImageManager implements ImageManager {
         if (fromCache != null) {
             return fromCache;
         } else {
-            String downloaded = downloadImagePropertiesXml(mImagePropertiesUrl, MAX_REDIRECTIONS);
+            String downloaded = Downloader.downloadMetadata(mImagePropertiesUrl);
             cache.storeXml(downloaded, mImagePropertiesUrl);
             return downloaded;
         }
     }
 
-    private String downloadImagePropertiesXml(String urlString, int remainingRedirections)
-            throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
-        logger.d("downloading metadata from " + urlString);
-        if (remainingRedirections == 0) {
-            throw new TooManyRedirectionsException(urlString, MAX_REDIRECTIONS);
-        }
-        HttpURLConnection urlConnection = null;
-        // logger.d( urlString + " remaining redirections: " +
-        // remainingRedirections);
-        try {
-            URL url = new URL(urlString);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(IMAGE_PROPERTIES_TIMEOUT);
-            urlConnection.setInstanceFollowRedirects(false); //because I handle following redirects manually to avoid redirection loop
-            int responseCode = urlConnection.getResponseCode();
-            // logger.d( "http code: " + responseCode);
-            String location = urlConnection.getHeaderField("Location");
-            switch (responseCode) {
-                case 200:
-                    return stringFromUrlConnection(urlConnection);
-                case 300:
-                    if (location == null || location.isEmpty()) {
-                        throw new ImageServerResponseException(urlString, responseCode);
-                    }
-                    urlConnection.disconnect();
-                    return downloadImagePropertiesXml(location, remainingRedirections - 1);
-                case 301:
-                    if (location == null || location.isEmpty()) {
-                        throw new ImageServerResponseException(urlString, responseCode);
-                    }
-                    mImagePropertiesUrl = location;
-                    urlConnection.disconnect();
-                    return downloadImagePropertiesXml(location, remainingRedirections - 1);
-                case 302:
-                case 303:
-                case 305:
-                case 307:
-                    if (location == null || location.isEmpty()) {
-                        throw new ImageServerResponseException(urlString, responseCode);
-                    }
-                    urlConnection.disconnect();
-                    return downloadImagePropertiesXml(location, remainingRedirections - 1);
-                default:
-                    throw new ImageServerResponseException(urlString, responseCode);
-            }
-        } catch (IOException e) {
-            throw new OtherIOException(e.getMessage(), mImagePropertiesUrl);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
-    private String stringFromUrlConnection(HttpURLConnection urlConnection) throws IOException {
-        InputStream in = null;
-        ByteArrayOutputStream out = null;
-        try {
-            in = new BufferedInputStream(urlConnection.getInputStream());
-            byte[] buffer = new byte[8 * 1024];
-            out = new ByteArrayOutputStream();
-            int readBytes = 0;
-            while ((readBytes = in.read(buffer)) != -1) {
-                out.write(buffer, 0, readBytes);
-            }
-            return out.toString();
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
 
     private List<Layer> initLayers() {
         int numberOfLayers = computeNumberOfLayers();
@@ -254,25 +171,6 @@ public class ZoomifyImageManager implements ImageManager {
         return i;
     }
 
-    /**
-     * Downloads tile from zoomify server. TODO: InvalidDataException
-     *
-     * @param tileImageUrl Tile id.
-     * @return
-     * @throws IllegalStateException        If methodi initImageMetadata had not been called yet.
-     * @throws TooManyRedirectionsException If max. number of redirections exceeded before downloading tile. This probably means redirection loop.
-     * @throws ImageServerResponseException If zoomify server response code for tile cannot be handled here (everything apart from OK and 3xx
-     *                                      redirections).
-     * @throws InvalidDataException         If tile contains invalid data.
-     * @throws OtherIOException             In case of other IO error (invalid URL, error transfering data, ...)
-     */
-    /*@Override
-    public Bitmap downloadTile(String tileImageUrl) throws OtherIOException, TooManyRedirectionsException,
-            ImageServerResponseException {
-        checkInitialized();
-        logger.v("TILE URL: " + tileImageUrl);
-        return downloadTile(tileImageUrl, MAX_REDIRECTIONS);
-    }*/
     @Override
     public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords) {
         TilePositionInPyramid.TilePositionInLayer[] corners = getCornerVisibleTilesCoords(layerId, visibleAreaInImageCoords);
