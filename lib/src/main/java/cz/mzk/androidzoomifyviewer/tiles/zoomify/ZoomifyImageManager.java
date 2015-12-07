@@ -131,8 +131,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void initImageMetadataAsync(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        taskRegistry.enqueueInitializationTask(handler, successListener);
+    public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+        taskRegistry.enqueueMetadataInitializationTask(handler, successListener);
     }
 
     @Override
@@ -648,13 +648,13 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
-        taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, errorListener, successListener);
+        taskRegistry.enqueueTileDownloadTask(tilePositionInPyramid, mBaseUrl, errorListener, successListener);
     }
 
     @Override
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
         checkInitialized();
-        for (TilePositionInPyramid runningTilePositionInPyramid : taskRegistry.getAllTaskTileIds()) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : taskRegistry.getAllTileDownloadTaskIds()) {
             if (runningTilePositionInPyramid.getLayer() == layerId) {
                 if (!visibleTiles.contains(runningTilePositionInPyramid)) {
                     boolean wasCanceled = taskRegistry.cancel(runningTilePositionInPyramid);
@@ -665,13 +665,5 @@ public class ZoomifyImageManager implements ImageManager {
             }
         }
     }
-
-
-    @Override
-    public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid) {
-        checkInitialized();
-        taskRegistry.unregisterTask(tilePositionInPyramid);
-    }
-
 
 }

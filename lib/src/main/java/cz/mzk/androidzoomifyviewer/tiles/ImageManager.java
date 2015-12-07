@@ -18,30 +18,20 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
  */
 public interface ImageManager {
 
-    //METADATA INITIALIZATION
-
-    //public void initImageMetadataAsync(MetadataInitializationHandler handler);
-
-    public void initImageMetadataAsync(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener);
-
-
-    public boolean isInitialized();
-
-
     //TASK MANAGEMENT
+
+    public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener);
 
     public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener);
 
-    // TODO: 7.12.15 Unused, remove. Super, protoze to je zase interni vec ImageManageru
-    public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid);
-
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
-
-    // TODO: 7.12.15 also task to initialize metadata
 
     public void cancelAllTasks();
 
-    //IMAGE METADATA
+
+    //STATE & IMAGE METADATA
+
+    public boolean isInitialized();
 
     public int getImageWidth();
 
@@ -61,9 +51,6 @@ public interface ImageManager {
     public Rect getTileAreaInImageCoords(TilePositionInPyramid tilePositionInPyramid);
 
     public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid);
-
-
-    //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
 
 
     //TMP

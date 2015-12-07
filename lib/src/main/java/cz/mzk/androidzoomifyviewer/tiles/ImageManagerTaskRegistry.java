@@ -18,22 +18,22 @@ public class ImageManagerTaskRegistry {
 
     public static final int MAX_TASKS_IN_POOL = 50;
 
-    private static final Logger logger = new Logger(ImageManagerTaskRegistry.class);
+    private static final Logger LOGGER = new Logger(ImageManagerTaskRegistry.class);
 
     private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> tasks = new HashMap<TilePositionInPyramid, DownloadAndSaveTileTask>();
-    private final ImageManager imgManager;
+    private final ImageManager mImgManager;
     private InitImageManagerTask mInitTask;
 
     public ImageManagerTaskRegistry(ImageManager imgManager) {
-        this.imgManager = imgManager;
+        this.mImgManager = imgManager;
     }
 
-    public void registerTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
+    public void enqueueTileDownloadTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
         if (tasks.size() < MAX_TASKS_IN_POOL) {
             boolean registered = tasks.containsKey(tilePositionInPyramid);
             if (!registered) {
                 // TODO: 7.12.15 proc se posila zoomfyBaseUrl?
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(imgManager, mZoomifyBaseUrl, tilePositionInPyramid, errorListener, successListener, new TaskFinishedListener() {
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(mImgManager, mZoomifyBaseUrl, tilePositionInPyramid, errorListener, successListener, new TaskFinishedListener() {
 
                     @Override
                     public void onTaskFinished() {
@@ -41,28 +41,28 @@ public class ImageManagerTaskRegistry {
                     }
                 });
                 tasks.put(tilePositionInPyramid, task);
-                logger.v("  registered task for " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
+                LOGGER.v("enqueued tile-download task for " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
                 task.executeConcurrentIfPossible();
             } else {
-                // logger.v( " ignored task registration task for " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
+                LOGGER.v("ignoring tile-download task for " + tilePositionInPyramid + ", already in queue");
             }
         } else {
-            // logger.v( "registration ignored: to many tasks: " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
+            LOGGER.v("ignoring tile-download task for " + tilePositionInPyramid + ", queue full (" + tasks.size() + " tasks)");
         }
     }
 
-    public void enqueueInitializationTask(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        mInitTask = new InitImageManagerTask(imgManager, handler, successListener, new TaskFinishedListener() {
+    public void enqueueMetadataInitializationTask(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+        mInitTask = new InitImageManagerTask(mImgManager, handler, successListener, new TaskFinishedListener() {
 
             @Override
             public void onTaskFinished() {
                 mInitTask = null;
             }
         });
+        LOGGER.v("enqueued metadata-initialization task");
         mInitTask.executeConcurrentIfPossible();
 
     }
-
 
     public void cancelAllTasks() {
         if (mInitTask != null) {
@@ -72,11 +72,6 @@ public class ImageManagerTaskRegistry {
         for (DownloadAndSaveTileTask task : tasks.values()) {
             task.cancel(false);
         }
-    }
-
-    public void unregisterTask(TilePositionInPyramid tilePositionInPyramid) {
-        tasks.remove(tilePositionInPyramid);
-        logger.v("unregistration performed: " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
     }
 
     public boolean cancel(TilePositionInPyramid id) {
@@ -89,7 +84,7 @@ public class ImageManagerTaskRegistry {
         }
     }
 
-    public Set<TilePositionInPyramid> getAllTaskTileIds() {
+    public Set<TilePositionInPyramid> getAllTileDownloadTaskIds() {
         return tasks.keySet();
     }
 

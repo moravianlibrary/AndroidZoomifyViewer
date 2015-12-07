@@ -198,7 +198,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     private void initTilesDownloaderAsync() {
-        mImageManager.initImageMetadataAsync(mMetadataInitializationHandler, new MetadataInitializationSuccessListener() {
+        mImageManager.enqueueMetadataInitialization(mMetadataInitializationHandler, new MetadataInitializationSuccessListener() {
 
             @Override
             public void onMetadataDownloaded(ImageManager imgManager) {
