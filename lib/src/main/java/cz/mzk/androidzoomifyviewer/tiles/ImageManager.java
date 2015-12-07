@@ -11,6 +11,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * Created by Martin Řehánek on 3.12.15.
@@ -26,7 +27,7 @@ public interface ImageManager {
 
     //TASK MANAGEMENT
 
-    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler);
+    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener handler, TiledImageView.TileDownloadSuccessListener tileDownloadSuccessListener);
 
     public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid);
 

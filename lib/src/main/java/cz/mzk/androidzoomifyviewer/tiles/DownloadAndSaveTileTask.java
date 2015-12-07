@@ -9,6 +9,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * @author Martin Řehánek
@@ -21,7 +22,8 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     private final ImageManager mImgManager;// TODO: 7.12.15 Bude stacit jen mImgManager
     private final String zoomifyBaseUrl;
     private final TilePositionInPyramid tilePositionInPyramid;
-    private final TileDownloadHandler handler;
+    private final TiledImageView.TileDownloadErrorListener mErrorListener;
+    private final TiledImageView.TileDownloadSuccessListener mSuccessListener;
     private final ImageManagerTaskRegistry.TaskFinishedListener mRegistryListener;
 
     private OtherIOException otherIoException;
@@ -30,17 +32,19 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     private InvalidDataException invalidXmlException;
 
     /**
-     * @param imgManager            initialized Tiles mImgManager, not null
+     * @param imgManager            initialized ImageManager, not null
      * @param zoomifyBaseUrl        Zoomify base url, not null
      * @param tilePositionInPyramid Tile id, not null
-     * @param handler               Tile download result handler, not null
+     * @param errorListener         Tile download result mErrorListener, not null
+     * @param successListener
      * @param taskFinishedListener
      */
-    public DownloadAndSaveTileTask(ImageManager imgManager, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
+    public DownloadAndSaveTileTask(ImageManager imgManager, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
         this.mImgManager = imgManager;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
         this.tilePositionInPyramid = tilePositionInPyramid;
-        this.handler = handler;
+        mErrorListener = errorListener;
+        mSuccessListener = successListener;
         mRegistryListener = taskFinishedListener;
     }
 
@@ -96,19 +100,18 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         if (mRegistryListener != null) {
             mRegistryListener.onTaskFinished();
         }
-        if (handler != null) {
+        if (mSuccessListener != null && bitmap != null) {
+            mSuccessListener.onTileDownloaded();
+        }
+        if (mErrorListener != null) {
             if (tooManyRedirectionsException != null) {
-                handler.onRedirectionLoop(tilePositionInPyramid, tooManyRedirectionsException.getUrl(),
-                        tooManyRedirectionsException.getRedirections());
+                mErrorListener.onRedirectionLoop(tilePositionInPyramid, tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
             } else if (imageServerResponseException != null) {
-                handler.onUnhandableResponseCode(tilePositionInPyramid, imageServerResponseException.getUrl(),
-                        imageServerResponseException.getErrorCode());
+                mErrorListener.onUnhandableResponse(tilePositionInPyramid, imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
             } else if (invalidXmlException != null) {
-                handler.onInvalidData(tilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
+                mErrorListener.onInvalidDataError(tilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
             } else if (otherIoException != null) {
-                handler.onDataTransferError(tilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
-            } else {
-                handler.onSuccess(tilePositionInPyramid, bitmap);
+                mErrorListener.onDataTransferError(tilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
             }
         }
     }

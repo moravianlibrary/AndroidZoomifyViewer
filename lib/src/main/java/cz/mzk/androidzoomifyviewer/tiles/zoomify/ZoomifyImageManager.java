@@ -20,7 +20,6 @@ import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
-import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
@@ -28,6 +27,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 import cz.mzk.androidzoomifyviewer.viewer.Point;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
@@ -640,8 +640,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TileDownloadHandler handler) {
-        taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, handler);
+    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener handler, TiledImageView.TileDownloadSuccessListener tileDownloadSuccessListener) {
+        taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, handler, tileDownloadSuccessListener);
     }
 
     @Override

@@ -20,14 +20,14 @@ import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadErrorListener;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek
  */
 public class FullscreenSingleImageActivity extends AppCompatActivity implements ImageInitializationHandler,
-        TileDownloadHandler, SingleTapListener {
+        TileDownloadErrorListener, SingleTapListener {
 
     public static final String EXTRA_BASE_URL = "baseUrl";
     private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
@@ -59,7 +59,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         mErrorDescription = (TextView) findViewById(R.id.errorDescription);
         mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
         mImageView.setImageInitializationHandler(this);
-        mImageView.setTileDownloadHandler(this);
+        mImageView.setTileDownloadErrorListener(this);
         mImageView.setSingleTapListener(this);
         mImageView.setViewMode(AppConfig.VIEW_MODE);
 
@@ -194,33 +194,28 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onTileProcessed(TilePositionInPyramid tilePositionInPyramid) {
-        // nothing
-    }
-
-    @Override
-    public void onTileUnhandableResponseError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
+    public void onUnhandableResponse(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
         Toast.makeText(this,
                 "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': HTTP error " + responseCode,
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onTileRedirectionLoopError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections) {
+    public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections) {
         Toast.makeText(this,
                 "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': redirection loop",
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onTileDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
+    public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
         Toast.makeText(this,
                 "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': " + errorMessage,
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onTileInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
+    public void onInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
         Toast.makeText(
                 this,
                 "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': invalid data: "

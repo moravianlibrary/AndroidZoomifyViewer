@@ -101,7 +101,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
         mErrorDescription = (TextView) view.findViewById(R.id.errorDescription);
         mTiledImageView = (TiledImageView) view.findViewById(R.id.tiledImageView);
         mTiledImageView.setImageInitializationHandler(this);
-        // mTiledImageView.setTileDownloadHandler(this);
+        // mTiledImageView.setTileDownloadErrorListener(this);
         mTiledImageView.setSingleTapListener(this);
         mImageView = (ImageView) view.findViewById(R.id.imageView);
         mImageView.setOnTouchListener(this);

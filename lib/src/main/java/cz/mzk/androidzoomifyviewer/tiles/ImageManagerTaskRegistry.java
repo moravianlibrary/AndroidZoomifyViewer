@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * This class registers running AsynctTasks in which tiles for single image are downloaded and saved to cache. Purpose of this
@@ -27,12 +28,12 @@ public class ImageManagerTaskRegistry {
         this.imgManager = imgManager;
     }
 
-    public void registerTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TileDownloadHandler handler) {
+    public void registerTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TiledImageView.TileDownloadErrorListener handler, TiledImageView.TileDownloadSuccessListener tileDownloadSuccessListener) {
         if (tasks.size() < MAX_TASKS_IN_POOL) {
             boolean registered = tasks.containsKey(tilePositionInPyramid);
             if (!registered) {
                 // TODO: 7.12.15 proc se posila zoomfyBaseUrl?
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(imgManager, mZoomifyBaseUrl, tilePositionInPyramid, handler, new TaskFinishedListener() {
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(imgManager, mZoomifyBaseUrl, tilePositionInPyramid, handler, tileDownloadSuccessListener, new TaskFinishedListener() {
 
                     @Override
                     public void onTaskFinished() {

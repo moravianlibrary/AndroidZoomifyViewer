@@ -32,8 +32,7 @@ public interface TiledImageViewApi {
 
     public void setImageInitializationHandler(TiledImageView.ImageInitializationHandler imageInitializationHandler);
 
-    // TODO: 6.12.15 Dva interfacy TileDownloadHandler, asi prejmenovat, at neni zmatek
-    public void setTileDownloadHandler(TiledImageView.TileDownloadHandler tileDownloadHandler);
+    public void setTileDownloadErrorListener(TiledImageView.TileDownloadErrorListener tileDownloadErrorListener);
 
 
     //GESTURES

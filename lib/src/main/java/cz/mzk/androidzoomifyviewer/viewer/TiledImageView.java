@@ -60,7 +60,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     //EVENT HANDLERS
     private ImageInitializationHandler mImageInitializationHandler;
-    private TileDownloadHandler mTileDownloadHandler;
+    private TileDownloadErrorListener mTileDownloadErrorListener;
 
     //GESTURES
     private MyGestureListener mGestureListener;
@@ -149,8 +149,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     @Override
-    public void setTileDownloadHandler(TileDownloadHandler tileDownloadHandler) {
-        this.mTileDownloadHandler = tileDownloadHandler;
+    public void setTileDownloadErrorListener(TileDownloadErrorListener tileDownloadErrorListener) {
+        this.mTileDownloadErrorListener = tileDownloadErrorListener;
     }
 
     @Override
@@ -163,7 +163,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mDevTools = null;
         mImageManager = null;
         mImageInitializationHandler = null;
-        mTileDownloadHandler = null;
+        mTileDownloadErrorListener = null;
     }
 
     private void cancelAllTasks() {
@@ -459,42 +459,11 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     private void enqueTileDownload(TilePositionInPyramid visibleTileId) {
-        mImageManager.enqueTileDownload(visibleTileId, new cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler() {
+        mImageManager.enqueTileDownload(visibleTileId, mTileDownloadErrorListener, new TileDownloadSuccessListener() {
 
             @Override
-            public void onUnhandableResponseCode(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
-                if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileUnhandableResponseError(tilePositionInPyramid, tileUrl, responseCode);
-                }
-            }
-
-            @Override
-            public void onSuccess(TilePositionInPyramid tilePositionInPyramid, Bitmap bitmap) {
+            public void onTileDownloaded() {
                 invalidate();
-                if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileProcessed(tilePositionInPyramid);
-                }
-            }
-
-            @Override
-            public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections) {
-                if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileRedirectionLoopError(tilePositionInPyramid, tileUrl, redirections);
-                }
-            }
-
-            @Override
-            public void onInvalidData(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
-                if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileInvalidDataError(tilePositionInPyramid, tileUrl, errorMessage);
-                }
-            }
-
-            @Override
-            public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
-                if (mTileDownloadHandler != null) {
-                    mTileDownloadHandler.onTileDataTransferError(tilePositionInPyramid, tileUrl, errorMessage);
-                }
             }
         });
     }
@@ -772,14 +741,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
      *
      * @author martin
      */
-    public interface TileDownloadHandler {
-
-        /**
-         * Tile downloaded and processed properly.
-         *
-         * @param tilePositionInPyramid Tile id.
-         */
-        public void onTileProcessed(TilePositionInPyramid tilePositionInPyramid);
+    public interface TileDownloadErrorListener {
 
         /**
          * Response to HTTP request for tile returned code that cannot be handled here. That means almost everything except for
@@ -790,7 +752,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param responseCode          Http response code recieved.
          */
 
-        public void onTileUnhandableResponseError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode);
+        public void onUnhandableResponse(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode);
 
         /**
          * Too many redirections for tile, probably loop.
@@ -799,7 +761,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param tileUrl               Tile jpeg url.
          * @param redirections          Total redirections.
          */
-        public void onTileRedirectionLoopError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections);
+        public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections);
 
         /**
          * Other errors in transfering tile - timeouts etc.
@@ -808,7 +770,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param tileUrl               Tile jpeg url.
          * @param errorMessage          Error message.
          */
-        public void onTileDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
+        public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
 
         /**
          * Invalid tile content.
@@ -817,7 +779,11 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param tileUrl               Tile jpeg url.
          * @param errorMessage          Error message.
          */
-        public void onTileInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
+        public void onInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
+    }
+
+    public static interface TileDownloadSuccessListener {
+        public void onTileDownloaded();
     }
 
 }
