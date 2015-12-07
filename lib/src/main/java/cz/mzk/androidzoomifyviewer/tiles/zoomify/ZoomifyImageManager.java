@@ -259,16 +259,10 @@ public class ZoomifyImageManager implements ImageManager {
         return i;
     }
 
-    //@Override
-    /*private ImageManagerTaskRegistry getTaskRegistry() {
-        checkInitialized();
-        return taskRegistry;
-    }*/
-
     /**
      * Downloads tile from zoomify server. TODO: InvalidDataException
      *
-     * @param tilePositionInPyramid Tile id.
+     * @param tileImageUrl Tile id.
      * @return
      * @throws IllegalStateException        If methodi initImageMetadata had not been called yet.
      * @throws TooManyRedirectionsException If max. number of redirections exceeded before downloading tile. This probably means redirection loop.
@@ -278,12 +272,11 @@ public class ZoomifyImageManager implements ImageManager {
      * @throws OtherIOException             In case of other IO error (invalid URL, error transfering data, ...)
      */
     @Override
-    public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException,
+    public Bitmap downloadTile(String tileImageUrl) throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         checkInitialized();
-        String tileUrl = buildTileUrl(tilePositionInPyramid);
-        logger.v("TILE URL: " + tileUrl);
-        return downloadTile(tileUrl, MAX_REDIRECTIONS);
+        logger.v("TILE URL: " + tileImageUrl);
+        return downloadTile(tileImageUrl, MAX_REDIRECTIONS);
     }
 
     @Override
@@ -648,7 +641,8 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
-        taskRegistry.enqueueTileDownloadTask(tilePositionInPyramid, mBaseUrl, errorListener, successListener);
+        String tileImageUrl = buildTileUrl(tilePositionInPyramid);
+        taskRegistry.enqueueTileDownloadTask(tilePositionInPyramid, tileImageUrl, errorListener, successListener);
     }
 
     @Override

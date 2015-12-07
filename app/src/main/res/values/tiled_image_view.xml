@@ -2,5 +2,6 @@
 <resources>
     <bool name="androidzoomifyviewer_disk_cache_enabled">true</bool>
     <bool name="androidzoomifyviewer_disk_cache_clear_on_startup">false</bool>
-    <integer name="androidzoomifyviewer_tile_disk_cache_size_kb">51200</integer>
+    <!--50 MB-->
+    <integer name="androidzoomifyviewer_tile_disk_cache_size_kb">512000</integer>
 </resources>

@@ -15,19 +15,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadErrorListener;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek
  */
-public class FullscreenSingleImageActivity extends AppCompatActivity implements MetadataInitializationHandler,
-        TileDownloadErrorListener, SingleTapListener {
+public class FullscreenSingleImageActivity extends AppCompatActivity implements SingleTapListener, TiledImageView.MetadataInitializationHandler, TiledImageView.TileDownloadErrorListener {
 
     public static final String EXTRA_BASE_URL = "baseUrl";
     private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
@@ -158,7 +154,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+    public void onMetadataUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Cannot process server resource");
@@ -167,25 +163,25 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
+    public void onMetadataRedirectionLoop(String tileImageUrl, int redirections) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Redirection loop");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorResourceUrl.setText(tileImageUrl);
         mErrorDescription.setText("Too many redirections: " + redirections);
     }
 
     @Override
-    public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
+    public void onMetadataDataTransferError(String tileImageUrl, String errorMessage) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Data transfer error");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorResourceUrl.setText(tileImageUrl);
         mErrorDescription.setText(errorMessage);
     }
 
     @Override
-    public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
+    public void onMetadataInvalidData(String imagePropertiesUrl, String errorMessage) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Invalid content in ImageProperties.xml");
@@ -194,38 +190,29 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onUnhandableResponse(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode) {
-        Toast.makeText(this,
-                "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': HTTP error " + responseCode,
-                Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections) {
-        Toast.makeText(this,
-                "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': redirection loop",
-                Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
-        Toast.makeText(this,
-                "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': " + errorMessage,
-                Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage) {
-        Toast.makeText(
-                this,
-                "Failed to download tile " + tilePositionInPyramid.toString() + " from '" + tileUrl + "': invalid data: "
-                        + errorMessage, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     public void onSingleTap(float x, float y, Rect boundingBox) {
         PointD point = new PointD(x, y);
-        Toast.makeText(this, "Single tap at " + point.toString() + ", img: " + boundingBox, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Single tap at %s, img: %s", point, boundingBox), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onTileUnhandableResponse(String tileImageUrl, int responseCode) {
+        Toast.makeText(this, String.format("Failed to download tile from '%s': HTTP error: %d", tileImageUrl, responseCode), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTileRedirectionLoop(String tileImageUrl, int redirections) {
+        Toast.makeText(this, String.format("Failed to download tile from '%s': Redirection loop, redirections %d", tileImageUrl, redirections), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTileDataTransferError(String tileImageUrl, String errorMessage) {
+        Toast.makeText(this, String.format("Failed to download tile from '%s': Data transfer error: %d", tileImageUrl, errorMessage), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTileInvalidDataError(String tileImageUrl, String errorMessage) {
+        Toast.makeText(this, String.format("Failed to download tile from '%s': Invalid data error: %d", tileImageUrl, errorMessage), Toast.LENGTH_SHORT).show();
     }
 
 }

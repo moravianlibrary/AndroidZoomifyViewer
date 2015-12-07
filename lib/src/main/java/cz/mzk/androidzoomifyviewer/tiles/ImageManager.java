@@ -61,7 +61,7 @@ public interface ImageManager {
 
     //TODO: presunout do budouciho Downloaderu
 
-    public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
+    public Bitmap downloadTile(String tileImageUrl) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
 
     public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
 

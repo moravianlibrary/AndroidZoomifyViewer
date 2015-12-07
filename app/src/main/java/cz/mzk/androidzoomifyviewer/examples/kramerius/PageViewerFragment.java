@@ -235,8 +235,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
-        Log.d(TAG, "onUnhandableResponseCode, code: " + responseCode);
+    public void onMetadataUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+        Log.d(TAG, "onMetadataUnhandableResponseCode, code: " + responseCode);
         hideViews();
         switch (responseCode) {
             case 403: // FORBIDDEN
@@ -301,8 +301,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
-        Log.d(TAG, "onRedirectionLoop");
+    public void onMetadataRedirectionLoop(String imagePropertiesUrl, int redirections) {
+        Log.d(TAG, "onMetadataRedirectionLoop");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Redirection loop");
@@ -311,8 +311,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
-        Log.d(TAG, "onDataTransferError");
+    public void onMetadataDataTransferError(String imagePropertiesUrl, String errorMessage) {
+        Log.d(TAG, "onMetadataDataTransferError");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Data transfer error");
@@ -321,8 +321,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
-        Log.d(TAG, "onInvalidData");
+    public void onMetadataInvalidData(String imagePropertiesUrl, String errorMessage) {
+        Log.d(TAG, "onMetadataInvalidData");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Invalid content in ImageProperties.xml");

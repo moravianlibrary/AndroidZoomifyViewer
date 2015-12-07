@@ -28,7 +28,7 @@ public class TilePositionInPyramid {
 
     @Override
     public String toString() {
-        return "" + mLayer + ':' + mPositionInLayer.row + ':' + mPositionInLayer.column;
+        return "" + mLayer + ':' + mPositionInLayer.column + ':' + mPositionInLayer.row;
     }
 
     public int getLayer() {

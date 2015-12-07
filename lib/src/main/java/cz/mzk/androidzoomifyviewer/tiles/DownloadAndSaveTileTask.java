@@ -20,8 +20,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
     private static final Logger LOGGER = new Logger(DownloadAndSaveTileTask.class);
 
     private final ImageManager mImgManager;// TODO: 7.12.15 Bude stacit jen downloader
-    private final String zoomifyBaseUrl; // TODO: 7.12.15 Really needed here?
-    private final TilePositionInPyramid mTilePositionInPyramid;
+    private final String mTileImageUrl;
     private final TiledImageView.TileDownloadErrorListener mErrorListener;
     private final TiledImageView.TileDownloadSuccessListener mSuccessListener;
     private final ImageManagerTaskRegistry.TaskFinishedListener mRegistryListener;
@@ -32,17 +31,15 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
     private InvalidDataException invalidXmlException;
 
     /**
-     * @param imgManager             initialized ImageManager, not null
-     * @param zoomifyBaseUrl         Zoomify base url, not null
-     * @param mTilePositionInPyramid Tile id, not null
-     * @param errorListener          Tile download result mErrorListener, not null
+     * @param imgManager           initialized ImageManager, not null
+     * @param tileImageUrl         Url of tile image (jpeg, tif, png, bmp, ...)
+     * @param errorListener        Tile download result mErrorListener, not null
      * @param successListener
      * @param taskFinishedListener
      */
-    public DownloadAndSaveTileTask(ImageManager imgManager, String zoomifyBaseUrl, TilePositionInPyramid mTilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
+    public DownloadAndSaveTileTask(ImageManager imgManager, String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
         this.mImgManager = imgManager;
-        this.zoomifyBaseUrl = zoomifyBaseUrl;
-        this.mTilePositionInPyramid = mTilePositionInPyramid;
+        mTileImageUrl = tileImageUrl;
         mErrorListener = errorListener;
         mSuccessListener = successListener;
         mRegistryListener = taskFinishedListener;
@@ -58,22 +55,21 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
         // threadPriority, group.getName(), group.activeCount(), group.getMaxPriority()));
         try {
             if (!isCancelled()) {
-                Bitmap tile = mImgManager.downloadTile(mTilePositionInPyramid);
+                Bitmap tile = mImgManager.downloadTile(mTileImageUrl);
                 if (!isCancelled()) {
                     if (tile != null) {
-                        CacheManager.getTilesCache().storeTile(tile, mImgManager.buildTileUrl(mTilePositionInPyramid));
-                        LOGGER.v(String.format("tile downloaded and saved to disk cache: base url: '%s', tile: '%s'", zoomifyBaseUrl, mTilePositionInPyramid));
+                        CacheManager.getTilesCache().storeTile(tile, mTileImageUrl);
+                        LOGGER.v(String.format("tile downloaded and saved to disk cache: '%s'", mTileImageUrl));
                         return true;
                     } else {
                         // TODO: examine this
                         LOGGER.w("tile is null");
                     }
                 } else {
-                    LOGGER.v(String
-                            .format("tile processing canceled task after downloading and before saving data: base url: '%s', tile: '%s'", zoomifyBaseUrl, mTilePositionInPyramid));
+                    LOGGER.v(String.format("tile processing canceled task after downloading and before saving data: '%s'", mTileImageUrl));
                 }
             } else {
-                LOGGER.v(String.format("tile processing task canceled before download started: base url: '%s', tile: '%s'", zoomifyBaseUrl, mTilePositionInPyramid));
+                LOGGER.v(String.format("tile processing task canceled before download started: '%s'", mTileImageUrl));
             }
         } catch (TooManyRedirectionsException e) {
             tooManyRedirectionsException = e;
@@ -102,13 +98,13 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
         } else {
             if (mErrorListener != null) {
                 if (tooManyRedirectionsException != null) {
-                    mErrorListener.onRedirectionLoop(mTilePositionInPyramid, tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
+                    mErrorListener.onTileRedirectionLoop(tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
                 } else if (imageServerResponseException != null) {
-                    mErrorListener.onUnhandableResponse(mTilePositionInPyramid, imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
+                    mErrorListener.onTileUnhandableResponse(imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
                 } else if (invalidXmlException != null) {
-                    mErrorListener.onInvalidDataError(mTilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
+                    mErrorListener.onTileInvalidDataError(invalidXmlException.getUrl(), invalidXmlException.getMessage());
                 } else if (otherIoException != null) {
-                    mErrorListener.onDataTransferError(mTilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
+                    mErrorListener.onTileDataTransferError(otherIoException.getUrl(), otherIoException.getMessage());
                 }
             }
         }

@@ -28,25 +28,24 @@ public class ImageManagerTaskRegistry {
         this.mImgManager = imgManager;
     }
 
-    public void enqueueTileDownloadTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
+    public void enqueueTileDownloadTask(final TilePositionInPyramid tilePosition, String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
         if (mTileDownloadTasks.size() < MAX_TASKS_IN_POOL) {
-            if (!mTileDownloadTasks.containsKey(tilePositionInPyramid)) {
-                LOGGER.d("enqueuing tile-download task for " + tilePositionInPyramid + ": (total " + mTileDownloadTasks.size() + ")");
-                // TODO: 7.12.15 proc se posila zoomfyBaseUrl?
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(mImgManager, mZoomifyBaseUrl, tilePositionInPyramid, errorListener, successListener, new TaskFinishedListener() {
+            if (!mTileDownloadTasks.containsKey(tilePosition)) {
+                LOGGER.d(String.format("enqueuing tile-download task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(mImgManager, tileImageUrl, errorListener, successListener, new TaskFinishedListener() {
 
                     @Override
                     public void onTaskFinished() {
-                        mTileDownloadTasks.remove(tilePositionInPyramid);
+                        mTileDownloadTasks.remove(tilePosition);
                     }
                 });
-                mTileDownloadTasks.put(tilePositionInPyramid, task);
+                mTileDownloadTasks.put(tilePosition, task);
                 task.executeConcurrentIfPossible();
             } else {
-                LOGGER.d("ignoring tile-download task for " + tilePositionInPyramid + ", already in queue");
+                LOGGER.d(String.format("ignoring tile-download task for '%s' (already in queue)", tileImageUrl));
             }
         } else {
-            LOGGER.d("ignoring tile-download task for " + tilePositionInPyramid + ", queue full (" + mTileDownloadTasks.size() + " mTileDownloadTasks)");
+            LOGGER.d(String.format("ignoring tile-download task for '%s' (queue full - %d items)", tileImageUrl, mTileDownloadTasks.size()));
         }
     }
 
@@ -67,6 +66,7 @@ public class ImageManagerTaskRegistry {
     }
 
     public void cancelAllTasks() {
+        LOGGER.d("canceling all tasks");
         if (mInitMetadataTask != null) {
             mInitMetadataTask.cancel(false);
             mInitMetadataTask = null;
@@ -79,6 +79,7 @@ public class ImageManagerTaskRegistry {
     public boolean cancel(TilePositionInPyramid id) {
         DownloadAndSaveTileTask task = mTileDownloadTasks.get(id);
         if (task != null) {
+            LOGGER.d(String.format("canceling tile-download task for %s", id.toString()));
             task.cancel(false);
             return true;
         } else {

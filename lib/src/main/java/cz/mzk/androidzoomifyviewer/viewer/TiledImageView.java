@@ -669,7 +669,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param responseCode
          */
-        public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
+        public void onMetadataUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
 
         /**
          * Too many redirections to ImageProperties.xml, probably loop.
@@ -677,7 +677,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param redirections
          */
-        public void onRedirectionLoop(String imagePropertiesUrl, int redirections);
+        public void onMetadataRedirectionLoop(String imagePropertiesUrl, int redirections);
 
         /**
          * Other errors in transfering ImageProperties.xml - timeouts etc.
@@ -685,7 +685,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param errorMessage
          */
-        public void onDataTransferError(String imagePropertiesUrl, String errorMessage);
+        public void onMetadataDataTransferError(String imagePropertiesUrl, String errorMessage);
 
         /**
          * Invalid content in ImageProperties.xml. Particulary erroneous xml.
@@ -693,48 +693,44 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param errorMessage
          */
-        public void onInvalidData(String imagePropertiesUrl, String errorMessage);
+        public void onMetadataInvalidData(String imagePropertiesUrl, String errorMessage);
     }
 
     public interface TileDownloadErrorListener {
 
         /**
-         * Response to HTTP request for tile returned code that cannot be handled here. That means almost everything except for
+         * HTTP response code that could not be handled here. That means almost everything except for
          * some 2xx codes and some 3xx codes for which redirection is applied.
          *
-         * @param tilePositionInPyramid Tile id.
-         * @param tileUrl               Tile jpeg url.
-         * @param responseCode          Http response code recieved.
+         * @param tileImageUrl Url of tile image (jpeg, tif, png, bmp, ...).
+         * @param responseCode Http response code recieved.
          */
 
-        public void onUnhandableResponse(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int responseCode);
+        public void onTileUnhandableResponse(String tileImageUrl, int responseCode);
 
         /**
-         * Too many redirections for tile, probably loop.
+         * Too many redirections for tile, probably loop redirection loop.
          *
-         * @param tilePositionInPyramid Tile id.
-         * @param tileUrl               Tile jpeg url.
-         * @param redirections          Total redirections.
+         * @param tileImageUrl Url of tile image (jpeg, tif, png, bmp, ...)
+         * @param redirections Total redirections.
          */
-        public void onRedirectionLoop(TilePositionInPyramid tilePositionInPyramid, String tileUrl, int redirections);
+        public void onTileRedirectionLoop(String tileImageUrl, int redirections);
 
         /**
          * Other errors in transfering tile - timeouts etc.
          *
-         * @param tilePositionInPyramid Tile id.
-         * @param tileUrl               Tile jpeg url.
-         * @param errorMessage          Error message.
+         * @param tileImageUrl Url of tile image (jpeg, tif, png, bmp, ...)
+         * @param errorMessage Error message.
          */
-        public void onDataTransferError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
+        public void onTileDataTransferError(String tileImageUrl, String errorMessage);
 
         /**
          * Invalid tile content.
          *
-         * @param tilePositionInPyramid Tile id.
-         * @param tileUrl               Tile jpeg url.
-         * @param errorMessage          Error message.
+         * @param tileImageUrl Url of tile image (jpeg, tif, png, bmp, ...)
+         * @param errorMessage Error message.
          */
-        public void onInvalidDataError(TilePositionInPyramid tilePositionInPyramid, String tileUrl, String errorMessage);
+        public void onTileInvalidDataError(String tileImageUrl, String errorMessage);
     }
 
     public static interface TileDownloadSuccessListener {

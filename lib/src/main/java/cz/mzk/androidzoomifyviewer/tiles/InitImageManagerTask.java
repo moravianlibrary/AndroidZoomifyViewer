@@ -55,19 +55,19 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
         }
         if (mTooManyRedirectionsException != null) {
             if (mHandler != null) {
-                mHandler.onRedirectionLoop(mTooManyRedirectionsException.getUrl(), mTooManyRedirectionsException.getRedirections());
+                mHandler.onMetadataRedirectionLoop(mTooManyRedirectionsException.getUrl(), mTooManyRedirectionsException.getRedirections());
             }
         } else if (mImageServerResponseException != null) {
             if (mHandler != null) {
-                mHandler.onUnhandableResponseCode(mImageServerResponseException.getUrl(), mImageServerResponseException.getErrorCode());
+                mHandler.onMetadataUnhandableResponseCode(mImageServerResponseException.getUrl(), mImageServerResponseException.getErrorCode());
             }
         } else if (mInvalidXmlException != null) {
             if (mHandler != null) {
-                mHandler.onInvalidData(mInvalidXmlException.getUrl(), mInvalidXmlException.getMessage());
+                mHandler.onMetadataInvalidData(mInvalidXmlException.getUrl(), mInvalidXmlException.getMessage());
             }
         } else if (mOtherIoException != null) {
             if (mHandler != null) {
-                mHandler.onDataTransferError(mOtherIoException.getUrl(), mOtherIoException.getMessage());
+                mHandler.onMetadataDataTransferError(mOtherIoException.getUrl(), mOtherIoException.getMessage());
             }
         } else {
             if (mHandler != null) {
