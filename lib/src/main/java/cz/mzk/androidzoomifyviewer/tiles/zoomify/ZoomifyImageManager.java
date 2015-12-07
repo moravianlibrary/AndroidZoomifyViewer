@@ -17,6 +17,7 @@ import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
+import cz.mzk.androidzoomifyviewer.tiles.InitImageManagerTask;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
@@ -133,7 +134,7 @@ public class ZoomifyImageManager implements ImageManager {
     @Override
     public void initImageMetadataAsync(MetadataInitializationHandler handler) {
         // TODO: 6.12.15 Uchovavat task a pripadne zabit v onDestroy
-        new InitTilesDownloaderTask(this, handler).executeConcurrentIfPossible();
+        new InitImageManagerTask(this, handler).executeConcurrentIfPossible();
     }
 
     @Override

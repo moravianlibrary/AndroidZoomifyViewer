@@ -4,7 +4,7 @@ package cz.mzk.androidzoomifyviewer.tiles;
  * Created by Martin Řehánek on 6.12.15.
  */
 public interface MetadataInitializationHandler {
-    public void onSuccess();
+    public void onSuccess(ImageManager imgManager);
 
     public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
 

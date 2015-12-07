@@ -205,18 +205,22 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mImageManager.initImageMetadataAsync(new MetadataInitializationHandler() {
 
             @Override
-            public void onSuccess() {
+            public void onSuccess(ImageManager imgManager) {
                 LOGGER.d("downloader mInitialized");
-                //mImageManager = downloader;
-                if (DEV_MODE) {
-                    mTestPoints = new ImageCoordsPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
-                }
+                if (imgManager.equals(mImageManager)) {
+                    //TODO: jenze instance ImageManager se od te doby mohla zmenit
+                    if (DEV_MODE) {
+                        mTestPoints = new ImageCoordsPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
+                    }
 
-                if (mImageInitializationHandler != null) {
-                    mImageInitializationHandler.onImagePropertiesProcessed();
+                    if (mImageInitializationHandler != null) {
+                        mImageInitializationHandler.onImagePropertiesProcessed();
+                    }
+                    pageInitialized = true;
+                    invalidate();
+                } else {
+                    //ImageManager has changed since, so this one is ignored.
                 }
-                pageInitialized = true;
-                invalidate();
             }
 
             @Override

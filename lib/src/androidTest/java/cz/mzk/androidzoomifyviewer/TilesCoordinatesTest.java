@@ -12,7 +12,7 @@ import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.InitTilesDownloaderTask;
+import cz.mzk.androidzoomifyviewer.tiles.InitImageManagerTask;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 
 import static org.hamcrest.core.Is.is;
@@ -45,7 +45,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
     private ImageManager initTilesDownloader(String baseUrl) {
         double pxRatio = 0.5;
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
-        new InitTilesDownloaderTask(baseUrl, pxRatio, new MetadataInitializationHandler() {
+        new InitImageManagerTask(baseUrl, pxRatio, new MetadataInitializationHandler() {
 
             @Override
             public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {

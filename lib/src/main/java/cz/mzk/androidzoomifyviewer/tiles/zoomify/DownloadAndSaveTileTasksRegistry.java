@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 
 /**
  * This class registers running AsynctTasks in which tiles for single image are downloaded and saved to cache. Purpose of this
