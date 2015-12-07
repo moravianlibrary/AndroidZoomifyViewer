@@ -11,11 +11,9 @@ public interface TilesCache {
      * Returns tile's bitmap from memory cache. If it's not found there, returns bitmap loaded from disc cache (blocking). Returns
      * null if bitmap was not found in either cache.
      *
-     * @param zoomifyBaseUrl
-     * @param tilePositionInPyramid
+     * @param tileUrl
      * @return
      */
-    //public Bitmap getTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
     public Bitmap getTile(String tileUrl);
 
     /**
@@ -23,32 +21,26 @@ public interface TilesCache {
      * execute async task that fetches bitmap from disk and stores into memory cache. Or informs that bitmap was not found in
      * either cache.
      *
-     * @param zoomifyBaseUrl
-     * @param tilePositionInPyramid
+     * @param tileUrl
      * @param handler
      * @return TileBitmap object that contains bitmap it self (or null) and tile's bitmap state.
      */
-    //public TileBitmap getTileAsync(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, FetchingBitmapFromDiskHandler handler);
     public TileBitmap getTileAsync(String tileUrl, FetchingBitmapFromDiskHandler handler);
 
-    //public boolean containsTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
     public boolean containsTile(String tileUrl);
 
-    //public boolean containsTileInMemory(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
     public boolean containsTileInMemory(String tileUrl);
 
 
-    //public void storeTile(Bitmap tile, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
-
     public void storeTile(Bitmap tile, String tileUrl);
+
 
     public void cancelAllTasks();
 
-    public void updateMemoryCacheSizeInItems(int size);
 
-    // public void updateMemoryCacheSizeInItems(int minSize, int maxSize);
+    public void updateMemoryCacheSizeInItems(int size);
 
     // TODO: use this
     public void close();
