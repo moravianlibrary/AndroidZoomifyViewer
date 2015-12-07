@@ -2,8 +2,6 @@ package cz.mzk.androidzoomifyviewer.cache;
 
 import android.graphics.Bitmap;
 
-import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-
 /**
  * @author Martin Řehánek
  */
@@ -17,7 +15,8 @@ public interface TilesCache {
      * @param tilePositionInPyramid
      * @return
      */
-    public Bitmap getTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+    //public Bitmap getTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+    public Bitmap getTile(String tileUrl);
 
     /**
      * Returns tile's bitmap if it has been found in memory cache. Or if the bitmap is not in memory but in disk cache, tries to
@@ -29,13 +28,21 @@ public interface TilesCache {
      * @param handler
      * @return TileBitmap object that contains bitmap it self (or null) and tile's bitmap state.
      */
-    public TileBitmap getTileAsync(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, FetchingBitmapFromDiskHandler handler);
+    //public TileBitmap getTileAsync(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, FetchingBitmapFromDiskHandler handler);
+    public TileBitmap getTileAsync(String tileUrl, FetchingBitmapFromDiskHandler handler);
 
-    public boolean containsTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+    //public boolean containsTile(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
 
-    public boolean containsTileInMemory(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+    public boolean containsTile(String tileUrl);
 
-    public void storeTile(Bitmap tile, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+    //public boolean containsTileInMemory(String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+
+    public boolean containsTileInMemory(String tileUrl);
+
+
+    //public void storeTile(Bitmap tile, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid);
+
+    public void storeTile(Bitmap tile, String tileUrl);
 
     public void cancelAllTasks();
 

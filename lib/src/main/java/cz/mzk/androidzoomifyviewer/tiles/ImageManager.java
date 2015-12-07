@@ -59,6 +59,8 @@ public interface ImageManager {
 
     public Rect getTileAreaInImageCoords(TilePositionInPyramid tilePositionInPyramid);
 
+    public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid);
+
 
     //A CO TOHLE? Vola zase jenom task. Mela by se lip oddelit sprava tasku od samotneho stahovani
 

@@ -34,8 +34,7 @@ public class CacheManager {
         } else {
             LOGGER.i("initializing");
             int memoryCacheMaxItems = computeMaxTilesOnScreen(context);
-            tilesCache = new MemoryAndDiskTilesCache(context, memoryCacheMaxItems, diskCacheEnabled, clearDiskCacheOnStart,
-                    tileDiskCacheBytes);
+            tilesCache = new MemoryAndDiskTilesCache(context, memoryCacheMaxItems, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes);
             // tilesCache = new MemoryAndDiskTilesMulticache(context, clearDiskCache);
             // tilesCache = new MemoryTilesCache();
             imagePropertiesCache = new MemoryAndDiskImagePropertiesCache(context, diskCacheEnabled, clearDiskCacheOnStart);

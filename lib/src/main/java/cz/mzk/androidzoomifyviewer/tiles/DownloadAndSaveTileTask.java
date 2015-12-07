@@ -20,8 +20,8 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     private static final Logger LOGGER = new Logger(DownloadAndSaveTileTask.class);
 
     private final ImageManager mImgManager;// TODO: 7.12.15 Bude stacit jen mImgManager
-    private final String zoomifyBaseUrl;
-    private final TilePositionInPyramid tilePositionInPyramid;
+    private final String zoomifyBaseUrl; // TODO: 7.12.15 Really needed here?
+    private final TilePositionInPyramid mTilePositionInPyramid;
     private final TiledImageView.TileDownloadErrorListener mErrorListener;
     private final TiledImageView.TileDownloadSuccessListener mSuccessListener;
     private final ImageManagerTaskRegistry.TaskFinishedListener mRegistryListener;
@@ -32,17 +32,17 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
     private InvalidDataException invalidXmlException;
 
     /**
-     * @param imgManager            initialized ImageManager, not null
-     * @param zoomifyBaseUrl        Zoomify base url, not null
-     * @param tilePositionInPyramid Tile id, not null
-     * @param errorListener         Tile download result mErrorListener, not null
+     * @param imgManager             initialized ImageManager, not null
+     * @param zoomifyBaseUrl         Zoomify base url, not null
+     * @param mTilePositionInPyramid Tile id, not null
+     * @param errorListener          Tile download result mErrorListener, not null
      * @param successListener
      * @param taskFinishedListener
      */
-    public DownloadAndSaveTileTask(ImageManager imgManager, String zoomifyBaseUrl, TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
+    public DownloadAndSaveTileTask(ImageManager imgManager, String zoomifyBaseUrl, TilePositionInPyramid mTilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
         this.mImgManager = imgManager;
         this.zoomifyBaseUrl = zoomifyBaseUrl;
-        this.tilePositionInPyramid = tilePositionInPyramid;
+        this.mTilePositionInPyramid = mTilePositionInPyramid;
         mErrorListener = errorListener;
         mSuccessListener = successListener;
         mRegistryListener = taskFinishedListener;
@@ -58,12 +58,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         // threadPriority, group.getName(), group.activeCount(), group.getMaxPriority()));
         try {
             if (!isCancelled()) {
-                Bitmap tile = mImgManager.downloadTile(tilePositionInPyramid);
+                Bitmap tile = mImgManager.downloadTile(mTilePositionInPyramid);
                 if (!isCancelled()) {
                     if (tile != null) {
-                        CacheManager.getTilesCache().storeTile(tile, zoomifyBaseUrl, tilePositionInPyramid);
+                        CacheManager.getTilesCache().storeTile(tile, mImgManager.buildTileUrl(mTilePositionInPyramid));
                         LOGGER.v(String.format("tile downloaded and saved to disk cache: base url: '%s', tile: '%s'",
-                                zoomifyBaseUrl, tilePositionInPyramid));
+                                zoomifyBaseUrl, mTilePositionInPyramid));
                     } else {
                         // TODO: examine this
                         LOGGER.w("tile is null");
@@ -71,12 +71,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
                 } else {
                     LOGGER.v(String
                             .format("tile processing canceled task after downloading and before saving data: base url: '%s', tile: '%s'",
-                                    zoomifyBaseUrl, tilePositionInPyramid));
+                                    zoomifyBaseUrl, mTilePositionInPyramid));
                 }
             } else {
                 LOGGER.v(String.format(
                         "tile processing task canceled before download started: base url: '%s', tile: '%s'",
-                        zoomifyBaseUrl, tilePositionInPyramid));
+                        zoomifyBaseUrl, mTilePositionInPyramid));
             }
         } catch (TooManyRedirectionsException e) {
             tooManyRedirectionsException = e;
@@ -105,13 +105,13 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Bit
         }
         if (mErrorListener != null) {
             if (tooManyRedirectionsException != null) {
-                mErrorListener.onRedirectionLoop(tilePositionInPyramid, tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
+                mErrorListener.onRedirectionLoop(mTilePositionInPyramid, tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
             } else if (imageServerResponseException != null) {
-                mErrorListener.onUnhandableResponse(tilePositionInPyramid, imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
+                mErrorListener.onUnhandableResponse(mTilePositionInPyramid, imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
             } else if (invalidXmlException != null) {
-                mErrorListener.onInvalidDataError(tilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
+                mErrorListener.onInvalidDataError(mTilePositionInPyramid, invalidXmlException.getUrl(), invalidXmlException.getMessage());
             } else if (otherIoException != null) {
-                mErrorListener.onDataTransferError(tilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
+                mErrorListener.onDataTransferError(mTilePositionInPyramid, otherIoException.getUrl(), otherIoException.getMessage());
             }
         }
     }

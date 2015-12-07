@@ -14,7 +14,7 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 /**
  * @author Martin Řehánek
  */
-public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCache implements ImagePropertiesCache {
+public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
 
     public static final String DISK_CACHE_SUBDIR = "imageProperties";
     public static final int DISK_CACHE_SIZE_B = 1024 * 1024 * 10; // 10MB
@@ -83,6 +83,11 @@ public class MemoryAndDiskImagePropertiesCache extends AbstractImagePropertiesCa
         String key = buildKey(zoomifyBaseUrl);
         storeXmlToMemoryCache(key, xml);
         storeXmlToDiskCache(key, xml);
+    }
+
+    // TODO: exception if file name to long (probably over 127 chars)
+    private String buildKey(String zoomifyBaseUrl) {
+        return CacheUtils.escapeSpecialChars(zoomifyBaseUrl);
     }
 
     private void storeXmlToMemoryCache(String key, String xml) {

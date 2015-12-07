@@ -143,12 +143,12 @@ public class ZoomifyImageManager implements ImageManager {
     private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         ImagePropertiesCache cache = CacheManager.getImagePropertiesCache();
-        String fromCache = cache.getXml(mBaseUrl);
+        String fromCache = cache.getXml(mImagePropertiesUrl);
         if (fromCache != null) {
             return fromCache;
         } else {
             String downloaded = downloadImagePropertiesXml(mImagePropertiesUrl, MAX_REDIRECTIONS);
-            cache.storeXml(downloaded, mBaseUrl);
+            cache.storeXml(downloaded, mImagePropertiesUrl);
             return downloaded;
         }
     }
@@ -281,8 +281,7 @@ public class ZoomifyImageManager implements ImageManager {
     public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         checkInitialized();
-        int tileGroup = computeTileGroup(tilePositionInPyramid);
-        String tileUrl = buildTileUrl(tileGroup, tilePositionInPyramid);
+        String tileUrl = buildTileUrl(tilePositionInPyramid);
         logger.v("TILE URL: " + tileUrl);
         return downloadTile(tileUrl, MAX_REDIRECTIONS);
     }
@@ -571,6 +570,15 @@ public class ZoomifyImageManager implements ImageManager {
         int top = tileSizesInImage.basicSize * tilePositionInPyramid.getPositionInLayer().row;
         int bottom = top + tileSizesInImage.actualHeight;
         return new Rect(left, top, right, bottom);
+    }
+
+    @Override
+    public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid) {
+        // TODO: 7.12.15 definitively cache this
+        int tileGroup = computeTileGroup(tilePositionInPyramid);
+        String tileUrl = buildTileUrl(tileGroup, tilePositionInPyramid);
+        logger.v("TILE URL: " + tileUrl);
+        return tileUrl;
     }
 
     private TileDimensionsInImage calculateTileDimensionsInImageCoords(TilePositionInPyramid tilePositionInPyramid) {

@@ -5,34 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Martin Řehánek
+ * Created by Martin Řehánek on 7.12.15.
  */
-public abstract class AbstractImagePropertiesCache {
+public class CacheUtils {
 
     private static final char ESCAPE_CHAR = '-';
-    private final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
+    private static final Map<Character, Character> POSSIBLY_RESERVED_CHARS = initPossiblyReservedChars();
 
-    // TODO: exception if file name to long (probably over 127 chars)
-    String buildKey(String zoomifyBaseUrl) {
-        return escapeSpecialChars(zoomifyBaseUrl);
-    }
-
-    private String escapeSpecialChars(String zoomifyBaseUrl) {
-        StringBuilder builder = new StringBuilder();
-        Set<Character> keys = POSSIBLY_RESERVED_CHARS.keySet();
-        for (int i = 0; i < zoomifyBaseUrl.length(); i++) {
-            char original = zoomifyBaseUrl.charAt(i);
-            Character key = Character.valueOf(original);
-            if (keys.contains(key)) {
-                builder.append(ESCAPE_CHAR).append(POSSIBLY_RESERVED_CHARS.get(key));
-            } else {
-                builder.append(original);
-            }
-        }
-        return builder.toString();
-    }
-
-    private Map<Character, Character> initPossiblyReservedChars() {
+    private static Map<Character, Character> initPossiblyReservedChars() {
         Map<Character, Character> map = new HashMap<Character, Character>();
         // RFC 3986 reserved characters
         map.put(Character.valueOf('%'), Character.valueOf('a'));
@@ -62,4 +42,18 @@ public abstract class AbstractImagePropertiesCache {
         return map;
     }
 
+    public static String escapeSpecialChars(String zoomifyBaseUrl) {
+        StringBuilder builder = new StringBuilder();
+        Set<Character> keys = POSSIBLY_RESERVED_CHARS.keySet();
+        for (int i = 0; i < zoomifyBaseUrl.length(); i++) {
+            char original = zoomifyBaseUrl.charAt(i);
+            Character key = Character.valueOf(original);
+            if (keys.contains(key)) {
+                builder.append(ESCAPE_CHAR).append(POSSIBLY_RESERVED_CHARS.get(key));
+            } else {
+                builder.append(original);
+            }
+        }
+        return builder.toString();
+    }
 }

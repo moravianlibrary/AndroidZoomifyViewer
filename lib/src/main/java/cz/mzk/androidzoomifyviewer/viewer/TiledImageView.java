@@ -381,7 +381,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         // check if all visible tiles within layer are available
         boolean allTilesAvailable = true;
         for (TilePositionInPyramid visibleTile : visibleTiles) {
-            boolean tileAccessible = CacheManager.getTilesCache().containsTileInMemory(mZoomifyBaseUrl, visibleTile);
+            boolean tileAccessible = CacheManager.getTilesCache().containsTileInMemory(mImageManager.buildTileUrl(visibleTile));
             if (!tileAccessible) {
                 allTilesAvailable = false;
                 break;
@@ -403,7 +403,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     private void fetchTileWithoutBlockingOnDiskRead(Canvas canv, TilePositionInPyramid visibleTileId) {
-        TileBitmap tile = CacheManager.getTilesCache().getTileAsync(mZoomifyBaseUrl, visibleTileId, new FetchingBitmapFromDiskHandler() {
+        TileBitmap tile = CacheManager.getTilesCache().getTileAsync(mImageManager.buildTileUrl(visibleTileId), new FetchingBitmapFromDiskHandler() {
 
             @Override
             public void onFetched() {
