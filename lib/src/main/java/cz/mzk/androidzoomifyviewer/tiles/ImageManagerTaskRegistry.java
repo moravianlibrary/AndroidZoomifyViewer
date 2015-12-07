@@ -1,13 +1,10 @@
-package cz.mzk.androidzoomifyviewer.tiles.zoomify;
+package cz.mzk.androidzoomifyviewer.tiles;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
-import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
-import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 
 /**
  * This class registers running AsynctTasks in which tiles for single image are downloaded and saved to cache. Purpose of this
@@ -16,24 +13,32 @@ import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
  *
  * @author Martin Řehánek
  */
-public class DownloadAndSaveTileTasksRegistry {
+public class ImageManagerTaskRegistry {
 
-    public static final int MAX_TASKS_IN_POOL = 10;
+    public static final int MAX_TASKS_IN_POOL = 50;
 
-    private static final Logger logger = new Logger(DownloadAndSaveTileTasksRegistry.class);
+    private static final Logger logger = new Logger(ImageManagerTaskRegistry.class);
 
     private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> tasks = new HashMap<TilePositionInPyramid, DownloadAndSaveTileTask>();
-    private final ImageManager downloader;
+    private final ImageManager imgManager;
+    private InitImageManagerTask mInitTask;
 
-    public DownloadAndSaveTileTasksRegistry(ImageManager downloader) {
-        this.downloader = downloader;
+    public ImageManagerTaskRegistry(ImageManager imgManager) {
+        this.imgManager = imgManager;
     }
 
-    public void registerTask(TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TileDownloadHandler handler) {
+    public void registerTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TileDownloadHandler handler) {
         if (tasks.size() < MAX_TASKS_IN_POOL) {
             boolean registered = tasks.containsKey(tilePositionInPyramid);
             if (!registered) {
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(downloader, mZoomifyBaseUrl, tilePositionInPyramid, handler);
+                // TODO: 7.12.15 proc se posila zoomfyBaseUrl?
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(imgManager, mZoomifyBaseUrl, tilePositionInPyramid, handler, new TaskFinishedListener() {
+
+                    @Override
+                    public void onTaskFinished() {
+                        tasks.remove(tilePositionInPyramid);
+                    }
+                });
                 tasks.put(tilePositionInPyramid, task);
                 logger.v("  registered task for " + tilePositionInPyramid + ": (total " + tasks.size() + ")");
                 task.executeConcurrentIfPossible();
@@ -45,7 +50,23 @@ public class DownloadAndSaveTileTasksRegistry {
         }
     }
 
+    public void enqueueInitializationTask(MetadataInitializationHandler handler) {
+        mInitTask = new InitImageManagerTask(imgManager, handler, new TaskFinishedListener() {
+
+            @Override
+            public void onTaskFinished() {
+                mInitTask = null;
+            }
+        });
+        mInitTask.executeConcurrentIfPossible();
+    }
+
+
     public void cancelAllTasks() {
+        if (mInitTask != null) {
+            mInitTask.cancel(false);
+            mInitTask = null;
+        }
         for (DownloadAndSaveTileTask task : tasks.values()) {
             task.cancel(false);
         }
@@ -68,5 +89,9 @@ public class DownloadAndSaveTileTasksRegistry {
 
     public Set<TilePositionInPyramid> getAllTaskTileIds() {
         return tasks.keySet();
+    }
+
+    public static interface TaskFinishedListener {
+        void onTaskFinished();
     }
 }

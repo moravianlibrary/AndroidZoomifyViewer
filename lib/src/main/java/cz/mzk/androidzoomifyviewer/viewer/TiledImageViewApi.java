@@ -38,9 +38,9 @@ public interface TiledImageViewApi {
 
     //GESTURES
 
-    public void setSingleTapListener(TiledImageView.SingleTapListener singleTapListener);
-
     public TiledImageView.SingleTapListener getSingleTapListener();
+
+    public void setSingleTapListener(TiledImageView.SingleTapListener singleTapListener);
 
 
     //FRAMING RECTANGLES
@@ -50,9 +50,9 @@ public interface TiledImageViewApi {
 
     //VIEW MODE
 
-    public void setViewMode(TiledImageView.ViewMode viewMode);
-
     public TiledImageView.ViewMode getViewMode();
+
+    public void setViewMode(TiledImageView.ViewMode viewMode);
 
 
     //CANVAS
@@ -86,12 +86,5 @@ public interface TiledImageViewApi {
     public int getWidth();
 
     public int getHeight();
-
-
-    //TODO
-
-    /*public void destroy();
-
-    public void pause();*/
 
 }

@@ -30,17 +30,15 @@ import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyImageManager;
  * @author Martin Řehánek
  */
 public class TiledImageView extends View implements TiledImageViewApi {
-    private static final Logger LOGGER = new Logger(TiledImageView.class);
     public static final boolean DEV_MODE = true;// TODO: 7.12.15 configurable
-
+    private static final Logger LOGGER = new Logger(TiledImageView.class);
+    //STATE
+    boolean mMinZoomCanvasImagePaddingInitialized = false;
     //CANVAS
     private double mCanvasImagePaddingHorizontal = -1;
     private double mCanvasImagePaddingVertical = -1;
     private Rect mWholeImageAreaInCanvasCoords = null; // whole image area in canvas coords, even from invisible canvas part (i.e. top and left can be negative)
     private Rect mVisibleImageAreaInCanvas = null;     // only part of image (in canvas coords) that is in visible part of canvas
-
-    //STATE
-    boolean mMinZoomCanvasImagePaddingInitialized = false;
     private boolean mViewmodeScaleFactorsInitialized = false;
 
     // SHIFT
@@ -155,16 +153,29 @@ public class TiledImageView extends View implements TiledImageViewApi {
         this.mTileDownloadHandler = tileDownloadHandler;
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        cancelAllTasks();
+        //better remove other object, especially those with context in order to prevent memory leaks
+        mGestureListener = null;
+        mSingleTapListener = null;
+        mDevTools = null;
+        mImageManager = null;
+        mImageInitializationHandler = null;
+        mTileDownloadHandler = null;
+    }
 
-    public void cancelAllTasks() {
+    private void cancelAllTasks() {
         if (mImageManager != null) {
-            //mImageManager.getTaskRegistry().cancelAllTasks();
             mImageManager.cancelAllTasks();
         }
         if (CacheManager.getTilesCache() != null) {
             CacheManager.getTilesCache().cancelAllTasks();
         }
-        mGestureListener.stopAllAnimations();
+        if (mGestureListener != null) {
+            mGestureListener.stopAllAnimations();
+        }
     }
 
     @Override
@@ -174,12 +185,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mViewmodeShiftInitialized = false;
         mMinZoomCanvasImagePaddingInitialized = false;
         mZoomifyBaseUrl = zoomifyBaseUrl;
-        //mImageManager = null;
         cancelAllTasks();
         mGestureListener.reset();
-        if (mImageManager != null) {
-            mImageManager.destroy();
-        }
         double pxRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;
         mImageManager = new ZoomifyImageManager(mZoomifyBaseUrl, pxRatio);
         initTilesDownloaderAsync();
@@ -445,7 +452,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 break;
             case IN_DISK:
                 // nothing, wait for it to be fetched into memory
-                // TODO: 7.12.15 Probably invalidate as well
                 break;
             case NOT_FOUND:
                 enqueTileDownload(visibleTileId);

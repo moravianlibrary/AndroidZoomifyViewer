@@ -12,17 +12,19 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException
  */
 public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> {
 
-    private static final Logger logger = new Logger(InitImageManagerTask.class);
+    private static final Logger LOGGER = new Logger(InitImageManagerTask.class);
     private final MetadataInitializationHandler mHandler;
+    private final ImageManagerTaskRegistry.TaskFinishedListener mRegistryListener;
     private ImageManager mImgManager;
     private OtherIOException mOtherIoException;
     private TooManyRedirectionsException mTooManyRedirectionsException;
     private ImageServerResponseException mImageServerResponseException;
     private InvalidDataException mInvalidXmlException;
 
-    public InitImageManagerTask(ImageManager imgManager, MetadataInitializationHandler handler) {
+    public InitImageManagerTask(ImageManager imgManager, MetadataInitializationHandler handler, ImageManagerTaskRegistry.TaskFinishedListener registryListener) {
         mImgManager = imgManager;
         mHandler = handler;
+        mRegistryListener = registryListener;
     }
 
     @Override
@@ -45,6 +47,9 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
 
     @Override
     protected void onPostExecute(Void result) {
+        if (mRegistryListener != null) {
+            mRegistryListener.onTaskFinished();
+        }
         if (mTooManyRedirectionsException != null) {
             mHandler.onRedirectionLoop(mTooManyRedirectionsException.getUrl(), mTooManyRedirectionsException.getRedirections());
         } else if (mImageServerResponseException != null) {
@@ -55,6 +60,14 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
             mHandler.onDataTransferError(mOtherIoException.getUrl(), mOtherIoException.getMessage());
         } else {
             mHandler.onSuccess(mImgManager);
+        }
+    }
+
+    @Override
+    protected void onCancelled() {
+        super.onCancelled();
+        if (mRegistryListener != null) {
+            mRegistryListener.onTaskFinished();
         }
     }
 

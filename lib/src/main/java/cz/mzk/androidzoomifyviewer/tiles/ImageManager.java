@@ -32,14 +32,9 @@ public interface ImageManager {
 
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
 
-    //vsechno, krome samotne inicializace metadat
+    // TODO: 7.12.15 also task to initialize metadata
 
     public void cancelAllTasks();
-
-    // TODO: 3.12.15 pouzivat
-    // zabije uplne vsechny tasky a uvolni pripadne dalsi zdroje
-    public void destroy();
-
 
     //IMAGE METADATA
 

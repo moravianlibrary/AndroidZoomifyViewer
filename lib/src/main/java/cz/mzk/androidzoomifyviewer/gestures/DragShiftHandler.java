@@ -10,12 +10,11 @@ import cz.mzk.androidzoomifyviewer.viewer.VectorD;
  */
 public class DragShiftHandler extends GestureHandler {
 
-    // private static final Logger LOGGER = new Logger("GST: drag shift");
-    private static final Logger LOGGER = new Logger(DragShiftHandler.class);
-
     public static final double MIN_DRAG_DISTANCE_TO_RECOGNIZE_SHIFT_DP = 1.0;
     public static final long MAX_DRAG_TIME_TO_BE_CONSIDERED_SINGLE_TAP_NS = 200000000;
     public static final double MAX_DRAG_DISTANCE_TO_BE_CONSIDERED_SINGLE_TAP_DP = 10.0;
+    // private static final Logger LOGGER = new Logger("GST: drag shift");
+    private static final Logger LOGGER = new Logger(DragShiftHandler.class);
     private VectorD mAccumulatedShift = VectorD.ZERO_VECTOR;
     private State mState = State.IDLE;
 

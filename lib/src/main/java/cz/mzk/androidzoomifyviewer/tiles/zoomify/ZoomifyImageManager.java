@@ -17,7 +17,7 @@ import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
-import cz.mzk.androidzoomifyviewer.tiles.InitImageManagerTask;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TileDownloadHandler;
@@ -48,7 +48,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     private static final Logger logger = new Logger(ZoomifyImageManager.class);
 
-    private final DownloadAndSaveTileTasksRegistry taskRegistry = new DownloadAndSaveTileTasksRegistry(this);
+    private final ImageManagerTaskRegistry taskRegistry = new ImageManagerTaskRegistry(this);
 
     private final String mBaseUrl;
     private final double mPxRatio;
@@ -133,8 +133,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void initImageMetadataAsync(MetadataInitializationHandler handler) {
-        // TODO: 6.12.15 Uchovavat task a pripadne zabit v onDestroy
-        new InitImageManagerTask(this, handler).executeConcurrentIfPossible();
+        taskRegistry.enqueueInitializationTask(handler);
     }
 
     @Override
@@ -262,7 +261,7 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     //@Override
-    /*private DownloadAndSaveTileTasksRegistry getTaskRegistry() {
+    /*private ImageManagerTaskRegistry getTaskRegistry() {
         checkInitialized();
         return taskRegistry;
     }*/
@@ -638,11 +637,6 @@ public class ZoomifyImageManager implements ImageManager {
     @Override
     public void cancelAllTasks() {
         taskRegistry.cancelAllTasks();
-    }
-
-    @Override
-    public void destroy() {
-        //TODO: zabit vsechny procesy, pripadne i ten, co inicializuje metadata
     }
 
     @Override
