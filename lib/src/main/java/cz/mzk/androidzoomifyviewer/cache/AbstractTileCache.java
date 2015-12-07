@@ -4,13 +4,21 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.os.Build;
 
+import cz.mzk.androidzoomifyviewer.Logger;
+
 /**
  * @author Martin Řehánek
  */
 public abstract class AbstractTileCache {
 
+    private static final Logger LOGGER = new Logger(AbstractTileCache.class);
+
     protected String buildKey(String tileUrl) {
-        return CacheUtils.escapeSpecialChars(tileUrl);
+        String key = CacheUtils.escapeSpecialChars(tileUrl);
+        if (key.length() > 127) {
+            LOGGER.w("cache key is longer then 127 characters");
+        }
+        return key;
     }
 
     @SuppressLint("NewApi")

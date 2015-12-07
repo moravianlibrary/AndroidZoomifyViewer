@@ -14,20 +14,20 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
 /**
  * @author Martin Řehánek
  */
-public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
+public class MemoryAndDiskMetadataCache implements MetadataCache {
 
     public static final String DISK_CACHE_SUBDIR = "imageProperties";
     public static final int DISK_CACHE_SIZE_B = 1024 * 1024 * 10; // 10MB
     public static final int MEMORY_CACHE_SIZE_ITEMS = 10;
 
-    private static final Logger logger = new Logger(MemoryAndDiskImagePropertiesCache.class);
+    private static final Logger LOGGER = new Logger(MemoryAndDiskMetadataCache.class);
 
     private final LruCache<String, String> mMemoryCache;
     private final Object mDiskCacheInitializationLock = new Object();
     private DiskLruCache mDiskCache = null;
     private boolean mDiskCacheEnabled;
 
-    public MemoryAndDiskImagePropertiesCache(Context context, boolean diskCacheEnabled, boolean clearCache) {
+    public MemoryAndDiskMetadataCache(Context context, boolean diskCacheEnabled, boolean clearCache) {
         mDiskCacheEnabled = diskCacheEnabled;
         mMemoryCache = initMemoryCache();
         if (mDiskCacheEnabled) {
@@ -37,7 +37,7 @@ public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
 
     private LruCache<String, String> initMemoryCache() {
         LruCache<String, String> cache = new LruCache<String, String>(MEMORY_CACHE_SIZE_ITEMS);
-        logger.d("in-memory lru cache allocated for " + MEMORY_CACHE_SIZE_ITEMS + " items");
+        LOGGER.d("in-memory lru cache allocated for " + MEMORY_CACHE_SIZE_ITEMS + " items");
         return cache;
     }
 
@@ -74,50 +74,53 @@ public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
     }
 
     private void disableDiskCache() {
-        logger.i("disabling disk cache");
+        LOGGER.i("disabling disk cache");
         mDiskCacheEnabled = false;
     }
 
     @Override
-    public void storeXml(String xml, String zoomifyBaseUrl) {
-        String key = buildKey(zoomifyBaseUrl);
-        storeXmlToMemoryCache(key, xml);
-        storeXmlToDiskCache(key, xml);
+    public void storeXml(String metadata, String metadataUrl) {
+        String key = buildKey(metadataUrl);
+        storeXmlToMemoryCache(key, metadata);
+        storeXmlToDiskCache(key, metadata);
     }
 
-    // TODO: exception if file name to long (probably over 127 chars)
-    private String buildKey(String zoomifyBaseUrl) {
-        return CacheUtils.escapeSpecialChars(zoomifyBaseUrl);
+    private String buildKey(String metadataUrl) {
+        String key = CacheUtils.escapeSpecialChars(metadataUrl);
+        if (key.length() > 127) {
+            LOGGER.w("cache key is longer then 127 characters");
+        }
+        return key;
     }
 
     private void storeXmlToMemoryCache(String key, String xml) {
         synchronized (mMemoryCache) {
-            logger.v("assuming mMemoryCache lock: " + Thread.currentThread().toString());
+            LOGGER.v("assuming mMemoryCache lock: " + Thread.currentThread().toString());
             if (mMemoryCache.get(key) == null) {
-                logger.d("storing to memory cache: " + key);
+                LOGGER.d("storing to memory cache: " + key);
                 mMemoryCache.put(key, xml);
             } else {
-                logger.d("already in memory cache: " + key);
+                LOGGER.d("already in memory cache: " + key);
             }
-            logger.v("releasing mMemoryCache lock: " + Thread.currentThread().toString());
+            LOGGER.v("releasing mMemoryCache lock: " + Thread.currentThread().toString());
         }
     }
 
     private void waitUntilDiskCacheInitializedOrDisabled() {
         try {
             synchronized (mDiskCacheInitializationLock) {
-                logger.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
+                LOGGER.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
                 // Wait until disk cache is initialized or disabled
                 while (mDiskCache == null && mDiskCacheEnabled) {
                     try {
                         mDiskCacheInitializationLock.wait();
                     } catch (InterruptedException e) {
-                        logger.e("waiting for disk cache initialization lock was interrupted", e);
+                        LOGGER.e("waiting for disk cache initialization lock was interrupted", e);
                     }
                 }
             }
         } finally {
-            logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
+            LOGGER.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
         }
     }
 
@@ -127,30 +130,30 @@ public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
             if (mDiskCacheEnabled) {
                 Snapshot fromDiskCache = mDiskCache.get(key);
                 if (fromDiskCache != null) {
-                    logger.d("already in disk cache: " + key);
+                    LOGGER.d("already in disk cache: " + key);
                 } else {
-                    logger.d("storing to disk cache: " + key);
+                    LOGGER.d("storing to disk cache: " + key);
                     mDiskCache.storeString(0, key, xml);
                 }
             }
         } catch (DiskLruCacheException e) {
-            logger.e("failed to store xml to disk cache: " + key, e);
+            LOGGER.e("failed to store xml to disk cache: " + key, e);
         }
     }
 
     @Override
-    public String getXml(String zoomifyBaseUrl) {
-        String key = buildKey(zoomifyBaseUrl);
+    public String getXml(String metadataUrl) {
+        String key = buildKey(metadataUrl);
         // long start = System.currentTimeMillis();
         String inMemoryCache = mMemoryCache.get(key);
         // long afterHitOrMiss = System.currentTimeMillis();
         if (inMemoryCache != null) {
-            logger.d("memory cache hit: " + key);
-            // logger.d("memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
+            LOGGER.d("memory cache hit: " + key);
+            // LOGGER.d("memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
             return inMemoryCache;
         } else {
-            logger.d("memory cache miss: " + key);
-            // logger.d("memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
+            LOGGER.d("memory cache miss: " + key);
+            // LOGGER.d("memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
             String fromDiskCache = getXmlFromDiskCache(key);
             // store also to memory cache (nonblocking)
             if (fromDiskCache != null) {
@@ -175,7 +178,7 @@ public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            logger.i("error loading xml from disk cache: " + key, e);
+            LOGGER.i("error loading xml from disk cache: " + key, e);
             return null;
         }
     }
@@ -192,24 +195,24 @@ public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
         @Override
         protected Void doInBackground(File... params) {
             synchronized (mDiskCacheInitializationLock) {
-                logger.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
+                LOGGER.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
                 try {
                     File cacheDir = params[0];
                     if (cacheDir.exists()) {
                         if (clearCache) {
-                            logger.i("clearing image-properties disk cache");
+                            LOGGER.i("clearing image-properties disk cache");
                             boolean cleared = DiskUtils.deleteDirContent(cacheDir);
                             if (!cleared) {
-                                logger.w("failed to delete content of " + cacheDir.getAbsolutePath());
+                                LOGGER.w("failed to delete content of " + cacheDir.getAbsolutePath());
                                 disableDiskCache();
                                 return null;
                             }
                         }
                     } else {
-                        logger.i("creating cache dir " + cacheDir);
+                        LOGGER.i("creating cache dir " + cacheDir);
                         boolean created = cacheDir.mkdir();
                         if (!created) {
-                            logger.w("failed to create cache dir " + cacheDir.getAbsolutePath());
+                            LOGGER.w("failed to create cache dir " + cacheDir.getAbsolutePath());
                             disableDiskCache();
                             return null;
                         }
@@ -217,13 +220,13 @@ public class MemoryAndDiskImagePropertiesCache implements ImagePropertiesCache {
                     mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
                     return null;
                 } catch (DiskLruCacheException e) {
-                    logger.w("error initializing disk cache, disabling");
+                    LOGGER.w("error initializing disk cache, disabling");
                     disableDiskCache();
                     mDiskCacheInitializationLock.notifyAll();
                     return null;
                 } finally {
                     mDiskCacheInitializationLock.notifyAll();
-                    logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
+                    LOGGER.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
                 }
             }
         }

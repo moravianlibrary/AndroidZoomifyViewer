@@ -7,9 +7,9 @@ import android.os.Build;
 import android.view.Display;
 import android.view.WindowManager;
 
-import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
-import cz.mzk.androidzoomifyviewer.cache.MemoryAndDiskImagePropertiesCache;
+import cz.mzk.androidzoomifyviewer.cache.MemoryAndDiskMetadataCache;
 import cz.mzk.androidzoomifyviewer.cache.MemoryAndDiskTilesCache;
+import cz.mzk.androidzoomifyviewer.cache.MetadataCache;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache;
 
 /**
@@ -21,7 +21,7 @@ public class CacheManager {
     private static final Logger LOGGER = new Logger(CacheManager.class);
 
     private static TilesCache tilesCache;
-    private static ImagePropertiesCache imagePropertiesCache;
+    private static MetadataCache metadataCache;
     private static boolean initialized = false;
 
     /**
@@ -37,7 +37,7 @@ public class CacheManager {
             tilesCache = new MemoryAndDiskTilesCache(context, memoryCacheMaxItems, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes);
             // tilesCache = new MemoryAndDiskTilesMulticache(context, clearDiskCache);
             // tilesCache = new MemoryTilesCache();
-            imagePropertiesCache = new MemoryAndDiskImagePropertiesCache(context, diskCacheEnabled, clearDiskCacheOnStart);
+            metadataCache = new MemoryAndDiskMetadataCache(context, diskCacheEnabled, clearDiskCacheOnStart);
             initialized = true;
         }
     }
@@ -83,11 +83,11 @@ public class CacheManager {
         return tilesCache;
     }
 
-    public static ImagePropertiesCache getImagePropertiesCache() {
+    public static MetadataCache getMetadataCache() {
         if (!initialized) {
             throw new IllegalStateException(CacheManager.class.getSimpleName() + " has not been initialized");
         }
-        return imagePropertiesCache;
+        return metadataCache;
     }
 
 }
