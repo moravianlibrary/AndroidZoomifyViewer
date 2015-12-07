@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.tiles.zoomify;
+package cz.mzk.androidzoomifyviewer.tiles;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

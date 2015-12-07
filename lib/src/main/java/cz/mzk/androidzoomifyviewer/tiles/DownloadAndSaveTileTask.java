@@ -9,7 +9,6 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.Downloader;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**

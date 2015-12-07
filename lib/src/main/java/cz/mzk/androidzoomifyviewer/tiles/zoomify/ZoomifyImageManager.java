@@ -8,6 +8,7 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.MetadataCache;
+import cz.mzk.androidzoomifyviewer.tiles.Downloader;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
