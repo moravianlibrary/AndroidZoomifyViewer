@@ -25,7 +25,6 @@ public class AndroidZoomifyViewerExamplesApp extends Application {
         // TODO: tohle taky hodit do resource
         // boolean clearCache = AppConfig.DEV_MODE && AppConfig.DEV_MODE_CLEAR_CACHE_ON_STARTUP;
         setupHttpUrlConnection(this);
-        TiledImageView.initialize(this);
         VolleyRequestManager.initialize(this);
         // TiledImageView.DEV_MODE = AppConfig.DEV_MODE;
     }

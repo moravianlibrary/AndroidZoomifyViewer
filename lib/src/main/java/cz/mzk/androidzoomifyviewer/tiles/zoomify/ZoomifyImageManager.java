@@ -499,7 +499,7 @@ public class ZoomifyImageManager implements ImageManager {
 
         int imageInCanvasWidthDp = 0;
         int imageInCanvasHeightDp = 0;
-        if (mPxRatio < 1.0) {// optimization: initialize only if will be used
+        if (mPxRatio < 1.0) {// optimization: initCache only if will be used
             imageInCanvasWidthDp = Utils.pxToDp(wholeImageInCanvasCoords.width());
             imageInCanvasHeightDp = Utils.pxToDp(wholeImageInCanvasCoords.height());
         }
@@ -637,7 +637,6 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void cancelAllTasks() {
-//        checkInitialized();
         taskRegistry.cancelAllTasks();
     }
 

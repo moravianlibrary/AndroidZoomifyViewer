@@ -28,7 +28,6 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
     @Override
     protected Void doInBackground(Void... params) {
         try {
-            //logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
             if (!isCancelled()) {
                 mImgManager.initImageMetadata();
             }
