@@ -9,6 +9,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.Downloader;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
@@ -19,7 +20,6 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
     // private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 1);
     private static final Logger LOGGER = new Logger(DownloadAndSaveTileTask.class);
 
-    private final ImageManager mImgManager;// TODO: 7.12.15 Bude stacit jen downloader
     private final String mTileImageUrl;
     private final TiledImageView.TileDownloadErrorListener mErrorListener;
     private final TiledImageView.TileDownloadSuccessListener mSuccessListener;
@@ -31,14 +31,12 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
     private InvalidDataException invalidXmlException;
 
     /**
-     * @param imgManager           initialized ImageManager, not null
      * @param tileImageUrl         Url of tile image (jpeg, tif, png, bmp, ...)
      * @param errorListener        Tile download result mErrorListener, not null
      * @param successListener
      * @param taskFinishedListener
      */
-    public DownloadAndSaveTileTask(ImageManager imgManager, String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
-        this.mImgManager = imgManager;
+    public DownloadAndSaveTileTask(String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
         mTileImageUrl = tileImageUrl;
         mErrorListener = errorListener;
         mSuccessListener = successListener;
@@ -55,7 +53,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
         // threadPriority, group.getName(), group.activeCount(), group.getMaxPriority()));
         try {
             if (!isCancelled()) {
-                Bitmap tile = mImgManager.downloadTile(mTileImageUrl);
+                Bitmap tile = Downloader.downloadTile(mTileImageUrl);
                 if (!isCancelled()) {
                     if (tile != null) {
                         CacheManager.getTilesCache().storeTile(tile, mTileImageUrl);

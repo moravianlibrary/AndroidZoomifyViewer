@@ -20,7 +20,7 @@ public class ImageManagerTaskRegistry {
 
     private static final Logger LOGGER = new Logger(ImageManagerTaskRegistry.class);
 
-    private final ImageManager mImgManager;
+    private final ImageManager mImgManager;// TODO: 8.12.15 Mozna uz nebude potreba
     private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> mTileDownloadTasks = new HashMap<>();
     private InitImageManagerTask mInitMetadataTask;
 
@@ -32,7 +32,7 @@ public class ImageManagerTaskRegistry {
         if (mTileDownloadTasks.size() < MAX_TASKS_IN_POOL) {
             if (!mTileDownloadTasks.containsKey(tilePosition)) {
                 LOGGER.d(String.format("enqueuing tile-download task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(mImgManager, tileImageUrl, errorListener, successListener, new TaskFinishedListener() {
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(tileImageUrl, errorListener, successListener, new TaskFinishedListener() {
 
                     @Override
                     public void onTaskFinished() {

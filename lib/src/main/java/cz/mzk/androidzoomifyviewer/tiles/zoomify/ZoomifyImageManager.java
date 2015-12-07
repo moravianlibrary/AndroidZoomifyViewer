@@ -1,7 +1,5 @@
 package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
 import java.io.BufferedInputStream;
@@ -43,7 +41,6 @@ public class ZoomifyImageManager implements ImageManager {
     public static final boolean COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION = true;
     public static final int MAX_REDIRECTIONS = 5;
     public static final int IMAGE_PROPERTIES_TIMEOUT = 3000;
-    public static final int TILES_TIMEOUT = 5000;
 
     private static final Logger logger = new Logger(ZoomifyImageManager.class);
 
@@ -115,14 +112,13 @@ public class ZoomifyImageManager implements ImageManager {
      * @throws OtherIOException             In case of other error (invalid URL, error transfering data, ...)
      */
     @Override
-    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException,
-            InvalidDataException {
+    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException {
         if (initialized) {
             throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
         } else {
             logger.d("initImageMetadata: " + mImagePropertiesUrl);
         }
-        HttpURLConnection.setFollowRedirects(false);
+        HttpURLConnection.setFollowRedirects(false);//protoze presmerovani si resim sam?
         String propertiesXml = fetchImagePropertiesXml();
         imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
         logger.d(imageProperties.toString());
@@ -271,14 +267,13 @@ public class ZoomifyImageManager implements ImageManager {
      * @throws InvalidDataException         If tile contains invalid data.
      * @throws OtherIOException             In case of other IO error (invalid URL, error transfering data, ...)
      */
-    @Override
+    /*@Override
     public Bitmap downloadTile(String tileImageUrl) throws OtherIOException, TooManyRedirectionsException,
             ImageServerResponseException {
         checkInitialized();
         logger.v("TILE URL: " + tileImageUrl);
         return downloadTile(tileImageUrl, MAX_REDIRECTIONS);
-    }
-
+    }*/
     @Override
     public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords) {
         TilePositionInPyramid.TilePositionInLayer[] corners = getCornerVisibleTilesCoords(layerId, visibleAreaInImageCoords);
@@ -352,61 +347,6 @@ public class ZoomifyImageManager implements ImageManager {
                 .append(".jpg");
         return builder.toString();
     }
-
-    private Bitmap downloadTile(String tileUrl, int remainingRedirections) throws TooManyRedirectionsException,
-            ImageServerResponseException, OtherIOException {
-        logger.d("downloading tile from " + tileUrl);
-        if (remainingRedirections == 0) {
-            throw new TooManyRedirectionsException(tileUrl, MAX_REDIRECTIONS);
-        }
-        // logger.d( tileUrl + " remaining redirections: " +
-        // remainingRedirections);
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL(tileUrl);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(TILES_TIMEOUT);
-            int responseCode = urlConnection.getResponseCode();
-            switch (responseCode) {
-                case 200:
-                    return bitmapFromUrlConnection(urlConnection);
-                case 300:
-                case 301:
-                case 302:
-                case 303:
-                case 305:
-                case 307:
-                    String location = urlConnection.getHeaderField("Location");
-                    if (location == null || location.isEmpty()) {
-                        throw new ImageServerResponseException(tileUrl, responseCode);
-                    } else {
-                        urlConnection.disconnect();
-                        return downloadTile(location, remainingRedirections - 1);
-                    }
-                default:
-                    throw new ImageServerResponseException(tileUrl, responseCode);
-            }
-        } catch (IOException e) {
-            throw new OtherIOException(e.getMessage(), tileUrl);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-        }
-    }
-
-    private Bitmap bitmapFromUrlConnection(HttpURLConnection urlConnection) throws IOException {
-        InputStream in = null;
-        try {
-            in = new BufferedInputStream(urlConnection.getInputStream());
-            return BitmapFactory.decodeStream(in);
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-        }
-    }
-
 
     @Override
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY) {
