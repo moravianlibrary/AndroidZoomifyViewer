@@ -8,37 +8,41 @@ import cz.mzk.androidzoomifyviewer.viewer.DevTools.RectWithPaint;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageViewApi;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 import cz.mzk.androidzoomifyviewer.viewer.VectorD;
 
 public class GestureHandler {
 
-    private static final Logger logger = new Logger(GestureHandler.class);
+    private static final Logger LOGGER = new Logger(GestureHandler.class);
 
-    final TiledImageView imageView;
+    protected final TiledImageViewApi mImageViewApi;
+    protected final DevTools mDevTools;
 
-    public GestureHandler(TiledImageView imageView) {
-        this.imageView = imageView;
+    public GestureHandler(TiledImageViewApi imageView, DevTools devTools) {
+        mImageViewApi = imageView;
+        mDevTools = devTools;
     }
 
     protected VectorD limitNewShift(VectorD newShift) {
         double limitedLocalX = newShift.x;
         double limitedLocalY = newShift.y;
-        double scaleFactor = imageView.getTotalScaleFactor();
+        double scaleFactor = mImageViewApi.getTotalScaleFactor();
 
-        RectD paddingRectImg = new RectD(0.0, 0.0, imageView.getCanvasImagePaddingHorizontal(),
-                imageView.getCanvasImagePaddingVertical());
-        Rect imageAreaInCanvasWithoutAnyShift = imageView.computeWholeImageAreaInCanvasCoords(scaleFactor, VectorD.ZERO_VECTOR);
+        RectD paddingRectImg = new RectD(0.0, 0.0, mImageViewApi.getCanvasImagePaddingHorizontal(),
+                mImageViewApi.getCanvasImagePaddingVertical());
+
+        Rect imageAreaInCanvasWithoutAnyShift = computeWholeImageAreaInCanvasCoords(scaleFactor, VectorD.ZERO_VECTOR);
         RectD paddingRectCanv = convertToPaddingInCanvas(paddingRectImg, imageAreaInCanvasWithoutAnyShift);
 
-        VectorD totalShift = imageView.getTotalShift();
+        VectorD totalShift = mImageViewApi.getTotalShift();
         VectorD totalPlusNewShift = totalShift.plus(newShift);
-        Rect imageAreaInCanvasWithNewShift = imageView.computeWholeImageAreaInCanvasCoords(scaleFactor, totalPlusNewShift);
+        Rect imageAreaInCanvasWithNewShift = computeWholeImageAreaInCanvasCoords(scaleFactor, totalPlusNewShift);
 
         // horizontal
         double extraSpaceHorizontalCanv = paddingRectCanv.height();
         double maxTop = extraSpaceHorizontalCanv;
-        double minBottom = imageView.getHeight() - extraSpaceHorizontalCanv;
+        double minBottom = mImageViewApi.getHeight() - extraSpaceHorizontalCanv;
         if (imageAreaInCanvasWithNewShift.top > maxTop) {
             double limitedGlobalY = maxTop;
             limitedLocalY = limitedGlobalY - totalShift.y;
@@ -50,7 +54,7 @@ public class GestureHandler {
         // vertical
         double extraSpaceVerticalCanv = paddingRectCanv.width();
         double maxLeft = extraSpaceVerticalCanv;
-        double minRight = imageView.getWidth() - extraSpaceVerticalCanv;
+        double minRight = mImageViewApi.getWidth() - extraSpaceVerticalCanv;
         if (imageAreaInCanvasWithNewShift.left > maxLeft) {
             double limitedGlobalX = maxLeft;
             limitedLocalX = limitedGlobalX - totalShift.x;
@@ -67,25 +71,25 @@ public class GestureHandler {
 
     private RectD convertToPaddingInCanvas(RectD paddingRectImg, Rect imageAreaInCanvasWithoutAnyShift) {
         PointD rightBottomImg = new PointD(paddingRectImg.right, paddingRectImg.bottom);
-        PointD rightBottomCanv = Utils.toCanvasCoords(rightBottomImg, imageView.getMinScaleFactor(),
+        PointD rightBottomCanv = Utils.toCanvasCoords(rightBottomImg, mImageViewApi.getMinScaleFactor(),
                 VectorD.ZERO_VECTOR);
         double width = rightBottomCanv.x;
         double height = rightBottomCanv.y;
 
         if (width != 0) {
-            if (imageAreaInCanvasWithoutAnyShift.width() >= imageView.getWidth()) {
+            if (imageAreaInCanvasWithoutAnyShift.width() >= mImageViewApi.getWidth()) {
                 width = 0;
             } else {
-                double min = (imageView.getWidth() - imageAreaInCanvasWithoutAnyShift.width()) * 0.5;
+                double min = (mImageViewApi.getWidth() - imageAreaInCanvasWithoutAnyShift.width()) * 0.5;
                 width = Math.min(width, min);
             }
         }
 
         if (height != 0) {
-            if (imageAreaInCanvasWithoutAnyShift.height() >= imageView.getHeight()) {
+            if (imageAreaInCanvasWithoutAnyShift.height() >= mImageViewApi.getHeight()) {
                 height = 0;
             } else {
-                double min = (imageView.getHeight() - imageAreaInCanvasWithoutAnyShift.height()) * 0.5;
+                double min = (mImageViewApi.getHeight() - imageAreaInCanvasWithoutAnyShift.height()) * 0.5;
                 height = Math.min(height, min);
             }
         }
@@ -94,10 +98,9 @@ public class GestureHandler {
     }
 
     private void devVisualisePaddingArea(RectD paddingRectCanv) {
-        DevTools devTools = imageView.getDevTools();
-        if (devTools != null) {
+        if (mDevTools != null) {
             Rect paddingRectangleVisualisation = paddingVisualisation(paddingRectCanv);
-            devTools.addToRectStack(new RectWithPaint(paddingRectangleVisualisation, devTools.getPaintGreen()));
+            mDevTools.addToRectStack(new RectWithPaint(paddingRectangleVisualisation, mDevTools.getPaintGreen()));
         }
     }
 
@@ -111,6 +114,11 @@ public class GestureHandler {
             y = 10;
         }
         return new Rect(0, 0, x, y);
+    }
+
+    Rect computeWholeImageAreaInCanvasCoords(double scaleFactor, VectorD shift) {
+        Rect imgArea = new Rect(0, 0, mImageViewApi.getImageWidth(), mImageViewApi.getImageHeight());
+        return Utils.toCanvasCoords(imgArea, scaleFactor, shift).toRect();
     }
 
 }

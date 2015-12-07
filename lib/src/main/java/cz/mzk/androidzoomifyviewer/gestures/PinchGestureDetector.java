@@ -7,12 +7,13 @@ import cz.mzk.androidzoomifyviewer.Logger;
 
 public class PinchGestureDetector {
 
-    // private static final Logger logger = new Logger("GST: pinch detector");
-    private static final Logger logger = new Logger(PinchGestureDetector.class);
+    // private static final Logger LOGGER = new Logger("GST: pinch detector");
+    private static final Logger LOGGER = new Logger(PinchGestureDetector.class);
+
     private final OnScaleGestureListener listener;
-    private double focusX;
-    private double focusY;
-    private double span;
+    private double mFocusX;
+    private double mFocusY;
+    private double mSpan;
 
     public PinchGestureDetector(OnScaleGestureListener listener) {
         this.listener = listener;
@@ -27,9 +28,9 @@ public class PinchGestureDetector {
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 if (event.getPointerCount() == 2) {
-                    span = computeSpan(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
-                    focusX = (event.getX(0) + event.getX(1)) * 0.5;
-                    focusY = (event.getY(0) + event.getY(1)) * 0.5;
+                    mSpan = computeSpan(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
+                    mFocusX = (event.getX(0) + event.getX(1)) * 0.5;
+                    mFocusY = (event.getY(0) + event.getY(1)) * 0.5;
                     listener.onScaleBegin(this);
                 }
                 break;
@@ -40,25 +41,25 @@ public class PinchGestureDetector {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (event.getPointerCount() == 2) {
-                    span = computeSpan(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
-                    focusX = (event.getX(0) + event.getX(1)) * 0.5;
-                    focusY = (event.getY(0) + event.getY(1)) * 0.5;
+                    mSpan = computeSpan(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
+                    mFocusX = (event.getX(0) + event.getX(1)) * 0.5;
+                    mFocusY = (event.getY(0) + event.getY(1)) * 0.5;
                     listener.onScale(this);
                 }
                 break;
         }
     }
 
-    public double getFocusX() {
-        return focusX;
+    public double getmFocusX() {
+        return mFocusX;
     }
 
-    public double getFocusY() {
-        return focusY;
+    public double getmFocusY() {
+        return mFocusY;
     }
 
     public double getCurrentSpan() {
-        return span;
+        return mSpan;
     }
 
     private double computeSpan(float firstX, float firstY, float secondX, float secondY) {

@@ -4,8 +4,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.viewer.DevTools;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageViewApi;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 import cz.mzk.androidzoomifyviewer.viewer.VectorD;
 
@@ -14,122 +15,122 @@ public class FlingShiftHandler extends Handler {
     public static final long ANIM_STEP_MS = 30;
     public static final float MIN_VELOCITY_PX_P_S = 10f;
     public static final float VELOCITY_PRESERVATION_FACTOR = 0.9f;
-    private static final Logger logger = new Logger(FlingShiftHandler.class);
+    // private static final Logger LOGGER = new Logger("GST: fling shift");
+    private static final Logger LOGGER = new Logger(FlingShiftHandler.class);
     // persistent data
-    private final TiledImageView imageView;
-    // private static final Logger logger = new Logger("GST: fling shift");
-    private final GestureHandler abstractGestureHandler; // since no multiple inheritance in java
-    private State state = State.IDLE;
-    private VectorD accumulatedShift = VectorD.ZERO_VECTOR;
-    private Thread workerThread;
-    private int correctWorkerId = 0;
+    private final TiledImageViewApi mImageViewApi;
+    private final GestureHandler mAbstractGestureHandler; // since no multiple inheritance in java
+    private State mState = State.IDLE;
+    private VectorD mAccumulatedShift = VectorD.ZERO_VECTOR;
+    private Thread mWorkerThread;
+    private int mCorrectWorkerId = 0;
     // data of running animation
-    private PointD initialFocusInImg;
-    private float velocityX;
-    private float velocityY;
-    public FlingShiftHandler(TiledImageView imageView) {
-        this.imageView = imageView;
-        this.abstractGestureHandler = new GestureHandler(imageView);
+    private PointD mInitialFocusInImg;
+    private float mVelocityX;
+    private float mVelocityY;
+
+    public FlingShiftHandler(TiledImageViewApi imageViewApi, DevTools devTools) {
+        this.mImageViewApi = imageViewApi;
+        this.mAbstractGestureHandler = new GestureHandler(imageViewApi, devTools);
     }
 
     public VectorD getShift() {
-        return accumulatedShift;
+        return mAccumulatedShift;
     }
 
     public void fling(float downX, float downY, float velocityX, float velocityY) {
-        state = State.SHIFTING;
-        logger.i(state.name());
-        this.velocityX = velocityX;
-        this.velocityY = velocityY;
-        this.initialFocusInImg = Utils.toImageCoords(new PointD(downX, downY), imageView.getTotalScaleFactor(),
-                imageView.getTotalShift());
-        workerThread = new Thread(new AnimationRunnable(this, correctWorkerId));
-        workerThread.start();
+        mState = State.SHIFTING;
+        LOGGER.i(mState.name());
+        this.mVelocityX = velocityX;
+        this.mVelocityY = velocityY;
+        this.mInitialFocusInImg = Utils.toImageCoords(new PointD(downX, downY), mImageViewApi.getTotalScaleFactor(), mImageViewApi.getTotalShift());
+        mWorkerThread = new Thread(new AnimationRunnable(this, mCorrectWorkerId));
+        mWorkerThread.start();
     }
 
     @Override
     public void handleMessage(Message msg) {
-        switch (state) {
+        switch (mState) {
             case SHIFTING:
                 int workerId = msg.arg1;
-                if (workerId == correctWorkerId) {
+                if (workerId == mCorrectWorkerId) {
                     boolean keepMoving = shift();
                     if (keepMoving) {
-                        // logger.v(String.format("ui thread: message from thread %d - processing", workerId));
+                        // LOGGER.v(String.format("ui thread: message from thread %d - processing", workerId));
                         updateVelocities();
                     } else {
-                        logger.v(String
+                        LOGGER.v(String
                                 .format("ui thread: message from thread %d - ignoring (velocities to low)", workerId));
                         stopAnimation();
                     }
                 } else {
-                    logger.v(String.format("ui thread: message from thread %d - ignoring (old threadead)", workerId));
+                    LOGGER.v(String.format("ui thread: message from thread %d - ignoring (old threadead)", workerId));
                 }
                 break;
             case IDLE:
-                logger.v(String.format("ui thread: message from thread %d - ignoring (state IDLE)", msg.arg1));
+                LOGGER.v(String.format("ui thread: message from thread %d - ignoring (mState IDLE)", msg.arg1));
                 break;
         }
     }
 
     private boolean shift() {
-        double totalScaleFactor = imageView.getTotalScaleFactor();
-        VectorD totalShift = imageView.getTotalShift();
+        double totalScaleFactor = mImageViewApi.getTotalScaleFactor();
+        VectorD totalShift = mImageViewApi.getTotalShift();
         // pixels for animation step
         float stepSecondFraction = ANIM_STEP_MS / 1000.0f;
-        float pixelsPerStepX = velocityX * stepSecondFraction;
-        float pixelsPerStepY = velocityY * stepSecondFraction;
+        float pixelsPerStepX = mVelocityX * stepSecondFraction;
+        float pixelsPerStepY = mVelocityY * stepSecondFraction;
         double pixelsPerStepCanvasX = pixelsPerStepX * totalScaleFactor;
         double pixelsPerStepCanvasY = pixelsPerStepY * totalScaleFactor;
         // shift
-        PointD currentInCanvas = Utils.toCanvasCoords(initialFocusInImg, totalScaleFactor, totalShift);
+        PointD currentInCanvas = Utils.toCanvasCoords(mInitialFocusInImg, totalScaleFactor, totalShift);
         PointD nextInCanvas = currentInCanvas.plus(new VectorD(pixelsPerStepCanvasX, pixelsPerStepCanvasY));
         PointD nextInImg = Utils.toImageCoords(nextInCanvas, totalScaleFactor, totalShift);
-        VectorD newShift = abstractGestureHandler.limitNewShift(initialFocusInImg.minus(nextInImg));
-        logger.v("shift: " + newShift.toString());
+        VectorD newShift = mAbstractGestureHandler.limitNewShift(mInitialFocusInImg.minus(nextInImg));
+        LOGGER.v("shift: " + newShift.toString());
         // optimization for zero shift
         if (newShift.x == 0.0 && newShift.y == 0.0) {
-            logger.d("zero shift");
+            LOGGER.d("zero shift");
             stopAnimation();
         }
-        newShift = abstractGestureHandler.limitNewShift(newShift);
-        accumulatedShift = accumulatedShift.plus(newShift);
-        imageView.invalidate();
-        return (Math.abs(velocityX) > MIN_VELOCITY_PX_P_S || Math.abs(velocityY) > MIN_VELOCITY_PX_P_S);
+        newShift = mAbstractGestureHandler.limitNewShift(newShift);
+        mAccumulatedShift = mAccumulatedShift.plus(newShift);
+        mImageViewApi.invalidate();
+        return (Math.abs(mVelocityX) > MIN_VELOCITY_PX_P_S || Math.abs(mVelocityY) > MIN_VELOCITY_PX_P_S);
     }
 
     private void updateVelocities() {
-        velocityX = velocityX * VELOCITY_PRESERVATION_FACTOR;
-        velocityY = velocityY * VELOCITY_PRESERVATION_FACTOR;
-        logger.v(String.format("velocities: x: %.2f, y: %.2f px/s", velocityX, velocityY));
+        mVelocityX = mVelocityX * VELOCITY_PRESERVATION_FACTOR;
+        mVelocityY = mVelocityY * VELOCITY_PRESERVATION_FACTOR;
+        LOGGER.v(String.format("velocities: x: %.2f, y: %.2f px/s", mVelocityX, mVelocityY));
     }
 
     public void reset() {
-        logger.d("resetting");
-        if (state == State.SHIFTING) {
-            logger.w("animation still running");
+        LOGGER.d("resetting");
+        if (mState == State.SHIFTING) {
+            LOGGER.w("animation still running");
             stopAnimation();
         }
-        accumulatedShift = VectorD.ZERO_VECTOR;
+        mAccumulatedShift = VectorD.ZERO_VECTOR;
     }
 
-    public State getState() {
-        return state;
+    public State getmState() {
+        return mState;
     }
 
     public void stopAnimation() {
-        logger.d("stopping animation");
-        if (state == State.IDLE) {
-            logger.w("already stopped");
+        LOGGER.d("stopping animation");
+        if (mState == State.IDLE) {
+            LOGGER.w("already stopped");
         } else {
-            if (workerThread != null && workerThread.isAlive()) {
-                workerThread.interrupt();
+            if (mWorkerThread != null && mWorkerThread.isAlive()) {
+                mWorkerThread.interrupt();
             }
-            workerThread = null;
-            correctWorkerId++;
-            logger.v("correct worker id: " + correctWorkerId);
-            this.state = State.IDLE;
-            logger.i(state.name());
+            mWorkerThread = null;
+            mCorrectWorkerId++;
+            LOGGER.v("correct worker id: " + mCorrectWorkerId);
+            this.mState = State.IDLE;
+            LOGGER.i(mState.name());
         }
     }
 
@@ -153,11 +154,11 @@ public class FlingShiftHandler extends Handler {
                 Message msg = Message.obtain();
                 msg.arg1 = workerId;
                 handler.sendMessage(msg);
-                // logger.v(String.format("worker thread %d:  sending message", workerId));
+                // LOGGER.v(String.format("worker thread %d:  sending message", workerId));
                 try {
                     Thread.sleep(ANIM_STEP_MS);
                 } catch (InterruptedException e) {
-                    // logger.v(String.format("worker thread %d:  killed in sleep", workerId));
+                    // LOGGER.v(String.format("worker thread %d:  killed in sleep", workerId));
                     return;
                 }
             }

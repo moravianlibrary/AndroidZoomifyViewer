@@ -83,12 +83,6 @@ public class ZoomifyImageManager implements ImageManager {
         }
     }
 
-    /*@Override
-    public ImageProperties getImageProperties() {
-        checkInitialized();
-        return imageProperties;
-    }*/
-
     @Override
     public int getImageWidth() {
         checkInitialized();
@@ -140,7 +134,6 @@ public class ZoomifyImageManager implements ImageManager {
     public void initImageMetadataAsync(MetadataInitializationHandler handler) {
         // TODO: 6.12.15 Uchovavat task a pripadne zabit v onDestroy
         new InitTilesDownloaderTask(this, handler).executeConcurrentIfPossible();
-        //).executeConcurrentIfPossible();
     }
 
     @Override
@@ -643,7 +636,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void cancelAllTasks() {
-        checkInitialized();
+//        checkInitialized();
         taskRegistry.cancelAllTasks();
     }
 

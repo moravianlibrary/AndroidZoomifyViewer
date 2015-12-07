@@ -36,10 +36,8 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Voi
     protected Void doInBackground(Void... params) {
         try {
             //logger.d("downloading metadata from '" + zoomifyBaseUrl + "'");
-            //ImageManager downloader = new ZoomifyImageManager(zoomifyBaseUrl, pxRatio);
             if (!isCancelled()) {
                 mDownloader.initImageMetadata();
-                //return downloader;
             }
         } catch (TooManyRedirectionsException e) {
             tooManyRedirectionsException = e;
@@ -56,17 +54,14 @@ public class InitTilesDownloaderTask extends ConcurrentAsyncTask<Void, Void, Voi
     @Override
     protected void onPostExecute(Void result) {
         if (tooManyRedirectionsException != null) {
-            mHandler.onRedirectionLoop(tooManyRedirectionsException.getUrl(),
-                    tooManyRedirectionsException.getRedirections());
+            mHandler.onRedirectionLoop(tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
         } else if (imageServerResponseException != null) {
-            mHandler.onUnhandableResponseCode(imageServerResponseException.getUrl(),
-                    imageServerResponseException.getErrorCode());
+            mHandler.onUnhandableResponseCode(imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
         } else if (invalidXmlException != null) {
             mHandler.onInvalidData(invalidXmlException.getUrl(), invalidXmlException.getMessage());
         } else if (otherIoException != null) {
             mHandler.onDataTransferError(otherIoException.getUrl(), otherIoException.getMessage());
         } else {
-            //mHandler.onSuccess(downloader);
             mHandler.onSuccess();
         }
     }

@@ -1,5 +1,6 @@
 package cz.mzk.androidzoomifyviewer.gestures;
 
+import android.content.Context;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
@@ -8,164 +9,165 @@ import android.view.MotionEvent;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.gestures.PinchGestureDetector.OnScaleGestureListener;
 import cz.mzk.androidzoomifyviewer.gestures.PinchZoomHandler.State;
+import cz.mzk.androidzoomifyviewer.viewer.DevTools;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageViewApi;
 import cz.mzk.androidzoomifyviewer.viewer.VectorD;
 
 public class MyGestureListener implements OnGestureListener, OnDoubleTapListener, OnScaleGestureListener {
 
-    // private static final Logger logger = new Logger("GST: gestures");
-    private static final Logger logger = new Logger(MyGestureListener.class);
+    // private static final Logger LOGGER = new Logger("GST: gestures");
+    private static final Logger LOGGER = new Logger(MyGestureListener.class);
 
     // detectors
-    private final PinchGestureDetector scaleGestureDetector;
-    private final GestureDetector gestureDetector;
+    private final PinchGestureDetector mScaleGestureDetector;
+    private final GestureDetector mGestureDetector;
     // handlers
-    private final TiledImageView imageView;
-    private final PinchZoomHandler pinchZoomHandler;
-    private final DoubletapZoomHandler doubletapZoomHandler;
-    private final DragShiftHandler dragShiftHandler;
-    private final FlingShiftHandler flingShiftHandler;
+    private final TiledImageViewApi mImageViewApi;
+    private final PinchZoomHandler mPinchZoomHandler;
+    private final DoubletapZoomHandler mDoubletapZoomHandler;
+    private final DragShiftHandler mDragShiftHandler;
+    private final FlingShiftHandler mFlingShiftHandler;
 
-    public MyGestureListener(TiledImageView imageView) {
-        this.imageView = imageView;
-        gestureDetector = new GestureDetector(imageView.getContext(), this);
-        gestureDetector.setOnDoubleTapListener(this);
-        scaleGestureDetector = new PinchGestureDetector(this);
+    public MyGestureListener(Context context, TiledImageViewApi imageViewApi, DevTools devTools) {
+        mImageViewApi = imageViewApi;
+        mGestureDetector = new GestureDetector(context, this);
+        mGestureDetector.setOnDoubleTapListener(this);
+        mScaleGestureDetector = new PinchGestureDetector(this);
 
-        pinchZoomHandler = new PinchZoomHandler(imageView);
-        doubletapZoomHandler = new DoubletapZoomHandler(imageView);
-        dragShiftHandler = new DragShiftHandler(imageView);
-        flingShiftHandler = new FlingShiftHandler(imageView);
+        mPinchZoomHandler = new PinchZoomHandler(imageViewApi, devTools);
+        mDoubletapZoomHandler = new DoubletapZoomHandler(imageViewApi, devTools);
+        mDragShiftHandler = new DragShiftHandler(imageViewApi, devTools);
+        mFlingShiftHandler = new FlingShiftHandler(imageViewApi, devTools);
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        scaleGestureDetector.onTouchEvent(event);
-        gestureDetector.onTouchEvent(event);
+        mScaleGestureDetector.onTouchEvent(event);
+        mGestureDetector.onTouchEvent(event);
         return true;
     }
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        // logger.d("onSingleTapConfirmed");
+        // LOGGER.d("onSingleTapConfirmed");
         // stop possibly running DOUBLE-TAP ZOOM animation
-        if (doubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
-            doubletapZoomHandler.stopAnimation();
+        if (mDoubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
+            mDoubletapZoomHandler.stopAnimation();
         }
         // stop possibly running FLING SHIFT animation
-        if (flingShiftHandler.getState() == FlingShiftHandler.State.SHIFTING) {
-            flingShiftHandler.stopAnimation();
+        if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
+            mFlingShiftHandler.stopAnimation();
         }
-        imageView.getSingleTapListener().onSingleTap(e.getX(), e.getY(), imageView.getVisibleImageInCanvas());
+        mImageViewApi.getSingleTapListener().onSingleTap(e.getX(), e.getY(), mImageViewApi.getVisibleImageAreaInCanvas());
         return false;
     }
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        // logger.d("onDoubleTap");
-        if (pinchZoomHandler.getState() != State.PINCHING) {
+        // LOGGER.d("onDoubleTap");
+        if (mPinchZoomHandler.getmState() != State.PINCHING) {
             // stop possibly running DOUBLE-TAP ZOOM animation
-            if (doubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
-                doubletapZoomHandler.stopAnimation();
+            if (mDoubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
+                mDoubletapZoomHandler.stopAnimation();
             }
             // stop possibly running FLING SHIFT animation
-            if (flingShiftHandler.getState() == FlingShiftHandler.State.SHIFTING) {
-                flingShiftHandler.stopAnimation();
+            if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
+                mFlingShiftHandler.stopAnimation();
             }
-            doubletapZoomHandler.startZooming(new PointD(e.getX(), e.getY()));
+            mDoubletapZoomHandler.startZooming(new PointD(e.getX(), e.getY()));
         }
         return false;
     }
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        // logger.d("onScroll");
-        if (pinchZoomHandler.getState() != State.PINCHING) {
+        // LOGGER.d("onScroll");
+        if (mPinchZoomHandler.getmState() != State.PINCHING) {
             // stop possibly running DOUBLE-TAP ZOOM animation
-            if (doubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
-                doubletapZoomHandler.stopAnimation();
+            if (mDoubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
+                mDoubletapZoomHandler.stopAnimation();
             }
             // stop possibly running FLING SHIFT animation
-            if (flingShiftHandler.getState() == FlingShiftHandler.State.SHIFTING) {
-                flingShiftHandler.stopAnimation();
+            if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
+                mFlingShiftHandler.stopAnimation();
             }
-            dragShiftHandler.drag(-distanceX, -distanceY);
+            mDragShiftHandler.drag(-distanceX, -distanceY);
         }
         return false;
     }
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        // logger.d("onFling");
-        if (pinchZoomHandler.getState() != State.PINCHING) {
+        // LOGGER.d("onFling");
+        if (mPinchZoomHandler.getmState() != State.PINCHING) {
             // stop possibly running DOUBLE-TAP ZOOM animation
-            if (doubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
-                doubletapZoomHandler.stopAnimation();
+            if (mDoubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
+                mDoubletapZoomHandler.stopAnimation();
             }
             // stop possibly running FLING SHIFT animation
-            if (flingShiftHandler.getState() == FlingShiftHandler.State.SHIFTING) {
-                flingShiftHandler.stopAnimation();
+            if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
+                mFlingShiftHandler.stopAnimation();
             }
-            flingShiftHandler.fling(e2.getX(), e2.getY(), -velocityX, -velocityY);
+            mFlingShiftHandler.fling(e2.getX(), e2.getY(), -velocityX, -velocityY);
         }
         return false;
     }
 
     @Override
     public boolean onScale(PinchGestureDetector detector) {
-        // logger.d("onScale");
-        PointD focus = new PointD(detector.getFocusX(), detector.getFocusY());
+        // LOGGER.d("onScale");
+        PointD focus = new PointD(detector.getmFocusX(), detector.getmFocusY());
         double span = detector.getCurrentSpan();
-        pinchZoomHandler.zoom(focus, span);
+        mPinchZoomHandler.zoom(focus, span);
         return false;
     }
 
     @Override
     public boolean onScaleBegin(PinchGestureDetector detector) {
-        // logger.d("onScaleBegin");
+        // LOGGER.d("onScaleBegin");
         // stop possibly running DOUBLE-TAP ZOOM animation
-        if (doubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
-            doubletapZoomHandler.stopAnimation();
+        if (mDoubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
+            mDoubletapZoomHandler.stopAnimation();
         }
         // stop possibly running FLING SHIFT animation
-        if (flingShiftHandler.getState() == FlingShiftHandler.State.SHIFTING) {
-            flingShiftHandler.stopAnimation();
+        if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
+            mFlingShiftHandler.stopAnimation();
         }
-        pinchZoomHandler
-                .startZooming(detector.getCurrentSpan(), new PointD(detector.getFocusX(), detector.getFocusY()));
+        mPinchZoomHandler
+                .startZooming(detector.getCurrentSpan(), new PointD(detector.getmFocusX(), detector.getmFocusY()));
         return false;
     }
 
     @Override
     public void onScaleEnd(PinchGestureDetector detector) {
-        logger.d("onScaleEnd");
-        pinchZoomHandler.finishZooming();
+        LOGGER.d("onScaleEnd");
+        mPinchZoomHandler.finishZooming();
     }
 
     public void stopAllAnimations() {
-        if (doubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
-            doubletapZoomHandler.stopAnimation();
+        if (mDoubletapZoomHandler.getState() == DoubletapZoomHandler.State.ZOOMING) {
+            mDoubletapZoomHandler.stopAnimation();
         }
-        if (flingShiftHandler.getState() == FlingShiftHandler.State.SHIFTING) {
-            flingShiftHandler.stopAnimation();
+        if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
+            mFlingShiftHandler.stopAnimation();
         }
     }
 
     public void reset() {
-        dragShiftHandler.reset();
-        flingShiftHandler.reset();
-        pinchZoomHandler.reset();
-        doubletapZoomHandler.reset();
+        mDragShiftHandler.reset();
+        mFlingShiftHandler.reset();
+        mPinchZoomHandler.reset();
+        mDoubletapZoomHandler.reset();
     }
 
     /**
      * @return Shift caused by all gestures. Accumulated shift and also active one from gesture currently in progress.
      */
     public VectorD getTotalShift() {
-        VectorD swipeShift = dragShiftHandler.getShift();
-        VectorD pinchZoomShift = pinchZoomHandler.getCurrentShift();
-        VectorD doubleTapZoomShift = doubletapZoomHandler.getCurrentZoomShift();
-        VectorD flingShift = flingShiftHandler.getShift();
+        VectorD swipeShift = mDragShiftHandler.getShift();
+        VectorD pinchZoomShift = mPinchZoomHandler.getCurrentShift();
+        VectorD doubleTapZoomShift = mDoubletapZoomHandler.getCurrentZoomShift();
+        VectorD flingShift = mFlingShiftHandler.getShift();
         return VectorD.sum(swipeShift, pinchZoomShift, doubleTapZoomShift, flingShift);
     }
 
@@ -173,35 +175,35 @@ public class MyGestureListener implements OnGestureListener, OnDoubleTapListener
      * @return Scale factorecaused by all gestures. Accumulated shift and also active one from gesture currently in progress.
      */
     public double getTotalScaleFactor() {
-        return pinchZoomHandler.getCurrentScaleFactor() * doubletapZoomHandler.getCurrentScaleFactor();
+        return mPinchZoomHandler.getCurrentScaleFactor() * mDoubletapZoomHandler.getCurrentScaleFactor();
     }
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent e) {
-        // logger.d("onDoubleTapEvent");
+        // LOGGER.d("onDoubleTapEvent");
         return false;
     }
 
     @Override
     public boolean onDown(MotionEvent e) {
-        // logger.d("onDown");
+        // LOGGER.d("onDown");
         return false;
     }
 
     @Override
     public void onShowPress(MotionEvent e) {
-        // logger.d("onShowPress");
+        // LOGGER.d("onShowPress");
     }
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        // logger.d("onSingleTapUp");
+        // LOGGER.d("onSingleTapUp");
         return false;
     }
 
     @Override
     public void onLongPress(MotionEvent e) {
-        // logger.d("onLongPress");
+        // LOGGER.d("onLongPress");
     }
 
 }

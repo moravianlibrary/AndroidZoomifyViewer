@@ -3,7 +3,7 @@ package cz.mzk.androidzoomifyviewer.gestures;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.viewer.DevTools;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageViewApi;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 import cz.mzk.androidzoomifyviewer.viewer.VectorD;
 
@@ -12,103 +12,101 @@ import cz.mzk.androidzoomifyviewer.viewer.VectorD;
  */
 public class PinchZoomHandler extends GestureHandler {
 
-    // private static final Logger logger = new Logger(PinchZoomManager.class);
-    private static final Logger logger = new Logger("GST: pinch zoom");
-    private State state = State.IDLE;
-    private double initialSpan;
-    private PointD initialFocusInImageCoords;
-    // shift
-    private VectorD accumalatedShift = VectorD.ZERO_VECTOR;
-    private VectorD activeShift = VectorD.ZERO_VECTOR;
-    // scale
-    private double accumulatedScaleFactor = 1.0;
-    private double activeScaleFactor = 1.0;
+    //private static final Logger LOGGER = new Logger("GST: pinch zoom");
+    private static final Logger LOGGER = new Logger(PinchZoomHandler.class);
 
-    public PinchZoomHandler(TiledImageView imageView) {
-        super(imageView);
+    private State mState = State.IDLE;
+    private double mInitialSpan;
+    private PointD mInitialFocusInImageCoords;
+    // shift
+    private VectorD mAccumalatedShift = VectorD.ZERO_VECTOR;
+    private VectorD mActiveShift = VectorD.ZERO_VECTOR;
+    // scale
+    private double mAccumulatedScaleFactor = 1.0;
+    private double mActiveScaleFactor = 1.0;
+
+    public PinchZoomHandler(TiledImageViewApi imageView, DevTools devTools) {
+        super(imageView, devTools);
     }
 
-    public State getState() {
-        return state;
+    public State getmState() {
+        return mState;
     }
 
     public double getCurrentScaleFactor() {
-        return accumulatedScaleFactor * activeScaleFactor;
+        return mAccumulatedScaleFactor * mActiveScaleFactor;
     }
 
     public VectorD getCurrentShift() {
-        return VectorD.sum(accumalatedShift, activeShift);
+        return VectorD.sum(mAccumalatedShift, mActiveShift);
     }
 
     public void startZooming(double span, PointD focus) {
-        initialSpan = span;
-        initialFocusInImageCoords = Utils.toImageCoords(focus, imageView.getTotalScaleFactor(),
-                imageView.getTotalShift());
+        mInitialSpan = span;
+        mInitialFocusInImageCoords = Utils.toImageCoords(focus, mImageViewApi.getTotalScaleFactor(),
+                mImageViewApi.getTotalShift());
         devUpdateZoomCenters(focus);
-        state = State.READY_TO_PINCH;
-        logger.i(state.name());
+        mState = State.READY_TO_PINCH;
+        LOGGER.i(mState.name());
     }
 
     public void zoom(PointD currentFocusInCanvas, double currentSpan) {
-        state = State.PINCHING;
-        logger.i(state.name());
+        mState = State.PINCHING;
+        LOGGER.i(mState.name());
         // scale
-        activeScaleFactor = 1.0;
-        double currentScaleFactor = currentSpan / initialSpan;
-        logger.d("scale factor: " + currentScaleFactor);
-        double totalScaleFactorWithoutActive = imageView.getTotalScaleFactor();
-        double maxTotalScaleFactor = imageView.getMaxScaleFactor();
+        mActiveScaleFactor = 1.0;
+        double currentScaleFactor = currentSpan / mInitialSpan;
+        LOGGER.d("scale factor: " + currentScaleFactor);
+        double totalScaleFactorWithoutActive = mImageViewApi.getTotalScaleFactor();
+        double maxTotalScaleFactor = mImageViewApi.getMaxScaleFactor();
         double maxActiveScaleFactor = maxTotalScaleFactor / totalScaleFactorWithoutActive;
-        double minTotalScaleFactor = imageView.getMinScaleFactor();
+        double minTotalScaleFactor = mImageViewApi.getMinScaleFactor();
         double minActiveScaleFactor = minTotalScaleFactor / totalScaleFactorWithoutActive;
         if (currentScaleFactor >= maxActiveScaleFactor) {
-            logger.d("max scale reached");
-            activeScaleFactor = maxActiveScaleFactor;
+            LOGGER.d("max scale reached");
+            mActiveScaleFactor = maxActiveScaleFactor;
         } else if (currentScaleFactor <= minActiveScaleFactor) {
-            activeScaleFactor = minActiveScaleFactor;
+            mActiveScaleFactor = minActiveScaleFactor;
         } else {
-            activeScaleFactor = currentScaleFactor;
+            mActiveScaleFactor = currentScaleFactor;
         }
-        if (activeScaleFactor > 1) {
-            logger.d("zooming in");
+        if (mActiveScaleFactor > 1) {
+            LOGGER.d("zooming in");
         } else {// zooming out
-            logger.d("zooming out");
+            LOGGER.d("zooming out");
         }
         // shift
-        activeShift = VectorD.ZERO_VECTOR;
-        PointD initialFocusToBeShiftedInCanvasCoords = Utils.toCanvasCoords(initialFocusInImageCoords,
-                imageView.getTotalScaleFactor(), imageView.getTotalShift());
+        mActiveShift = VectorD.ZERO_VECTOR;
+        PointD initialFocusToBeShiftedInCanvasCoords = Utils.toCanvasCoords(mInitialFocusInImageCoords,
+                mImageViewApi.getTotalScaleFactor(), mImageViewApi.getTotalShift());
         VectorD newShift = currentFocusInCanvas.minus(initialFocusToBeShiftedInCanvasCoords);
-        activeShift = limitNewShift(newShift);
+        mActiveShift = limitNewShift(newShift);
         devUpdateZoomCenters(currentFocusInCanvas);
-        imageView.invalidate();
+        mImageViewApi.invalidate();
     }
 
     private void devUpdateZoomCenters(PointD currentFocusInCanvas) {
-        if (TiledImageView.DEV_MODE) {
-            DevTools devTools = imageView.getDevTools();
-            if (devTools != null) {
-                devTools.setPinchZoomCenters(currentFocusInCanvas, initialFocusInImageCoords);
-            }
+        if (mDevTools != null) {
+            mDevTools.setPinchZoomCenters(currentFocusInCanvas, mInitialFocusInImageCoords);
         }
     }
 
     public void finishZooming() {
-        accumulatedScaleFactor *= activeScaleFactor;
-        activeScaleFactor = 1.0;
-        accumalatedShift = VectorD.sum(accumalatedShift, activeShift);
-        activeShift = VectorD.ZERO_VECTOR;
-        initialSpan = 0.0;
-        initialFocusInImageCoords = null;
-        state = State.IDLE;
-        logger.i(state.name());
+        mAccumulatedScaleFactor *= mActiveScaleFactor;
+        mActiveScaleFactor = 1.0;
+        mAccumalatedShift = VectorD.sum(mAccumalatedShift, mActiveShift);
+        mActiveShift = VectorD.ZERO_VECTOR;
+        mInitialSpan = 0.0;
+        mInitialFocusInImageCoords = null;
+        mState = State.IDLE;
+        LOGGER.i(mState.name());
     }
 
     public void reset() {
-        accumalatedShift = VectorD.ZERO_VECTOR;
-        activeShift = VectorD.ZERO_VECTOR;
-        accumulatedScaleFactor = 1.0;
-        activeScaleFactor = 1.0;
+        mAccumalatedShift = VectorD.ZERO_VECTOR;
+        mActiveShift = VectorD.ZERO_VECTOR;
+        mAccumulatedScaleFactor = 1.0;
+        mActiveScaleFactor = 1.0;
     }
 
     public enum State {
