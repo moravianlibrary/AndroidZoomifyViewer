@@ -18,7 +18,7 @@ import android.widget.Toast;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.TileDownloadErrorListener;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
@@ -26,7 +26,7 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 /**
  * @author Martin Řehánek
  */
-public class FullscreenSingleImageActivity extends AppCompatActivity implements ImageInitializationHandler,
+public class FullscreenSingleImageActivity extends AppCompatActivity implements MetadataInitializationHandler,
         TileDownloadErrorListener, SingleTapListener {
 
     public static final String EXTRA_BASE_URL = "baseUrl";
@@ -58,7 +58,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         mErrorResourceUrl = (TextView) findViewById(R.id.errorResourceUrl);
         mErrorDescription = (TextView) findViewById(R.id.errorDescription);
         mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
-        mImageView.setImageInitializationHandler(this);
+        mImageView.setMetadataInitializationHandler(this);
         mImageView.setTileDownloadErrorListener(this);
         mImageView.setSingleTapListener(this);
         mImageView.setViewMode(AppConfig.VIEW_MODE);
@@ -152,13 +152,13 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onImagePropertiesProcessed() {
+    public void onMetadataInitialized() {
         mProgressView.setVisibility(View.INVISIBLE);
         mImageView.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
+    public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Cannot process server resource");
@@ -167,7 +167,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
+    public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Redirection loop");
@@ -176,7 +176,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
+    public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Data transfer error");
@@ -185,7 +185,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
+    public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Invalid content in ImageProperties.xml");

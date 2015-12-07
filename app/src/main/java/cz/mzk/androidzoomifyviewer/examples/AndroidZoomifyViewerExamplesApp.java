@@ -10,7 +10,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 import cz.mzk.androidzoomifyviewer.examples.kramerius.VolleyRequestManager;
 import cz.mzk.androidzoomifyviewer.examples.ssl.SSLSocketFactoryProvider;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * @author Martin Řehánek

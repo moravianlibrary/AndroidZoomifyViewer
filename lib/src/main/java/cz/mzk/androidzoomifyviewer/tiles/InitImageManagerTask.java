@@ -6,6 +6,7 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * @author Martin Řehánek
@@ -13,7 +14,8 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException
 public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> {
 
     private static final Logger LOGGER = new Logger(InitImageManagerTask.class);
-    private final MetadataInitializationHandler mHandler;
+    private final TiledImageView.MetadataInitializationHandler mHandler;
+    private final TiledImageView.MetadataInitializationSuccessListener mSuccessListener;
     private final ImageManagerTaskRegistry.TaskFinishedListener mRegistryListener;
     private ImageManager mImgManager;
     private OtherIOException mOtherIoException;
@@ -21,9 +23,10 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
     private ImageServerResponseException mImageServerResponseException;
     private InvalidDataException mInvalidXmlException;
 
-    public InitImageManagerTask(ImageManager imgManager, MetadataInitializationHandler handler, ImageManagerTaskRegistry.TaskFinishedListener registryListener) {
+    public InitImageManagerTask(ImageManager imgManager, TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener registryListener) {
         mImgManager = imgManager;
         mHandler = handler;
+        mSuccessListener = successListener;
         mRegistryListener = registryListener;
     }
 
@@ -51,15 +54,28 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
             mRegistryListener.onTaskFinished();
         }
         if (mTooManyRedirectionsException != null) {
-            mHandler.onRedirectionLoop(mTooManyRedirectionsException.getUrl(), mTooManyRedirectionsException.getRedirections());
+            if (mHandler != null) {
+                mHandler.onRedirectionLoop(mTooManyRedirectionsException.getUrl(), mTooManyRedirectionsException.getRedirections());
+            }
         } else if (mImageServerResponseException != null) {
-            mHandler.onUnhandableResponseCode(mImageServerResponseException.getUrl(), mImageServerResponseException.getErrorCode());
+            if (mHandler != null) {
+                mHandler.onUnhandableResponseCode(mImageServerResponseException.getUrl(), mImageServerResponseException.getErrorCode());
+            }
         } else if (mInvalidXmlException != null) {
-            mHandler.onInvalidData(mInvalidXmlException.getUrl(), mInvalidXmlException.getMessage());
+            if (mHandler != null) {
+                mHandler.onInvalidData(mInvalidXmlException.getUrl(), mInvalidXmlException.getMessage());
+            }
         } else if (mOtherIoException != null) {
-            mHandler.onDataTransferError(mOtherIoException.getUrl(), mOtherIoException.getMessage());
+            if (mHandler != null) {
+                mHandler.onDataTransferError(mOtherIoException.getUrl(), mOtherIoException.getMessage());
+            }
         } else {
-            mHandler.onSuccess(mImgManager);
+            if (mHandler != null) {
+                mHandler.onMetadataInitialized();
+            }
+            if (mSuccessListener != null) {
+                mSuccessListener.onMetadataDownloaded(mImgManager);
+            }
         }
     }
 

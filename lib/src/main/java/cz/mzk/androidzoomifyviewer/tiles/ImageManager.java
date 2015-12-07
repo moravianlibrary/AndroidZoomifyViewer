@@ -20,7 +20,10 @@ public interface ImageManager {
 
     //METADATA INITIALIZATION
 
-    public void initImageMetadataAsync(MetadataInitializationHandler handler);
+    //public void initImageMetadataAsync(MetadataInitializationHandler handler);
+
+    public void initImageMetadataAsync(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener);
+
 
     public boolean isInitialized();
 
@@ -71,5 +74,6 @@ public interface ImageManager {
     public Bitmap downloadTile(TilePositionInPyramid tilePositionInPyramid) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
 
     public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
+
 
 }

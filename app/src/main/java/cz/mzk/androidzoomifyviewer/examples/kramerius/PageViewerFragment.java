@@ -26,7 +26,7 @@ import java.util.List;
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
-import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ImageInitializationHandler;
+import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.ViewMode;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
@@ -35,7 +35,7 @@ import cz.mzk.androidzoomifyviewer.viewer.Utils;
  * @author Martin Řehánek
  */
 public class PageViewerFragment extends Fragment implements IPageViewerFragment, OnTouchListener,
-        ImageInitializationHandler, SingleTapListener {
+        MetadataInitializationHandler, SingleTapListener {
 
     public static final String KEY_PROTOCOL = PageViewerFragment.class.getSimpleName() + "_protocol";
     public static final String KEY_DOMAIN = PageViewerFragment.class.getSimpleName() + "_domain";
@@ -100,7 +100,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
         mErrorResourceUrl = (TextView) view.findViewById(R.id.errorResourceUrl);
         mErrorDescription = (TextView) view.findViewById(R.id.errorDescription);
         mTiledImageView = (TiledImageView) view.findViewById(R.id.tiledImageView);
-        mTiledImageView.setImageInitializationHandler(this);
+        mTiledImageView.setMetadataInitializationHandler(this);
         // mTiledImageView.setTileDownloadErrorListener(this);
         mTiledImageView.setSingleTapListener(this);
         mImageView = (ImageView) view.findViewById(R.id.imageView);
@@ -228,15 +228,15 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onImagePropertiesProcessed() {
+    public void onMetadataInitialized() {
         Log.d(TAG, "onImagePropertiesProcessed");
         hideViews();
         mTiledImageView.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode) {
-        Log.d(TAG, "onImagePropertiesUnhandableResponseCodeError, code: " + responseCode);
+    public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+        Log.d(TAG, "onUnhandableResponseCode, code: " + responseCode);
         hideViews();
         switch (responseCode) {
             case 403: // FORBIDDEN
@@ -301,8 +301,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections) {
-        Log.d(TAG, "onImagePropertiesRedirectionLoopError");
+    public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
+        Log.d(TAG, "onRedirectionLoop");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Redirection loop");
@@ -311,8 +311,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage) {
-        Log.d(TAG, "onImagePropertiesDataTransferError");
+    public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
+        Log.d(TAG, "onDataTransferError");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Data transfer error");
@@ -321,8 +321,8 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage) {
-        Log.d(TAG, "onImagePropertiesInvalidDataError");
+    public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
+        Log.d(TAG, "onInvalidData");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Invalid content in ImageProperties.xml");

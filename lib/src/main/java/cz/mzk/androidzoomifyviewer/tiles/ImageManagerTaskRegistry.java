@@ -51,8 +51,8 @@ public class ImageManagerTaskRegistry {
         }
     }
 
-    public void enqueueInitializationTask(MetadataInitializationHandler handler) {
-        mInitTask = new InitImageManagerTask(imgManager, handler, new TaskFinishedListener() {
+    public void enqueueInitializationTask(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+        mInitTask = new InitImageManagerTask(imgManager, handler, successListener, new TaskFinishedListener() {
 
             @Override
             public void onTaskFinished() {
@@ -60,6 +60,7 @@ public class ImageManagerTaskRegistry {
             }
         });
         mInitTask.executeConcurrentIfPossible();
+
     }
 
 
@@ -91,6 +92,7 @@ public class ImageManagerTaskRegistry {
     public Set<TilePositionInPyramid> getAllTaskTileIds() {
         return tasks.keySet();
     }
+
 
     public static interface TaskFinishedListener {
         void onTaskFinished();

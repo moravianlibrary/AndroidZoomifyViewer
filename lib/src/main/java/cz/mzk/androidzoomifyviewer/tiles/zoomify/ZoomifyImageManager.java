@@ -18,7 +18,6 @@ import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.ImagePropertiesCache;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
-import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
@@ -132,8 +131,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void initImageMetadataAsync(MetadataInitializationHandler handler) {
-        taskRegistry.enqueueInitializationTask(handler);
+    public void initImageMetadataAsync(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+        taskRegistry.enqueueInitializationTask(handler, successListener);
     }
 
     @Override

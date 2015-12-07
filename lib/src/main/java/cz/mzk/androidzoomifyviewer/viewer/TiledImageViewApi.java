@@ -30,7 +30,7 @@ public interface TiledImageViewApi {
 
     //HANDLERS
 
-    public void setImageInitializationHandler(TiledImageView.ImageInitializationHandler imageInitializationHandler);
+    public void setMetadataInitializationHandler(TiledImageView.MetadataInitializationHandler metadataInitializationHandler);
 
     public void setTileDownloadErrorListener(TiledImageView.TileDownloadErrorListener tileDownloadErrorListener);
 

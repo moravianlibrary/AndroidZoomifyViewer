@@ -22,7 +22,6 @@ import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
-import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyImageManager;
 
@@ -59,7 +58,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private ImageManager mImageManager;
 
     //EVENT HANDLERS
-    private ImageInitializationHandler mImageInitializationHandler;
+    private MetadataInitializationHandler mMetadataInitializationHandler;
     private TileDownloadErrorListener mTileDownloadErrorListener;
 
     //GESTURES
@@ -144,8 +143,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     @Override
-    public void setImageInitializationHandler(ImageInitializationHandler imageInitializationHandler) {
-        this.mImageInitializationHandler = imageInitializationHandler;
+    public void setMetadataInitializationHandler(MetadataInitializationHandler metadataInitializationHandler) {
+        this.mMetadataInitializationHandler = metadataInitializationHandler;
     }
 
     @Override
@@ -162,7 +161,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mSingleTapListener = null;
         mDevTools = null;
         mImageManager = null;
-        mImageInitializationHandler = null;
+        mMetadataInitializationHandler = null;
         mTileDownloadErrorListener = null;
     }
 
@@ -199,55 +198,20 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     private void initTilesDownloaderAsync() {
-        mImageManager.initImageMetadataAsync(new MetadataInitializationHandler() {
+        mImageManager.initImageMetadataAsync(mMetadataInitializationHandler, new MetadataInitializationSuccessListener() {
 
             @Override
-            public void onSuccess(ImageManager imgManager) {
+            public void onMetadataDownloaded(ImageManager imgManager) {
                 LOGGER.d("ImageManager initialized");
                 if (imgManager.equals(mImageManager)) {
                     if (DEV_MODE) {
                         mTestPoints = new ImageCoordsPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
                     }
-
-                    if (mImageInitializationHandler != null) {
-                        mImageInitializationHandler.onImagePropertiesProcessed();
-                    }
                     invalidate();
                 } else {
                     //ImageManager has changed since, so this one is ignored.
                 }
-            }
 
-            @Override
-            public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
-                if (mImageInitializationHandler != null) {
-                    mImageInitializationHandler.onImagePropertiesUnhandableResponseCodeError(
-                            imagePropertiesUrl, responseCode);
-                }
-            }
-
-            @Override
-            public void onRedirectionLoop(String imagePropertiesUrl, int redirections) {
-                if (mImageInitializationHandler != null) {
-                    mImageInitializationHandler.onImagePropertiesRedirectionLoopError(imagePropertiesUrl,
-                            redirections);
-                }
-            }
-
-            @Override
-            public void onDataTransferError(String imagePropertiesUrl, String errorMessage) {
-                if (mImageInitializationHandler != null) {
-                    mImageInitializationHandler.onImagePropertiesDataTransferError(imagePropertiesUrl,
-                            errorMessage);
-                }
-            }
-
-            @Override
-            public void onInvalidData(String imagePropertiesUrl, String errorMessage) {
-                if (mImageInitializationHandler != null) {
-                    mImageInitializationHandler.onImagePropertiesInvalidDataError(imagePropertiesUrl,
-                            errorMessage);
-                }
             }
         });
     }
@@ -688,18 +652,18 @@ public class TiledImageView extends View implements TiledImageViewApi {
         public void onSingleTap(float x, float y, Rect boundingBox);
     }
 
+
     /**
-     * Exactly one of these methods is called eventually after loadImage(). Either onImagePropertiesProcessed() if
-     * ImageProperties.xml is found, downloaded and processed or one of the other methods in case of some error.
+     * Exactly one of these methods is called eventually unless async task to initialize metadata is canceled prematurely.
      *
      * @author martin
      */
-    public interface ImageInitializationHandler {
+    public interface MetadataInitializationHandler {
 
         /**
-         * ImageProperties.xml downloaded and processed properly.
+         * Metadata downloaded and processed properly.
          */
-        public void onImagePropertiesProcessed();
+        public void onMetadataInitialized();
 
         /**
          * Response to HTTP request for ImageProperties.xml returned code that cannot be handled here. That means almost
@@ -708,7 +672,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param responseCode
          */
-        public void onImagePropertiesUnhandableResponseCodeError(String imagePropertiesUrl, int responseCode);
+        public void onUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
 
         /**
          * Too many redirections to ImageProperties.xml, probably loop.
@@ -716,7 +680,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param redirections
          */
-        public void onImagePropertiesRedirectionLoopError(String imagePropertiesUrl, int redirections);
+        public void onRedirectionLoop(String imagePropertiesUrl, int redirections);
 
         /**
          * Other errors in transfering ImageProperties.xml - timeouts etc.
@@ -724,7 +688,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param errorMessage
          */
-        public void onImagePropertiesDataTransferError(String imagePropertiesUrl, String errorMessage);
+        public void onDataTransferError(String imagePropertiesUrl, String errorMessage);
 
         /**
          * Invalid content in ImageProperties.xml. Particulary erroneous xml.
@@ -732,15 +696,9 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param imagePropertiesUrl
          * @param errorMessage
          */
-        public void onImagePropertiesInvalidDataError(String imagePropertiesUrl, String errorMessage);
+        public void onInvalidData(String imagePropertiesUrl, String errorMessage);
     }
 
-    /**
-     * Exactly one of these methods is called after tile is downloaded and stored to cache or something goes wrong in this
-     * process.
-     *
-     * @author martin
-     */
     public interface TileDownloadErrorListener {
 
         /**
@@ -784,6 +742,10 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     public static interface TileDownloadSuccessListener {
         public void onTileDownloaded();
+    }
+
+    public interface MetadataInitializationSuccessListener {
+        public void onMetadataDownloaded(ImageManager imgManager);
     }
 
 }
