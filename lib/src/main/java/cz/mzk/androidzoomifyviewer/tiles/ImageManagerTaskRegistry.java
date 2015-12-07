@@ -28,12 +28,12 @@ public class ImageManagerTaskRegistry {
         this.imgManager = imgManager;
     }
 
-    public void registerTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TiledImageView.TileDownloadErrorListener handler, TiledImageView.TileDownloadSuccessListener tileDownloadSuccessListener) {
+    public void registerTask(final TilePositionInPyramid tilePositionInPyramid, String mZoomifyBaseUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
         if (tasks.size() < MAX_TASKS_IN_POOL) {
             boolean registered = tasks.containsKey(tilePositionInPyramid);
             if (!registered) {
                 // TODO: 7.12.15 proc se posila zoomfyBaseUrl?
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(imgManager, mZoomifyBaseUrl, tilePositionInPyramid, handler, tileDownloadSuccessListener, new TaskFinishedListener() {
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(imgManager, mZoomifyBaseUrl, tilePositionInPyramid, errorListener, successListener, new TaskFinishedListener() {
 
                     @Override
                     public void onTaskFinished() {

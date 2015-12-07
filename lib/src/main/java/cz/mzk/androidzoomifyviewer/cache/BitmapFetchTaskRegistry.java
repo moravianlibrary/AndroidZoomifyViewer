@@ -58,8 +58,7 @@ public class BitmapFetchTaskRegistry {
         private final FetchingBitmapFromDiskHandler onFinishedHandler;
         private boolean success = false;
 
-        public FetchBitmapFromDiskAndStoreToMemoryCacheTask(MemoryAndDiskTilesCache cache, String key,
-                                                            FetchingBitmapFromDiskHandler onFinishedHandler) {
+        public FetchBitmapFromDiskAndStoreToMemoryCacheTask(MemoryAndDiskTilesCache cache, String key, FetchingBitmapFromDiskHandler onFinishedHandler) {
             this.cache = cache;
             this.key = key;
             this.onFinishedHandler = onFinishedHandler;

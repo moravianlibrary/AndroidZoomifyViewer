@@ -647,8 +647,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener handler, TiledImageView.TileDownloadSuccessListener tileDownloadSuccessListener) {
-        taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, handler, tileDownloadSuccessListener);
+    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
+        taskRegistry.registerTask(tilePositionInPyramid, mBaseUrl, errorListener, successListener);
     }
 
     @Override

@@ -410,6 +410,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 invalidate();
             }
         });
+        //LOGGER.d(tile.getState().toString());
         switch (tile.getState()) {
             case IN_MEMORY:
                 drawTile(canv, visibleTileId, tile.getBitmap());
@@ -418,18 +419,14 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 // nothing, wait for it to be fetched into memory
                 break;
             case NOT_FOUND:
-                enqueTileDownload(visibleTileId);
+                mImageManager.enqueTileDownload(visibleTileId, mTileDownloadErrorListener, new TileDownloadSuccessListener() {
+
+                    @Override
+                    public void onTileDownloaded() {
+                        invalidate();
+                    }
+                });
         }
-    }
-
-    private void enqueTileDownload(TilePositionInPyramid visibleTileId) {
-        mImageManager.enqueTileDownload(visibleTileId, mTileDownloadErrorListener, new TileDownloadSuccessListener() {
-
-            @Override
-            public void onTileDownloaded() {
-                invalidate();
-            }
-        });
     }
 
     private void drawTile(Canvas canv, TilePositionInPyramid tileId, Bitmap tileBmp) {

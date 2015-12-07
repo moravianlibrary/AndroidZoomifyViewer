@@ -30,8 +30,9 @@ public interface ImageManager {
 
     //TASK MANAGEMENT
 
-    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener handler, TiledImageView.TileDownloadSuccessListener tileDownloadSuccessListener);
+    public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener);
 
+    // TODO: 7.12.15 Unused, remove. Super, protoze to je zase interni vec ImageManageru
     public void unregisterFinishedOrCanceledTask(TilePositionInPyramid tilePositionInPyramid);
 
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
