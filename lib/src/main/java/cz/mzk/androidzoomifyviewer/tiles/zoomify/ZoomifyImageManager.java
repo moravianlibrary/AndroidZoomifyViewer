@@ -5,8 +5,8 @@ import android.graphics.Rect;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.cache.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.MetadataCache;
 import cz.mzk.androidzoomifyviewer.tiles.Downloader;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;

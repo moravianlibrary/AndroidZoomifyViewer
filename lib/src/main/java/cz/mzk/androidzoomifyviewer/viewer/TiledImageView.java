@@ -13,9 +13,9 @@ import android.view.View;
 
 import java.util.List;
 
-import cz.mzk.androidzoomifyviewer.CacheManager;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.R;
+import cz.mzk.androidzoomifyviewer.cache.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.TileBitmap;
 import cz.mzk.androidzoomifyviewer.cache.TilesCache.FetchingBitmapFromDiskHandler;
 import cz.mzk.androidzoomifyviewer.gestures.MyGestureListener;

@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer;
+package cz.mzk.androidzoomifyviewer.cache;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -7,10 +7,7 @@ import android.os.Build;
 import android.view.Display;
 import android.view.WindowManager;
 
-import cz.mzk.androidzoomifyviewer.cache.MemoryAndDiskMetadataCache;
-import cz.mzk.androidzoomifyviewer.cache.MemoryAndDiskTilesCache;
-import cz.mzk.androidzoomifyviewer.cache.MetadataCache;
-import cz.mzk.androidzoomifyviewer.cache.TilesCache;
+import cz.mzk.androidzoomifyviewer.Logger;
 
 /**
  * @author Martin Řehánek
