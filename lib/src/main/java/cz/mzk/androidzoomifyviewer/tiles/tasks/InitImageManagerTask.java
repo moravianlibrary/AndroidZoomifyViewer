@@ -86,7 +86,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageM
             } else {
                 LOGGER.d("Downloading metadata: " + mMetadataUrl);
                 String downloaded = Downloader.downloadMetadata(mMetadataUrl);
-                cache.storeXml(downloaded, mMetadataUrl);
+                cache.storeMetadata(downloaded, mMetadataUrl);
                 return downloaded;
             }
         }

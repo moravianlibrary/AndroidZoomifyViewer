@@ -8,6 +8,6 @@ public interface MetadataCache {
 
     public String getMetadata(String metadataUrl);
 
-    public void storeXml(String metadata, String metadataUrl);
+    public void storeMetadata(String metadata, String metadataUrl);
 
 }

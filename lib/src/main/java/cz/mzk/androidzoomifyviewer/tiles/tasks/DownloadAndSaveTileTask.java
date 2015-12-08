@@ -75,12 +75,7 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
             imageServerResponseException = e;
         } catch (OtherIOException e) {
             otherIoException = e;
-        }
-        // TODO
-        // catch (InvalidDataException e) {
-        // invalidXmlException = e;
-        // }
-        finally {
+        } finally {
             LOGGER.v("tile processing task finished");
         }
         return false;

@@ -23,7 +23,7 @@ public class ImageManagerTaskRegistry {
 
     private static final Logger LOGGER = new Logger(ImageManagerTaskRegistry.class);
 
-    private final ImageManager mImgManager;// TODO: 8.12.15 Mozna uz nebude potreba
+    private final ImageManager mImgManager;
     private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> mTileDownloadTasks = new HashMap<>();
     private InitImageManagerTask mInitMetadataTask;
 
