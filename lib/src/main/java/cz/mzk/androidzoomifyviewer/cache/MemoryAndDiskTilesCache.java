@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
@@ -158,7 +159,11 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
             Bitmap fromDiskCache = getTileFromDiskCache(key);
             // store also to memory cache (nonblocking)
             if (fromDiskCache != null) {
-                new StoreTileToMemoryCacheTask(key).executeConcurrentIfPossible(fromDiskCache);
+                try {
+                    new StoreTileToMemoryCacheTask(key).executeConcurrentIfPossible(fromDiskCache);
+                } catch (RejectedExecutionException e) {
+                    LOGGER.w("to many threads in execution pool");
+                }
             }
             return fromDiskCache;
         }

@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
@@ -31,7 +32,12 @@ public class BitmapFetchTaskRegistry {
                         cache, key, fetchedListener);
                 tasks.put(key, task);
                 LOGGER.v("registration performed: " + key + ": (total " + tasks.size() + ")");
-                task.executeConcurrentIfPossible();
+                try {
+                    task.executeConcurrentIfPossible();
+                } catch (RejectedExecutionException e) {
+                    LOGGER.w("to many threads in execution pool");
+                    unregisterTask(key);
+                }
             } else {
                 LOGGER.v("registration ignored: already registered: " + key + ": (total " + tasks.size() + ")");
             }
