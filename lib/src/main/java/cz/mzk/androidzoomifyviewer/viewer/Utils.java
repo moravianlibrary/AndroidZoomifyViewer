@@ -77,20 +77,20 @@ public class Utils {
 
     //rectangle
 
-    public static RectD toImageCoords(RectD rectInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+    public static Rect toImageCoords(Rect rectInCanvasCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
         double left = (rectInCanvasCoords.left - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
         double top = (rectInCanvasCoords.top - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
         double right = (rectInCanvasCoords.right - imageShiftInCanvas.x) / imageToCanvasScaleFactor;
         double bottom = (rectInCanvasCoords.bottom - imageShiftInCanvas.y) / imageToCanvasScaleFactor;
-        return new RectD(left, top, right, bottom);
+        return new Rect((int) left, (int) top, (int) right, (int) bottom);
     }
 
-    public static RectD toCanvasCoords(Rect rectInImageCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
+    public static Rect toCanvasCoords(Rect rectInImageCoords, double imageToCanvasScaleFactor, VectorD imageShiftInCanvas) {
         double left = rectInImageCoords.left * imageToCanvasScaleFactor + imageShiftInCanvas.x;
         double top = rectInImageCoords.top * imageToCanvasScaleFactor + imageShiftInCanvas.y;
         double right = rectInImageCoords.right * imageToCanvasScaleFactor + imageShiftInCanvas.x;
         double bottom = rectInImageCoords.bottom * imageToCanvasScaleFactor + imageShiftInCanvas.y;
-        return new RectD(left, top, right, bottom);
+        return new Rect((int) left, (int) top, (int) right, (int) bottom);
     }
 
     //DP <-> PX CONVERSIONS

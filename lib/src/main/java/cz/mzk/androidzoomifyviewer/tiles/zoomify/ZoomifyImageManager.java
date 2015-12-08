@@ -13,7 +13,6 @@ import cz.mzk.androidzoomifyviewer.tiles.TiledImageProtocol;
 import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
 import cz.mzk.androidzoomifyviewer.tiles.tasks.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.viewer.Point;
-import cz.mzk.androidzoomifyviewer.viewer.RectD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
@@ -139,7 +138,7 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords) {
+    public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, Rect visibleAreaInImageCoords) {
         TilePositionInPyramid.TilePositionInLayer[] corners = getCornerVisibleTilesCoords(layerId, visibleAreaInImageCoords);
         TilePositionInPyramid.TilePositionInLayer topLeftVisibleTilePositionInLayer = corners[0];
         TilePositionInPyramid.TilePositionInLayer bottomRightVisibleTilePositionInLayer = corners[1];
@@ -154,14 +153,14 @@ public class ZoomifyImageManager implements ImageManager {
 
     }
 
-    private TilePositionInPyramid.TilePositionInLayer[] getCornerVisibleTilesCoords(int layerId, RectD visibleAreaInImageCoords) {
+    private TilePositionInPyramid.TilePositionInLayer[] getCornerVisibleTilesCoords(int layerId, Rect visibleAreaInImageCoords) {
         int imageWidthMinusOne = mImageMetadata.getWidth() - 1;
         int imageHeightMinusOne = mImageMetadata.getHeight() - 1;
 
-        int topLeftVisibleX = Utils.collapseToInterval((int) visibleAreaInImageCoords.left, 0, imageWidthMinusOne);
-        int topLeftVisibleY = Utils.collapseToInterval((int) visibleAreaInImageCoords.top, 0, imageHeightMinusOne);
-        int bottomRightVisibleX = Utils.collapseToInterval((int) visibleAreaInImageCoords.right, 0, imageWidthMinusOne);
-        int bottomRightVisibleY = Utils.collapseToInterval((int) visibleAreaInImageCoords.bottom, 0, imageHeightMinusOne);
+        int topLeftVisibleX = Utils.collapseToInterval(visibleAreaInImageCoords.left, 0, imageWidthMinusOne);
+        int topLeftVisibleY = Utils.collapseToInterval(visibleAreaInImageCoords.top, 0, imageHeightMinusOne);
+        int bottomRightVisibleX = Utils.collapseToInterval(visibleAreaInImageCoords.right, 0, imageWidthMinusOne);
+        int bottomRightVisibleY = Utils.collapseToInterval(visibleAreaInImageCoords.bottom, 0, imageHeightMinusOne);
         Point topLeftVisibleInImageCoords = new Point(topLeftVisibleX, topLeftVisibleY);
         Point bottomRightVisibleInImageCoords = new Point(bottomRightVisibleX, bottomRightVisibleY);
 

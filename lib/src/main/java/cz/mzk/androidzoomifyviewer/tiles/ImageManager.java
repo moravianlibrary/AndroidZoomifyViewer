@@ -6,7 +6,6 @@ import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
-import cz.mzk.androidzoomifyviewer.viewer.RectD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
@@ -46,7 +45,7 @@ public interface ImageManager {
 
     public int computeBestLayerId(Rect wholeImageInCanvasCoords);
 
-    public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, RectD visibleAreaInImageCoords);
+    public List<TilePositionInPyramid> getVisibleTilesForLayer(int layerId, Rect visibleAreaInImageCoords);
 
     public Rect getTileAreaInImageCoords(TilePositionInPyramid tilePositionInPyramid);
 

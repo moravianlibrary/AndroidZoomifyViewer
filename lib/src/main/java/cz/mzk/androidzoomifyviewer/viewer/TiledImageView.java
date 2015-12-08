@@ -71,7 +71,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     //DEV
     private DevTools mDevTools = null;
-    private ImageCoordsPoints mTestPoints = null;
+    private DevPoints mTestPoints = null;
 
     public TiledImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -207,7 +207,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 LOGGER.d("ImageManager initialized");
                 if (imgManager.equals(mImageManager)) {
                     if (DEV_MODE) {
-                        mTestPoints = new ImageCoordsPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
+                        mTestPoints = new DevPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
                     }
                     invalidate();
                 } else {
@@ -364,7 +364,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
 
-    private void drawLayers(Canvas canv, int highestLayer, boolean isIdealLayer, RectD visibleAreaInImageCoords) {
+    private void drawLayers(Canvas canv, int highestLayer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
         // long start = System.currentTimeMillis();
         List<TilePositionInPyramid> visibleTiles = mImageManager.getVisibleTilesForLayer(highestLayer, visibleAreaInImageCoords);
         // cancel downloading/saving of not visible tiles within layer
@@ -432,7 +432,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     private void drawTile(Canvas canv, TilePositionInPyramid tileId, Bitmap tileBmp) {
-        Rect tileInCanvas = toTileAreaInCanvas(tileId, tileBmp).toRect();
+        Rect tileInCanvas = toTileAreaInCanvas(tileId, tileBmp);
         // Log.d(TestTags.TEST, "drawing tile: " + tileId + " to: " + tileInCanvas.toShortString());
         canv.drawBitmap(tileBmp, null, tileInCanvas, null);
         if (mDevTools != null) {
@@ -442,10 +442,10 @@ public class TiledImageView extends View implements TiledImageViewApi {
         }
     }
 
-    private RectD calculateVisibleAreaInImageCoords() {
+    private Rect calculateVisibleAreaInImageCoords() {
         double resizeFactor = getTotalScaleFactor();
         VectorD totalShift = getTotalShift();
-        return Utils.toImageCoords(new RectD(mVisibleImageAreaInCanvas), resizeFactor, totalShift);
+        return Utils.toImageCoords(mVisibleImageAreaInCanvas, resizeFactor, totalShift);
     }
 
 
@@ -454,7 +454,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
 
-    private RectD toTileAreaInCanvas(TilePositionInPyramid tilePositionInPyramid, Bitmap tile) {
+    private Rect toTileAreaInCanvas(TilePositionInPyramid tilePositionInPyramid, Bitmap tile) {
         Rect tileAreaInImageCoords = mImageManager.getTileAreaInImageCoords(tilePositionInPyramid);
         return Utils.toCanvasCoords(tileAreaInImageCoords, getTotalScaleFactor(), getTotalShift());
     }
@@ -566,7 +566,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     private Rect computeWholeImageAreaInCanvasCoords(double scaleFactor, VectorD shift) {
         Rect imgArea = new Rect(0, 0, mImageManager.getImageWidth(), mImageManager.getImageHeight());
-        return Utils.toCanvasCoords(imgArea, scaleFactor, shift).toRect();
+        return Utils.toCanvasCoords(imgArea, scaleFactor, shift);
     }
 
     private Rect computeVisibleImageAreaInCanvas(Canvas canv) {

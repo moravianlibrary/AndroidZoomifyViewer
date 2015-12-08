@@ -90,7 +90,7 @@ public class FramingRectangleDrawer {
     }
 
     private void drawRect(FramingRectangle framingRect, double totalScaleFactor, VectorD totalShift) {
-        Rect rectInCanvasCoords = Utils.toCanvasCoords(framingRect.getRect(), totalScaleFactor, totalShift).toRect();
+        Rect rectInCanvasCoords = Utils.toCanvasCoords(framingRect.getRect(), totalScaleFactor, totalShift);
         if (framingRect.getFillColorRes() != null) {
             Paint fillPaint = mFillingPaintMap.get(framingRect.getFillColorRes());
             mCanv.drawRect(rectInCanvasCoords, fillPaint);

@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * @author Martin Řehánek
  */
-public class ImageCoordsPoints {
+public class DevPoints {
 
     private final Point center;
     private final List<Point> corners;
@@ -14,7 +14,7 @@ public class ImageCoordsPoints {
 
     private Point initialZoomCenter;
 
-    public ImageCoordsPoints(int imageWidth, int imageHeight) {
+    public DevPoints(int imageWidth, int imageHeight) {
         this.center = new Point(imageWidth / 2, imageHeight / 2);
         this.corners = initCorners(imageWidth, imageHeight);
         this.clickedPoints = new ArrayList<Point>();

@@ -118,7 +118,7 @@ public class GestureHandler {
 
     Rect computeWholeImageAreaInCanvasCoords(double scaleFactor, VectorD shift) {
         Rect imgArea = new Rect(0, 0, mImageViewApi.getImageWidth(), mImageViewApi.getImageHeight());
-        return Utils.toCanvasCoords(imgArea, scaleFactor, shift).toRect();
+        return Utils.toCanvasCoords(imgArea, scaleFactor, shift);
     }
 
 }

@@ -73,7 +73,7 @@ public class DevTools {
         mCanv.drawCircle((float) pointInCanvas.x, (float) pointInCanvas.y, size, paint);
     }
 
-    public void drawImageCoordPoints(ImageCoordsPoints testPoints, double resizeFactor, VectorD imageShiftInCanvas) {
+    public void drawImageCoordPoints(DevPoints testPoints, double resizeFactor, VectorD imageShiftInCanvas) {
         drawImageCoordPoint(testPoints.getCenter(), resizeFactor, imageShiftInCanvas, paintRedTrans);
         for (Point corner : testPoints.getCorners()) {
             drawImageCoordPoint(corner, resizeFactor, imageShiftInCanvas, paintRedTrans);
