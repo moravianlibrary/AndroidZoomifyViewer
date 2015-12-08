@@ -9,18 +9,20 @@ import java.io.StringReader;
 
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
+import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadataParser;
 
 /**
  * Created by Martin Řehánek on 3.12.15.
+ * Parses xml ImageProperties.xml
  */
-public class ImagePropertiesParser {
+public class ZoomifyMetadataParser implements ImageMetadataParser {
 
-    public static ImageProperties parse(String propertiesXml, String imagePropertiesUrl) throws InvalidDataException, OtherIOException {
+    public ZoomifyImageMetadata parse(String imagePropertiesXml, String imagePropertiesUrl) throws InvalidDataException, OtherIOException {
         try {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setNamespaceAware(false);
             XmlPullParser xpp = factory.newPullParser();
-            xpp.setInput(new StringReader(propertiesXml));
+            xpp.setInput(new StringReader(imagePropertiesXml));
             boolean elementImagePropertiesStarted = false;
             boolean elementImagePropertiesEnded = false;
             int width = -1;
@@ -64,8 +66,8 @@ public class ImagePropertiesParser {
             if (numimages != 1) {
                 throw new InvalidDataException(imagePropertiesUrl, "Unsupported number of images: " + numimages);
             }
-            // TODO: check numTiles
-            return new ImageProperties(width, height, numtiles, tileSize);
+            // TODO: 8.12.15 check numTiles and throw InvalidDataException if it doesn't match
+            return new ZoomifyImageMetadata(width, height, numtiles, tileSize);
         } catch (XmlPullParserException e1) {
             throw new InvalidDataException(imagePropertiesUrl, e1.getMessage());
         } catch (IOException e) {
@@ -73,7 +75,7 @@ public class ImagePropertiesParser {
         }
     }
 
-    private static Double getAttributeDoubleValue(XmlPullParser xpp, String attrName, String imagePropertiesUrl) throws InvalidDataException {
+    private Double getAttributeDoubleValue(XmlPullParser xpp, String attrName, String imagePropertiesUrl) throws InvalidDataException {
         String attrValue = getAttributeStringValue(xpp, attrName, imagePropertiesUrl);
         try {
             return Double.valueOf(attrValue);
@@ -83,7 +85,7 @@ public class ImagePropertiesParser {
         }
     }
 
-    private static int getAttributeIntegerValue(XmlPullParser xpp, String attrName, String imagePropertiesUrl) throws InvalidDataException {
+    private int getAttributeIntegerValue(XmlPullParser xpp, String attrName, String imagePropertiesUrl) throws InvalidDataException {
         String attrValue = getAttributeStringValue(xpp, attrName, imagePropertiesUrl);
         try {
             return Integer.valueOf(attrValue);
@@ -93,7 +95,7 @@ public class ImagePropertiesParser {
         }
     }
 
-    private static String getAttributeStringValue(XmlPullParser xpp, String attrName, String imagePropertiesUrl) throws InvalidDataException {
+    private String getAttributeStringValue(XmlPullParser xpp, String attrName, String imagePropertiesUrl) throws InvalidDataException {
         String attrValue = xpp.getAttributeValue(null, attrName);
         if (attrValue == null) {
             throw new InvalidDataException(imagePropertiesUrl, "missing attribute " + attrName);

@@ -23,7 +23,7 @@ public class ImagePropertiesHttpResponseCodeExamplesActivity extends ExamplesLis
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState, "ImageProperties.xml", "HTTP response codes", new MyAdapter(this,
+        super.onCreate(savedInstanceState, "ZoomifyImageMetadata.xml", "HTTP response codes", new MyAdapter(this,
                 SingleImageExamplesFactory.getImagePropertiesResponseExamples()));
     }
 

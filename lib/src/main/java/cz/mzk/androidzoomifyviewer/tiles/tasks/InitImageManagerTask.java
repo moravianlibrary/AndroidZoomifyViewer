@@ -1,23 +1,25 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.tasks;
 
 import cz.mzk.androidzoomifyviewer.ConcurrentAsyncTask;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.CacheManager;
 import cz.mzk.androidzoomifyviewer.cache.MetadataCache;
+import cz.mzk.androidzoomifyviewer.tiles.Downloader;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
 import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
-import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImagePropertiesParser;
+import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyMetadataParser;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
  * @author Martin Řehánek
  */
-// TODO: 8.12.15 Zobecnit na Metadata instead of ImageProperties
-// TODO: 8.12.15 A taky dodavat v parametru Perser jako zobecneni ImagePropertiesParser
-public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageProperties> {
+// TODO: 8.12.15 Zobecnit na Metadata instead of ZoomifyImageMetadata
+// TODO: 8.12.15 A taky dodavat v parametru Perser jako zobecneni ZoomifyMetadataParser
+public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageMetadata> {
 
     private static final Logger LOGGER = new Logger(InitImageManagerTask.class);
 
@@ -40,7 +42,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageP
     }
 
     @Override
-    protected ImageProperties doInBackground(Void... params) {
+    protected ImageMetadata doInBackground(Void... params) {
         try {
             if (isCancelled()) {
                 LOGGER.d("Task canceled before fetching metadata: " + mMetadataUrl);
@@ -50,7 +52,12 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageP
                     LOGGER.d("Task canceled before parsing metadata: " + mMetadataUrl);
                 } else {
                     if (metadataStr != null) {
-                        return ImagePropertiesParser.parse(metadataStr, mMetadataUrl);
+                        switch (mImgManager.getTilesFormat()) {
+                            case ZOOMIFY:
+                                return new ZoomifyMetadataParser().parse(metadataStr, mMetadataUrl);
+                            default:
+                                return null;
+                        }
                     }
                 }
             }
@@ -88,7 +95,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageP
     }
 
     @Override
-    protected void onPostExecute(ImageProperties result) {
+    protected void onPostExecute(ImageMetadata result) {
         if (mRegistryListener != null) {
             mRegistryListener.onTaskFinished();
         }

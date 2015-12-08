@@ -12,7 +12,7 @@ import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.cache.CacheManager;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
-import cz.mzk.androidzoomifyviewer.tiles.InitImageManagerTask;
+import cz.mzk.androidzoomifyviewer.tiles.tasks.InitImageManagerTask;
 import cz.mzk.androidzoomifyviewer.tiles.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 

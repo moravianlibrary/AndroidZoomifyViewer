@@ -16,6 +16,7 @@ import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
  */
 public class MemoryAndDiskMetadataCache implements MetadataCache {
 
+    // TODO: 8.12.15 Should be renamed to "metadata" but that would require imageProperties subdir to be deleted
     public static final String DISK_CACHE_SUBDIR = "imageProperties";
     public static final int DISK_CACHE_SIZE_B = 1024 * 1024 * 10; // 10MB
     public static final int MEMORY_CACHE_SIZE_ITEMS = 10;
@@ -200,7 +201,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
                     File cacheDir = params[0];
                     if (cacheDir.exists()) {
                         if (clearCache) {
-                            LOGGER.i("clearing image-properties disk cache");
+                            LOGGER.i("clearing metadata disk cache");
                             boolean cleared = DiskUtils.deleteDirContent(cacheDir);
                             if (!cleared) {
                                 LOGGER.w("failed to delete content of " + cacheDir.getAbsolutePath());

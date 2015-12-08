@@ -235,7 +235,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onMetadataUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+    public void onMetadataUnhandableResponseCode(String imageMetadataUrl, int responseCode) {
         Log.d(TAG, "onMetadataUnhandableResponseCode, code: " + responseCode);
         hideViews();
         switch (responseCode) {
@@ -254,7 +254,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
             default:
                 mErrorView.setVisibility(View.VISIBLE);
                 mErrorTitle.setText("Cannot process server resource");
-                mErrorResourceUrl.setText(imagePropertiesUrl);
+                mErrorResourceUrl.setText(imageMetadataUrl);
                 mErrorDescription.setText("HTTP code: " + responseCode);
         }
 
@@ -301,32 +301,32 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
     }
 
     @Override
-    public void onMetadataRedirectionLoop(String imagePropertiesUrl, int redirections) {
+    public void onMetadataRedirectionLoop(String imageMetadataUrl, int redirections) {
         Log.d(TAG, "onMetadataRedirectionLoop");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Redirection loop");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText("Too many redirections: " + redirections);
     }
 
     @Override
-    public void onMetadataDataTransferError(String imagePropertiesUrl, String errorMessage) {
+    public void onMetadataDataTransferError(String imageMetadataUrl, String errorMessage) {
         Log.d(TAG, "onMetadataDataTransferError");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Data transfer error");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText(errorMessage);
     }
 
     @Override
-    public void onMetadataInvalidData(String imagePropertiesUrl, String errorMessage) {
+    public void onMetadataInvalidData(String imageMetadataUrl, String errorMessage) {
         Log.d(TAG, "onMetadataInvalidData");
         hideViews();
         mErrorView.setVisibility(View.VISIBLE);
-        mErrorTitle.setText("Invalid content in ImageProperties.xml");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorTitle.setText("Invalid content in ZoomifyImageMetadata.xml");
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText(errorMessage);
     }
 

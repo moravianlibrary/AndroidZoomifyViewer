@@ -1,18 +1,19 @@
 package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
+import cz.mzk.androidzoomifyviewer.tiles.Orientation;
+import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
+
 /**
  * @author Martin Řehánek
  */
-public class ImageProperties {
+public class ZoomifyImageMetadata implements ImageMetadata {
 
     private final int width;
     private final int height;
     private final int numtiles; // pro kontrolu
     private final int tileSize;
 
-    // private final int level;
-
-    public ImageProperties(int width, int height, int numtiles, int tilesize) {
+    public ZoomifyImageMetadata(int width, int height, int numtiles, int tilesize) {
         this.width = width;
         this.height = height;
         this.numtiles = numtiles;
@@ -22,32 +23,27 @@ public class ImageProperties {
         // this.level = xTiles * yTiles;
     }
 
-    // public int getWidthInMaxZoomEstimate(){
-    // int xTiles = (int) Math.ceil(width/tileSize);
-    //
-    //
-    // }
-
-    // public int getLevel(){
-    // return level;
-    // }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
     public int getNumtiles() {
         return numtiles;
     }
 
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
+    }
+
+
+    @Override
     public int getTileSize() {
         return tileSize;
     }
 
+    @Override
     public Orientation getOrientation() {
         if (width > height) {
             return Orientation.LANDSCAPE;
@@ -58,7 +54,7 @@ public class ImageProperties {
 
     @Override
     public String toString() {
-        return "ImageProperties [width=" + width + ", height=" + height + ", numtiles=" + numtiles + ", tileSize="
+        return "ZoomifyImageMetadata [width=" + width + ", height=" + height + ", numtiles=" + numtiles + ", tileSize="
                 + tileSize + "]";
     }
 

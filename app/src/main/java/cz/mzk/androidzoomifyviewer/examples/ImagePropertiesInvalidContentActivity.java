@@ -23,7 +23,7 @@ public class ImagePropertiesInvalidContentActivity extends ExamplesListActivity 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState, "ImageProperties.xml", "invalid content", new MyAdapter(this,
+        super.onCreate(savedInstanceState, "ZoomifyImageMetadata.xml", "invalid content", new MyAdapter(this,
                 SingleImageExamplesFactory.getImagePropertiesInvalidContentExamples()));
     }
 

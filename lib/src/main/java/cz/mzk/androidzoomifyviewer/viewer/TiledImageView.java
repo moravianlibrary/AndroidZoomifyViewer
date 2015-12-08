@@ -663,37 +663,37 @@ public class TiledImageView extends View implements TiledImageViewApi {
         public void onMetadataInitialized();
 
         /**
-         * Response to HTTP request for ImageProperties.xml returned code that cannot be handled here. That means almost
+         * Response to HTTP request for ZoomifyImageMetadata.xml returned code that cannot be handled here. That means almost
          * everything except for some 2xx codes and some 3xx codes for which redirection is applied.
          *
-         * @param imagePropertiesUrl
+         * @param imageMetadataUrl
          * @param responseCode
          */
-        public void onMetadataUnhandableResponseCode(String imagePropertiesUrl, int responseCode);
+        public void onMetadataUnhandableResponseCode(String imageMetadataUrl, int responseCode);
 
         /**
-         * Too many redirections to ImageProperties.xml, probably loop.
+         * Too many redirections to ZoomifyImageMetadata.xml, probably loop.
          *
-         * @param imagePropertiesUrl
+         * @param imageMetadataUrl
          * @param redirections
          */
-        public void onMetadataRedirectionLoop(String imagePropertiesUrl, int redirections);
+        public void onMetadataRedirectionLoop(String imageMetadataUrl, int redirections);
 
         /**
-         * Other errors in transfering ImageProperties.xml - timeouts etc.
+         * Other errors in transfering ZoomifyImageMetadata.xml - timeouts etc.
          *
-         * @param imagePropertiesUrl
+         * @param imageMetadataUrl
          * @param errorMessage
          */
-        public void onMetadataDataTransferError(String imagePropertiesUrl, String errorMessage);
+        public void onMetadataDataTransferError(String imageMetadataUrl, String errorMessage);
 
         /**
-         * Invalid content in ImageProperties.xml. Particulary erroneous xml.
+         * Invalid content in ZoomifyImageMetadata.xml. Particulary erroneous xml.
          *
-         * @param imagePropertiesUrl
+         * @param imageMetadataUrl
          * @param errorMessage
          */
-        public void onMetadataInvalidData(String imagePropertiesUrl, String errorMessage);
+        public void onMetadataInvalidData(String imageMetadataUrl, String errorMessage);
     }
 
     public interface TileDownloadErrorListener {

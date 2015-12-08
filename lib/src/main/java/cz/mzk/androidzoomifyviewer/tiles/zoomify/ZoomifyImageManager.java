@@ -7,16 +7,18 @@ import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
-import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
+import cz.mzk.androidzoomifyviewer.tiles.TilesFormat;
+import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
+import cz.mzk.androidzoomifyviewer.tiles.tasks.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.viewer.Point;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
- * This class encapsulates image metadata from ImageProperties.xml and provides method for downloading tiles (bitmaps) for given
+ * This class encapsulates image metadata from ZoomifyImageMetadata.xml and provides method for downloading tiles (bitmaps) for given
  * image.
  *
  * @author Martin Řehánek
@@ -37,25 +39,25 @@ public class ZoomifyImageManager implements ImageManager {
     private final String mImagePropertiesUrl; // TODO: 8.12.15 lazy initialization?
 
     private boolean initialized = false;
-    private ImageProperties imageProperties;
+    private ImageMetadata mImageMetadata;// TODO: 8.12.15 rename
     private List<Layer> layers;
 
 
     /**
-     * @param baseUrl Zoomify base url.
-     * @param pxRatio Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
-     *                dpRatio = (1-pxRatio)
+     * @param zoomifyBaseUrl Zoomify base url.
+     * @param pxRatio        Ratio between pixels and density-independent pixels for computing image_size_in_canvas. Must be between 0 and 1.
+     *                       dpRatio = (1-pxRatio)
      */
-    public ZoomifyImageManager(String baseUrl, double pxRatio) {
+    public ZoomifyImageManager(String zoomifyBaseUrl, double pxRatio) {
         if (pxRatio < 0 || pxRatio > 1) {
             throw new IllegalArgumentException("pxRation not in <0;1> interval");
         } else {
             mPxRatio = pxRatio;
         }
-        if (baseUrl == null || baseUrl.isEmpty()) {
+        if (zoomifyBaseUrl == null || zoomifyBaseUrl.isEmpty()) {
             throw new IllegalArgumentException("baseUrl is null or empty");
         } else {
-            mBaseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + '/';
+            mBaseUrl = zoomifyBaseUrl.endsWith("/") ? zoomifyBaseUrl : zoomifyBaseUrl + '/';
         }
         mImagePropertiesUrl = mBaseUrl + "ImageProperties.xml";
     }
@@ -69,32 +71,32 @@ public class ZoomifyImageManager implements ImageManager {
     @Override
     public int getImageWidth() {
         checkInitialized();
-        return imageProperties.getWidth();
+        return mImageMetadata.getWidth();
     }
 
     @Override
     public int getImageHeight() {
         checkInitialized();
-        return imageProperties.getHeight();
+        return mImageMetadata.getHeight();
     }
 
     @Override
     public int getTileTypicalSize() {
         checkInitialized();
-        return imageProperties.getTileSize();
+        return mImageMetadata.getTileSize();
     }
 
     @Override
-    public void init(ImageProperties imgProp) {
-        if (initialized) { //// TODO: 8.12.15 tahle promenna asi nepotreba, staci imageProperties!=null
+    public void init(ImageMetadata imgProp) {
+        if (initialized) { //// TODO: 8.12.15 tahle promenna asi nepotreba, staci mImageMetadata!=null
             throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
         } else {
             logger.d("initImageMetadata: " + mImagePropertiesUrl);
         }
         //String propertiesXml = fetchImagePropertiesXml();
-        //imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
-        imageProperties = imgProp;
-        logger.d(imageProperties.toString());
+        //mImageMetadata = ZoomifyMetadataParser.parse(propertiesXml, mImagePropertiesUrl);
+        mImageMetadata = imgProp;
+        logger.d(mImageMetadata.toString());
         layers = initLayers();
         initialized = true;
     }
@@ -113,9 +115,9 @@ public class ZoomifyImageManager implements ImageManager {
         int numberOfLayers = computeNumberOfLayers();
         // logger.d( "layers #: " + numberOfLayers);
         List<Layer> result = new ArrayList<Layer>(numberOfLayers);
-        double width = imageProperties.getWidth();
-        double height = imageProperties.getHeight();
-        double tileSize = imageProperties.getTileSize();
+        double width = mImageMetadata.getWidth();
+        double height = mImageMetadata.getHeight();
+        double tileSize = mImageMetadata.getTileSize();
         for (int layer = 0; layer < numberOfLayers; layer++) {
             double powerOf2 = Utils.pow(2, numberOfLayers - layer - 1);
             int tilesHorizontal = (int) Math.ceil(Math.floor(width / powerOf2) / tileSize);
@@ -128,8 +130,8 @@ public class ZoomifyImageManager implements ImageManager {
     private int computeNumberOfLayers() {
         float tilesInLayer = -1f;
         int tilesInLayerInt = -1;
-        float maxDimension = Math.max(imageProperties.getWidth(), imageProperties.getHeight());
-        float tileSize = imageProperties.getTileSize();
+        float maxDimension = Math.max(mImageMetadata.getWidth(), mImageMetadata.getHeight());
+        float tileSize = mImageMetadata.getTileSize();
         int i = 0;
         do {
             tilesInLayer = (maxDimension / (tileSize * Utils.pow(2, i)));
@@ -157,8 +159,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private TilePositionInPyramid.TilePositionInLayer[] getCornerVisibleTilesCoords(int layerId, RectD visibleAreaInImageCoords) {
-        int imageWidthMinusOne = imageProperties.getWidth() - 1;
-        int imageHeightMinusOne = imageProperties.getHeight() - 1;
+        int imageWidthMinusOne = mImageMetadata.getWidth() - 1;
+        int imageHeightMinusOne = mImageMetadata.getHeight() - 1;
 
         int topLeftVisibleX = Utils.collapseToInterval((int) visibleAreaInImageCoords.left, 0, imageWidthMinusOne);
         int topLeftVisibleY = Utils.collapseToInterval((int) visibleAreaInImageCoords.top, 0, imageHeightMinusOne);
@@ -184,9 +186,9 @@ public class ZoomifyImageManager implements ImageManager {
         int column = tilePositionInPyramid.getPositionInLayer().column;
         int row = tilePositionInPyramid.getPositionInLayer().row;
         int level = tilePositionInPyramid.getLayer();
-        double tileSize = imageProperties.getTileSize();
-        double width = imageProperties.getWidth();
-        double height = imageProperties.getHeight();
+        double tileSize = mImageMetadata.getTileSize();
+        double width = mImageMetadata.getWidth();
+        double height = mImageMetadata.getHeight();
         double depth = layers.size();
         // logger.d( tilePositionInPyramid.toString());
         // logger.d( "column: " + column + ", row: " + row + ", d: " + depth + ", l: " + level);
@@ -230,10 +232,10 @@ public class ZoomifyImageManager implements ImageManager {
             throw new IllegalArgumentException("layer out of range: " + layerId);
         }
 
-        if (pointInMageCoords.x < 0 || pointInMageCoords.x >= imageProperties.getWidth()) {
+        if (pointInMageCoords.x < 0 || pointInMageCoords.x >= mImageMetadata.getWidth()) {
             throw new IllegalArgumentException("x coord out of range: " + pointInMageCoords.x);
         }
-        if (pointInMageCoords.y < 0 || pointInMageCoords.y >= imageProperties.getHeight()) {
+        if (pointInMageCoords.y < 0 || pointInMageCoords.y >= mImageMetadata.getHeight()) {
             throw new IllegalArgumentException("y coord out of range: " + pointInMageCoords.y);
         }
 
@@ -244,7 +246,7 @@ public class ZoomifyImageManager implements ImageManager {
         // logger.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
         // ", y=" + pixelY);
         // Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
-        double step = imageProperties.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
+        double step = mImageMetadata.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
         // Log.d(TestTags.TILES, "step: " + step);
         // x
         double cx_step = pointInMageCoords.x / step;
@@ -320,14 +322,14 @@ public class ZoomifyImageManager implements ImageManager {
         // Log.d(TestTags.TEST, "imgInCanvas: width: " + imgInCanvasWidth + ", height: " + imgInCanvasHeight);
         for (int layerId = topLayer; layerId >= 0; layerId--) {
             int horizontalTiles = layers.get(layerId).getTilesHorizontal();
-            int layerWidthWithoutLastTile = imageProperties.getTileSize() * (horizontalTiles - 1);
-            // int testWidth = imageProperties.getTileSize() * horizontalTiles;
+            int layerWidthWithoutLastTile = mImageMetadata.getTileSize() * (horizontalTiles - 1);
+            // int testWidth = mImageMetadata.getTileSize() * horizontalTiles;
 
             int verticalTiles = layers.get(layerId).getTilesVertical();
-            int layerHeightWithoutLastTile = imageProperties.getTileSize() * (verticalTiles - 1);
-            // int testHeight = imageProperties.getTileSize() * verticalTiles;
+            int layerHeightWithoutLastTile = mImageMetadata.getTileSize() * (verticalTiles - 1);
+            // int testHeight = mImageMetadata.getTileSize() * verticalTiles;
             double layerWidth = getLayerWidth(layerId);
-            // double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
+            // double result = mImageMetadata.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
             double layerHeight = getLayerHeight(layerId);
             // Log.d(TestTags.TEST, "layer " + layerId + ": width: " + layerWidth + ", height: " + layerHeight);
             if (layerWidth <= imgInCanvasWidth && layerHeight <= imgInCanvasHeight) {
@@ -380,6 +382,11 @@ public class ZoomifyImageManager implements ImageManager {
         return tileUrl;
     }
 
+    @Override
+    public TilesFormat getTilesFormat() {
+        return TilesFormat.ZOOMIFY;
+    }
+
     private TileDimensionsInImage calculateTileDimensionsInImageCoords(TilePositionInPyramid tilePositionInPyramid) {
         checkInitialized();
         int basicSize = getTilesBasicSizeInImageCoordsForGivenLayer(tilePositionInPyramid.getLayer());
@@ -390,13 +397,13 @@ public class ZoomifyImageManager implements ImageManager {
 
     private int getTilesBasicSizeInImageCoordsForGivenLayer(int layerId) {
         // TODO: 4.12.15 cachovat
-        return imageProperties.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
+        return mImageMetadata.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
     }
 
     // TODO: sjednotit slovnik, tomuhle obcas rikam 'step'
     private int getTileWidthInImageCoords(int layerId, int tileHorizontalIndex, int basicSize) {
         if (tileHorizontalIndex == layers.get(layerId).getTilesHorizontal() - 1) {
-            int result = imageProperties.getWidth() - basicSize * (layers.get(layerId).getTilesHorizontal() - 1);
+            int result = mImageMetadata.getWidth() - basicSize * (layers.get(layerId).getTilesHorizontal() - 1);
             // logger.d( "TILE FAR RIGHT WIDTH: " + result);
             return result;
         } else {
@@ -413,7 +420,7 @@ public class ZoomifyImageManager implements ImageManager {
         // Log.d(TestTags.TILES, "last tile's index: " + layerId + ": " + lastTilesIndex);
         // Log.d(TestTags.TEST, "tileVerticalI: " + tileVerticalIndex + ", lastTilesI: " + lastTilesIndex);
         if (tileVerticalIndex == lastTilesIndex) {
-            return imageProperties.getHeight() - basicSize * (lastTilesIndex);
+            return mImageMetadata.getHeight() - basicSize * (lastTilesIndex);
         } else {
             return basicSize;
         }
@@ -422,7 +429,7 @@ public class ZoomifyImageManager implements ImageManager {
     private double getLayerWidth(int layerId) {
         checkInitialized();
         // TODO: 4.12.15 possibly cache this if it's being called frequently
-        double result = imageProperties.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
+        double result = mImageMetadata.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
         // logger.d( "layer " + layerId + ", width=" + result + " px");
         return result;
     }
@@ -430,7 +437,7 @@ public class ZoomifyImageManager implements ImageManager {
     private double getLayerHeight(int layerId) {
         checkInitialized();
         // TODO: 4.12.15 possibly cache this if it's being called frequently
-        return imageProperties.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
+        return mImageMetadata.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
     }
 
     @Override

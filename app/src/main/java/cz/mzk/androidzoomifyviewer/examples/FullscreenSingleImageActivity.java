@@ -154,38 +154,38 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void onMetadataUnhandableResponseCode(String imagePropertiesUrl, int responseCode) {
+    public void onMetadataUnhandableResponseCode(String imageMetadataUrl, int responseCode) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Cannot process server resource");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText("HTTP code: " + responseCode);
     }
 
     @Override
-    public void onMetadataRedirectionLoop(String tileImageUrl, int redirections) {
+    public void onMetadataRedirectionLoop(String imageMetadataUrl, int redirections) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Redirection loop");
-        mErrorResourceUrl.setText(tileImageUrl);
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText("Too many redirections: " + redirections);
     }
 
     @Override
-    public void onMetadataDataTransferError(String tileImageUrl, String errorMessage) {
+    public void onMetadataDataTransferError(String imageMetadataUrl, String errorMessage) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
         mErrorTitle.setText("Data transfer error");
-        mErrorResourceUrl.setText(tileImageUrl);
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText(errorMessage);
     }
 
     @Override
-    public void onMetadataInvalidData(String imagePropertiesUrl, String errorMessage) {
+    public void onMetadataInvalidData(String imageMetadataUrl, String errorMessage) {
         mProgressView.setVisibility(View.INVISIBLE);
         mErrorView.setVisibility(View.VISIBLE);
-        mErrorTitle.setText("Invalid content in ImageProperties.xml");
-        mErrorResourceUrl.setText(imagePropertiesUrl);
+        mErrorTitle.setText("Invalid content in ZoomifyImageMetadata.xml");
+        mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText(errorMessage);
     }
 

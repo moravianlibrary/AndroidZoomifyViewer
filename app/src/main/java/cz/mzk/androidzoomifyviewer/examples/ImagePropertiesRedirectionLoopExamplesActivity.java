@@ -23,7 +23,7 @@ public class ImagePropertiesRedirectionLoopExamplesActivity extends ExamplesList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState, "ImageProperties.xml", "redirection loops", new MyAdapter(this,
+        super.onCreate(savedInstanceState, "ZoomifyImageMetadata.xml", "redirection loops", new MyAdapter(this,
                 SingleImageExamplesFactory.getErrorsExamples()));
     }
 

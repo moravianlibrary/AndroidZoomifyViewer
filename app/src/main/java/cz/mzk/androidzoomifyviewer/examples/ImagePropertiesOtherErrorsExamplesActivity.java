@@ -23,7 +23,7 @@ public class ImagePropertiesOtherErrorsExamplesActivity extends ExamplesListActi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState, "ImageProperties.xml", "other error examples", new MyAdapter(this,
+        super.onCreate(savedInstanceState, "ZoomifyImageMetadata.xml", "other error examples", new MyAdapter(this,
                 SingleImageExamplesFactory.getImagePropertiesOtherErrorsExamples()));
     }
 

@@ -1,10 +1,12 @@
-package cz.mzk.androidzoomifyviewer.tiles;
+package cz.mzk.androidzoomifyviewer.tiles.tasks;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import cz.mzk.androidzoomifyviewer.Logger;
+import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
+import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 
 /**
