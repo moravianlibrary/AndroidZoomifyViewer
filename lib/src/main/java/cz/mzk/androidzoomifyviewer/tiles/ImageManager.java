@@ -4,10 +4,7 @@ import android.graphics.Rect;
 
 import java.util.List;
 
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
+import cz.mzk.androidzoomifyviewer.tiles.zoomify.ImageProperties;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.Layer;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
@@ -18,6 +15,9 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 public interface ImageManager {
 
     //TASK MANAGEMENT
+
+    // TODO: 8.12.15 Zobecnit na tridu Metadata
+    public void init(ImageProperties imgProp);
 
     public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener);
 
@@ -57,12 +57,6 @@ public interface ImageManager {
     //jenom na testy, TODO: odstranit odsud
     @Deprecated
     public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
-
-    //TODO: presunout do budouciho Downloaderu
-
-    //public Bitmap downloadTile(String tileImageUrl) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException;
-
-    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException;
 
 
 }

@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.Logger;
-import cz.mzk.androidzoomifyviewer.cache.CacheManager;
-import cz.mzk.androidzoomifyviewer.cache.MetadataCache;
-import cz.mzk.androidzoomifyviewer.tiles.Downloader;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
@@ -41,8 +38,8 @@ public class ZoomifyImageManager implements ImageManager {
 
     private final String mBaseUrl;
     private final double mPxRatio;
+    private final String mImagePropertiesUrl; // TODO: 8.12.15 lazy initialization?
 
-    private String mImagePropertiesUrl;
     private boolean initialized = false;
     private ImageProperties imageProperties;
     private List<Layer> layers;
@@ -104,7 +101,7 @@ public class ZoomifyImageManager implements ImageManager {
      *                                      etc.
      * @throws OtherIOException             In case of other error (invalid URL, error transfering data, ...)
      */
-    @Override
+    /*@Override
     public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException {
         if (initialized) {
             throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
@@ -116,11 +113,25 @@ public class ZoomifyImageManager implements ImageManager {
         logger.d(imageProperties.toString());
         layers = initLayers();
         initialized = true;
+    }*/
+    @Override
+    public void init(ImageProperties imgProp) {
+        if (initialized) { //// TODO: 8.12.15 tahle promenna asi nepotreba, staci imageProperties!=null
+            throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
+        } else {
+            logger.d("initImageMetadata: " + mImagePropertiesUrl);
+        }
+        //String propertiesXml = fetchImagePropertiesXml();
+        //imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
+        imageProperties = imgProp;
+        logger.d(imageProperties.toString());
+        layers = initLayers();
+        initialized = true;
     }
 
     @Override
     public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        taskRegistry.enqueueMetadataInitializationTask(handler, successListener);
+        taskRegistry.enqueueMetadataInitializationTask(mImagePropertiesUrl, handler, successListener);
     }
 
     @Override
@@ -128,7 +139,7 @@ public class ZoomifyImageManager implements ImageManager {
         return initialized;
     }
 
-    private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
+    /*private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
         MetadataCache cache = CacheManager.getMetadataCache();
         String fromCache = cache.getXml(mImagePropertiesUrl);
         if (fromCache != null) {
@@ -138,7 +149,7 @@ public class ZoomifyImageManager implements ImageManager {
             cache.storeXml(downloaded, mImagePropertiesUrl);
             return downloaded;
         }
-    }
+    }*/
 
 
     private List<Layer> initLayers() {

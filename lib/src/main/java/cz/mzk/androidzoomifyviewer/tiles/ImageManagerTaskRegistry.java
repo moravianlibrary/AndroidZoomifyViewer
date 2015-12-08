@@ -16,7 +16,7 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
  */
 public class ImageManagerTaskRegistry {
 
-    public static final int MAX_TASKS_IN_POOL = 50;
+    public static final int MAX_TASKS_IN_POOL = 30;
 
     private static final Logger LOGGER = new Logger(ImageManagerTaskRegistry.class);
 
@@ -49,10 +49,10 @@ public class ImageManagerTaskRegistry {
         }
     }
 
-    public void enqueueMetadataInitializationTask(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+    public void enqueueMetadataInitializationTask(String metadataUrl, TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
         if (mInitMetadataTask == null) {
             LOGGER.d("enqueuing metadata-initialization task");
-            mInitMetadataTask = new InitImageManagerTask(mImgManager, handler, successListener, new TaskFinishedListener() {
+            mInitMetadataTask = new InitImageManagerTask(mImgManager, metadataUrl, handler, successListener, new TaskFinishedListener() {
 
                 @Override
                 public void onTaskFinished() {
