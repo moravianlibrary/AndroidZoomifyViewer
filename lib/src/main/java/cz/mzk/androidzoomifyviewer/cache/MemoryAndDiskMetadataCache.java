@@ -22,6 +22,8 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
 
     private static final Logger LOGGER = new Logger(MemoryAndDiskMetadataCache.class);
 
+
+    private final Object mMemoryCacheLock = new Object();
     private final LruCache<String, String> mMemoryCache;
     private final Object mDiskCacheInitializationLock = new Object();
     private DiskLruCache mDiskCache = null;
@@ -29,7 +31,9 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
 
     public MemoryAndDiskMetadataCache(Context context, boolean diskCacheEnabled, boolean clearCache) {
         mDiskCacheEnabled = diskCacheEnabled;
-        mMemoryCache = initMemoryCache();
+        synchronized (mMemoryCacheLock) {
+            mMemoryCache = initMemoryCache();
+        }
         if (mDiskCacheEnabled) {
             initDiskCacheAsync(context, clearCache);
         }
@@ -81,8 +85,8 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
     @Override
     public void storeMetadata(String metadata, String metadataUrl) {
         String key = buildKey(metadataUrl);
-        storeXmlToMemoryCache(key, metadata);
-        storeXmlToDiskCache(key, metadata);
+        storeMetadataToMemoryCache(key, metadata);
+        storeMetadataToDiskCache(key, metadata);
     }
 
     private String buildKey(String metadataUrl) {
@@ -93,12 +97,12 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
         return key;
     }
 
-    private void storeXmlToMemoryCache(String key, String xml) {
-        synchronized (mMemoryCache) {
+    private void storeMetadataToMemoryCache(String key, String metadata) {
+        synchronized (mMemoryCacheLock) {
             LOGGER.v("assuming mMemoryCache lock: " + Thread.currentThread().toString());
             if (mMemoryCache.get(key) == null) {
                 LOGGER.d("storing to memory cache: " + key);
-                mMemoryCache.put(key, xml);
+                mMemoryCache.put(key, metadata);
             } else {
                 LOGGER.d("already in memory cache: " + key);
             }
@@ -124,7 +128,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
         }
     }
 
-    private void storeXmlToDiskCache(String key, String xml) {
+    private void storeMetadataToDiskCache(String key, String metadata) {
         waitUntilDiskCacheInitializedOrDisabled();
         try {
             if (mDiskCacheEnabled) {
@@ -132,12 +136,12 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
                 if (fromDiskCache != null) {
                     LOGGER.d("already in disk cache: " + key);
                 } else {
-                    LOGGER.d("storing to disk cache: " + key);
-                    mDiskCache.storeString(0, key, xml);
+                    LOGGER.d("storing into disk cache: " + key);
+                    mDiskCache.storeString(0, key, metadata);
                 }
             }
         } catch (DiskLruCacheException e) {
-            LOGGER.e("failed to store xml to disk cache: " + key, e);
+            LOGGER.e("failed to store into disk cache: " + key, e);
         }
     }
 
@@ -145,7 +149,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
     public String getMetadata(String metadataUrl) {
         String key = buildKey(metadataUrl);
         // long start = System.currentTimeMillis();
-        String inMemoryCache = mMemoryCache.get(key);
+        String inMemoryCache = getMetadataFromMemoryCache(key);
         // long afterHitOrMiss = System.currentTimeMillis();
         if (inMemoryCache != null) {
             LOGGER.d("memory cache hit: " + key);
@@ -154,16 +158,22 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
         } else {
             LOGGER.d("memory cache miss: " + key);
             // LOGGER.d("memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
-            String fromDiskCache = getXmlFromDiskCache(key);
+            String fromDiskCache = getMetadataFromDiskCache(key);
             // store also to memory cache (nonblocking)
             if (fromDiskCache != null) {
-                new StoreXmlToMemoryCacheTask(key).execute(fromDiskCache);
+                new StoreMetadataToMemoryCacheTask(key).execute(fromDiskCache);
             }
             return fromDiskCache;
         }
     }
 
-    private String getXmlFromDiskCache(String key) {
+    private String getMetadataFromMemoryCache(String key) {
+        synchronized (mMemoryCacheLock) {
+            return mMemoryCache.get(key);
+        }
+    }
+
+    private String getMetadataFromDiskCache(String key) {
         waitUntilDiskCacheInitializedOrDisabled();
         try {
             if (mDiskCacheEnabled) {
@@ -178,7 +188,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            LOGGER.i("error loading xml from disk cache: " + key, e);
+            LOGGER.i("error loading from disk cache: " + key, e);
             return null;
         }
     }
@@ -232,16 +242,16 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
         }
     }
 
-    private class StoreXmlToMemoryCacheTask extends AsyncTask<String, Void, Void> {
+    private class StoreMetadataToMemoryCacheTask extends AsyncTask<String, Void, Void> {
         private final String key;
 
-        public StoreXmlToMemoryCacheTask(String key) {
+        public StoreMetadataToMemoryCacheTask(String key) {
             this.key = key;
         }
 
         @Override
         protected Void doInBackground(String... params) {
-            storeXmlToMemoryCache(key, params[0]);
+            storeMetadataToMemoryCache(key, params[0]);
             return null;
         }
     }

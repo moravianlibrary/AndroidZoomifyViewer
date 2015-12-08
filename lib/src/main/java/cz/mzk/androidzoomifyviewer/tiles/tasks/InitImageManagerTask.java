@@ -72,7 +72,6 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageM
     }
 
     private String fetchMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
-        // TODO: 8.12.15 proverit, jestli opravdu vzdy funguje i z worker threadu
         MetadataCache cache = CacheManager.getMetadataCache();
         String fromCache = cache.getMetadata(mMetadataUrl);
         if (fromCache != null) {

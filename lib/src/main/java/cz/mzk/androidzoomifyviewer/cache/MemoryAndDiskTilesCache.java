@@ -38,12 +38,13 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
     private boolean mDiskCacheEnabled;
     private DiskLruCache mDiskCache = null;
 
-    public MemoryAndDiskTilesCache(Context context, int memoryCacheMaxItems, boolean diskCacheEnabled,
-                                   boolean clearDiskCache, long diskCacheBytes) {
+    public MemoryAndDiskTilesCache(Context context, int memoryCacheMaxItems, boolean diskCacheEnabled, boolean clearDiskCache, long diskCacheBytes) {
         super();
         mDiskCacheEnabled = diskCacheEnabled;
         // mMemoryCache = initMemoryCacheFixedSize();
-        mMemoryCache = new LruCache<String, Bitmap>(memoryCacheMaxItems);
+        synchronized (mMemoryCacheLock) {
+            mMemoryCache = new LruCache<String, Bitmap>(memoryCacheMaxItems);
+        }
         LOGGER.i("memory cache initialized; max items: " + memoryCacheMaxItems);
         mBitmapFetchManager = new BitmapFetchTaskRegistry(this);
         if (mDiskCacheEnabled) {
