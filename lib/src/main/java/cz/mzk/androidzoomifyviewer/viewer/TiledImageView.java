@@ -23,6 +23,7 @@ import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangleDrawer;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
+import cz.mzk.androidzoomifyviewer.tiles.TiledImageProtocol;
 import cz.mzk.androidzoomifyviewer.tiles.zoomify.ZoomifyImageManager;
 
 /**
@@ -178,12 +179,13 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     @Override
-    public void loadImage(String zoomifyBaseUrl) {
-        LOGGER.d("loading new image, base url: " + zoomifyBaseUrl);
+    public void loadImage(TiledImageProtocol tiledImageProtocol, String baseUrl) {
+        LOGGER.d("loading new image, base url: " + baseUrl);
+        // TODO: 8.12.15 use tiledImageProtocol when other implementation is available
         mViewmodeScaleFactorsInitialized = false;
         mViewmodeShiftInitialized = false;
         mMinZoomCanvasImagePaddingInitialized = false;
-        mZoomifyBaseUrl = zoomifyBaseUrl;
+        mZoomifyBaseUrl = baseUrl;
         cancelAllTasks();
         mGestureListener.reset();
         double pxRatio = getResources().getInteger(R.integer.androidzoomifyviewer_pxRatio) / 100.0;

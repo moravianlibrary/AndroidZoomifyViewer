@@ -15,6 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import cz.mzk.androidzoomifyviewer.tiles.TiledImageProtocol;
 import cz.mzk.androidzoomifyviewer.viewer.PointD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
@@ -111,7 +112,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
                 AppConfig.VIEW_MODE = ViewMode.values()[position];
                 if (mImageView != null) {
                     mImageView.setViewMode(AppConfig.VIEW_MODE);
-                    mImageView.loadImage(mBaseUrl);
+                    mImageView.loadImage(TiledImageProtocol.ZOOMIFY, mBaseUrl);
                 }
             }
 
@@ -126,7 +127,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         Log.v(TAG, "showing image");
         mImageView.setVisibility(View.INVISIBLE);
         mProgressView.setVisibility(View.VISIBLE);
-        mImageView.loadImage(mBaseUrl);
+        mImageView.loadImage(TiledImageProtocol.ZOOMIFY, mBaseUrl);
     }
 
 

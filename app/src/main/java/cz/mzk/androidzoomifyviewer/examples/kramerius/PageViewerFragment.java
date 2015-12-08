@@ -25,6 +25,7 @@ import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.examples.R;
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
+import cz.mzk.androidzoomifyviewer.tiles.TiledImageProtocol;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.MetadataInitializationHandler;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView.SingleTapListener;
@@ -202,7 +203,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
             String pid = mPagePids.get(pageIndex);
             String url = buildZoomifyBaseUrl(pid);
             Log.d(TAG, "base url: " + url);
-            mTiledImageView.loadImage(url.toString());
+            mTiledImageView.loadImage(TiledImageProtocol.ZOOMIFY, url.toString());
             //mTiledImageView.setFramingRectangles(getTestRectangles(getContext()));
         } else {
             Log.w(TAG, "Page index out of range: " + pageIndex);

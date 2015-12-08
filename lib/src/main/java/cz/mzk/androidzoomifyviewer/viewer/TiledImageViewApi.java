@@ -5,8 +5,10 @@ import android.graphics.Rect;
 import java.util.List;
 
 import cz.mzk.androidzoomifyviewer.rectangles.FramingRectangle;
+import cz.mzk.androidzoomifyviewer.tiles.TiledImageProtocol;
 
 /**
+ * This interface doesn't have to be used in your code. It just summarizes new public operations avaible in TiledImageView. Also some inherited from View (technical reasons).
  * Created by Martin Řehánek on 6.12.15.
  */
 public interface TiledImageViewApi {
@@ -25,8 +27,7 @@ public interface TiledImageViewApi {
     public VectorD getTotalShift();
 
     //LOADING IMAGE
-    // TODO: 6.12.15 Define protocol, for now zoomify only
-    public void loadImage(String zoomifyBaseUrl);
+    public void loadImage(TiledImageProtocol tiledImageProtocol, String baseUrl);
 
     //HANDLERS
 
