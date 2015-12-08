@@ -1,6 +1,5 @@
 package cz.mzk.androidzoomifyviewer.tiles.zoomify;
 
-import cz.mzk.androidzoomifyviewer.tiles.Orientation;
 import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
 
 /**

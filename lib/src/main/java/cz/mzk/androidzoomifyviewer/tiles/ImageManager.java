@@ -39,6 +39,8 @@ public interface ImageManager {
 
     public List<Layer> getLayers();
 
+    public TiledImageProtocol getTiledImageProtocol();
+
 
     //CORE - computations with tiles
 
@@ -50,9 +52,6 @@ public interface ImageManager {
 
     public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid);
 
-
-    // TODO: 8.12.15
-    public TilesFormat getTilesFormat();
 
     //TMP
 

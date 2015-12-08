@@ -9,7 +9,7 @@ import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.TilesFormat;
+import cz.mzk.androidzoomifyviewer.tiles.TiledImageProtocol;
 import cz.mzk.androidzoomifyviewer.tiles.metadata.ImageMetadata;
 import cz.mzk.androidzoomifyviewer.tiles.tasks.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.viewer.Point;
@@ -379,8 +379,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public TilesFormat getTilesFormat() {
-        return TilesFormat.ZOOMIFY;
+    public TiledImageProtocol getTiledImageProtocol() {
+        return TiledImageProtocol.ZOOMIFY;
     }
 
     private TileDimensionsInImage calculateTileDimensionsInImageCoords(TilePositionInPyramid tilePositionInPyramid) {

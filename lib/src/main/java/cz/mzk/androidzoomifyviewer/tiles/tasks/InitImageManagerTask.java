@@ -50,7 +50,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageM
                     LOGGER.d("Task canceled before parsing metadata: " + mMetadataUrl);
                 } else {
                     if (metadataStr != null) {
-                        switch (mImgManager.getTilesFormat()) {
+                        switch (mImgManager.getTiledImageProtocol()) {
                             case ZOOMIFY:
                                 return new ZoomifyMetadataParser().parse(metadataStr, mMetadataUrl);
                             default:
