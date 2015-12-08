@@ -10,10 +10,6 @@ import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManagerTaskRegistry;
 import cz.mzk.androidzoomifyviewer.tiles.TileDimensionsInImage;
 import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.ImageServerResponseException;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.InvalidDataException;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.OtherIOException;
-import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException;
 import cz.mzk.androidzoomifyviewer.viewer.Point;
 import cz.mzk.androidzoomifyviewer.viewer.RectD;
 import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
@@ -88,32 +84,6 @@ public class ZoomifyImageManager implements ImageManager {
         return imageProperties.getTileSize();
     }
 
-    /**
-     * Initializes ZoomifyImageManager by downloading and processing ImageProperties.xml. Instead of downloading, ImageProperties.xml
-     * may be loaded from cache. Also ImageProperties.xml is saved to cache after being downloaded.
-     *
-     * @throws IllegalStateException        If this method had already been called
-     * @throws TooManyRedirectionsException If max. number of redirections exceeded before downloading ImageProperties.xml. This probably means redirection
-     *                                      loop.
-     * @throws ImageServerResponseException If zoomify server response code for ImageProperties.xml cannot be handled here (everything apart from OK and
-     *                                      3xx redirections).
-     * @throws InvalidDataException         If ImageProperties.xml contains invalid data - empty content, not well formed xml, missing required attributes,
-     *                                      etc.
-     * @throws OtherIOException             In case of other error (invalid URL, error transfering data, ...)
-     */
-    /*@Override
-    public void initImageMetadata() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException, InvalidDataException {
-        if (initialized) {
-            throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
-        } else {
-            logger.d("initImageMetadata: " + mImagePropertiesUrl);
-        }
-        String propertiesXml = fetchImagePropertiesXml();
-        imageProperties = ImagePropertiesParser.parse(propertiesXml, mImagePropertiesUrl);
-        logger.d(imageProperties.toString());
-        layers = initLayers();
-        initialized = true;
-    }*/
     @Override
     public void init(ImageProperties imgProp) {
         if (initialized) { //// TODO: 8.12.15 tahle promenna asi nepotreba, staci imageProperties!=null
@@ -138,19 +108,6 @@ public class ZoomifyImageManager implements ImageManager {
     public boolean isInitialized() {
         return initialized;
     }
-
-    /*private String fetchImagePropertiesXml() throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
-        MetadataCache cache = CacheManager.getMetadataCache();
-        String fromCache = cache.getXml(mImagePropertiesUrl);
-        if (fromCache != null) {
-            return fromCache;
-        } else {
-            String downloaded = Downloader.downloadMetadata(mImagePropertiesUrl);
-            cache.storeXml(downloaded, mImagePropertiesUrl);
-            return downloaded;
-        }
-    }*/
-
 
     private List<Layer> initLayers() {
         int numberOfLayers = computeNumberOfLayers();

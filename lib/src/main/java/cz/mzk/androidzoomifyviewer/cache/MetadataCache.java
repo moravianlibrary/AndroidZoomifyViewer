@@ -6,7 +6,7 @@ package cz.mzk.androidzoomifyviewer.cache;
 
 public interface MetadataCache {
 
-    public String getXml(String metadataUrl);
+    public String getMetadata(String metadataUrl);
 
     public void storeXml(String metadata, String metadataUrl);
 

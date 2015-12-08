@@ -142,7 +142,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
     }
 
     @Override
-    public String getXml(String metadataUrl) {
+    public String getMetadata(String metadataUrl) {
         String key = buildKey(metadataUrl);
         // long start = System.currentTimeMillis();
         String inMemoryCache = mMemoryCache.get(key);
