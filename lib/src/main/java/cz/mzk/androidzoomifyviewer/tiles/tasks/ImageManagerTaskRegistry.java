@@ -3,6 +3,7 @@ package cz.mzk.androidzoomifyviewer.tiles.tasks;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.RejectedExecutionException;
 
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.tiles.ImageManager;
@@ -33,6 +34,7 @@ public class ImageManagerTaskRegistry {
     public void enqueueTileDownloadTask(final TilePositionInPyramid tilePosition, String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
         if (mTileDownloadTasks.size() < MAX_TASKS_IN_POOL) {
             if (!mTileDownloadTasks.containsKey(tilePosition)) {
+                //if (true) {
                 LOGGER.d(String.format("enqueuing tile-download task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
                 DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(tileImageUrl, errorListener, successListener, new TaskFinishedListener() {
 
@@ -42,7 +44,12 @@ public class ImageManagerTaskRegistry {
                     }
                 });
                 mTileDownloadTasks.put(tilePosition, task);
-                task.executeConcurrentIfPossible();
+                try {
+                    task.executeConcurrentIfPossible();
+                } catch (RejectedExecutionException e) {
+                    LOGGER.w("to many threads in execution pool");
+                    mTileDownloadTasks.remove(tilePosition);
+                }
             } else {
                 LOGGER.d(String.format("ignoring tile-download task for '%s' (already in queue)", tileImageUrl));
             }
@@ -61,7 +68,12 @@ public class ImageManagerTaskRegistry {
                     mInitMetadataTask = null;
                 }
             });
-            mInitMetadataTask.executeConcurrentIfPossible();
+            try {
+                mInitMetadataTask.executeConcurrentIfPossible();
+            } catch (RejectedExecutionException e) {
+                LOGGER.w("to many threads in execution pool");
+                mInitMetadataTask = null;
+            }
         } else {
             LOGGER.d("ignoring metadata-initialization task - already in queue");
         }
