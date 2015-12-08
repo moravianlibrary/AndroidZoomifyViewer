@@ -38,8 +38,7 @@ public class ZoomifyImageManager implements ImageManager {
     private final double mPxRatio;
     private final String mImagePropertiesUrl; // TODO: 8.12.15 lazy initialization?
 
-    private boolean initialized = false;
-    private ImageMetadata mImageMetadata;// TODO: 8.12.15 rename
+    private ImageMetadata mImageMetadata;
     private List<Layer> layers;
 
 
@@ -63,7 +62,7 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private void checkInitialized() {
-        if (!initialized) {
+        if (mImageMetadata != null) {
             throw new IllegalStateException("not initialized (" + mBaseUrl + ")");
         }
     }
@@ -87,18 +86,15 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void init(ImageMetadata imgProp) {
-        if (initialized) { //// TODO: 8.12.15 tahle promenna asi nepotreba, staci mImageMetadata!=null
+    public void init(ImageMetadata imageMetadata) {
+        if (mImageMetadata != null) {
             throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
         } else {
             logger.d("initImageMetadata: " + mImagePropertiesUrl);
         }
-        //String propertiesXml = fetchImagePropertiesXml();
-        //mImageMetadata = ZoomifyMetadataParser.parse(propertiesXml, mImagePropertiesUrl);
-        mImageMetadata = imgProp;
+        mImageMetadata = imageMetadata;
         logger.d(mImageMetadata.toString());
         layers = initLayers();
-        initialized = true;
     }
 
     @Override
@@ -108,7 +104,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public boolean isInitialized() {
-        return initialized;
+        return mImageMetadata != null;
     }
 
     private List<Layer> initLayers() {
