@@ -35,10 +35,10 @@ public class ZoomifyImageManager implements ImageManager {
 
     private final String mBaseUrl;
     private final double mPxRatio;
-    private final String mImagePropertiesUrl; // TODO: 8.12.15 lazy initialization?
+    private final String mImagePropertiesUrl;
 
     private ImageMetadata mImageMetadata;
-    private List<Layer> layers;
+    private List<Layer> mLayers;
 
 
     /**
@@ -93,7 +93,7 @@ public class ZoomifyImageManager implements ImageManager {
         }
         mImageMetadata = imageMetadata;
         LOGGER.d(mImageMetadata.toString());
-        layers = initLayers();
+        mLayers = initLayers();
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     private List<Layer> initLayers() {
         int numberOfLayers = computeNumberOfLayers();
-        // LOGGER.d( "layers #: " + numberOfLayers);
+        // LOGGER.d( "mLayers #: " + numberOfLayers);
         List<Layer> result = new ArrayList<Layer>(numberOfLayers);
         double width = mImageMetadata.getWidth();
         double height = mImageMetadata.getHeight();
@@ -184,7 +184,7 @@ public class ZoomifyImageManager implements ImageManager {
         double tileSize = mImageMetadata.getTileSize();
         double width = mImageMetadata.getWidth();
         double height = mImageMetadata.getHeight();
-        double depth = layers.size();
+        double depth = mLayers.size();
         // LOGGER.d( tilePositionInPyramid.toString());
         // LOGGER.d( "column: " + column + ", row: " + row + ", d: " + depth + ", l: " + level);
         // LOGGER.d( "width: " + width + ", height: " + height + ", tileSize: " + tileSize);
@@ -213,7 +213,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     private TilePositionInPyramid.TilePositionInLayer calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords) {
         checkInitialized();
-        if (layerId < 0 || layerId >= layers.size()) {
+        if (layerId < 0 || layerId >= mLayers.size()) {
             throw new IllegalArgumentException("layer out of range: " + layerId);
         }
 
@@ -230,8 +230,8 @@ public class ZoomifyImageManager implements ImageManager {
         }
         // LOGGER.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
         // ", y=" + pixelY);
-        // Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
-        double step = mImageMetadata.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
+        // Log.d(TestTags.TILES, "mLayers: " + mLayers.size() + ", layer: " + layerId);
+        double step = mImageMetadata.getTileSize() * Math.pow(2, mLayers.size() - layerId - 1);
         // Log.d(TestTags.TILES, "step: " + step);
         // x
         double cx_step = pointInMageCoords.x / step;
@@ -288,7 +288,7 @@ public class ZoomifyImageManager implements ImageManager {
         }
         int imgInCanvasWidth = (int) (imageInCanvasWidthDp * dpRatio + wholeImageInCanvasCoords.width() * mPxRatio);
         int imgInCanvasHeight = (int) (imageInCanvasHeightDp * dpRatio + wholeImageInCanvasCoords.height() * mPxRatio);
-        // int layersNum = layers.size();
+        // int layersNum = mLayers.size();
         // if (true) {
         // // if (layersNum>=3){
         // // return 2;
@@ -303,18 +303,18 @@ public class ZoomifyImageManager implements ImageManager {
             return bestLayerAtLeastAsBigAs(imgInCanvasWidth, imgInCanvasHeight);
         }
 
-        int topLayer = layers.size() - 1;
+        int topLayer = mLayers.size() - 1;
         // Log.d(TestTags.TEST, "imgInCanvas: width: " + imgInCanvasWidth + ", height: " + imgInCanvasHeight);
         for (int layerId = topLayer; layerId >= 0; layerId--) {
-            int horizontalTiles = layers.get(layerId).getTilesHorizontal();
+            int horizontalTiles = mLayers.get(layerId).getTilesHorizontal();
             int layerWidthWithoutLastTile = mImageMetadata.getTileSize() * (horizontalTiles - 1);
             // int testWidth = mImageMetadata.getTileSize() * horizontalTiles;
 
-            int verticalTiles = layers.get(layerId).getTilesVertical();
+            int verticalTiles = mLayers.get(layerId).getTilesVertical();
             int layerHeightWithoutLastTile = mImageMetadata.getTileSize() * (verticalTiles - 1);
             // int testHeight = mImageMetadata.getTileSize() * verticalTiles;
             double layerWidth = getLayerWidth(layerId);
-            // double result = mImageMetadata.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
+            // double result = mImageMetadata.getWidth() / Utils.pow(2, mLayers.size() - layerId - 1);
             double layerHeight = getLayerHeight(layerId);
             // Log.d(TestTags.TEST, "layer " + layerId + ": width: " + layerWidth + ", height: " + layerHeight);
             if (layerWidth <= imgInCanvasWidth && layerHeight <= imgInCanvasHeight) {
@@ -329,22 +329,22 @@ public class ZoomifyImageManager implements ImageManager {
             // }
         }
         int layerId = 0;
-        // int layerId = layers.size() - 1;
+        // int layerId = mLayers.size() - 1;
         // Log.d(TestTags.TEST, "selected layer: " + layerId);
-        // return layers.size() - 1;
+        // return mLayers.size() - 1;
         return layerId;
     }
 
     private int bestLayerAtLeastAsBigAs(int imgInCanvasWidth, int imageInCanvasHeight) {
         // Log.d(TestTags.TEST, "imgInCanvas: width: " + imgInCanvasWidth + ", height: " + imageInCanvasHeight);
-        for (int layerId = 0; layerId < layers.size(); layerId++) {
+        for (int layerId = 0; layerId < mLayers.size(); layerId++) {
             double layerWidth = getLayerWidth(layerId);
             double layerHeight = getLayerHeight(layerId);
             if (layerWidth >= imgInCanvasWidth && layerHeight >= imageInCanvasHeight) {
                 return layerId;
             }
         }
-        return layers.size() - 1;
+        return mLayers.size() - 1;
     }
 
 
@@ -382,13 +382,13 @@ public class ZoomifyImageManager implements ImageManager {
 
     private int getTilesBasicSizeInImageCoordsForGivenLayer(int layerId) {
         // TODO: 4.12.15 cachovat
-        return mImageMetadata.getTileSize() * (int) (Math.pow(2, layers.size() - layerId - 1));
+        return mImageMetadata.getTileSize() * (int) (Math.pow(2, mLayers.size() - layerId - 1));
     }
 
     // TODO: sjednotit slovnik, tomuhle obcas rikam 'step'
     private int getTileWidthInImageCoords(int layerId, int tileHorizontalIndex, int basicSize) {
-        if (tileHorizontalIndex == layers.get(layerId).getTilesHorizontal() - 1) {
-            int result = mImageMetadata.getWidth() - basicSize * (layers.get(layerId).getTilesHorizontal() - 1);
+        if (tileHorizontalIndex == mLayers.get(layerId).getTilesHorizontal() - 1) {
+            int result = mImageMetadata.getWidth() - basicSize * (mLayers.get(layerId).getTilesHorizontal() - 1);
             // LOGGER.d( "TILE FAR RIGHT WIDTH: " + result);
             return result;
         } else {
@@ -398,7 +398,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     private int getTileHeightInImageCoords(int layerId, int tileVerticalIndex, int basicSize) {
         // Log.d(TestTags.TILES, "tileVerticalIndex:" + tileVerticalIndex);
-        int verticalTilesForLayer = layers.get(layerId).getTilesVertical();
+        int verticalTilesForLayer = mLayers.get(layerId).getTilesVertical();
         // LOGGER.d( "vertical tiles for layer " + layerId + ": " + verticalTilesForLayer);
         int lastTilesIndex = verticalTilesForLayer - 1;
         // Log.d(TestTags.TILES, "tiles vertical for layer: " + layerId + ": " + tilesVerticalForLayer);
@@ -414,7 +414,7 @@ public class ZoomifyImageManager implements ImageManager {
     private double getLayerWidth(int layerId) {
         checkInitialized();
         // TODO: 4.12.15 possibly cache this if it's being called frequently
-        double result = mImageMetadata.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
+        double result = mImageMetadata.getWidth() / Utils.pow(2, mLayers.size() - layerId - 1);
         // LOGGER.d( "layer " + layerId + ", width=" + result + " px");
         return result;
     }
@@ -422,13 +422,13 @@ public class ZoomifyImageManager implements ImageManager {
     private double getLayerHeight(int layerId) {
         checkInitialized();
         // TODO: 4.12.15 possibly cache this if it's being called frequently
-        return mImageMetadata.getHeight() / Utils.pow(2, layers.size() - layerId - 1);
+        return mImageMetadata.getHeight() / Utils.pow(2, mLayers.size() - layerId - 1);
     }
 
     @Override
     public List<Layer> getLayers() {
         checkInitialized();
-        return layers;
+        return mLayers;
     }
 
 
