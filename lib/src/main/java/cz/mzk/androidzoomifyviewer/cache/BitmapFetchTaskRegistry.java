@@ -14,7 +14,7 @@ public class BitmapFetchTaskRegistry {
     public static final int MAX_TASKS = 10;
     // private static final int THREAD_PRIORITY = Math.min(Thread.MAX_PRIORITY, Thread.MIN_PRIORITY + 2);
 
-    private static final Logger logger = new Logger(BitmapFetchTaskRegistry.class);
+    private static final Logger LOGGER = new Logger(BitmapFetchTaskRegistry.class);
 
     private final Map<String, FetchBitmapFromDiskAndStoreToMemoryCacheTask> tasks = new HashMap<String, FetchBitmapFromDiskAndStoreToMemoryCacheTask>();
     private final MemoryAndDiskTilesCache cache;
@@ -30,13 +30,13 @@ public class BitmapFetchTaskRegistry {
                 FetchBitmapFromDiskAndStoreToMemoryCacheTask task = new FetchBitmapFromDiskAndStoreToMemoryCacheTask(
                         cache, key, fetchedListener);
                 tasks.put(key, task);
-                logger.v("registration performed: " + key + ": (total " + tasks.size() + ")");
+                LOGGER.v("registration performed: " + key + ": (total " + tasks.size() + ")");
                 task.executeConcurrentIfPossible();
             } else {
-                logger.v("registration ignored: already registered: " + key + ": (total " + tasks.size() + ")");
+                LOGGER.v("registration ignored: already registered: " + key + ": (total " + tasks.size() + ")");
             }
         } else {
-            logger.v("registration ignored: to many tasks: " + key + ": (total " + tasks.size() + ")");
+            LOGGER.v("registration ignored: to many tasks: " + key + ": (total " + tasks.size() + ")");
         }
     }
 
@@ -48,7 +48,7 @@ public class BitmapFetchTaskRegistry {
 
     private void unregisterTask(String key) {
         tasks.remove(key);
-        // logger.v("unregistration performed: " + key + ": (total " + tasks.size() + ")");
+        // LOGGER.v("unregistration performed: " + key + ": (total " + tasks.size() + ")");
     }
 
     private class FetchBitmapFromDiskAndStoreToMemoryCacheTask extends ConcurrentAsyncTask<Void, Void, Void> {
@@ -78,25 +78,25 @@ public class BitmapFetchTaskRegistry {
                     Bitmap fromDiskCache = cache.getTileFromDiskCache(key);
                     if (!isCancelled()) {
                         if (fromDiskCache != null) {
-                            logger.v("storing to memory cache: " + key);
+                            LOGGER.v("storing to memory cache: " + key);
                             cache.storeTileToMemoryCache(key, fromDiskCache);
                             success = true;
                         } else {
-                            logger.v("tile bitmap is null: " + key);
+                            LOGGER.v("tile bitmap is null: " + key);
                             success = false;
                         }
                     }
                 }
                 return null;
             } catch (Throwable e) {
-                logger.e("error fetching tile " + key, e);
+                LOGGER.e("error fetching tile " + key, e);
                 return null;
             }
         }
 
         @Override
         protected void onCancelled() {
-            // logger.e("canceled: " + key);
+            // LOGGER.e("canceled: " + key);
             super.onCancelled();
             unregisterTask(key);
         }

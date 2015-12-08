@@ -16,7 +16,7 @@ import cz.mzk.androidzoomifyviewer.R;
  */
 public class DevTools {
 
-    private static final Logger logger = new Logger(DevTools.class);
+    private static final Logger LOGGER = new Logger(DevTools.class);
 
     // colors
     private final Paint paintBlue = new Paint();

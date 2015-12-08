@@ -17,7 +17,7 @@ import cz.mzk.androidzoomifyviewer.viewer.VectorD;
  * Created by Martin Řehánek on 12.11.15.
  */
 public class FramingRectangleDrawer {
-    private static final Logger logger = new Logger(FramingRectangleDrawer.class);
+    private static final Logger LOGGER = new Logger(FramingRectangleDrawer.class);
 
 
     private final Context mContext;
@@ -79,7 +79,7 @@ public class FramingRectangleDrawer {
 
     public void draw(double totalScaleFactor, VectorD totalShift) {
         if (mCanv == null) {
-            logger.w("draw() called, but canvas not initialized yet");
+            LOGGER.w("draw() called, but canvas not initialized yet");
         } else {
             if (mFramingRectangles != null) {
                 for (FramingRectangle rect : mFramingRectangles) {

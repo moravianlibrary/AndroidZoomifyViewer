@@ -30,7 +30,7 @@ public class ZoomifyImageManager implements ImageManager {
      */
     public static final boolean COMPUTE_NUMBER_OF_LAYERS_ROUND_CALCULATION = true;
 
-    private static final Logger logger = new Logger(ZoomifyImageManager.class);
+    private static final Logger LOGGER = new Logger(ZoomifyImageManager.class);
 
     private final ImageManagerTaskRegistry taskRegistry = new ImageManagerTaskRegistry(this);
 
@@ -90,10 +90,10 @@ public class ZoomifyImageManager implements ImageManager {
         if (mImageMetadata != null) {
             throw new IllegalStateException("already initialized (" + mImagePropertiesUrl + ")");
         } else {
-            logger.d("initImageMetadata: " + mImagePropertiesUrl);
+            LOGGER.d("initImageMetadata: " + mImagePropertiesUrl);
         }
         mImageMetadata = imageMetadata;
-        logger.d(mImageMetadata.toString());
+        LOGGER.d(mImageMetadata.toString());
         layers = initLayers();
     }
 
@@ -109,7 +109,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     private List<Layer> initLayers() {
         int numberOfLayers = computeNumberOfLayers();
-        // logger.d( "layers #: " + numberOfLayers);
+        // LOGGER.d( "layers #: " + numberOfLayers);
         List<Layer> result = new ArrayList<Layer>(numberOfLayers);
         double width = mImageMetadata.getWidth();
         double height = mImageMetadata.getHeight();
@@ -186,9 +186,9 @@ public class ZoomifyImageManager implements ImageManager {
         double width = mImageMetadata.getWidth();
         double height = mImageMetadata.getHeight();
         double depth = layers.size();
-        // logger.d( tilePositionInPyramid.toString());
-        // logger.d( "column: " + column + ", row: " + row + ", d: " + depth + ", l: " + level);
-        // logger.d( "width: " + width + ", height: " + height + ", tileSize: " + tileSize);
+        // LOGGER.d( tilePositionInPyramid.toString());
+        // LOGGER.d( "column: " + column + ", row: " + row + ", d: " + depth + ", l: " + level);
+        // LOGGER.d( "width: " + width + ", height: " + height + ", tileSize: " + tileSize);
 
         double first = Math.ceil(Math.floor(width / Math.pow(2, depth - level - 1)) / tileSize);
         double index = column + row * first;
@@ -196,9 +196,9 @@ public class ZoomifyImageManager implements ImageManager {
             index += Math.ceil(Math.floor(width / Math.pow(2, depth - i)) / tileSize)
                     * Math.ceil(Math.floor(height / Math.pow(2, depth - i)) / tileSize);
         }
-        // logger.d( "index: " + index);
+        // LOGGER.d( "index: " + index);
         int result = (int) (index / tileSize);
-        // logger.d( "tile group: " + result);
+        // LOGGER.d( "tile group: " + result);
         return result;
     }
 
@@ -239,7 +239,7 @@ public class ZoomifyImageManager implements ImageManager {
         if (layerId == 0) {
             return new TilePositionInPyramid.TilePositionInLayer(0, 0);
         }
-        // logger.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
+        // LOGGER.d( "getting picture for layer=" + layerId + ", x=" + pixelX +
         // ", y=" + pixelY);
         // Log.d(TestTags.TILES, "layers: " + layers.size() + ", layer: " + layerId);
         double step = mImageMetadata.getTileSize() * Math.pow(2, layers.size() - layerId - 1);
@@ -374,7 +374,7 @@ public class ZoomifyImageManager implements ImageManager {
         // TODO: 7.12.15 definitively cache this
         int tileGroup = computeTileGroup(tilePositionInPyramid);
         String tileUrl = buildTileUrl(tileGroup, tilePositionInPyramid);
-        logger.v("TILE URL: " + tileUrl);
+        LOGGER.v("TILE URL: " + tileUrl);
         return tileUrl;
     }
 
@@ -400,7 +400,7 @@ public class ZoomifyImageManager implements ImageManager {
     private int getTileWidthInImageCoords(int layerId, int tileHorizontalIndex, int basicSize) {
         if (tileHorizontalIndex == layers.get(layerId).getTilesHorizontal() - 1) {
             int result = mImageMetadata.getWidth() - basicSize * (layers.get(layerId).getTilesHorizontal() - 1);
-            // logger.d( "TILE FAR RIGHT WIDTH: " + result);
+            // LOGGER.d( "TILE FAR RIGHT WIDTH: " + result);
             return result;
         } else {
             return basicSize;
@@ -410,7 +410,7 @@ public class ZoomifyImageManager implements ImageManager {
     private int getTileHeightInImageCoords(int layerId, int tileVerticalIndex, int basicSize) {
         // Log.d(TestTags.TILES, "tileVerticalIndex:" + tileVerticalIndex);
         int verticalTilesForLayer = layers.get(layerId).getTilesVertical();
-        // logger.d( "vertical tiles for layer " + layerId + ": " + verticalTilesForLayer);
+        // LOGGER.d( "vertical tiles for layer " + layerId + ": " + verticalTilesForLayer);
         int lastTilesIndex = verticalTilesForLayer - 1;
         // Log.d(TestTags.TILES, "tiles vertical for layer: " + layerId + ": " + tilesVerticalForLayer);
         // Log.d(TestTags.TILES, "last tile's index: " + layerId + ": " + lastTilesIndex);
@@ -426,7 +426,7 @@ public class ZoomifyImageManager implements ImageManager {
         checkInitialized();
         // TODO: 4.12.15 possibly cache this if it's being called frequently
         double result = mImageMetadata.getWidth() / Utils.pow(2, layers.size() - layerId - 1);
-        // logger.d( "layer " + layerId + ", width=" + result + " px");
+        // LOGGER.d( "layer " + layerId + ", width=" + result + " px");
         return result;
     }
 

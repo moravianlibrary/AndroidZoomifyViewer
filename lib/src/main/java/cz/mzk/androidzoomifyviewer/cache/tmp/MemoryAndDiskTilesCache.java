@@ -22,7 +22,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
  */
 public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesCache {
 
-    private static final Logger logger = new Logger(MemoryAndDiskTilesCache.class);
+    private static final Logger LOGGER = new Logger(MemoryAndDiskTilesCache.class);
 
     private static final int DEFAULT_DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
     private static final String DEFAULT_DISK_CACHE_SUBDIR = "tiles";
@@ -48,7 +48,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
         // TODO
         int maxItems = 50;
         mMemoryCache = new LruCache<String, Bitmap>(maxItems);
-        logger.d("Lru cache allocated, max items: " + maxItems);
+        LOGGER.d("Lru cache allocated, max items: " + maxItems);
         // TODO: no need to do it asynchronously
         initDiskCacheAsync(context, diskCacheSize, diskCacheDir, clearCache);
     }
@@ -71,7 +71,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
 
                 @Override
                 public void onError() {
-                    logger.i("disabling disk cache");
+                    LOGGER.i("disabling disk cache");
                     mDiskCacheDisabled = true;
                     state = mMemoryCache != null ? State.READY : State.DISABLED;
                 }
@@ -174,12 +174,12 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                     try {
                         mDiskCacheInitializationLock.wait();
                     } catch (InterruptedException e) {
-                        logger.e("waiting for disk cache lock interrupted", e);
+                        LOGGER.e("waiting for disk cache lock interrupted", e);
                     }
                 }
             }
         } finally {
-            logger.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
+            LOGGER.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
         }
     }
 
@@ -209,7 +209,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            logger.e("error loading tile from disk cache: " + key, e);
+            LOGGER.e("error loading tile from disk cache: " + key, e);
             return null;
         }
     }

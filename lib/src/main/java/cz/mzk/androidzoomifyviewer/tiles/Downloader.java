@@ -24,18 +24,18 @@ public class Downloader {
     public static final int METADATA_TIMEOUT = 3000;
     public static final int TILES_TIMEOUT = 5000;
 
-    private static final Logger logger = new Logger(Downloader.class);
+    private static final Logger LOGGER = new Logger(Downloader.class);
 
     public static Bitmap downloadTile(String tileUrl) throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
         return downloadTile(tileUrl, MAX_REDIRECTIONS);
     }
 
     private static Bitmap downloadTile(String tileUrl, int remainingRedirections) throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
-        logger.d("downloading tile from " + tileUrl);
+        LOGGER.d("downloading tile from " + tileUrl);
         if (remainingRedirections == 0) {
             throw new TooManyRedirectionsException(tileUrl, MAX_REDIRECTIONS);
         }
-        // logger.d( tileUrl + " remaining redirections: " +
+        // LOGGER.d( tileUrl + " remaining redirections: " +
         // remainingRedirections);
         HttpURLConnection urlConnection = null;
         try {
@@ -89,12 +89,12 @@ public class Downloader {
     }
 
     private static String downloadMetadata(String metadataUrl, int remainingRedirections) throws TooManyRedirectionsException, ImageServerResponseException, OtherIOException {
-        logger.d("downloading metadata from " + metadataUrl);
+        LOGGER.d("downloading metadata from " + metadataUrl);
         if (remainingRedirections == 0) {
             throw new TooManyRedirectionsException(metadataUrl, MAX_REDIRECTIONS);
         }
         HttpURLConnection urlConnection = null;
-        // logger.d( metadataUrl + " remaining redirections: " +
+        // LOGGER.d( metadataUrl + " remaining redirections: " +
         // remainingRedirections);
         try {
             URL url = new URL(metadataUrl);
@@ -102,7 +102,7 @@ public class Downloader {
             urlConnection.setReadTimeout(METADATA_TIMEOUT);
             urlConnection.setInstanceFollowRedirects(false); //because I handle following redirects manually to avoid redirection loop
             int responseCode = urlConnection.getResponseCode();
-            // logger.d( "http code: " + responseCode);
+            // LOGGER.d( "http code: " + responseCode);
             String location = urlConnection.getHeaderField("Location");
             switch (responseCode) {
                 case 200:

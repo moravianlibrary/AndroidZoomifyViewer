@@ -13,7 +13,7 @@ import cz.mzk.androidzoomifyviewer.Logger;
  */
 public class Utils {
 
-    private static final Logger logger = new Logger(Utils.class);
+    private static final Logger LOGGER = new Logger(Utils.class);
 
     //SHITFT & SCALE COMPUTATIONS
 

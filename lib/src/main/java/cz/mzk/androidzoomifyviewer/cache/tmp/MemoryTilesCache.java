@@ -15,7 +15,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
  */
 public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
 
-    private static final Logger logger = new Logger(MemoryTilesCache.class);
+    private static final Logger LOGGER = new Logger(MemoryTilesCache.class);
 
     private final LruCache<String, Bitmap> mMemoryCache;
     private final Object mMemoryCacheLock = new Object();
@@ -37,7 +37,7 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
                     return getBitmapSizeInKB(bitmap);
                 }
             };
-            logger.d("Lru cache allocated with " + cacheSizeKB + " kB");
+            LOGGER.d("Lru cache allocated with " + cacheSizeKB + " kB");
             state = State.READY;
         }
     }
@@ -52,7 +52,7 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
         String key = buildKey(zoomifyBaseUrl, tilePositionInPyramid);
         synchronized (mMemoryCacheLock) {
             if (mMemoryCache.get(key) == null) {
-                logger.d("storing " + key);
+                LOGGER.d("storing " + key);
                 mMemoryCache.put(key, bmp);
                 logStatistics();
             }
@@ -63,7 +63,7 @@ public class MemoryTilesCache extends AbstractTileCache implements TilesCache {
         int hitCount = mMemoryCache.hitCount();
         int missCount = mMemoryCache.missCount();
         float hitRatio = (float) hitCount / (float) (hitCount + missCount) * 100f;
-        logger.d(String.format("hit ratio: %,.2f %%", hitRatio));
+        LOGGER.d(String.format("hit ratio: %,.2f %%", hitRatio));
     }
 
     @Override

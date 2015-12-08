@@ -9,18 +9,18 @@ import cz.mzk.androidzoomifyviewer.Logger;
  */
 public class DiskUtils {
 
-    private static final Logger logger = new Logger(DiskUtils.class);
+    private static final Logger LOGGER = new Logger(DiskUtils.class);
 
     public static boolean deleteDirContent(File file) {
         if (file == null) {
             throw new NullPointerException("file is null");
         }
         if (!file.exists()) {
-            logger.w("file doesn't exist: " + file.getAbsolutePath());
+            LOGGER.w("file doesn't exist: " + file.getAbsolutePath());
             return false;
         }
         if (!file.isDirectory()) {
-            logger.w("not directory: " + file.getAbsolutePath());
+            LOGGER.w("not directory: " + file.getAbsolutePath());
             return false;
         } else {
             File[] filesInDir = file.listFiles();
@@ -40,17 +40,17 @@ public class DiskUtils {
             throw new NullPointerException("file is null");
         }
         if (!file.exists()) {
-            logger.w("doesn't exist: " + file.getAbsolutePath());
+            LOGGER.w("doesn't exist: " + file.getAbsolutePath());
             return false;
         }
         if (file.isFile()) {
             boolean deleted = file.delete();
             if (!deleted) {
-                logger.w("failed to delete file " + file.getAbsolutePath());
+                LOGGER.w("failed to delete file " + file.getAbsolutePath());
             }
             return deleted;
         } else if (!file.isDirectory()) {
-            logger.w("not file nor directory: " + file.getAbsolutePath());
+            LOGGER.w("not file nor directory: " + file.getAbsolutePath());
             return false;
         } else { // dir
             File[] filesInDir = file.listFiles();
@@ -63,7 +63,7 @@ public class DiskUtils {
             }
             boolean deleted = file.delete();
             if (!deleted) {
-                logger.w("failed to delete directory " + file.getAbsolutePath());
+                LOGGER.w("failed to delete directory " + file.getAbsolutePath());
             }
             return deleted;
         }

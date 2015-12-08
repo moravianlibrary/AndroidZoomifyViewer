@@ -101,7 +101,7 @@ public final class DiskLruCache implements Closeable {
     static final String MAGIC = "libcore.io.DiskLruCache";
     static final String VERSION_1 = "1";
     static final long ANY_SEQUENCE_NUMBER = -1;
-    private static final Logger logger = new Logger(DiskLruCache.class);
+    private static final Logger LOGGER = new Logger(DiskLruCache.class);
     private static final String CLEAN = "CLEAN";
     private static final String DIRTY = "DIRTY";
     private static final String REMOVE = "REMOVE";
@@ -527,7 +527,7 @@ public final class DiskLruCache implements Closeable {
                 edit.commit();
             } else {
                 // another thread trying to write, i.e. incorrectly implemented synchronization
-                logger.w("editor allready opened");
+                LOGGER.w("editor allready opened");
                 throw new DiskLruCacheException("thread synchronization error");
             }
         } catch (IOException e) {
@@ -536,7 +536,7 @@ public final class DiskLruCache implements Closeable {
                     edit.abort();
                 }
             } catch (IOException e1) {
-                logger.w("failed to release editor", e1);
+                LOGGER.w("failed to release editor", e1);
             }
             throw new DiskLruCacheException(e);
         }
@@ -558,7 +558,7 @@ public final class DiskLruCache implements Closeable {
                 edit.commit();
             } else {
                 // another thread trying to write, i.e. incorrectly implemented synchronization
-                logger.w("editor allready opened");
+                LOGGER.w("editor allready opened");
                 throw new DiskLruCacheException("thread synchronization error");
             }
         } catch (IOException e) {
@@ -567,7 +567,7 @@ public final class DiskLruCache implements Closeable {
                     edit.abort();
                 }
             } catch (IOException e1) {
-                logger.w("failed to release editor", e1);
+                LOGGER.w("failed to release editor", e1);
             }
             throw new DiskLruCacheException(e);
         } finally {
@@ -576,7 +576,7 @@ public final class DiskLruCache implements Closeable {
                     out.close();
                 }
             } catch (IOException e1) {
-                logger.w("failed to close bitmap outputstream", e1);
+                LOGGER.w("failed to close bitmap outputstream", e1);
             }
         }
     }

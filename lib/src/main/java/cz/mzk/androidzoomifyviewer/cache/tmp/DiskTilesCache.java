@@ -18,7 +18,7 @@ import cz.mzk.androidzoomifyviewer.tiles.TilePositionInPyramid;
 
 public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 
-    private static final Logger logger = new Logger(DiskTilesCache.class);
+    private static final Logger LOGGER = new Logger(DiskTilesCache.class);
 
     private DiskLruCache mCache = null;
     private State state = State.INITIALIZING;
@@ -41,7 +41,7 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 
                 @Override
                 public void onError() {
-                    logger.i("disabling cache");
+                    LOGGER.i("disabling cache");
                     state = State.DISABLED;
                 }
             }).execute(cacheDir);
@@ -88,7 +88,7 @@ public class DiskTilesCache extends AbstractTileCache implements TilesCache {
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            logger.i("error loading tile from disk cache: " + key, e);
+            LOGGER.i("error loading tile from disk cache: " + key, e);
             return null;
         }
     }
