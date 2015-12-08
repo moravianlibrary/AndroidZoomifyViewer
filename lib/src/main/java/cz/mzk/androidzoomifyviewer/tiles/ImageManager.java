@@ -53,11 +53,4 @@ public interface ImageManager {
     public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid);
 
 
-    //TMP
-
-    //jenom na testy, TODO: odstranit odsud
-    @Deprecated
-    public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY);
-
-
 }

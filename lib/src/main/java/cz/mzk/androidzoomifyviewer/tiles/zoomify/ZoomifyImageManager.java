@@ -212,16 +212,6 @@ public class ZoomifyImageManager implements ImageManager {
         return builder.toString();
     }
 
-    @Override
-    public int[] calculateTileCoordsFromPointInImageCoords(int layerId, int pixelX, int pixelY) {
-        int[] result = new int[2];
-        TilePositionInPyramid.TilePositionInLayer tilePositionInLayer = calculateTileCoordsFromPointInImageCoords(layerId, new Point(pixelX, pixelY));
-        result[0] = tilePositionInLayer.column;
-        result[1] = tilePositionInLayer.row;
-        return result;
-    }
-
-    //@Override
     private TilePositionInPyramid.TilePositionInLayer calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords) {
         checkInitialized();
         if (layerId < 0 || layerId >= layers.size()) {
