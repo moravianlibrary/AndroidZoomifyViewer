@@ -62,7 +62,7 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private void checkInitialized() {
-        if (mImageMetadata != null) {
+        if (mImageMetadata == null) {
             throw new IllegalStateException("not initialized (" + mBaseUrl + ")");
         }
     }
