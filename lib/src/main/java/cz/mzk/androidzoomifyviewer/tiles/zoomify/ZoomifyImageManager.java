@@ -166,7 +166,6 @@ public class ZoomifyImageManager implements ImageManager {
 
         // TestTags.TILES.d( "top left: [" + topLeftVisibleX + "," + topLeftVisibleY + "]");
         // TestTags.TILES.d( "bottom right: [" + bottomRightVisibleX + "," + bottomRightVisibleY + "]");
-        // TODO: 4.12.15 udelat private metodu calculateTileCoordsFromPointInImageCoords, pokud se vola jen odsud
         TilePositionInPyramid.TilePositionInLayer topLeftVisibleTile = calculateTileCoordsFromPointInImageCoords(layerId, topLeftVisibleInImageCoords);
         TilePositionInPyramid.TilePositionInLayer bottomRightVisibleTile = calculateTileCoordsFromPointInImageCoords(layerId, bottomRightVisibleInImageCoords);
         // TestTags.TILES.d( "top_left:     " + Utils.toString(topLeftVisibleTileCoords));
@@ -360,7 +359,6 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid) {
-        // TODO: 7.12.15 definitively cache this
         int tileGroup = computeTileGroup(tilePositionInPyramid);
         String tileUrl = buildTileUrl(tileGroup, tilePositionInPyramid);
         LOGGER.v("TILE URL: " + tileUrl);
@@ -381,7 +379,6 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private int getTilesBasicSizeInImageCoordsForGivenLayer(int layerId) {
-        // TODO: 4.12.15 cachovat
         return mImageMetadata.getTileSize() * (int) (Math.pow(2, mLayers.size() - layerId - 1));
     }
 
@@ -413,7 +410,6 @@ public class ZoomifyImageManager implements ImageManager {
 
     private double getLayerWidth(int layerId) {
         checkInitialized();
-        // TODO: 4.12.15 possibly cache this if it's being called frequently
         double result = mImageMetadata.getWidth() / Utils.pow(2, mLayers.size() - layerId - 1);
         // LOGGER.d( "layer " + layerId + ", width=" + result + " px");
         return result;
@@ -421,7 +417,6 @@ public class ZoomifyImageManager implements ImageManager {
 
     private double getLayerHeight(int layerId) {
         checkInitialized();
-        // TODO: 4.12.15 possibly cache this if it's being called frequently
         return mImageMetadata.getHeight() / Utils.pow(2, mLayers.size() - layerId - 1);
     }
 

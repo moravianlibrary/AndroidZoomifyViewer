@@ -369,7 +369,7 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                             }
                         }
                     } else {
-                        // LOGGER.i("creating cache dir " + cacheDir);
+                        LOGGER.i("creating cache dir " + cacheDir);
                         boolean created = cacheDir.mkdir();
                         if (!created) {
                             LOGGER.w("failed to create cache dir " + cacheDir.getAbsolutePath());
@@ -377,8 +377,9 @@ public class MemoryAndDiskTilesCache extends AbstractTileCache implements TilesC
                             return null;
                         }
                     }
+                    LOGGER.d("disk cache dir: " + cacheDir.getAbsolutePath());
                     mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, cacheSizeBytes);
-                    LOGGER.i("disk cache initialized; size: " + Utils.formatBytes(cacheSizeBytes));
+                    LOGGER.d("disk cache initialized; size: " + Utils.formatBytes(cacheSizeBytes));
                     return null;
                 } catch (DiskLruCacheException e) {
                     LOGGER.w("error opening disk cache, disabling");

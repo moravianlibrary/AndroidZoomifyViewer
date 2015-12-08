@@ -10,6 +10,7 @@ import java.io.File;
 import cz.mzk.androidzoomifyviewer.Logger;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.androidzoomifyviewer.cache.DiskLruCache.Snapshot;
+import cz.mzk.androidzoomifyviewer.viewer.Utils;
 
 /**
  * @author Martin Řehánek
@@ -73,6 +74,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
         // || !Environment.isExternalStorageRemovable() ?
         // context.getExternalCacheDir().getPath() : context
         // .getCacheDir().getPath();
+
         String cacheDirPath = context.getCacheDir().getPath();
         return new File(cacheDirPath + File.separator + DISK_CACHE_SUBDIR);
     }
@@ -90,7 +92,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
     }
 
     private String buildKey(String metadataUrl) {
-        String key = CacheUtils.escapeSpecialChars(metadataUrl);
+        String key = CacheKeyBuilder.buildKeyFromUrl(metadataUrl);
         if (key.length() > 127) {
             LOGGER.w("cache key is longer then 127 characters");
         }
@@ -188,7 +190,7 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
                 return null;
             }
         } catch (DiskLruCacheException e) {
-            LOGGER.i("error loading from disk cache: " + key, e);
+            LOGGER.w("error loading from disk cache: " + key, e);
             return null;
         }
     }
@@ -227,7 +229,9 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
                             return null;
                         }
                     }
+                    LOGGER.d("disk cache dir: " + cacheDir.getAbsolutePath());
                     mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
+                    LOGGER.i("disk cache initialized; size: " + Utils.formatBytes(DISK_CACHE_SIZE_B));
                     return null;
                 } catch (DiskLruCacheException e) {
                     LOGGER.w("error initializing disk cache, disabling");

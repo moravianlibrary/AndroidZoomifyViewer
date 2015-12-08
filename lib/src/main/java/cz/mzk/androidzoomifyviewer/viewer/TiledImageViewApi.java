@@ -57,7 +57,6 @@ public interface TiledImageViewApi {
 
     //CANVAS
 
-    // TODO: 7.12.15 Tohle spis vracet v img souradnicich
     public Rect getVisibleImageAreaInCanvas();
 
 

@@ -14,7 +14,7 @@ public abstract class AbstractTileCache {
     private static final Logger LOGGER = new Logger(AbstractTileCache.class);
 
     protected String buildKey(String tileUrl) {
-        String key = CacheUtils.escapeSpecialChars(tileUrl);
+        String key = CacheKeyBuilder.buildKeyFromUrl(tileUrl);
         if (key.length() > 127) {
             LOGGER.w("cache key is longer then 127 characters");
         }
