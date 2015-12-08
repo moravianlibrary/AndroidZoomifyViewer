@@ -17,8 +17,6 @@ import cz.mzk.androidzoomifyviewer.viewer.TiledImageView;
 /**
  * @author Martin Řehánek
  */
-// TODO: 8.12.15 Zobecnit na Metadata instead of ZoomifyImageMetadata
-// TODO: 8.12.15 A taky dodavat v parametru Perser jako zobecneni ZoomifyMetadataParser
 public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, ImageMetadata> {
 
     private static final Logger LOGGER = new Logger(InitImageManagerTask.class);
