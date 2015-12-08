@@ -21,8 +21,10 @@ import cz.mzk.androidzoomifyviewer.tiles.exceptions.TooManyRedirectionsException
 public class Downloader {
 
     public static final int MAX_REDIRECTIONS = 5;
-    public static final int METADATA_TIMEOUT = 3000;
-    public static final int TILES_TIMEOUT = 5000;
+    public static final int METADATA_CONNECTION_TIMEOUT = 1000;
+    public static final int METADATA_READ_TIMEOUT = 3000;
+    public static final int TILES_CONNECTION_TIMEOUT = 2000;
+    public static final int TILES_READ_TIMEOUT = 10000;
 
     private static final Logger LOGGER = new Logger(Downloader.class);
 
@@ -41,7 +43,8 @@ public class Downloader {
         try {
             URL url = new URL(tileUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(TILES_TIMEOUT);
+            urlConnection.setConnectTimeout(TILES_CONNECTION_TIMEOUT);
+            urlConnection.setReadTimeout(TILES_READ_TIMEOUT);
             urlConnection.setInstanceFollowRedirects(false); //because I handle following redirects manually to avoid redirection loop
             int responseCode = urlConnection.getResponseCode();
             switch (responseCode) {
@@ -99,7 +102,8 @@ public class Downloader {
         try {
             URL url = new URL(metadataUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(METADATA_TIMEOUT);
+            urlConnection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
+            urlConnection.setReadTimeout(METADATA_READ_TIMEOUT);
             urlConnection.setInstanceFollowRedirects(false); //because I handle following redirects manually to avoid redirection loop
             int responseCode = urlConnection.getResponseCode();
             // LOGGER.d( "http code: " + responseCode);
