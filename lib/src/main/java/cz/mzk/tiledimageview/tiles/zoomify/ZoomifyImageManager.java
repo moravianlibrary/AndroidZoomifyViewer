@@ -421,13 +421,6 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public List<Layer> getLayers() {
-        checkInitialized();
-        return mLayers;
-    }
-
-
-    @Override
     public void cancelAllTasks() {
         taskRegistry.cancelAllTasks();
     }

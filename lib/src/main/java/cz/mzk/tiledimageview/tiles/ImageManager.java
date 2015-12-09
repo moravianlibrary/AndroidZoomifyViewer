@@ -5,8 +5,6 @@ import android.graphics.Rect;
 import java.util.List;
 
 import cz.mzk.tiledimageview.tiles.metadata.ImageMetadata;
-// TODO: 8.12.15 Asi presunout do jineho baliku
-import cz.mzk.tiledimageview.tiles.zoomify.Layer;
 import cz.mzk.tiledimageview.viewer.TiledImageView;
 
 /**
@@ -36,8 +34,6 @@ public interface ImageManager {
     public int getImageHeight();
 
     public int getTileTypicalSize();
-
-    public List<Layer> getLayers();
 
     public TiledImageProtocol getTiledImageProtocol();
 

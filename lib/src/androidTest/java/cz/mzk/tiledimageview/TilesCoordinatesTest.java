@@ -8,11 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
-
 import cz.mzk.tiledimageview.cache.CacheManager;
 import cz.mzk.tiledimageview.tiles.ImageManager;
-import cz.mzk.tiledimageview.tiles.zoomify.Layer;
 import cz.mzk.tiledimageview.tiles.zoomify.ZoomifyImageManager;
 import cz.mzk.tiledimageview.viewer.TiledImageView;
 import cz.mzk.tiledimageview.viewer.TiledImageView.MetadataInitializationSuccessListener;
@@ -143,7 +140,8 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         assertNotNull("Tiles downloader not initialized. Probably image no longer available on base url: " + baseUrl, imageManager);
         int width = imageManager.getImageWidth();
         int height = imageManager.getImageHeight();
-        List<Layer> layers = imageManager.getLayers();
+
+        /*List<Layer> layers = imageManager.getLayers();
         int[] topLeftCorner = {0, 0};
         int[] topRightCorner = {width - 1, 0};
         int[] bottomLeftCorner = {0, height - 1};
@@ -157,7 +155,7 @@ public class TilesCoordinatesTest extends AndroidTestCase {
             assertTileCoords(imageManager, layer, topRightCorner, new int[]{horizontal - 1, 0});
             assertTileCoords(imageManager, layer, bottomLeftCorner, new int[]{0, vertical - 1});
             assertTileCoords(imageManager, layer, bottomRightCorner, new int[]{horizontal - 1, vertical - 1});
-        }
+        }*/
     }
 
     //url no longer available
