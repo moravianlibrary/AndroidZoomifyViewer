@@ -2,6 +2,7 @@ package cz.mzk.tiledimageview;
 
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.view.View;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -198,6 +199,20 @@ public class Utils {
             return max;
         } else {
             return x;
+        }
+    }
+
+
+    public static String visibilityToString(int visibility) {
+        switch (visibility) {
+            case View.VISIBLE:
+                return "VISIBLE  ";
+            case View.INVISIBLE:
+                return "INVISIBLE";
+            case View.GONE:
+                return "GONE     ";
+            default:
+                return "WTF      ";
         }
     }
 

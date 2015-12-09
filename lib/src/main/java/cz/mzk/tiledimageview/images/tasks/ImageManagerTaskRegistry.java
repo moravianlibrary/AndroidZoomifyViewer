@@ -66,6 +66,7 @@ public class ImageManagerTaskRegistry {
                 @Override
                 public void onTaskFinished() {
                     mInitMetadataTask = null;
+                    LOGGER.d("metadata-initialization task success");
                 }
             });
             try {

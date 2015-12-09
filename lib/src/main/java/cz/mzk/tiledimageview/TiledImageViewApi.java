@@ -59,7 +59,6 @@ public interface TiledImageViewApi {
 
     public Rect getVisibleImageAreaInCanvas();
 
-
     public double getCanvasImagePaddingHorizontal();
 
     public double getCanvasImagePaddingVertical();

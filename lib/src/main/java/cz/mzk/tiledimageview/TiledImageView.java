@@ -31,10 +31,11 @@ import cz.mzk.tiledimageview.rectangles.FramingRectangleDrawer;
  * @author Martin Řehánek
  */
 public class TiledImageView extends View implements TiledImageViewApi {
-    public static final boolean DEV_MODE = false;// TODO: 7.12.15 configurable
+    public static final boolean DEV_MODE = true;// TODO: 7.12.15 configurable
     private static final Logger LOGGER = new Logger(TiledImageView.class);
     //STATE
-    boolean mMinZoomCanvasImagePaddingInitialized = false;
+    private boolean mMinZoomCanvasImagePaddingInitialized = false;
+
     //CANVAS
     private double mCanvasImagePaddingHorizontal = -1;
     private double mCanvasImagePaddingVertical = -1;
@@ -56,7 +57,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
 
     // TILES ACCESS
-    private String mZoomifyBaseUrl; //todo: vyhledove odstranit, tady to nepatri
+    private String mImageBaseUrl;
     private ImageManager mImageManager;
 
     //EVENT HANDLERS
@@ -92,7 +93,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
             logDeviceScreenCategory();
             logHwAcceleration();
         }
-        //mTilesCache = CacheManager.getTilesCache();
         mGestureListener = new MyGestureListener(context, this, mDevTools);
         mFramingRectDrawer = new FramingRectangleDrawer(context);
     }
@@ -167,11 +167,13 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mTileDownloadErrorListener = null;
     }
 
+    // TODO: 9.12.15 onVisibilityChanged, onWindowVisibilityChanged
+
     private void cancelAllTasks() {
         if (mImageManager != null) {
             mImageManager.cancelAllTasks();
         }
-        if (CacheManager.getTilesCache() != null) {
+        if (CacheManager.isInitialized() && CacheManager.getTilesCache() != null) {
             CacheManager.getTilesCache().cancelAllTasks();
         }
         if (mGestureListener != null) {
@@ -186,11 +188,11 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mViewmodeScaleFactorsInitialized = false;
         mViewmodeShiftInitialized = false;
         mMinZoomCanvasImagePaddingInitialized = false;
-        mZoomifyBaseUrl = baseUrl;
+        mImageBaseUrl = baseUrl;
         cancelAllTasks();
         mGestureListener.reset();
         double pxRatio = getResources().getInteger(R.integer.tiledimageview_pxRatio) / 100.0;
-        mImageManager = new ZoomifyImageManager(mZoomifyBaseUrl, pxRatio);
+        mImageManager = new ZoomifyImageManager(mImageBaseUrl, pxRatio);
         initTilesDownloaderAsync();
     }
 
@@ -206,15 +208,14 @@ public class TiledImageView extends View implements TiledImageViewApi {
             @Override
             public void onMetadataDownloaded(ImageManager imgManager) {
                 LOGGER.d("ImageManager initialized");
-                if (imgManager.equals(mImageManager)) {
+                if (mImageManager == null || imgManager.getImageBaseUrl().equals(mImageBaseUrl)) {
                     if (DEV_MODE) {
                         mTestPoints = new DevPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
                     }
                     invalidate();
                 } else {
-                    //ImageManager has changed since, so this one is ignored.
+                    //nothing, ImageManager for old page was loaded
                 }
-
             }
         });
     }
@@ -229,6 +230,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
             mDevTools.setCanvas(canv);
             mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintYellow());
         }
+
+        // TODO: 9.12.15 mImageManager is null, see https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/33
         if (mImageManager.isInitialized()) {
             if (mDevTools != null) {
                 mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintBlue());

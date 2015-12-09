@@ -29,6 +29,8 @@ public interface ImageManager {
 
     public boolean isInitialized();
 
+    public String getImageBaseUrl();
+
     public int getImageWidth();
 
     public int getImageHeight();

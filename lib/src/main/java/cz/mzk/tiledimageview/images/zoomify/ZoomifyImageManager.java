@@ -106,6 +106,11 @@ public class ZoomifyImageManager implements ImageManager {
         return mImageMetadata != null;
     }
 
+    @Override
+    public String getImageBaseUrl() {
+        return mBaseUrl;
+    }
+
     private List<Layer> initLayers() {
         int numberOfLayers = computeNumberOfLayers();
         // LOGGER.d( "mLayers #: " + numberOfLayers);
