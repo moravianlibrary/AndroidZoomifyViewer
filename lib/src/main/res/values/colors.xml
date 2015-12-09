@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="androidzoomifyviewer_black">#000000</color>
-    <color name="androidzoomifyviewer_white">#FFFFFF</color>
-    <color name="androidzoomifyviewer_red">#ff0000</color>
-    <color name="androidzoomifyviewer_green">#00FF00</color>
-    <color name="androidzoomifyviewer_blue">#0000FF</color>
-    <color name="androidzoomifyviewer_blue_light">#3AAFDE</color>
-    <color name="androidzoomifyviewer_yellow">#FFFF00</color>
-    <color name="androidzoomifyviewer_grey">#C0C0C0</color>
-    <color name="androidzoomifyviewer_cyamon">#00FFFF</color>
-    <color name="androidzoomifyviewer_grey_light">#E8E8E8</color>
-    <color name="androidzoomifyviewer_brown">#c67935</color>
-    <color name="androidzoomifyviewer_brown_dark">#66401e</color>
+    <color name="tiledimageview_black">#000000</color>
+    <color name="tiledimageview_white">#FFFFFF</color>
+    <color name="tiledimageview_red">#ff0000</color>
+    <color name="tiledimageview_green">#00FF00</color>
+    <color name="tiledimageview_blue">#0000FF</color>
+    <color name="tiledimageview_blue_light">#3AAFDE</color>
+    <color name="tiledimageview_yellow">#FFFF00</color>
+    <color name="tiledimageview_grey">#C0C0C0</color>
+    <color name="tiledimageview_cyamon">#00FFFF</color>
+    <color name="tiledimageview_grey_light">#E8E8E8</color>
+    <color name="tiledimageview_brown">#c67935</color>
+    <color name="tiledimageview_brown_dark">#66401e</color>
     <!-- transparent versions -->
-    <color name="androidzoomifyviewer_white_trans">#85FFFFFF</color>
-    <color name="androidzoomifyviewer_red_trans">#80ff0000</color>
-    <color name="androidzoomifyviewer_yellow_trans">#80FFFF00</color>
-    <color name="androidzoomifyviewer_black_trans">#80000000</color>
-    <color name="androidzoomifyviewer_green_trans">#8000FF00</color>
-    <color name="androidzoomifyviewer_blue_trans">#800000FF</color>
+    <color name="tiledimageview_white_trans">#85FFFFFF</color>
+    <color name="tiledimageview_red_trans">#80ff0000</color>
+    <color name="tiledimageview_yellow_trans">#80FFFF00</color>
+    <color name="tiledimageview_black_trans">#80000000</color>
+    <color name="tiledimageview_green_trans">#8000FF00</color>
+    <color name="tiledimageview_blue_trans">#800000FF</color>
 
 </resources>

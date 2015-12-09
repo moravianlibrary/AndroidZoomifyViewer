@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">AndroidZoomifyViewerExamples</string>
-    <string name="actionbar_title">AndroidZoomifyViewer Examples</string>
+    <string name="app_name">TiledImageViewDemonstration</string>
+    <string name="actionbar_title">TiledImageView demonstration</string>
 
 </resources>

@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 
 
 ext {
-    PUBLISH_GROUP_ID = 'cz.mzk.androidzoomifyviewer'
-    PUBLISH_ARTIFACT_ID = 'android-zoomify-viewer'
+    PUBLISH_GROUP_ID = 'cz.mzk.tiledimageview'
+    PUBLISH_ARTIFACT_ID = 'tiled-image-view'
     PUBLISH_VERSION = '1.2.0'
 }
 

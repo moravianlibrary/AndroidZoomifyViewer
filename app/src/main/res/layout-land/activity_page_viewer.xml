@@ -10,14 +10,14 @@
 
         <fragment
             android:id="@+id/fragmentControls"
-            android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageControlsFragment"
+            android:name="cz.mzk.tiledimageview.demonstration.kramerius.PageControlsFragment"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true" />
 
         <fragment
             android:id="@+id/fragmentViewer"
-            android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerFragment"
+            android:name="cz.mzk.tiledimageview.demonstration.kramerius.PageViewerFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="5dp"

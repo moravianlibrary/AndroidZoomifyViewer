@@ -1,4 +1,4 @@
-package cz.mzk.androidzoomifyviewer.examples;
+package cz.mzk.tiledimageview.demonstration;
 
 import junit.framework.TestCase;
 
@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 
-import cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusObjectPersistentUrl;
+import cz.mzk.tiledimageview.demonstration.kramerius.KrameriusObjectPersistentUrl;
 
 /**
  * @author Martin Řehánek

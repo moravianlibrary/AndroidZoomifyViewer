@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cz.mzk.androidzoomifyviewer.examples">
+    package="cz.mzk.tiledimageview.demonstration">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!--<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"-->
@@ -14,14 +14,14 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
 
     <application
-        android:name="cz.mzk.androidzoomifyviewer.examples.AndroidZoomifyViewerExamplesApp"
+        android:name="cz.mzk.tiledimageview.demonstration.TiledImageViewDemostrationApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="cz.mzk.androidzoomifyviewer.examples.MainActivity"
+            android:name="cz.mzk.tiledimageview.demonstration.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,17 +29,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.FullscreenSingleImageActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesHttpResponseCodeExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesRedirectionLoopExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesInvalidContentExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ImagePropertiesOtherErrorsExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.SingleImageWorkingExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.KrameriusMultiplePageExamplesActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageViewerActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.kramerius.PageMetadataActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.tmp.ViewFlipperDemoActivity" />
-        <activity android:name="cz.mzk.androidzoomifyviewer.examples.ssl.SslTestActivity">
+        <activity android:name="cz.mzk.tiledimageview.demonstration.FullscreenSingleImageActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesHttpResponseCodeExamplesActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesRedirectionLoopExamplesActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesInvalidContentExamplesActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesOtherErrorsExamplesActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.SingleImageWorkingExamplesActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.kramerius.KrameriusMultiplePageExamplesActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.kramerius.PageViewerActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.kramerius.PageMetadataActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.tmp.ViewFlipperDemoActivity" />
+        <activity android:name="cz.mzk.tiledimageview.demonstration.ssl.SslTestActivity">
             <!-- <intent-filter> -->
             <!-- <action android:name="android.intent.action.MAIN" /> -->
 

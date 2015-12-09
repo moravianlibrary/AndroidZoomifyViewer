@@ -66,7 +66,7 @@
                 android:textSize="15sp" />
         </LinearLayout>
 
-        <cz.mzk.androidzoomifyviewer.viewer.TiledImageView
+        <cz.mzk.tiledimageview.viewer.TiledImageView
             android:id="@+id/tiledImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
