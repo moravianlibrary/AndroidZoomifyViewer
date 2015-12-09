@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 ext {
     PUBLISH_GROUP_ID = 'cz.mzk.tiledimageview'
     PUBLISH_ARTIFACT_ID = 'tiled-image-view'
-    PUBLISH_VERSION = '1.2.0'
+    PUBLISH_VERSION = '2.0.0'
 }
 
 
@@ -15,8 +15,8 @@ android {
     defaultConfig {
         minSdkVersion 12
         targetSdkVersion 23
-        versionCode 120
-        versionName "1.2.0"
+        versionCode 20000
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }

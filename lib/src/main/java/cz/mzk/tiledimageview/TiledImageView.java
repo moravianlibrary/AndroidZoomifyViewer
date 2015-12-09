@@ -31,7 +31,7 @@ import cz.mzk.tiledimageview.rectangles.FramingRectangleDrawer;
  * @author Martin Řehánek
  */
 public class TiledImageView extends View implements TiledImageViewApi {
-    public static final boolean DEV_MODE = true;// TODO: 7.12.15 configurable
+    public static final boolean DEV_MODE = false;// TODO: 7.12.15 configurable
     private static final Logger LOGGER = new Logger(TiledImageView.class);
     //STATE
     boolean mMinZoomCanvasImagePaddingInitialized = false;
