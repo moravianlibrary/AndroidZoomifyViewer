@@ -1,28 +1,26 @@
 <resources>
-	<!-- Application theme. -->
-	<!-- <style -->
-	<!-- name="AppTheme.Light" -->
-	<!-- parent="AppBaseTheme"> -->
-	<style
-		name="AppTheme"
-		parent="AppBaseTheme">
-		<!-- <item name="android:windowContentTransitions">true</item> -->
-		<!-- <item name="android:windowAllowEnterTransitionOverlap">true</item> -->
-		<!-- <item name="android:windowAllowReturnTransitionOverlap">true</item> -->
-		<!-- <item name="android:windowSharedElementEnterTransition">@android:transition/move</item> -->
-		<!-- <item name="android:windowSharedElementExitTransition">@android:transition/move</item> -->
+    <!-- Application theme. -->
+    <!-- <style -->
+    <!-- name="AppTheme.Light" -->
+    <!-- parent="AppBaseTheme"> -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- <item name="android:windowContentTransitions">true</item> -->
+        <!-- <item name="android:windowAllowEnterTransitionOverlap">true</item> -->
+        <!-- <item name="android:windowAllowReturnTransitionOverlap">true</item> -->
+        <!-- <item name="android:windowSharedElementEnterTransition">@android:transition/move</item> -->
+        <!-- <item name="android:windowSharedElementExitTransition">@android:transition/move</item> -->
 
-		<!-- <item name="android:colorPrimary">@color/theme_primary</item> -->
-		<!-- <item name="android:colorPrimaryDark">@color/theme_primary_dark</item> -->
-		<!-- <item name="android:colorAccent">@color/theme_accent</item> -->
-		<!-- <item name="android:colorControlNormal">@color/theme_primary</item> -->
-		<!-- <item name="android:colorControlActivated">@color/theme_primary</item> -->
-		<!-- <item name="android:colorControlHighlight">@color/theme_primary</item> -->
-		<!-- <item name="android:windowNoTitle">true</item> -->
-		<!-- <item name="android:windowActionBar">false</item> -->
+        <!-- <item name="android:colorPrimary">@color/theme_primary</item> -->
+        <!-- <item name="android:colorPrimaryDark">@color/theme_primary_dark</item> -->
+        <!-- <item name="android:colorAccent">@color/theme_accent</item> -->
+        <!-- <item name="android:colorControlNormal">@color/theme_primary</item> -->
+        <!-- <item name="android:colorControlActivated">@color/theme_primary</item> -->
+        <!-- <item name="android:colorControlHighlight">@color/theme_primary</item> -->
+        <!-- <item name="android:windowNoTitle">true</item> -->
+        <!-- <item name="android:windowActionBar">false</item> -->
 
-		<item name="android:windowActionBar">false</item>
-		<item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
 
-	</style>
+    </style>
 </resources>

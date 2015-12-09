@@ -1,88 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-	<android.support.v7.widget.Toolbar
-		android:id="@+id/action_bar"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-		android:minHeight="?attr/actionBarSize"
-		android:background="?attr/colorPrimary"
-		android:elevation="@dimen/action_bar_elevation" />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="@dimen/action_bar_elevation"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
 
-	<!-- <LinearLayout -->
-	<!-- android:layout_width="match_parent" -->
-	<!-- android:layout_height="wrap_content" -->
-	<!-- android:background="#d4c46a" -->
-	<!-- android:gravity="center" -->
-	<!-- android:orientation="vertical" -->
-	<!-- android:padding="10dp"> -->
+    <!-- <LinearLayout -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="wrap_content" -->
+    <!-- android:background="#d4c46a" -->
+    <!-- android:gravity="center" -->
+    <!-- android:orientation="vertical" -->
+    <!-- android:padding="10dp"> -->
 
-	<!-- <TextView -->
-	<!-- android:layout_width="wrap_content" -->
-	<!-- android:layout_height="wrap_content" -->
-	<!-- android:text="Examples of data and possible errors" -->
-	<!-- android:textSize="30sp" /> -->
-	<!-- </LinearLayout> -->
+    <!-- <TextView -->
+    <!-- android:layout_width="wrap_content" -->
+    <!-- android:layout_height="wrap_content" -->
+    <!-- android:text="Examples of data and possible errors" -->
+    <!-- android:textSize="30sp" /> -->
+    <!-- </LinearLayout> -->
 
-	<ScrollView
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
-		<!-- android:background="#fff2aa" -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <!-- android:background="#fff2aa" -->
 
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:padding="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-			<Button
-				android:id="@+id/btnSingleImageWorkingExamples"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Single images (should be all working)" />
+            <Button
+                android:id="@+id/btnSingleImageWorkingExamples"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Single images (should be all working)" />
 
-			<Button
-				android:id="@+id/btnImagePropertiesHttpResponseCodes"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="ImageProperties.xml HTTP response codes" />
+            <Button
+                android:id="@+id/btnImagePropertiesHttpResponseCodes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ImageProperties.xml HTTP response codes" />
 
-			<Button
-				android:id="@+id/btnImagePropertiesRedirectionLoops"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="ImageProperties.xml redirection loops" />
+            <Button
+                android:id="@+id/btnImagePropertiesRedirectionLoops"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ImageProperties.xml redirection loops" />
 
-			<Button
-				android:id="@+id/btnImagePropertiesInvalidContent"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="ImageProperties.xml invalid content" />
+            <Button
+                android:id="@+id/btnImagePropertiesInvalidContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ImageProperties.xml invalid content" />
 
-			<Button
-				android:id="@+id/btnImagePropertiesOtherErrors"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="ImageProperties.xml other errors" />
+            <Button
+                android:id="@+id/btnImagePropertiesOtherErrors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ImageProperties.xml other errors" />
 
-			<Button
-				android:id="@+id/btnKrameriusMultiplePageExamples"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Kramerius examples (books etc. with multiple pages)" />
+            <Button
+                android:id="@+id/btnKrameriusMultiplePageExamples"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kramerius examples (books etc. with multiple pages)" />
 
-			<Button
-				android:id="@+id/btnSslTest"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="HTTPS test" />
-		</LinearLayout>
-	</ScrollView>
+            <Button
+                android:id="@+id/btnSslTest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HTTPS test" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

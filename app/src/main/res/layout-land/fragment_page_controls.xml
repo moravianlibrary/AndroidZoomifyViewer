@@ -53,6 +53,14 @@
             android:layout_height="wrap_content"
             android:textSize="25dp" />
 
+        <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+        <View
+            android:id="@+id/focusDummy"
+            android:layout_width="0px"
+            android:layout_height="0px"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+
         <EditText
             android:id="@+id/editTextSearch"
             android:layout_width="match_parent"

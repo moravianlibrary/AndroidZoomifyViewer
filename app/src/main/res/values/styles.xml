@@ -1,78 +1,70 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<!-- Base application theme, dependent on API level. This theme is replaced 
-		by AppBaseTheme from res/values-vXX/styles.xml on newer devices. -->
-	<!-- <style -->
-	<!-- name="AppBaseTheme" -->
-	<!-- parent="Theme.AppCompat.Light"> -->
+    <!-- Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices. -->
+    <!-- <style -->
+    <!-- name="AppBaseTheme" -->
+    <!-- parent="Theme.AppCompat.Light"> -->
 
-	<style
-		name="ThemeTest"
-		parent="Theme.AppCompat">
-		<item name="colorPrimary">@color/theme_primary</item>
-		<item name="colorPrimaryDark">@color/theme_primary_dark</item>
-		<item name="colorAccent">@color/theme_accent</item>
-	</style>
+    <style name="ThemeTest" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+    </style>
 
 
-	<style
-		name="AppBaseTheme"
-		parent="@style/Theme.AppCompat.Light.DarkActionBar">
-		<!-- parent="Theme.AppCompat" -->
-		<!-- parent="Theme.AppCompat.Light.DarkActionBar" -->
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <!-- parent="Theme.AppCompat" -->
+        <!-- parent="Theme.AppCompat.Light.DarkActionBar" -->
 
 
-		<!-- <item name="android:windowContentOverlay">@null</item> -->
+        <!-- <item name="android:windowContentOverlay">@null</item> -->
 
-		<!-- Theme customizations available in newer API levels can go in res/values-vXX/styles.xml, 
-			while customizations related to backward-compatibility can go here. -->
-		<!-- Main theme colors -->
-		<!-- your app branding color for the app bar -->
-		<item name="colorPrimary">@color/theme_primary</item>
-		<item name="colorPrimaryDark">@color/theme_primary_dark</item>
-		<item name="colorAccent">@color/theme_accent</item>
-		<!-- for edittext -->
-		<item name="colorControlNormal">@color/theme_primary</item>
-		<item name="colorControlActivated">@color/theme_primary</item>
-		<item name="colorControlHighlight">@color/theme_primary</item>
-		<!-- <item name="android:windowNoTitle">true</item> -->
-		<!-- <item name="windowNoTitle">true</item> -->
-		<item name="windowActionBar">false</item>
-		<item name="windowNoTitle">true</item>
-		<!-- <item name="floatingActionButtonStyle">@style/AppTheme.Fab</item> -->
+        <!-- Theme customizations available in newer API levels can go in res/values-vXX/styles.xml,
+            while customizations related to backward-compatibility can go here. -->
+        <!-- Main theme colors -->
+        <!-- your app branding color for the app bar -->
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorPrimaryDark">@color/theme_primary_dark</item>
+        <item name="colorAccent">@color/theme_accent</item>
+        <!-- for edittext -->
+        <item name="colorControlNormal">@color/theme_primary</item>
+        <item name="colorControlActivated">@color/theme_primary</item>
+        <item name="colorControlHighlight">@color/theme_primary</item>
+        <!-- <item name="android:windowNoTitle">true</item> -->
+        <!-- <item name="windowNoTitle">true</item> -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <!-- <item name="floatingActionButtonStyle">@style/AppTheme.Fab</item> -->
 
-		<!-- Support library compatibility -->
-		<!-- <item name="actionBarStyle">@style/Theme.MyApp.ActionBar</item> -->
-	</style>
+        <!-- Support library compatibility -->
+        <!-- <item name="actionBarStyle">@style/Theme.MyApp.ActionBar</item> -->
+    </style>
 
-	<!-- Application theme. -->
+    <!-- Application theme. -->
 
-	<style
-		name="AppTheme"
-		parent="AppBaseTheme">
-		<!-- All customizations that are NOT specific to a particular API-level 
-			can go here. -->
-	</style>
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level
+            can go here. -->
+    </style>
 
-	<style
-		name="Theme.MyApp.ActionBar"
-		parent="style/ThemeOverlay.AppCompat.Dark.ActionBar">
-		
-<!-- 		style/ThemeOverlay.AppCompat.Dark.ActionBar -->
-<!-- 		style/Widget.AppCompat.Light.ActionBar.Solid.Inverse -->
-		
-<!-- 		<item name="android:background">?attr/colorPrimary</item> -->
-		<item name="background">?attr/colorPrimary</item>
-		<item name="android:minHeight">?attr/actionBarSize</item>
-		<item name="elevation">24dp</item>
+    <style name="Theme.MyApp.ActionBar" parent="style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-		<!-- remove shadow below action bar -->
-		<!-- <item name="android:elevation">0dp</item> -->
-		<!-- Support library compatibility -->
-		<!-- TODO:korektni elevation -->
-		<!-- <item name="elevation">4dp</item> -->
-		<!-- <item name="elevation">24dp</item> -->
-	</style>
+        <!-- 		style/ThemeOverlay.AppCompat.Dark.ActionBar -->
+        <!-- 		style/Widget.AppCompat.Light.ActionBar.Solid.Inverse -->
+
+        <!-- 		<item name="android:background">?attr/colorPrimary</item> -->
+        <item name="background">?attr/colorPrimary</item>
+        <item name="android:minHeight">?attr/actionBarSize</item>
+        <item name="elevation">24dp</item>
+
+        <!-- remove shadow below action bar -->
+        <!-- <item name="android:elevation">0dp</item> -->
+        <!-- Support library compatibility -->
+        <!-- TODO:korektni elevation -->
+        <!-- <item name="elevation">4dp</item> -->
+        <!-- <item name="elevation">24dp</item> -->
+    </style>
 
 
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="androidzoomifyviewer_screen_type">default</string>
-	<!-- out of 100 -->
-	<integer name="androidzoomifyviewer_pxRatio">100</integer>
+    <string name="tiledimageview_screen_type">default</string>
+    <!-- out of 100 -->
+    <integer name="tiledimageview_pxRatio">100</integer>
 </resources>

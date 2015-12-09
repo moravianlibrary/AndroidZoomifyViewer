@@ -1,81 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/root"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:gravity="center"
-	android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
 
-	<android.support.v7.widget.Toolbar
-		android:id="@+id/action_bar"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-		android:minHeight="?attr/actionBarSize"
-		android:background="?attr/colorPrimary"
-		android:elevation="@dimen/action_bar_elevation">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="@dimen/action_bar_elevation"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-		<Spinner
-			android:gravity="end"
-			android:id="@+id/viewModeSpinner"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:padding="5dp" />
-	</android.support.v7.widget.Toolbar>
+        <Spinner
+            android:id="@+id/viewModeSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:padding="5dp" />
+    </android.support.v7.widget.Toolbar>
 
-	<FrameLayout
-		android:id="@+id/container"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:padding="5dp">
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp">
 
-		<RelativeLayout
-			android:id="@+id/progressView"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:gravity="center"
-			android:visibility="visible">
+        <RelativeLayout
+            android:id="@+id/progressView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="visible">
 
-			<ProgressBar
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:indeterminate="true" />
-		</RelativeLayout>
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+        </RelativeLayout>
 
-		<LinearLayout
-			android:id="@+id/errorView"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:gravity="center"
-			android:orientation="vertical"
-			android:visibility="invisible">
+        <LinearLayout
+            android:id="@+id/errorView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="invisible">
 
-			<TextView
-				android:id="@+id/errorTitle"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:textSize="30sp" />
+            <TextView
+                android:id="@+id/errorTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp" />
 
-			<TextView
-				android:id="@+id/errorDescription"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:textSize="20sp" />
+            <TextView
+                android:id="@+id/errorDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp" />
 
-			<TextView
-				android:id="@+id/errorResourceUrl"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:background="@color/grey_light"
-				android:textSize="15sp" />
-		</LinearLayout>
+            <TextView
+                android:id="@+id/errorResourceUrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/grey_light"
+                android:textSize="15sp" />
+        </LinearLayout>
 
-		<cz.mzk.androidzoomifyviewer.viewer.TiledImageView
-			android:id="@+id/tiledImageView"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:visibility="invisible" />
-	</FrameLayout>
+        <cz.mzk.tiledimageview.TiledImageView
+            android:id="@+id/tiledImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible" />
+    </FrameLayout>
 
 </LinearLayout>
