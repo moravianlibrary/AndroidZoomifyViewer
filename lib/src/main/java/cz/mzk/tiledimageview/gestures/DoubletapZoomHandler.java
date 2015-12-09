@@ -4,11 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 
 import cz.mzk.tiledimageview.Logger;
-import cz.mzk.tiledimageview.viewer.DevTools;
-import cz.mzk.tiledimageview.viewer.PointD;
-import cz.mzk.tiledimageview.viewer.TiledImageViewApi;
-import cz.mzk.tiledimageview.viewer.Utils;
-import cz.mzk.tiledimageview.viewer.VectorD;
+import cz.mzk.tiledimageview.PointD;
+import cz.mzk.tiledimageview.TiledImageViewApi;
+import cz.mzk.tiledimageview.Utils;
+import cz.mzk.tiledimageview.VectorD;
+import cz.mzk.tiledimageview.dev.DevTools;
 
 /**
  * @author Martin Řehánek
@@ -183,7 +183,7 @@ public class DoubletapZoomHandler extends Handler {
         public void run() {
             // ThreadGroup group = Thread.currentThread().getThreadGroup();
             // int threadPriority = Thread.currentThread().getPriority();
-            // TestLoggers.THREADS.d(String.format(
+            // DevLoggers.THREADS.d(String.format(
             // "double-tap worker: priority: %d, TG: name: %s, active: %d, max priority: %d, ", threadPriority,
             // group.getName(), group.activeCount(), group.getMaxPriority()));
             for (int i = 0; true; i++) {

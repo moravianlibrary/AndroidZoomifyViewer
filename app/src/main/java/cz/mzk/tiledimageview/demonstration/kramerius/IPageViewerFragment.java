@@ -4,8 +4,8 @@ import android.graphics.Rect;
 
 import java.util.List;
 
+import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
-import cz.mzk.tiledimageview.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek

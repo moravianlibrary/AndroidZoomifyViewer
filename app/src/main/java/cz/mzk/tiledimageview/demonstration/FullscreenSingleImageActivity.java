@@ -15,11 +15,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cz.mzk.tiledimageview.tiles.TiledImageProtocol;
-import cz.mzk.tiledimageview.viewer.PointD;
-import cz.mzk.tiledimageview.viewer.TiledImageView;
-import cz.mzk.tiledimageview.viewer.TiledImageView.SingleTapListener;
-import cz.mzk.tiledimageview.viewer.TiledImageView.ViewMode;
+import cz.mzk.tiledimageview.PointD;
+import cz.mzk.tiledimageview.TiledImageView;
+import cz.mzk.tiledimageview.TiledImageView.SingleTapListener;
+import cz.mzk.tiledimageview.TiledImageView.ViewMode;
+import cz.mzk.tiledimageview.images.TiledImageProtocol;
 
 /**
  * @author Martin Řehánek

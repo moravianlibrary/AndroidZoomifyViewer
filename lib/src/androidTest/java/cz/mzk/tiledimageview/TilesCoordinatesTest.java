@@ -9,10 +9,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import cz.mzk.tiledimageview.cache.CacheManager;
-import cz.mzk.tiledimageview.tiles.ImageManager;
-import cz.mzk.tiledimageview.tiles.zoomify.ZoomifyImageManager;
-import cz.mzk.tiledimageview.viewer.TiledImageView;
-import cz.mzk.tiledimageview.viewer.TiledImageView.MetadataInitializationSuccessListener;
+import cz.mzk.tiledimageview.images.ImageManager;
+import cz.mzk.tiledimageview.images.zoomify.ZoomifyImageManager;
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationSuccessListener;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;

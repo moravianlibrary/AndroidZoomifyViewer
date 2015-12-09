@@ -15,7 +15,7 @@ import cz.mzk.tiledimageview.cache.DiskLruCache;
 import cz.mzk.tiledimageview.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.tiledimageview.cache.DiskLruCache.Snapshot;
 import cz.mzk.tiledimageview.cache.InitDiskCacheTask;
-import cz.mzk.tiledimageview.tiles.TilePositionInPyramid;
+import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 
 /**
  * @author Martin Řehánek

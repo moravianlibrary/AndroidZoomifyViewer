@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 import cz.mzk.tiledimageview.demonstration.R;
 import cz.mzk.tiledimageview.demonstration.kramerius.DownloadPageListTask.DownloadPidListResultHandler;
 import cz.mzk.tiledimageview.demonstration.kramerius.IPageViewerFragment.EventListener;
@@ -22,7 +23,6 @@ import cz.mzk.tiledimageview.demonstration.kramerius.api.AltoParser;
 import cz.mzk.tiledimageview.demonstration.kramerius.api.K5Connector;
 import cz.mzk.tiledimageview.demonstration.kramerius.api.K5ConnectorImpl;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
-import cz.mzk.tiledimageview.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek

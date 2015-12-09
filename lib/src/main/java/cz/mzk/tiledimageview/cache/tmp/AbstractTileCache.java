@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cz.mzk.tiledimageview.tiles.TilePositionInPyramid;
+import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 
 /**
  * @author Martin Řehánek

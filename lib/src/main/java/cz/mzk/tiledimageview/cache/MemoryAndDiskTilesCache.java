@@ -16,10 +16,10 @@ import java.util.concurrent.RejectedExecutionException;
 
 import cz.mzk.tiledimageview.ConcurrentAsyncTask;
 import cz.mzk.tiledimageview.Logger;
+import cz.mzk.tiledimageview.Utils;
 import cz.mzk.tiledimageview.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.tiledimageview.cache.DiskLruCache.Snapshot;
 import cz.mzk.tiledimageview.cache.TileBitmap.State;
-import cz.mzk.tiledimageview.viewer.Utils;
 
 /**
  * @author Martin Řehánek

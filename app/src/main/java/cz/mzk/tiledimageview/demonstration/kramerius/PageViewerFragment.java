@@ -23,14 +23,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import cz.mzk.tiledimageview.TiledImageView;
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationHandler;
+import cz.mzk.tiledimageview.TiledImageView.SingleTapListener;
+import cz.mzk.tiledimageview.TiledImageView.ViewMode;
+import cz.mzk.tiledimageview.Utils;
 import cz.mzk.tiledimageview.demonstration.R;
+import cz.mzk.tiledimageview.images.TiledImageProtocol;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
-import cz.mzk.tiledimageview.tiles.TiledImageProtocol;
-import cz.mzk.tiledimageview.viewer.TiledImageView;
-import cz.mzk.tiledimageview.viewer.TiledImageView.MetadataInitializationHandler;
-import cz.mzk.tiledimageview.viewer.TiledImageView.SingleTapListener;
-import cz.mzk.tiledimageview.viewer.TiledImageView.ViewMode;
-import cz.mzk.tiledimageview.viewer.Utils;
 
 /**
  * @author Martin Řehánek

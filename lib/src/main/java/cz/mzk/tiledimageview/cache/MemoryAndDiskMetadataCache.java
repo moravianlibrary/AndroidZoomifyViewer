@@ -8,9 +8,9 @@ import android.util.LruCache;
 import java.io.File;
 
 import cz.mzk.tiledimageview.Logger;
+import cz.mzk.tiledimageview.Utils;
 import cz.mzk.tiledimageview.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.tiledimageview.cache.DiskLruCache.Snapshot;
-import cz.mzk.tiledimageview.viewer.Utils;
 
 /**
  * @author Martin Řehánek

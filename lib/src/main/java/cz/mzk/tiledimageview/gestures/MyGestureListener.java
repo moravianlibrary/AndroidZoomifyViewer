@@ -7,12 +7,12 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 
 import cz.mzk.tiledimageview.Logger;
+import cz.mzk.tiledimageview.PointD;
+import cz.mzk.tiledimageview.TiledImageViewApi;
+import cz.mzk.tiledimageview.VectorD;
+import cz.mzk.tiledimageview.dev.DevTools;
 import cz.mzk.tiledimageview.gestures.PinchGestureDetector.OnScaleGestureListener;
 import cz.mzk.tiledimageview.gestures.PinchZoomHandler.State;
-import cz.mzk.tiledimageview.viewer.DevTools;
-import cz.mzk.tiledimageview.viewer.PointD;
-import cz.mzk.tiledimageview.viewer.TiledImageViewApi;
-import cz.mzk.tiledimageview.viewer.VectorD;
 
 public class MyGestureListener implements OnGestureListener, OnDoubleTapListener, OnScaleGestureListener {
 

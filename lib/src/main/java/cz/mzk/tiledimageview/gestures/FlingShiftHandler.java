@@ -4,11 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 
 import cz.mzk.tiledimageview.Logger;
-import cz.mzk.tiledimageview.viewer.DevTools;
-import cz.mzk.tiledimageview.viewer.PointD;
-import cz.mzk.tiledimageview.viewer.TiledImageViewApi;
-import cz.mzk.tiledimageview.viewer.Utils;
-import cz.mzk.tiledimageview.viewer.VectorD;
+import cz.mzk.tiledimageview.PointD;
+import cz.mzk.tiledimageview.TiledImageViewApi;
+import cz.mzk.tiledimageview.Utils;
+import cz.mzk.tiledimageview.VectorD;
+import cz.mzk.tiledimageview.dev.DevTools;
 
 public class FlingShiftHandler extends Handler {
 
@@ -149,7 +149,7 @@ public class FlingShiftHandler extends Handler {
 
         @Override
         public void run() {
-            // TestLoggers.THREADS.d("fling worker: " + Thread.currentThread().getPriority());
+            // DevLoggers.THREADS.d("fling worker: " + Thread.currentThread().getPriority());
             while (true) {
                 Message msg = Message.obtain();
                 msg.arg1 = workerId;

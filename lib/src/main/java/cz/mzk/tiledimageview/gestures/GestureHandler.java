@@ -3,14 +3,13 @@ package cz.mzk.tiledimageview.gestures;
 import android.graphics.Rect;
 
 import cz.mzk.tiledimageview.Logger;
-import cz.mzk.tiledimageview.viewer.DevTools;
-import cz.mzk.tiledimageview.viewer.DevTools.RectWithPaint;
-import cz.mzk.tiledimageview.viewer.PointD;
-import cz.mzk.tiledimageview.viewer.RectD;
-import cz.mzk.tiledimageview.viewer.TiledImageView;
-import cz.mzk.tiledimageview.viewer.TiledImageViewApi;
-import cz.mzk.tiledimageview.viewer.Utils;
-import cz.mzk.tiledimageview.viewer.VectorD;
+import cz.mzk.tiledimageview.PointD;
+import cz.mzk.tiledimageview.TiledImageView;
+import cz.mzk.tiledimageview.TiledImageViewApi;
+import cz.mzk.tiledimageview.Utils;
+import cz.mzk.tiledimageview.VectorD;
+import cz.mzk.tiledimageview.dev.DevTools;
+import cz.mzk.tiledimageview.dev.DevTools.RectWithPaint;
 
 public class GestureHandler {
 

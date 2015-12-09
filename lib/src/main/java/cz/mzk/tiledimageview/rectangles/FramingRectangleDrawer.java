@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import cz.mzk.tiledimageview.Logger;
-import cz.mzk.tiledimageview.viewer.Utils;
-import cz.mzk.tiledimageview.viewer.VectorD;
+import cz.mzk.tiledimageview.Utils;
+import cz.mzk.tiledimageview.VectorD;
 
 /**
  * Created by Martin Řehánek on 12.11.15.

@@ -1,6 +1,6 @@
 package cz.mzk.tiledimageview.demonstration;
 
-import cz.mzk.tiledimageview.viewer.TiledImageView.ViewMode;
+import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek

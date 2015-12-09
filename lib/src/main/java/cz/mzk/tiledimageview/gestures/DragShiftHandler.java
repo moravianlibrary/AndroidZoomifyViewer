@@ -1,9 +1,9 @@
 package cz.mzk.tiledimageview.gestures;
 
 import cz.mzk.tiledimageview.Logger;
-import cz.mzk.tiledimageview.viewer.DevTools;
-import cz.mzk.tiledimageview.viewer.TiledImageViewApi;
-import cz.mzk.tiledimageview.viewer.VectorD;
+import cz.mzk.tiledimageview.TiledImageViewApi;
+import cz.mzk.tiledimageview.VectorD;
+import cz.mzk.tiledimageview.dev.DevTools;
 
 /**
  * @author Martin Řehánek

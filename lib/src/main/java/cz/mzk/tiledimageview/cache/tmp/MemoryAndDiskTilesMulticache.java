@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import cz.mzk.tiledimageview.Logger;
-import cz.mzk.tiledimageview.tiles.TilePositionInPyramid;
+import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 
 /**
  * This implementation contains different caches for different layers.

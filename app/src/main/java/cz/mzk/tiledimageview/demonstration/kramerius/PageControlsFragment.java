@@ -18,8 +18,8 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 import cz.mzk.tiledimageview.demonstration.R;
-import cz.mzk.tiledimageview.viewer.TiledImageView.ViewMode;
 
 /**
  * @author Martin Řehánek

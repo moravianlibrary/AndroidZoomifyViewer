@@ -2,7 +2,7 @@ package cz.mzk.tiledimageview.cache.tmp;
 
 import android.graphics.Bitmap;
 
-import cz.mzk.tiledimageview.tiles.TilePositionInPyramid;
+import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 
 /**
  * @author Martin Řehánek

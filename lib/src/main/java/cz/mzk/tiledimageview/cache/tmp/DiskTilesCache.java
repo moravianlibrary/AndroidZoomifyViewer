@@ -14,7 +14,7 @@ import cz.mzk.tiledimageview.cache.DiskLruCache.DiskLruCacheException;
 import cz.mzk.tiledimageview.cache.DiskLruCache.Snapshot;
 import cz.mzk.tiledimageview.cache.InitDiskCacheTask;
 import cz.mzk.tiledimageview.cache.InitDiskCacheTask.Listener;
-import cz.mzk.tiledimageview.tiles.TilePositionInPyramid;
+import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 
 public class DiskTilesCache extends AbstractTileCache implements TilesCache {
 

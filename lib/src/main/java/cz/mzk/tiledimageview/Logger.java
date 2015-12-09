@@ -2,8 +2,6 @@ package cz.mzk.tiledimageview;
 
 import android.util.Log;
 
-import cz.mzk.tiledimageview.viewer.TiledImageView;
-
 /**
  * @author Martin Řehánek
  *         <p/>

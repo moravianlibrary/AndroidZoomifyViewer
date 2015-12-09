@@ -76,7 +76,7 @@ public class BitmapFetchTaskRegistry {
             // thread.setPriority(THREAD_PRIORITY);
             // ThreadGroup group = thread.getThreadGroup();
             // int threadPriority = thread.getPriority();
-            // TestLoggers.THREADS.d(String.format(
+            // DevLoggers.THREADS.d(String.format(
             // "bmp fetch: priority: %d, TG: name: %s, active: %d, max priority: %d, ", threadPriority,
             // group.getName(), group.activeCount(), group.getMaxPriority()));
             try {

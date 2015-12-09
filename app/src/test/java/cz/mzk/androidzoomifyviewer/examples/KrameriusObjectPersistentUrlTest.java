@@ -18,8 +18,6 @@ public class KrameriusObjectPersistentUrlTest extends TestCase {
         return KrameriusObjectPersistentUrl.valueOf(url);
     }
 
-    // TODO: 22.10.15 move into kramerius-for-android project
-
     @Test
     public void testProtocols() {
         try {
