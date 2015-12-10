@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
+import android.support.annotation.WorkerThread;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -25,6 +26,7 @@ public class CacheManager {
      * @param context
      * @param clearDiskCacheOnStart whether disk cache should be cleared when application starts
      */
+    @WorkerThread
     public static void initialize(Context context, boolean diskCacheEnabled, boolean clearDiskCacheOnStart, long tileDiskCacheBytes) {
         if (initialized) {
             LOGGER.w("already initialized");
@@ -38,6 +40,12 @@ public class CacheManager {
             initialized = true;
         }
     }
+
+    @WorkerThread
+    public static void initMetadatataCache(Context context, boolean diskCacheEnabled, boolean clearDiskCacheOnStart) {
+        metadataCache = new MemoryAndDiskMetadataCache(context, diskCacheEnabled, clearDiskCacheOnStart);
+    }
+
 
     public static boolean isInitialized() {
         return initialized;

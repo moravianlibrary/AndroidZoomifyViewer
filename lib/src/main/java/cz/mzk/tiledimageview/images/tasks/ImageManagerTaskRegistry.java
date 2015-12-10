@@ -1,5 +1,7 @@
 package cz.mzk.tiledimageview.images.tasks;
 
+import android.support.annotation.UiThread;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,20 +28,31 @@ public class ImageManagerTaskRegistry {
     private final ImageManager mImgManager;
     private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> mTileDownloadTasks = new HashMap<>();
     private InitImageManagerTask mInitMetadataTask;
+    private StoreMetadataIntoDiskCacheTask mStoreToDiskCacheTask;
+
 
     public ImageManagerTaskRegistry(ImageManager imgManager) {
         this.mImgManager = imgManager;
     }
 
-    public void enqueueTileDownloadTask(final TilePositionInPyramid tilePosition, String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
+    @UiThread
+    public void enqueueTileDownloadTask(final TilePositionInPyramid tilePosition,
+                                        String tileImageUrl,
+                                        TiledImageView.TileDownloadErrorListener errorListener,
+                                        TiledImageView.TileDownloadSuccessListener successListener) {
         if (mTileDownloadTasks.size() < MAX_TASKS_IN_POOL) {
             if (!mTileDownloadTasks.containsKey(tilePosition)) {
                 //if (true) {
-                LOGGER.d(String.format("enqueuing tile-download task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(tileImageUrl, errorListener, successListener, new TaskFinishedListener() {
+                LOGGER.i(String.format("enqueuing tile-download task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
+                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(tileImageUrl, errorListener, successListener, new TaskHandler() {
 
                     @Override
-                    public void onTaskFinished() {
+                    public void onFinished(Object... data) {
+                        mTileDownloadTasks.remove(tilePosition);
+                    }
+
+                    @Override
+                    public void onCanceled() {
                         mTileDownloadTasks.remove(tilePosition);
                     }
                 });
@@ -48,31 +61,55 @@ public class ImageManagerTaskRegistry {
                     task.executeConcurrentIfPossible();
                 } catch (RejectedExecutionException e) {
                     LOGGER.w("to many threads in execution pool");
+                    // TODO: 10.12.15 dat vedet nahoru pres handlery
                     mTileDownloadTasks.remove(tilePosition);
                 }
             } else {
                 LOGGER.d(String.format("ignoring tile-download task for '%s' (already in queue)", tileImageUrl));
             }
         } else {
-            LOGGER.d(String.format("ignoring tile-download task for '%s' (queue full - %d items)", tileImageUrl, mTileDownloadTasks.size()));
+            LOGGER.w(String.format("ignoring tile-download task for '%s' (queue full - %d items)", tileImageUrl, mTileDownloadTasks.size()));
         }
     }
 
+    /*private boolean execute(ConcurrentAsyncTask<Object, Object, Object> task) {
+        try {
+            task.executeConcurrentIfPossible();
+            return true;
+        } catch (RejectedExecutionException e) {
+            LOGGER.w("to many threads in execution pool");
+            return false;
+        }
+    }*/
+
+    @UiThread
     public void enqueueMetadataInitializationTask(String metadataUrl, TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
         if (mInitMetadataTask == null) {
-            LOGGER.d("enqueuing metadata-initialization task");
-            mInitMetadataTask = new InitImageManagerTask(mImgManager, metadataUrl, handler, successListener, new TaskFinishedListener() {
+            LOGGER.i("enqueuing metadata-initialization task");
+            mInitMetadataTask = new InitImageManagerTask(mImgManager, metadataUrl, handler, successListener, new TaskHandler() {
 
                 @Override
-                public void onTaskFinished() {
+                public void onFinished(Object... data) {
                     mInitMetadataTask = null;
-                    LOGGER.d("metadata-initialization task success");
+                    LOGGER.d("metadata-initialization task finished");
+                    boolean storeMetadataToDisk = (boolean) data[0];
+                    if (storeMetadataToDisk) {
+                        //todo: naplanuj task, uloz ho
+                        enqueueMetadataIntoDiskCacheStoreTask((String) data[1], (String) data[2]);
+                    }
+                }
+
+                @Override
+                public void onCanceled() {
+                    mInitMetadataTask = null;
+                    LOGGER.d("metadata-initialization task canceled");
                 }
             });
             try {
                 mInitMetadataTask.executeConcurrentIfPossible();
             } catch (RejectedExecutionException e) {
                 LOGGER.w("to many threads in execution pool");
+                // TODO: 10.12.15 dat vedet nahoru pres handlery, nejspis novou metodou
                 mInitMetadataTask = null;
             }
         } else {
@@ -80,17 +117,46 @@ public class ImageManagerTaskRegistry {
         }
     }
 
+    private void enqueueMetadataIntoDiskCacheStoreTask(String cacheKey, String metadata) {
+        if (mStoreToDiskCacheTask == null) {
+            LOGGER.i("enqueuing store-metadata-into-disk-cache task");
+            mStoreToDiskCacheTask = new StoreMetadataIntoDiskCacheTask(cacheKey, metadata, new TaskHandler() {
+                @Override
+                public void onFinished(Object... data) {
+                    mStoreToDiskCacheTask = null;
+                    LOGGER.d("store-metadata-into-disk-cache task finished");
+                }
+
+                @Override
+                public void onCanceled() {
+                    LOGGER.d("store-metadata-into-disk-cache task canceled");
+                    mStoreToDiskCacheTask = null;
+                }
+            });
+            try {
+                mStoreToDiskCacheTask.executeConcurrentIfPossible();
+            } catch (RejectedExecutionException e) {
+                LOGGER.w("to many threads in execution pool");
+                mStoreToDiskCacheTask = null;
+            }
+        }
+    }
+
+    @UiThread
     public void cancelAllTasks() {
         LOGGER.d("canceling all tasks");
         if (mInitMetadataTask != null) {
             mInitMetadataTask.cancel(false);
-            mInitMetadataTask = null;
+        }
+        if (mStoreToDiskCacheTask != null) {
+            mStoreToDiskCacheTask.cancel(false);
         }
         for (DownloadAndSaveTileTask task : mTileDownloadTasks.values()) {
             task.cancel(false);
         }
     }
 
+    @UiThread
     public boolean cancel(TilePositionInPyramid id) {
         DownloadAndSaveTileTask task = mTileDownloadTasks.get(id);
         if (task != null) {
@@ -102,12 +168,17 @@ public class ImageManagerTaskRegistry {
         }
     }
 
+    @UiThread
     public Set<TilePositionInPyramid> getAllTileDownloadTaskIds() {
         return mTileDownloadTasks.keySet();
     }
 
 
-    public static interface TaskFinishedListener {
-        void onTaskFinished();
+    public static interface TaskHandler {
+        @UiThread
+        void onFinished(Object... data);
+
+        void onCanceled();
+
     }
 }

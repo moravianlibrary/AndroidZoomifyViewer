@@ -2,10 +2,11 @@ package cz.mzk.tiledimageview.cache;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.AsyncTask;
+import android.support.annotation.WorkerThread;
 import android.util.LruCache;
 
 import java.io.File;
+import java.io.IOException;
 
 import cz.mzk.tiledimageview.Logger;
 import cz.mzk.tiledimageview.Utils;
@@ -15,46 +16,102 @@ import cz.mzk.tiledimageview.cache.DiskLruCache.Snapshot;
 /**
  * @author Martin Řehánek
  */
+// TODO: 9.12.15 Prejmenovat mozna
 public class MemoryAndDiskMetadataCache implements MetadataCache {
 
     public static final String DISK_CACHE_SUBDIR = "imageProperties"; //legacy name for subdir. No need to change it
     public static final int DISK_CACHE_SIZE_B = 1024 * 1024 * 10; // 10MB
-    public static final int MEMORY_CACHE_SIZE_ITEMS = 10;
+    public static final int MEMORY_CACHE_SIZE_ITEMS = 100;
 
     private static final Logger LOGGER = new Logger(MemoryAndDiskMetadataCache.class);
 
-
     private final Object mMemoryCacheLock = new Object();
     private final LruCache<String, String> mMemoryCache;
-    private final Object mDiskCacheInitializationLock = new Object();
     private DiskLruCache mDiskCache = null;
-    private boolean mDiskCacheEnabled;
 
+    @WorkerThread
     public MemoryAndDiskMetadataCache(Context context, boolean diskCacheEnabled, boolean clearCache) {
-        mDiskCacheEnabled = diskCacheEnabled;
-        synchronized (mMemoryCacheLock) {
-            mMemoryCache = initMemoryCache();
-        }
-        if (mDiskCacheEnabled) {
-            initDiskCacheAsync(context, clearCache);
+        mMemoryCache = initMemoryCache();
+        if (diskCacheEnabled) {
+            mDiskCache = initDiskCache(context, clearCache);
+        } else {
+            mDiskCache = null;
         }
     }
+
 
     private LruCache<String, String> initMemoryCache() {
-        LruCache<String, String> cache = new LruCache<String, String>(MEMORY_CACHE_SIZE_ITEMS);
-        LOGGER.d("in-memory lru cache allocated for " + MEMORY_CACHE_SIZE_ITEMS + " items");
-        return cache;
+        LruCache<String, String> result;
+        synchronized (mMemoryCacheLock) {
+            LOGGER.v("assumed memory-cache lock (initializationd): " + Thread.currentThread().toString());
+            result = new LruCache<String, String>(MEMORY_CACHE_SIZE_ITEMS);
+            LOGGER.d("in-memory lru cache allocated for " + MEMORY_CACHE_SIZE_ITEMS + " items");
+        }
+        LOGGER.v("released memory-cache lock (initializationd): " + Thread.currentThread().toString());
+        return result;
     }
 
-    private void initDiskCacheAsync(Context context, boolean clearCache) {
+    @Override
+    public String getMetadataFromMemory(String key) {
+        String result;
+        synchronized (mMemoryCacheLock) {
+            LOGGER.v("assumed memory-cache lock (get): " + Thread.currentThread().toString());
+            result = mMemoryCache.get(key);
+        }
+        LOGGER.v("released memory-cache lock (get): " + Thread.currentThread().toString());
+        return result;
+    }
+
+    @Override
+    public void storeMetadataToMemory(String metadata, String key) {
+        synchronized (mMemoryCacheLock) {
+            LOGGER.v("assumed memory-cache lock (store): " + Thread.currentThread().toString());
+            if (mMemoryCache.get(key) == null) {
+                LOGGER.d("storing to memory cache: " + key);
+                mMemoryCache.put(key, metadata);
+            } else {
+                LOGGER.d("already in memory cache: " + key);
+            }
+        }
+        LOGGER.v("released memory-cache lock (store): " + Thread.currentThread().toString());
+    }
+
+
+    private DiskLruCache initDiskCache(Context context, boolean clearCache) {
         try {
             File cacheDir = getDiskCacheDir(context);
             int appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-            new InitDiskCacheTask(appVersion, clearCache).execute(cacheDir);
+            if (cacheDir.exists()) {
+                if (clearCache) {
+                    LOGGER.i("clearing metadata disk cache");
+                    boolean cleared = DiskUtils.deleteDirContent(cacheDir);
+                    if (!cleared) {
+                        LOGGER.w("failed to delete content of " + cacheDir.getAbsolutePath() + ", disabling disk cache");
+                        return null;
+                    }
+                }
+            } else {
+                LOGGER.i("creating cache dir " + cacheDir);
+                boolean created = cacheDir.mkdir();
+                if (!created) {
+                    LOGGER.w("failed to create cache dir " + cacheDir.getAbsolutePath() + ", disabling disk cache");
+                    return null;
+                }
+            }
+            LOGGER.d("disk cache dir: " + cacheDir.getAbsolutePath());
+            DiskLruCache result = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
+            LOGGER.i("disk cache initialized; size: " + Utils.formatBytes(DISK_CACHE_SIZE_B));
+            return result;
         } catch (NameNotFoundException e) {
             throw new RuntimeException(e);
+        } catch (DiskLruCacheException e) {
+            LOGGER.w("error initializing disk cache, disabling");
+            return null;
+        } finally {
+            LOGGER.v("initDiskCache: releasing disk cache initialization lock: " + Thread.currentThread().toString());
         }
     }
+
 
     /**
      * Creates a unique subdirectory of the designated app cache directory. Tries to use external but if not mounted, falls back
@@ -79,106 +136,31 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
         return new File(cacheDirPath + File.separator + DISK_CACHE_SUBDIR);
     }
 
-    private void disableDiskCache() {
-        LOGGER.i("disabling disk cache");
-        mDiskCacheEnabled = false;
-    }
 
     @Override
-    public void storeMetadata(String metadata, String metadataUrl) {
-        String key = buildKey(metadataUrl);
-        storeMetadataToMemoryCache(key, metadata);
-        storeMetadataToDiskCache(key, metadata);
+    public boolean isDiskCacheEnabled() {
+        return mDiskCache != null;
     }
 
-    private String buildKey(String metadataUrl) {
-        String key = CacheKeyBuilder.buildKeyFromUrl(metadataUrl);
-        if (key.length() > 127) {
-            LOGGER.w("cache key is longer then 127 characters");
-        }
-        return key;
-    }
-
-    private void storeMetadataToMemoryCache(String key, String metadata) {
-        synchronized (mMemoryCacheLock) {
-            LOGGER.v("assuming mMemoryCache lock: " + Thread.currentThread().toString());
-            if (mMemoryCache.get(key) == null) {
-                LOGGER.d("storing to memory cache: " + key);
-                mMemoryCache.put(key, metadata);
-            } else {
-                LOGGER.d("already in memory cache: " + key);
-            }
-            LOGGER.v("releasing mMemoryCache lock: " + Thread.currentThread().toString());
-        }
-    }
-
-    private void waitUntilDiskCacheInitializedOrDisabled() {
-        try {
-            synchronized (mDiskCacheInitializationLock) {
-                LOGGER.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
-                // Wait until disk cache is initialized or disabled
-                while (mDiskCache == null && mDiskCacheEnabled) {
-                    try {
-                        mDiskCacheInitializationLock.wait();
-                    } catch (InterruptedException e) {
-                        LOGGER.e("waiting for disk cache initialization lock was interrupted", e);
-                    }
-                }
-            }
-        } finally {
-            LOGGER.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
-        }
-    }
-
-    private void storeMetadataToDiskCache(String key, String metadata) {
-        waitUntilDiskCacheInitializedOrDisabled();
-        try {
-            if (mDiskCacheEnabled) {
-                Snapshot fromDiskCache = mDiskCache.get(key);
-                if (fromDiskCache != null) {
-                    LOGGER.d("already in disk cache: " + key);
-                } else {
-                    LOGGER.d("storing into disk cache: " + key);
-                    mDiskCache.storeString(0, key, metadata);
-                }
-            }
-        } catch (DiskLruCacheException e) {
-            LOGGER.e("failed to store into disk cache: " + key, e);
-        }
-    }
 
     @Override
-    public String getMetadata(String metadataUrl) {
-        String key = buildKey(metadataUrl);
-        // long start = System.currentTimeMillis();
-        String inMemoryCache = getMetadataFromMemoryCache(key);
-        // long afterHitOrMiss = System.currentTimeMillis();
-        if (inMemoryCache != null) {
-            LOGGER.d("memory cache hit: " + key);
-            // LOGGER.d("memory cache hit, delay: " + (afterHitOrMiss - start) + " ms");
-            return inMemoryCache;
+    public boolean isMetadataOnDisk(String key) {
+        if (mDiskCache != null) {
+            try {
+                return mDiskCache.containsReadable(key);
+            } catch (IOException e) {
+                LOGGER.v("isMetadataOnDisk error: " + key, e);
+                return false;
+            }
         } else {
-            LOGGER.d("memory cache miss: " + key);
-            // LOGGER.d("memory cache miss, delay: " + (afterHitOrMiss - start) + " ms");
-            String fromDiskCache = getMetadataFromDiskCache(key);
-            // store also to memory cache (nonblocking)
-            if (fromDiskCache != null) {
-                new StoreMetadataToMemoryCacheTask(key).execute(fromDiskCache);
-            }
-            return fromDiskCache;
+            return false;
         }
     }
 
-    private String getMetadataFromMemoryCache(String key) {
-        synchronized (mMemoryCacheLock) {
-            return mMemoryCache.get(key);
-        }
-    }
-
-    private String getMetadataFromDiskCache(String key) {
-        waitUntilDiskCacheInitializedOrDisabled();
-        try {
-            if (mDiskCacheEnabled) {
+    @Override
+    public String getMetadataFromDisk(String key) {
+        if (mDiskCache != null) {
+            try {
                 Snapshot snapshot = mDiskCache.get(key);
                 if (snapshot != null) {
                     String result = snapshot.getString(0);
@@ -186,77 +168,29 @@ public class MemoryAndDiskMetadataCache implements MetadataCache {
                 } else {
                     return null;
                 }
-            } else {
+            } catch (DiskLruCacheException e) {
+                LOGGER.w("error loading from disk cache: " + key, e);
                 return null;
             }
-        } catch (DiskLruCacheException e) {
-            LOGGER.w("error loading from disk cache: " + key, e);
+        } else {
             return null;
         }
     }
 
-    private class InitDiskCacheTask extends AsyncTask<File, Void, Void> {
-        private final int appVersion;
-        private final boolean clearCache;
-
-        public InitDiskCacheTask(int appVersion, boolean clearCache) {
-            this.appVersion = appVersion;
-            this.clearCache = clearCache;
-        }
-
-        @Override
-        protected Void doInBackground(File... params) {
-            synchronized (mDiskCacheInitializationLock) {
-                LOGGER.v("assuming disk cache initialization lock: " + Thread.currentThread().toString());
-                try {
-                    File cacheDir = params[0];
-                    if (cacheDir.exists()) {
-                        if (clearCache) {
-                            LOGGER.i("clearing metadata disk cache");
-                            boolean cleared = DiskUtils.deleteDirContent(cacheDir);
-                            if (!cleared) {
-                                LOGGER.w("failed to delete content of " + cacheDir.getAbsolutePath());
-                                disableDiskCache();
-                                return null;
-                            }
-                        }
-                    } else {
-                        LOGGER.i("creating cache dir " + cacheDir);
-                        boolean created = cacheDir.mkdir();
-                        if (!created) {
-                            LOGGER.w("failed to create cache dir " + cacheDir.getAbsolutePath());
-                            disableDiskCache();
-                            return null;
-                        }
-                    }
-                    LOGGER.d("disk cache dir: " + cacheDir.getAbsolutePath());
-                    mDiskCache = DiskLruCache.open(cacheDir, appVersion, 1, DISK_CACHE_SIZE_B);
-                    LOGGER.i("disk cache initialized; size: " + Utils.formatBytes(DISK_CACHE_SIZE_B));
-                    return null;
-                } catch (DiskLruCacheException e) {
-                    LOGGER.w("error initializing disk cache, disabling");
-                    disableDiskCache();
-                    mDiskCacheInitializationLock.notifyAll();
-                    return null;
-                } finally {
-                    mDiskCacheInitializationLock.notifyAll();
-                    LOGGER.v("releasing disk cache initialization lock: " + Thread.currentThread().toString());
+    @Override
+    public void storeMetadataIntoDisk(String key, String metadata) {
+        if (mDiskCache != null) {
+            try {
+                Snapshot fromDiskCache = mDiskCache.get(key);
+                if (fromDiskCache != null) {
+                    LOGGER.d("already in disk cache: " + key);
+                } else {
+                    LOGGER.d("storing into disk cache: " + key);
+                    mDiskCache.storeString(0, key, metadata);
                 }
+            } catch (DiskLruCacheException e) {
+                LOGGER.e("failed to store into disk cache: " + key, e);
             }
-        }
-    }
-
-    private class StoreMetadataToMemoryCacheTask extends AsyncTask<String, Void, Void> {
-        private final String key;
-
-        public StoreMetadataToMemoryCacheTask(String key) {
-            this.key = key;
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            storeMetadataToMemoryCache(key, params[0]);
-            return null;
         }
     }
 

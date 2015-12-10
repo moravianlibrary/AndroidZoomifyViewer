@@ -8,7 +8,6 @@ import cz.mzk.tiledimageview.TiledImageView;
 import cz.mzk.tiledimageview.cache.CacheManager;
 import cz.mzk.tiledimageview.images.Downloader;
 import cz.mzk.tiledimageview.images.exceptions.ImageServerResponseException;
-import cz.mzk.tiledimageview.images.exceptions.InvalidDataException;
 import cz.mzk.tiledimageview.images.exceptions.OtherIOException;
 import cz.mzk.tiledimageview.images.exceptions.TooManyRedirectionsException;
 
@@ -23,24 +22,26 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
     private final String mTileImageUrl;
     private final TiledImageView.TileDownloadErrorListener mErrorListener;
     private final TiledImageView.TileDownloadSuccessListener mSuccessListener;
-    private final ImageManagerTaskRegistry.TaskFinishedListener mRegistryListener;
+    private final ImageManagerTaskRegistry.TaskHandler mRegistryHandler;
 
     private OtherIOException otherIoException;
     private TooManyRedirectionsException tooManyRedirectionsException;
     private ImageServerResponseException imageServerResponseException;
-    private InvalidDataException invalidXmlException;
 
     /**
-     * @param tileImageUrl         Url of tile image (jpeg, tif, png, bmp, ...)
-     * @param errorListener        Tile download result mErrorListener, not null
+     * @param tileImageUrl    Url of tile image (jpeg, tif, png, bmp, ...)
+     * @param errorListener   Tile download result mErrorListener, not null
      * @param successListener
-     * @param taskFinishedListener
+     * @param registryHandler
      */
-    public DownloadAndSaveTileTask(String tileImageUrl, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener, ImageManagerTaskRegistry.TaskFinishedListener taskFinishedListener) {
+    public DownloadAndSaveTileTask(String tileImageUrl,
+                                   TiledImageView.TileDownloadErrorListener errorListener,
+                                   TiledImageView.TileDownloadSuccessListener successListener,
+                                   ImageManagerTaskRegistry.TaskHandler registryHandler) {
         mTileImageUrl = tileImageUrl;
         mErrorListener = errorListener;
         mSuccessListener = successListener;
-        mRegistryListener = taskFinishedListener;
+        mRegistryHandler = registryHandler;
     }
 
     @Override
@@ -83,8 +84,8 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
 
     @Override
     protected void onPostExecute(Boolean success) {
-        if (mRegistryListener != null) {
-            mRegistryListener.onTaskFinished();
+        if (mRegistryHandler != null) {
+            mRegistryHandler.onFinished();
         }
         if (mSuccessListener != null && success) {
             mSuccessListener.onTileDownloaded();
@@ -94,8 +95,6 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
                     mErrorListener.onTileRedirectionLoop(tooManyRedirectionsException.getUrl(), tooManyRedirectionsException.getRedirections());
                 } else if (imageServerResponseException != null) {
                     mErrorListener.onTileUnhandableResponse(imageServerResponseException.getUrl(), imageServerResponseException.getErrorCode());
-                } else if (invalidXmlException != null) {
-                    mErrorListener.onTileInvalidDataError(invalidXmlException.getUrl(), invalidXmlException.getMessage());
                 } else if (otherIoException != null) {
                     mErrorListener.onTileDataTransferError(otherIoException.getUrl(), otherIoException.getMessage());
                 }
@@ -106,8 +105,8 @@ public class DownloadAndSaveTileTask extends ConcurrentAsyncTask<Void, Void, Boo
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        if (mRegistryListener != null) {
-            mRegistryListener.onTaskFinished();
+        if (mRegistryHandler != null) {
+            mRegistryHandler.onCanceled();
         }
     }
 

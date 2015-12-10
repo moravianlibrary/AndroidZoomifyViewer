@@ -38,6 +38,8 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
     //androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
+    def android_support_version = '23.1.1'
+    compile "com.android.support:support-annotations:$android_support_version"
 }
 
 //https://medium.com/@tigr/how-to-publish-your-android-studio-library-to-jcenter-5384172c4739

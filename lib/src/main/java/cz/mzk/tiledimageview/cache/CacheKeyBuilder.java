@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import cz.mzk.tiledimageview.Logger;
+
 /**
  * Created by Martin Řehánek on 7.12.15.
  */
 public class CacheKeyBuilder {
 
+    private static final Logger LOGGER = new Logger(CacheKeyBuilder.class);
     // TODO: 8.12.15 Profiler a otestovat, jestli ma smysl cachovani
     private static final boolean CACHE_KEYS = true;
     private static final Object lock = CACHE_KEYS ? new Object() : null;
@@ -61,17 +64,27 @@ public class CacheKeyBuilder {
             synchronized (lock) {
                 String fromCache = KEY_CACHE.get(url);
                 if (fromCache != null) {
+                    if (fromCache.length() > 127) {
+                        LOGGER.w("cache key is longer then 127 characters");
+                    }
                     return fromCache;
                 } else {
                     String escapedSubstrings = escapeSubstrings(url);
                     String result = escapeSpecialChars(escapedSubstrings);
                     KEY_CACHE.put(url, result);
+                    if (result.length() > 127) {
+                        LOGGER.w("cache key is longer then 127 characters");
+                    }
                     return result;
                 }
             }
         } else {
             String escapedSubstrings = escapeSubstrings(url);
-            return escapeSpecialChars(escapedSubstrings);
+            String result = escapeSpecialChars(escapedSubstrings);
+            if (result.length() > 127) {
+                LOGGER.w("cache key is longer then 127 characters");
+            }
+            return result;
         }
     }
 
