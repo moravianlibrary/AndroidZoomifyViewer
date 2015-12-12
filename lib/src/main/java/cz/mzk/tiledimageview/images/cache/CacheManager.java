@@ -1,4 +1,4 @@
-package cz.mzk.tiledimageview.cache;
+package cz.mzk.tiledimageview.images.cache;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,34 +18,26 @@ public class CacheManager {
 
     private static final Logger LOGGER = new Logger(CacheManager.class);
 
-    private static TilesCache tilesCache;
     private static MetadataCache metadataCache;
+    private static TileCache tileCache;
     private static boolean initialized = false;
 
     /**
      * @param context
-     * @param clearDiskCacheOnStart whether disk cache should be cleared when application starts
+     * @param clearDiskCache whether disk cache should be cleared when application starts
      */
     @WorkerThread
-    public static void initialize(Context context, boolean diskCacheEnabled, boolean clearDiskCacheOnStart, long tileDiskCacheBytes) {
+    public static void initialize(Context context, boolean diskCacheEnabled, boolean clearDiskCache, long tileDiskCacheBytes) {
         if (initialized) {
             LOGGER.w("already initialized");
         } else {
             LOGGER.i("initializing");
-            int memoryCacheMaxItems = computeMaxTilesOnScreen(context);
-            tilesCache = new MemoryAndDiskTilesCache(context, memoryCacheMaxItems, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes);
-            // tilesCache = new MemoryAndDiskTilesMulticache(context, clearDiskCache);
-            // tilesCache = new MemoryTilesCache();
-            metadataCache = new MemoryAndDiskMetadataCache(context, diskCacheEnabled, clearDiskCacheOnStart);
+            int memoryCacheMaxItems = computeMaxTilesOnScreen(context) * 2;
+            metadataCache = new MetadataCache(context, diskCacheEnabled, clearDiskCache);
+            tileCache = new TileCache(context, memoryCacheMaxItems, diskCacheEnabled, tileDiskCacheBytes, clearDiskCache);
             initialized = true;
         }
     }
-
-    @WorkerThread
-    public static void initMetadatataCache(Context context, boolean diskCacheEnabled, boolean clearDiskCacheOnStart) {
-        metadataCache = new MemoryAndDiskMetadataCache(context, diskCacheEnabled, clearDiskCacheOnStart);
-    }
-
 
     public static boolean isInitialized() {
         return initialized;
@@ -81,11 +73,11 @@ public class CacheManager {
         }
     }
 
-    public static TilesCache getTilesCache() {
+    public static TileCache getTileCache() {
         if (!initialized) {
             throw new IllegalStateException(CacheManager.class.getSimpleName() + " has not been initialized");
         }
-        return tilesCache;
+        return tileCache;
     }
 
     public static MetadataCache getMetadataCache() {

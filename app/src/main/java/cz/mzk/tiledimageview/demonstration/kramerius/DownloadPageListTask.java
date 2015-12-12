@@ -20,7 +20,7 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import cz.mzk.tiledimageview.ConcurrentAsyncTask;
+import cz.mzk.tiledimageview.images.tasks.ConcurrentAsyncTask;
 
 /**
  * @author Martin Řehánek

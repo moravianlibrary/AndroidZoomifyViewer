@@ -84,7 +84,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
     @Override
     public void onClick(View v) {
         if (v == mRoot) {
-            // CacheStatistics statistics = CacheManager.getTilesCache().getKeyCacheStatistics();
+            // CacheStatistics statistics = CacheManager.getTileCache().getKeyCacheStatistics();
             // if (statistics != null) {
             // int requests = statistics.getRequests();
             // float avgTime = Utils.round(statistics.getAverageTime(), 1);

@@ -1,4 +1,4 @@
-package cz.mzk.tiledimageview;
+package cz.mzk.tiledimageview.images.tasks;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;

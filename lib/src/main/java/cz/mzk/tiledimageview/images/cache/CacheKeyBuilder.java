@@ -1,4 +1,4 @@
-package cz.mzk.tiledimageview.cache;
+package cz.mzk.tiledimageview.images.cache;
 
 import android.util.LruCache;
 

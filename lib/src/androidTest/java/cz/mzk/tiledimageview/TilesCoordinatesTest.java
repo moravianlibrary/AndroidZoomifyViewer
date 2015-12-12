@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import cz.mzk.tiledimageview.cache.CacheManager;
+import cz.mzk.tiledimageview.images.cache.CacheManager;
 import cz.mzk.tiledimageview.images.ImageManager;
 import cz.mzk.tiledimageview.images.zoomify.ZoomifyImageManager;
 import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationSuccessListener;

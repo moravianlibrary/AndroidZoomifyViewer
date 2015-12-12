@@ -1,5 +1,6 @@
 package cz.mzk.tiledimageview.images.zoomify;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 import java.util.ArrayList;
@@ -8,13 +9,18 @@ import java.util.List;
 import cz.mzk.tiledimageview.Logger;
 import cz.mzk.tiledimageview.Point;
 import cz.mzk.tiledimageview.TiledImageView;
+import cz.mzk.tiledimageview.TiledImageView.TileDownloadErrorListener;
+import cz.mzk.tiledimageview.TiledImageView.TileDownloadSuccessListener;
 import cz.mzk.tiledimageview.Utils;
 import cz.mzk.tiledimageview.images.ImageManager;
 import cz.mzk.tiledimageview.images.TileDimensionsInImage;
 import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
+import cz.mzk.tiledimageview.images.cache.CacheKeyBuilder;
+import cz.mzk.tiledimageview.images.cache.CacheManager;
+import cz.mzk.tiledimageview.images.cache.TileCache;
 import cz.mzk.tiledimageview.images.metadata.ImageMetadata;
-import cz.mzk.tiledimageview.images.tasks.ImageManagerTaskRegistry;
+import cz.mzk.tiledimageview.images.tasks.TaskManager;
 
 /**
  * This class encapsulates image metadata from ZoomifyImageMetadata.xml and provides method for downloading tiles (bitmaps) for given
@@ -31,8 +37,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     private static final Logger LOGGER = new Logger(ZoomifyImageManager.class);
 
-    private final ImageManagerTaskRegistry taskRegistry = new ImageManagerTaskRegistry(this);
-
+    private final TaskManager mTaskManager = new TaskManager(this);
     private final String mBaseUrl;
     private final double mPxRatio;
     private final String mImagePropertiesUrl;
@@ -98,7 +103,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        taskRegistry.enqueueMetadataInitializationTask(mImagePropertiesUrl, handler, successListener);
+        mTaskManager.enqueueMetadataInitializationTask(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, handler, successListener);
     }
 
     @Override
@@ -371,6 +376,29 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
+    public Bitmap getTile(TilePositionInPyramid tilePositionInPyramid, TileDownloadSuccessListener successListener, TileDownloadErrorListener errorListener) {
+        String tileUrl = buildTileUrl(tilePositionInPyramid);
+        String key = CacheKeyBuilder.buildKeyFromUrl(tileUrl);
+        TileCache cache = CacheManager.getTileCache();
+        Bitmap fromMemoryCache = cache.getItemFromMemoryCache(key);
+        if (fromMemoryCache != null) {
+            return fromMemoryCache;
+        } else {
+            mTaskManager.enqueuDeliveringTileIntoMemoryCache(tilePositionInPyramid, tileUrl, key, successListener, errorListener);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean tileIsAvailableNow(TilePositionInPyramid tilePositionInPyramid) {
+        String tileUrl = buildTileUrl(tilePositionInPyramid);
+        String key = CacheKeyBuilder.buildKeyFromUrl(tileUrl);
+        TileCache cache = CacheManager.getTileCache();
+        Bitmap fromMemoryCache = cache.getItemFromMemoryCache(key);
+        return fromMemoryCache != null;
+    }
+
+    @Override
     public TiledImageProtocol getTiledImageProtocol() {
         return TiledImageProtocol.ZOOMIFY;
     }
@@ -427,28 +455,33 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void cancelAllTasks() {
-        taskRegistry.cancelAllTasks();
+        mTaskManager.cancelAllTasks();
     }
 
-    @Override
+   /* @Override
     public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
         String tileImageUrl = buildTileUrl(tilePositionInPyramid);
-        taskRegistry.enqueueTileDownloadTask(tilePositionInPyramid, tileImageUrl, errorListener, successListener);
-    }
+        mTaskManager.enqueuDeliveringTileIntoMemoryCache(tilePositionInPyramid, tileImageUrl,successListener, errorListener);
+    }*/
 
     @Override
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
         checkInitialized();
-        for (TilePositionInPyramid runningTilePositionInPyramid : taskRegistry.getAllTileDownloadTaskIds()) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllTileDownloadTaskIds()) {
             if (runningTilePositionInPyramid.getLayer() == layerId) {
                 if (!visibleTiles.contains(runningTilePositionInPyramid)) {
-                    boolean wasCanceled = taskRegistry.cancel(runningTilePositionInPyramid);
+                    boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
                     // if (wasCanceled) {
                     // canceled++;
                     // }
                 }
             }
         }
+    }
+
+    @Override
+    public void inflateTilesMemoryCache(int newMaxSize) {
+        mTaskManager.enqueueTilesMemoryCacheInflation(newMaxSize);
     }
 
 }

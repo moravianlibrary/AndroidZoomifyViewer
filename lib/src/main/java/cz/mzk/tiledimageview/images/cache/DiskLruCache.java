@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package cz.mzk.tiledimageview.cache;
+package cz.mzk.tiledimageview.images.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;

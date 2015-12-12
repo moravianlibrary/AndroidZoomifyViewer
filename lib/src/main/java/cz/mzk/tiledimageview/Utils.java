@@ -1,7 +1,10 @@
 package cz.mzk.tiledimageview;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.View;
 
 import java.math.BigDecimal;
@@ -202,7 +205,6 @@ public class Utils {
         }
     }
 
-
     public static String visibilityToString(int visibility) {
         switch (visibility) {
             case View.VISIBLE:
@@ -213,6 +215,16 @@ public class Utils {
                 return "GONE     ";
             default:
                 return "WTF      ";
+        }
+    }
+
+
+    @SuppressLint("NewApi")
+    public static int getBitmapSizeInKB(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+            return bitmap.getByteCount() / 1024;
+        } else {
+            return (bitmap.getRowBytes() * bitmap.getHeight()) / 1024;
         }
     }
 

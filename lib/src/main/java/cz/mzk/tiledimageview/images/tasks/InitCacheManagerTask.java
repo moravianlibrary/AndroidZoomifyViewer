@@ -2,8 +2,7 @@ package cz.mzk.tiledimageview.images.tasks;
 
 import android.content.Context;
 
-import cz.mzk.tiledimageview.ConcurrentAsyncTask;
-import cz.mzk.tiledimageview.cache.CacheManager;
+import cz.mzk.tiledimageview.images.cache.CacheManager;
 
 /**
  * Created by Martin Řehánek on 10.12.15.

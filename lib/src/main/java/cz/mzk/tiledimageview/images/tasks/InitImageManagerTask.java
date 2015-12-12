@@ -1,13 +1,13 @@
 package cz.mzk.tiledimageview.images.tasks;
 
-import cz.mzk.tiledimageview.ConcurrentAsyncTask;
 import cz.mzk.tiledimageview.Logger;
 import cz.mzk.tiledimageview.TiledImageView;
-import cz.mzk.tiledimageview.cache.CacheKeyBuilder;
-import cz.mzk.tiledimageview.cache.CacheManager;
-import cz.mzk.tiledimageview.cache.MetadataCache;
 import cz.mzk.tiledimageview.images.Downloader;
 import cz.mzk.tiledimageview.images.ImageManager;
+import cz.mzk.tiledimageview.images.TiledImageProtocol;
+import cz.mzk.tiledimageview.images.cache.CacheKeyBuilder;
+import cz.mzk.tiledimageview.images.cache.CacheManager;
+import cz.mzk.tiledimageview.images.cache.MetadataCache;
 import cz.mzk.tiledimageview.images.exceptions.ImageServerResponseException;
 import cz.mzk.tiledimageview.images.exceptions.InvalidDataException;
 import cz.mzk.tiledimageview.images.exceptions.OtherIOException;
@@ -24,15 +24,19 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     private final TiledImageView.MetadataInitializationHandler mHandler;
     private final TiledImageView.MetadataInitializationSuccessListener mSuccessListener;
-    private final ImageManagerTaskRegistry.TaskHandler mRegitryHandler;
+    private final TaskManager.TaskHandler mRegitryHandler;
     private final ImageManager mImgManager;
     private final String mMetadataUrl;
+    private final TiledImageProtocol mProtocol;
 
-    public InitImageManagerTask(ImageManager imgManager, String metadataUrl,
+    public InitImageManagerTask(ImageManager imgManager,
+                                TiledImageProtocol protocol,
+                                String metadataUrl,
                                 TiledImageView.MetadataInitializationHandler handler,
                                 TiledImageView.MetadataInitializationSuccessListener successListener,
-                                ImageManagerTaskRegistry.TaskHandler registryHandler) {
+                                TaskManager.TaskHandler registryHandler) {
         mImgManager = imgManager;
+        mProtocol = protocol;
         mMetadataUrl = metadataUrl;
         mHandler = handler;
         mSuccessListener = successListener;
@@ -48,7 +52,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
                 fetchMetadata(result);
                 if (!isCancelled()) {
                     if (result.metadataStr != null) {
-                        switch (mImgManager.getTiledImageProtocol()) {
+                        switch (mProtocol) {
                             case ZOOMIFY:
                                 result.metadata = new ZoomifyMetadataParser().parse(result.metadataStr, mMetadataUrl);
                         }
@@ -72,26 +76,28 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     private Result fetchMetadata(Result result) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
         LOGGER.v("Fetching metadata: " + mMetadataUrl);
+        // TODO: 12.12.15 obacas tady CacheManager neni inicializovan. Poresit, proc
         MetadataCache cache = CacheManager.getMetadataCache();
         String key = CacheKeyBuilder.buildKeyFromUrl(mMetadataUrl);
         if (!isCancelled()) {
-            String fromMemory = cache.getMetadataFromMemory(key);
+            String fromMemory = cache.getItemFromMemoryCache(key);
             if (!isCancelled()) {
                 if (fromMemory != null) {
                     result.metadataStr = fromMemory;
                 } else {
-                    boolean inDisk = cache.isMetadataOnDisk(key);
+                    // TODO: 12.12.15 check if disk cache available first
+                    boolean inDisk = cache.isItemInDiskCache(key);
                     if (!isCancelled()) {
                         if (inDisk) {
-                            String fromDisk = cache.getMetadataFromDisk(key);
+                            String fromDisk = cache.getItemFromDiskCache(key);
                             if (!isCancelled()) {
-                                cache.storeMetadataToMemory(fromDisk, key);
+                                cache.storeItemToMemoryCache(key, fromDisk);
                                 result.metadataStr = fromDisk;
                             }
                         } else {
                             String fromNet = Downloader.downloadMetadata(mMetadataUrl);
                             if (!isCancelled()) {
-                                cache.storeMetadataToMemory(fromNet, key);
+                                cache.storeItemToMemoryCache(key, fromNet);
                                 result.storeToCacheDisk = true;
                                 result.cacheKey = key;
                                 result.metadataStr = fromNet;
@@ -106,7 +112,6 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     @Override
     protected void onPostExecute(Result result) {
-        System.out.println(result);
         if (mRegitryHandler != null) {
             mRegitryHandler.onFinished(result.storeToCacheDisk, result.cacheKey, result.metadataStr);
         }

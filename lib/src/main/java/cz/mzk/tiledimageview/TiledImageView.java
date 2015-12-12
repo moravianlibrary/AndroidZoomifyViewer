@@ -14,9 +14,6 @@ import android.view.View;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 
-import cz.mzk.tiledimageview.cache.CacheManager;
-import cz.mzk.tiledimageview.cache.TileBitmap;
-import cz.mzk.tiledimageview.cache.TilesCache.FetchingBitmapFromDiskHandler;
 import cz.mzk.tiledimageview.dev.DevLoggers;
 import cz.mzk.tiledimageview.dev.DevPoints;
 import cz.mzk.tiledimageview.dev.DevTools;
@@ -24,6 +21,7 @@ import cz.mzk.tiledimageview.gestures.MyGestureListener;
 import cz.mzk.tiledimageview.images.ImageManager;
 import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
+import cz.mzk.tiledimageview.images.cache.CacheManager;
 import cz.mzk.tiledimageview.images.tasks.InitCacheManagerTask;
 import cz.mzk.tiledimageview.images.zoomify.ZoomifyImageManager;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
@@ -51,7 +49,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
     // SHIFT
     private boolean mViewmodeShiftInitialized = false;
     private VectorD mViewmodeShift = VectorD.ZERO_VECTOR;
-    private boolean mDrawLayerWithWorseResolution = true;
 
     //SCALE
     private double mInitialScaleFactor = -1.0;
@@ -209,8 +206,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
         if (mImageManager != null) {
             mImageManager.cancelAllTasks();
         }
-        if (CacheManager.isInitialized() && CacheManager.getTilesCache() != null) {
-            CacheManager.getTilesCache().cancelAllTasks();
+        if (CacheManager.isInitialized() && CacheManager.getTileCache() != null) {
+            CacheManager.getTileCache().cancelAllTasks();
         }
         if (mGestureListener != null) {
             mGestureListener.stopAllAnimations();
@@ -226,13 +223,18 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mMinZoomCanvasImagePaddingInitialized = false;
         mImageBaseUrl = baseUrl;
         //cancelAllTasks();
-        mGestureListener.reset();
-        if (mImageManager == null) {
-            initImageManager();
-            //initTilesDownloaderAsync();
+        if (mGestureListener != null) {
+            mGestureListener.reset();
+        }
+        if (CacheManager.isInitialized()) {
+            if (mImageManager == null) {
+                initImageManager();
+            } else {
+                mImageManager.cancelAllTasks();//stary manager
+                initImageManager();
+            }
         } else {
-            mImageManager.cancelAllTasks();//stary manager
-            initImageManager();
+            // TODO: 12.12.15 Inicializuje se imageManager vzdy pozdeji?
         }
     }
 
@@ -258,7 +260,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     @Override
     public void setFramingRectangles(List<FramingRectangle> framingRectangles) {
-        mFramingRectDrawer.setFrameRectangles(framingRectangles);
+        // TODO: 12.12.15 reenable after state fixed
+        //mFramingRectDrawer.setFrameRectangles(framingRectangles);
         invalidate();
     }
 
@@ -282,6 +285,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     @Override
     public void onDraw(final Canvas canv) {
+        LOGGER.i("onDraw");
         // DevLoggers.THREADS.d("ui: " + Thread.currentThread().getPriority());
         // Debug.startMethodTracing("default");
         // long start = System.currentTimeMillis();
@@ -324,7 +328,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
             // Log.d(TestTags.TEST, "best layer: " + bestLayerId);
 
             //draw tiles
-            drawLayers(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
+            drawLayer(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
             //draw framing rectangles
             if (mFramingRectDrawer != null) {
                 mFramingRectDrawer.setCanvas(canv);
@@ -428,71 +432,48 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
 
-    private void drawLayers(Canvas canv, int highestLayer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
-        // long start = System.currentTimeMillis();
-        List<TilePositionInPyramid> visibleTiles = mImageManager.getVisibleTilesForLayer(highestLayer, visibleAreaInImageCoords);
-        // cancel downloading/saving of not visible tiles within layer
-        mImageManager.cancelFetchingATilesForLayerExeptForThese(highestLayer, visibleTiles);
-        // TODO: 4.12.15 Vyresit zruseni stahovani pro ty vrstvy, ktere uz nejsou relevantni. Treba kdyz rychle odzumuju
+    private void drawLayer(Canvas canv, int layer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
+        LOGGER.i("drawLayer " + layer);
+        List<TilePositionInPyramid> visibleTiles = mImageManager.getVisibleTilesForLayer(layer, visibleAreaInImageCoords);
+        // cancel fetching of not-visible-now tiles within layer
+        mImageManager.cancelFetchingATilesForLayerExeptForThese(layer, visibleTiles);
         if (isIdealLayer) {
             // possibly increase memory cache
-            if (CacheManager.getTilesCache() != null) {
-                // TODO: 4.12.15 jeste projit zvetsovani cache. Nemela by se vubec zmensovat a i nad tim faktorem pouvazovat
-                int minCacheSize = (visibleTiles.size() * 2);
-                // int maxCacheSize = (int) (visibleTiles.size() * 5.5);
-                // CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize, maxCacheSize);
-                CacheManager.getTilesCache().updateMemoryCacheSizeInItems(minCacheSize);
-            }
+            mImageManager.inflateTilesMemoryCache(visibleTiles.size() * 2);
         }
         // check if all visible tiles within layer are available
         boolean allTilesAvailable = true;
         for (TilePositionInPyramid visibleTile : visibleTiles) {
-            boolean tileAccessible = CacheManager.getTilesCache().containsTileInMemory(mImageManager.buildTileUrl(visibleTile));
-            if (!tileAccessible) {
+            if (!mImageManager.tileIsAvailableNow(visibleTile)) {
                 allTilesAvailable = false;
                 break;
             }
         }
-        // if not all visible tiles available, draw smaller layer with worse resolution under it
-        // TODO: disable, just for testing
-        // mDrawLayerWithWorseResolution = false;
-        if (!allTilesAvailable && highestLayer != 0 && mDrawLayerWithWorseResolution) {
-            drawLayers(canv, highestLayer - 1, false, visibleAreaInImageCoords);
+        // if not all visible tiles available, draw lower layer with worse resolution first
+        if (!allTilesAvailable && layer != 0) {
+            drawLayer(canv, layer - 1, false, visibleAreaInImageCoords);
         }
-        // draw visible tiles if available, start downloading otherwise
+        //actually draw this layer
+        LOGGER.i("actually drawing layer " + layer);
         for (TilePositionInPyramid visibleTile : visibleTiles) {
-            fetchTileWithoutBlockingOnDiskRead(canv, visibleTile);
-        }
-        // long end = System.currentTimeMillis();
-        // LOGGER.d( "drawLayers (layer=" + highestLayer + "): " + (end - start) +
-        // " ms");
-    }
-
-    private void fetchTileWithoutBlockingOnDiskRead(Canvas canv, TilePositionInPyramid visibleTileId) {
-        TileBitmap tile = CacheManager.getTilesCache().getTileAsync(mImageManager.buildTileUrl(visibleTileId), new FetchingBitmapFromDiskHandler() {
-
-            @Override
-            public void onFetched() {
-                invalidate();
+            Bitmap bitmap = mImageManager.getTile(visibleTile, new TileDownloadSuccessListener() {
+                @Override
+                public void onTileDelivered() {
+                    // tile not available yet, but when it's fetched it should be drawn probably
+                    invalidate();
+                }
+            }, mTileDownloadErrorListener);
+            if (bitmap != null) {
+                drawTile(canv, visibleTile, bitmap);
             }
-        });
-        //LOGGER.d(tile.getState().toString());
-        switch (tile.getState()) {
-            case IN_MEMORY:
-                drawTile(canv, visibleTileId, tile.getBitmap());
-                break;
-            case IN_DISK:
-                // nothing, wait for it to be fetched into memory
-                break;
-            case NOT_FOUND:
-                mImageManager.enqueTileDownload(visibleTileId, mTileDownloadErrorListener, new TileDownloadSuccessListener() {
-
-                    @Override
-                    public void onTileDownloaded() {
-                        invalidate();
-                    }
-                });
         }
+        if (!allTilesAvailable) { //make sure it will be redrawn
+            invalidate();
+        }
+
+        /*if(layer == 0){
+            System.err.println("layer 0");
+        }*/
     }
 
     private void drawTile(Canvas canv, TilePositionInPyramid tileId, Bitmap tileBmp) {
@@ -511,12 +492,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
         VectorD totalShift = getTotalShift();
         return Utils.toImageCoords(mVisibleImageAreaInCanvas, resizeFactor, totalShift);
     }
-
-
-    private void setDrawLayerWithWorseResolution(boolean show) {
-        mDrawLayerWithWorseResolution = show;
-    }
-
 
     private Rect toTileAreaInCanvas(TilePositionInPyramid tilePositionInPyramid, Bitmap tile) {
         Rect tileAreaInImageCoords = mImageManager.getTileAreaInImageCoords(tilePositionInPyramid);
@@ -803,7 +778,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     public static interface TileDownloadSuccessListener {
-        public void onTileDownloaded();
+        public void onTileDelivered();
     }
 
     public interface MetadataInitializationSuccessListener {

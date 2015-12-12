@@ -1,4 +1,4 @@
-package cz.mzk.tiledimageview.cache;
+package cz.mzk.tiledimageview.images.cache;
 
 public class CacheStatistics {
     private final long totalServingTime;

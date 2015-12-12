@@ -11,6 +11,7 @@ import cz.mzk.tiledimageview.Logger;
 import cz.mzk.tiledimageview.TiledImageView;
 import cz.mzk.tiledimageview.images.ImageManager;
 import cz.mzk.tiledimageview.images.TilePositionInPyramid;
+import cz.mzk.tiledimageview.images.TiledImageProtocol;
 
 /**
  * This class registers running AsyncTasks in which tiles for single image are downloaded and saved to cache. Also AsyncTask to initialize image metadata.
@@ -19,40 +20,48 @@ import cz.mzk.tiledimageview.images.TilePositionInPyramid;
  *
  * @author Martin Řehánek
  */
-public class ImageManagerTaskRegistry {
+public class TaskManager {
 
-    public static final int MAX_TASKS_IN_POOL = 30;
+    public static final int MAX_TASKS_IN_POOL = 40;
 
-    private static final Logger LOGGER = new Logger(ImageManagerTaskRegistry.class);
+    private static final Logger LOGGER = new Logger(TaskManager.class);
 
     private final ImageManager mImgManager;
-    private final Map<TilePositionInPyramid, DownloadAndSaveTileTask> mTileDownloadTasks = new HashMap<>();
+    private final Map<TilePositionInPyramid, DeliverTileIntoMemoryCacheTask> mTileDownloadTasks = new HashMap<>();
+    //private final Map<TilePositionInPyramid, FetchTileTask> mFetchTileTasks = new HashMap<>();
+
     private InitImageManagerTask mInitMetadataTask;
-    private StoreMetadataIntoDiskCacheTask mStoreToDiskCacheTask;
+    private StoreMetadataIntoDiskCacheTask mStoreMetadataToDiskCacheTask;
+    private InflateTileMemoryCache mInflateTileMemoryCacheTask;
+    private int lastITileMemoryCacheInflated = 0;
 
 
-    public ImageManagerTaskRegistry(ImageManager imgManager) {
+    public TaskManager(ImageManager imgManager) {
         this.mImgManager = imgManager;
     }
 
     @UiThread
-    public void enqueueTileDownloadTask(final TilePositionInPyramid tilePosition,
-                                        String tileImageUrl,
-                                        TiledImageView.TileDownloadErrorListener errorListener,
-                                        TiledImageView.TileDownloadSuccessListener successListener) {
+    public void enqueuDeliveringTileIntoMemoryCache(final TilePositionInPyramid tilePosition,
+                                                    final String tileImageUrl,
+                                                    String cacheKey,
+                                                    TiledImageView.TileDownloadSuccessListener successListener,
+                                                    TiledImageView.TileDownloadErrorListener errorListener
+    ) {
         if (mTileDownloadTasks.size() < MAX_TASKS_IN_POOL) {
             if (!mTileDownloadTasks.containsKey(tilePosition)) {
                 //if (true) {
-                LOGGER.i(String.format("enqueuing tile-download task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
-                DownloadAndSaveTileTask task = new DownloadAndSaveTileTask(tileImageUrl, errorListener, successListener, new TaskHandler() {
+                LOGGER.i(String.format("enqueuing deliver-tile-into-memory-cache task: %s, (total %d)", tileImageUrl, mTileDownloadTasks.size()));
+                DeliverTileIntoMemoryCacheTask task = new DeliverTileIntoMemoryCacheTask(tileImageUrl, cacheKey, successListener, errorListener, new TaskHandler() {
 
                     @Override
                     public void onFinished(Object... data) {
                         mTileDownloadTasks.remove(tilePosition);
+                        LOGGER.d(String.format("deliver-tile-into-memory-cache task finished: %s", tileImageUrl));
                     }
 
                     @Override
                     public void onCanceled() {
+                        LOGGER.d(String.format("deliver-tile-into-memory-cache task canceled: %s", tileImageUrl));
                         mTileDownloadTasks.remove(tilePosition);
                     }
                 });
@@ -60,8 +69,8 @@ public class ImageManagerTaskRegistry {
                 try {
                     task.executeConcurrentIfPossible();
                 } catch (RejectedExecutionException e) {
-                    LOGGER.w("to many threads in execution pool");
-                    // TODO: 10.12.15 dat vedet nahoru pres handlery
+                    LOGGER.w("deliver-tile-into-memory-cache task: to many threads in execution pool");
+                    // TODO: 10.12.15 dat vedet nahoru pres handlery?
                     mTileDownloadTasks.remove(tilePosition);
                 }
             } else {
@@ -72,21 +81,11 @@ public class ImageManagerTaskRegistry {
         }
     }
 
-    /*private boolean execute(ConcurrentAsyncTask<Object, Object, Object> task) {
-        try {
-            task.executeConcurrentIfPossible();
-            return true;
-        } catch (RejectedExecutionException e) {
-            LOGGER.w("to many threads in execution pool");
-            return false;
-        }
-    }*/
-
     @UiThread
-    public void enqueueMetadataInitializationTask(String metadataUrl, TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+    public void enqueueMetadataInitializationTask(TiledImageProtocol protocol, String metadataUrl, TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
         if (mInitMetadataTask == null) {
             LOGGER.i("enqueuing metadata-initialization task");
-            mInitMetadataTask = new InitImageManagerTask(mImgManager, metadataUrl, handler, successListener, new TaskHandler() {
+            mInitMetadataTask = new InitImageManagerTask(mImgManager, protocol, metadataUrl, handler, successListener, new TaskHandler() {
 
                 @Override
                 public void onFinished(Object... data) {
@@ -118,26 +117,26 @@ public class ImageManagerTaskRegistry {
     }
 
     private void enqueueMetadataIntoDiskCacheStoreTask(String cacheKey, String metadata) {
-        if (mStoreToDiskCacheTask == null) {
+        if (mStoreMetadataToDiskCacheTask == null) {
             LOGGER.i("enqueuing store-metadata-into-disk-cache task");
-            mStoreToDiskCacheTask = new StoreMetadataIntoDiskCacheTask(cacheKey, metadata, new TaskHandler() {
+            mStoreMetadataToDiskCacheTask = new StoreMetadataIntoDiskCacheTask(cacheKey, metadata, new TaskHandler() {
                 @Override
                 public void onFinished(Object... data) {
-                    mStoreToDiskCacheTask = null;
+                    mStoreMetadataToDiskCacheTask = null;
                     LOGGER.d("store-metadata-into-disk-cache task finished");
                 }
 
                 @Override
                 public void onCanceled() {
                     LOGGER.d("store-metadata-into-disk-cache task canceled");
-                    mStoreToDiskCacheTask = null;
+                    mStoreMetadataToDiskCacheTask = null;
                 }
             });
             try {
-                mStoreToDiskCacheTask.executeConcurrentIfPossible();
+                mStoreMetadataToDiskCacheTask.executeConcurrentIfPossible();
             } catch (RejectedExecutionException e) {
                 LOGGER.w("to many threads in execution pool");
-                mStoreToDiskCacheTask = null;
+                mStoreMetadataToDiskCacheTask = null;
             }
         }
     }
@@ -148,17 +147,20 @@ public class ImageManagerTaskRegistry {
         if (mInitMetadataTask != null) {
             mInitMetadataTask.cancel(false);
         }
-        if (mStoreToDiskCacheTask != null) {
-            mStoreToDiskCacheTask.cancel(false);
+        if (mStoreMetadataToDiskCacheTask != null) {
+            mStoreMetadataToDiskCacheTask.cancel(false);
         }
-        for (DownloadAndSaveTileTask task : mTileDownloadTasks.values()) {
+        if (mInflateTileMemoryCacheTask != null) {
+            mInflateTileMemoryCacheTask.cancel(false);
+        }
+        for (DeliverTileIntoMemoryCacheTask task : mTileDownloadTasks.values()) {
             task.cancel(false);
         }
     }
 
     @UiThread
     public boolean cancel(TilePositionInPyramid id) {
-        DownloadAndSaveTileTask task = mTileDownloadTasks.get(id);
+        DeliverTileIntoMemoryCacheTask task = mTileDownloadTasks.get(id);
         if (task != null) {
             LOGGER.d(String.format("canceling tile-download task for %s", id.toString()));
             task.cancel(false);
@@ -171,6 +173,37 @@ public class ImageManagerTaskRegistry {
     @UiThread
     public Set<TilePositionInPyramid> getAllTileDownloadTaskIds() {
         return mTileDownloadTasks.keySet();
+    }
+
+    public void enqueueTilesMemoryCacheInflation(final int newMaxSize) {
+        if (lastITileMemoryCacheInflated > newMaxSize) {
+            //ignore
+        } else {
+            if (mInflateTileMemoryCacheTask == null) {
+                //alright, enqueue
+                InflateTileMemoryCache task = new InflateTileMemoryCache(newMaxSize, new TaskHandler() {
+                    @Override
+                    public void onFinished(Object... data) {
+                        lastITileMemoryCacheInflated = newMaxSize;
+                        mInflateTileMemoryCacheTask = null;
+                    }
+
+                    @Override
+                    public void onCanceled() {
+                        mInflateTileMemoryCacheTask = null;
+                    }
+                });
+                mInflateTileMemoryCacheTask = task;
+                try {
+                    task.executeConcurrentIfPossible();
+                } catch (RejectedExecutionException e) {
+                    LOGGER.w("to many threads in execution pool");
+                    mInflateTileMemoryCacheTask = null;
+                }
+            } else {
+                //task is running or scheduled. Possibly lower maxSize, but doesn't matter, soon another task will appear
+            }
+        }
     }
 
 
