@@ -44,8 +44,8 @@ public class TilesCoordinatesTest extends AndroidTestCase {
         double pxRatio = 0.5;
         ImageManager imgManager = new ZoomifyImageManager(baseUrl, pxRatio);
         final TilesDownloaderInitializationResult result = new TilesDownloaderInitializationResult();
-        imgManager.enqueueMetadataInitialization(
-                new TiledImageView.MetadataInitializationHandler() {
+        imgManager.initialize(
+                new TiledImageView.MetadataInitializationListener() {
                     @Override
                     public void onMetadataInitialized() {
                         //nothing

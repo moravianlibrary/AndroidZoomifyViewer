@@ -4,6 +4,8 @@ import android.graphics.Rect;
 
 import java.util.List;
 
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationListener;
+import cz.mzk.tiledimageview.TiledImageView.TileDownloadErrorListener;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
 
@@ -29,12 +31,11 @@ public interface TiledImageViewApi {
     //LOADING IMAGE
     public void loadImage(TiledImageProtocol tiledImageProtocol, String baseUrl);
 
-    //HANDLERS
+    //LISTENERS
 
-    public void setMetadataInitializationHandler(TiledImageView.MetadataInitializationHandler metadataInitializationHandler);
+    public void setMetadataInitializationListener(MetadataInitializationListener listener);
 
-    public void setTileDownloadErrorListener(TiledImageView.TileDownloadErrorListener tileDownloadErrorListener);
-
+    public void setTileDownloadErrorListener(TileDownloadErrorListener errorListener);
 
     //GESTURES
 

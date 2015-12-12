@@ -102,8 +102,8 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        mTaskManager.enqueueMetadataInitialization(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, handler, successListener);
+    public void initialize(TiledImageView.MetadataInitializationListener listener, TiledImageView.MetadataInitializationSuccessListener successListener) {
+        mTaskManager.enqueueMetadataInitialization(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, listener, successListener);
     }
 
     @Override

@@ -22,8 +22,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     private static final Logger LOGGER = new Logger(InitImageManagerTask.class);
 
-    // TODO: 12.12.15 rename
-    private final TiledImageView.MetadataInitializationHandler mHandler;
+    private final TiledImageView.MetadataInitializationListener mListener;
     private final TiledImageView.MetadataInitializationSuccessListener mSuccessListener;
     private final TaskManager.TaskListener mTaskManagerListener;
     private final ImageManager mImgManager;
@@ -33,13 +32,13 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
     public InitImageManagerTask(ImageManager imgManager,
                                 TiledImageProtocol protocol,
                                 String metadataUrl,
-                                TiledImageView.MetadataInitializationHandler handler,
+                                TiledImageView.MetadataInitializationListener listener,
                                 TiledImageView.MetadataInitializationSuccessListener successListener,
                                 TaskManager.TaskListener taskManagerListener) {
         mImgManager = imgManager;
         mProtocol = protocol;
         mMetadataUrl = metadataUrl;
-        mHandler = handler;
+        mListener = listener;
         mSuccessListener = successListener;
         mTaskManagerListener = taskManagerListener;
     }
@@ -126,26 +125,18 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
                 mImgManager.init(result.metadata);
                 mSuccessListener.onMetadataDownloaded(mImgManager);
             }
-            if (mHandler != null) {
-                mHandler.onMetadataInitialized();
+            if (mListener != null) {
+                mListener.onMetadataInitialized();
             }
-        } else {
+        } else if (mListener != null) {
             if (result.mTooManyRedirectionsException != null) {
-                if (mHandler != null) {
-                    mHandler.onMetadataRedirectionLoop(result.mTooManyRedirectionsException.getUrl(), result.mTooManyRedirectionsException.getRedirections());
-                }
+                mListener.onMetadataRedirectionLoop(result.mTooManyRedirectionsException.getUrl(), result.mTooManyRedirectionsException.getRedirections());
             } else if (result.mImageServerResponseException != null) {
-                if (mHandler != null) {
-                    mHandler.onMetadataUnhandableResponseCode(result.mImageServerResponseException.getUrl(), result.mImageServerResponseException.getErrorCode());
-                }
+                mListener.onMetadataUnhandableResponseCode(result.mImageServerResponseException.getUrl(), result.mImageServerResponseException.getErrorCode());
             } else if (result.mInvalidXmlException != null) {
-                if (mHandler != null) {
-                    mHandler.onMetadataInvalidData(result.mInvalidXmlException.getUrl(), result.mInvalidXmlException.getMessage());
-                }
+                mListener.onMetadataInvalidData(result.mInvalidXmlException.getUrl(), result.mInvalidXmlException.getMessage());
             } else if (result.mOtherIoException != null) {
-                if (mHandler != null) {
-                    mHandler.onMetadataDataTransferError(result.mOtherIoException.getUrl(), result.mOtherIoException.getMessage());
-                }
+                mListener.onMetadataDataTransferError(result.mOtherIoException.getUrl(), result.mOtherIoException.getMessage());
             }
         }
     }

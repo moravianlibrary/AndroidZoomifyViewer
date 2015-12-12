@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import cz.mzk.tiledimageview.TiledImageView;
-import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationHandler;
 import cz.mzk.tiledimageview.TiledImageView.SingleTapListener;
 import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 import cz.mzk.tiledimageview.Utils;
@@ -36,7 +35,7 @@ import cz.mzk.tiledimageview.rectangles.FramingRectangle;
  * @author Martin Řehánek
  */
 public class PageViewerFragment extends Fragment implements IPageViewerFragment, OnTouchListener,
-        MetadataInitializationHandler, SingleTapListener {
+        TiledImageView.MetadataInitializationListener, SingleTapListener {
 
     public static final String KEY_PROTOCOL = PageViewerFragment.class.getSimpleName() + "_protocol";
     public static final String KEY_DOMAIN = PageViewerFragment.class.getSimpleName() + "_domain";
@@ -101,7 +100,7 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
         mErrorResourceUrl = (TextView) view.findViewById(R.id.errorResourceUrl);
         mErrorDescription = (TextView) view.findViewById(R.id.errorDescription);
         mTiledImageView = (TiledImageView) view.findViewById(R.id.tiledImageView);
-        mTiledImageView.setMetadataInitializationHandler(this);
+        mTiledImageView.setMetadataInitializationListener(this);
         // mTiledImageView.setTileDownloadErrorListener(this);
         mTiledImageView.setSingleTapListener(this);
         mImageView = (ImageView) view.findViewById(R.id.imageView);
@@ -329,6 +328,15 @@ public class PageViewerFragment extends Fragment implements IPageViewerFragment,
         mErrorTitle.setText("Invalid content in ZoomifyImageMetadata.xml");
         mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText(errorMessage);
+    }
+
+    @Override
+    public void onCannotExecuteMetadataInitialization(String imageMetadataUrl) {
+        mProgressView.setVisibility(View.INVISIBLE);
+        mErrorView.setVisibility(View.VISIBLE);
+        mErrorTitle.setText("Cannot schedule metadata initialization");
+        mErrorResourceUrl.setText(imageMetadataUrl);
+        mErrorDescription.setText("probably to many visible instances of " + TiledImageView.class.getSimpleName());
     }
 
     @Override

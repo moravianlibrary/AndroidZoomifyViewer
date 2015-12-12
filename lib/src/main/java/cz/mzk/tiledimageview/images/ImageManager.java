@@ -7,6 +7,7 @@ import android.support.annotation.UiThread;
 import java.util.List;
 
 import cz.mzk.tiledimageview.TiledImageView;
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationSuccessListener;
 import cz.mzk.tiledimageview.TiledImageView.TileDownloadErrorListener;
 import cz.mzk.tiledimageview.TiledImageView.TileDownloadSuccessListener;
 import cz.mzk.tiledimageview.images.metadata.ImageMetadata;
@@ -21,9 +22,7 @@ public interface ImageManager {
 
     public void init(ImageMetadata imageMetadata);
 
-    public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener);
-
-    //public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener);
+    public void initialize(TiledImageView.MetadataInitializationListener listener, MetadataInitializationSuccessListener successListener);
 
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
 

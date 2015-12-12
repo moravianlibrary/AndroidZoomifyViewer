@@ -23,7 +23,7 @@ import cz.mzk.tiledimageview.images.TiledImageProtocol;
  */
 public class TaskManager {
 
-    public static final int MAX_TASKS_IN_POOL = 40;
+    public static final int MAX_TASKS_IN_POOL = 40; //for at most 3 TiledImageView instances visible at the same time
 
     private static final Logger LOGGER = new Logger(TaskManager.class);
 
@@ -42,14 +42,14 @@ public class TaskManager {
 
 
     @UiThread
-    public static void enqueueCacheManagerInitialization(Context context, boolean diskCacheEnabled, boolean clearDiskCache, long tileDiskCacheBytes, TaskListener handler) {
-        InitCacheManagerTask task = new InitCacheManagerTask(context, diskCacheEnabled, clearDiskCache, tileDiskCacheBytes, handler);
+    public static void enqueueCacheManagerInitialization(Context context, boolean diskCacheEnabled, boolean clearDiskCache, long tileDiskCacheBytes, TaskListener listener) {
+        InitCacheManagerTask task = new InitCacheManagerTask(context, diskCacheEnabled, clearDiskCache, tileDiskCacheBytes, listener);
         try {
             LOGGER.i("enqueuing init-cache-manager task");
             task.executeConcurrentIfPossible();
         } catch (RejectedExecutionException e) {
             LOGGER.w("init-cache-manager task task: to many threads in execution pool");
-            handler.onCanceled();
+            listener.onCanceled();
         }
     }
 
@@ -83,7 +83,6 @@ public class TaskManager {
                     task.executeConcurrentIfPossible();
                 } catch (RejectedExecutionException e) {
                     LOGGER.w("deliver-tile-into-memory-cache task: to many threads in execution pool");
-                    // TODO: 10.12.15 dat vedet nahoru pres handlery?
                     mDeliverTileTasks.remove(tilePosition);
                 }
             } else {
@@ -95,10 +94,10 @@ public class TaskManager {
     }
 
     @UiThread
-    public void enqueueMetadataInitialization(TiledImageProtocol protocol, String metadataUrl, TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
+    public void enqueueMetadataInitialization(TiledImageProtocol protocol, String metadataUrl, TiledImageView.MetadataInitializationListener listener, TiledImageView.MetadataInitializationSuccessListener successListener) {
         if (mInitImageManagerTask == null) {
             LOGGER.i("enqueuing metadata-initialization task");
-            mInitImageManagerTask = new InitImageManagerTask(mImgManager, protocol, metadataUrl, handler, successListener, new TaskListener() {
+            mInitImageManagerTask = new InitImageManagerTask(mImgManager, protocol, metadataUrl, listener, successListener, new TaskListener() {
 
                 @Override
                 public void onFinished(Object... data) {
@@ -106,7 +105,6 @@ public class TaskManager {
                     LOGGER.d("metadata-initialization task finished");
                     boolean storeMetadataToDisk = (boolean) data[0];
                     if (storeMetadataToDisk) {
-                        //todo: naplanuj task, uloz ho
                         enqueueMetadataIntoDiskCacheStoreTask((String) data[1], (String) data[2]);
                     }
                 }
@@ -121,8 +119,8 @@ public class TaskManager {
                 mInitImageManagerTask.executeConcurrentIfPossible();
             } catch (RejectedExecutionException e) {
                 LOGGER.w("to many threads in execution pool");
-                // TODO: 10.12.15 dat vedet nahoru pres handlery, nejspis novou metodou
                 mInitImageManagerTask = null;
+                listener.onCannotExecuteMetadataInitialization(metadataUrl);
             }
         } else {
             LOGGER.d("ignoring metadata-initialization task - already in queue");

@@ -24,7 +24,7 @@ import cz.mzk.tiledimageview.images.TiledImageProtocol;
 /**
  * @author Martin Řehánek
  */
-public class FullscreenSingleImageActivity extends AppCompatActivity implements SingleTapListener, TiledImageView.MetadataInitializationHandler, TiledImageView.TileDownloadErrorListener {
+public class FullscreenSingleImageActivity extends AppCompatActivity implements SingleTapListener, TiledImageView.MetadataInitializationListener, TiledImageView.TileDownloadErrorListener {
 
     public static final String EXTRA_BASE_URL = "baseUrl";
     private static final String TAG = FullscreenSingleImageActivity.class.getSimpleName();
@@ -55,7 +55,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         mErrorResourceUrl = (TextView) findViewById(R.id.errorResourceUrl);
         mErrorDescription = (TextView) findViewById(R.id.errorDescription);
         mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
-        mImageView.setMetadataInitializationHandler(this);
+        mImageView.setMetadataInitializationListener(this);
         mImageView.setTileDownloadErrorListener(this);
         mImageView.setSingleTapListener(this);
         mImageView.setViewMode(AppConfig.VIEW_MODE);
@@ -188,6 +188,15 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         mErrorTitle.setText("Invalid content in ZoomifyImageMetadata.xml");
         mErrorResourceUrl.setText(imageMetadataUrl);
         mErrorDescription.setText(errorMessage);
+    }
+
+    @Override
+    public void onCannotExecuteMetadataInitialization(String imageMetadataUrl) {
+        mProgressView.setVisibility(View.INVISIBLE);
+        mErrorView.setVisibility(View.VISIBLE);
+        mErrorTitle.setText("Cannot schedule metadata initialization");
+        mErrorResourceUrl.setText(imageMetadataUrl);
+        mErrorDescription.setText("probably to many visible instances of " + TiledImageView.class.getSimpleName());
     }
 
     @Override

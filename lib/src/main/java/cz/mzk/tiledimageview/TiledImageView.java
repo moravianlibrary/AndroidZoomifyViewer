@@ -61,8 +61,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private String mImageBaseUrl;
     private ImageManager mImageManager;
 
-    //EVENT HANDLERS
-    private MetadataInitializationHandler mMetadataInitializationHandler;
+    //EVENT LISTENERS
+    private MetadataInitializationListener mMetadataInitializationListener;
     private TileDownloadErrorListener mTileDownloadErrorListener;
 
     //GESTURES
@@ -163,13 +163,13 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     @Override
-    public void setMetadataInitializationHandler(MetadataInitializationHandler metadataInitializationHandler) {
-        this.mMetadataInitializationHandler = metadataInitializationHandler;
+    public void setMetadataInitializationListener(MetadataInitializationListener listener) {
+        this.mMetadataInitializationListener = listener;
     }
 
     @Override
-    public void setTileDownloadErrorListener(TileDownloadErrorListener tileDownloadErrorListener) {
-        this.mTileDownloadErrorListener = tileDownloadErrorListener;
+    public void setTileDownloadErrorListener(TileDownloadErrorListener errorListener) {
+        this.mTileDownloadErrorListener = errorListener;
     }
 
     @Override
@@ -185,7 +185,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
             mImageManager = null;
         }
         //mImageManager = null;
-        mMetadataInitializationHandler = null;
+        mMetadataInitializationListener = null;
         mTileDownloadErrorListener = null;
     }
 
@@ -230,7 +230,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private void initImageManager() {
         mImageManager = new ZoomifyImageManager(mImageBaseUrl, mPxRatio);
         //initTilesDownloaderAsync();
-        mImageManager.enqueueMetadataInitialization(mMetadataInitializationHandler, new MetadataInitializationSuccessListener() {
+        mImageManager.initialize(mMetadataInitializationListener, new MetadataInitializationSuccessListener() {
 
             @Override
             public void onMetadataDownloaded(ImageManager imgManager) {
@@ -255,7 +255,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
   /* private void initTilesDownloaderAsync() {
-        mImageManager.enqueueMetadataInitialization(mMetadataInitializationHandler, new MetadataInitializationSuccessListener() {
+        mImageManager.initialize(mMetadataInitializationListener, new MetadataInitializationSuccessListener() {
 
             @Override
             public void onMetadataDownloaded(ImageManager imgManager) {
@@ -688,7 +688,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
      *
      * @author martin
      */
-    public interface MetadataInitializationHandler {
+    public interface MetadataInitializationListener {
 
         /**
          * Metadata downloaded and processed properly.
@@ -727,6 +727,13 @@ public class TiledImageView extends View implements TiledImageViewApi {
          * @param errorMessage
          */
         public void onMetadataInvalidData(String imageMetadataUrl, String errorMessage);
+
+        /**
+         * If worker thread to initialize metadata cannot be scheduled. This could happen if more than 3 instances of TiledImageView are visible at same time.
+         *
+         * @param imageMetadataUrl
+         */
+        public void onCannotExecuteMetadataInitialization(String imageMetadataUrl);
     }
 
     public interface TileDownloadErrorListener {
