@@ -103,7 +103,7 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void enqueueMetadataInitialization(TiledImageView.MetadataInitializationHandler handler, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        mTaskManager.enqueueMetadataInitializationTask(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, handler, successListener);
+        mTaskManager.enqueueMetadataInitialization(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, handler, successListener);
     }
 
     @Override
@@ -467,7 +467,7 @@ public class ZoomifyImageManager implements ImageManager {
     @Override
     public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
         checkInitialized();
-        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllTileDownloadTaskIds()) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
             if (runningTilePositionInPyramid.getLayer() == layerId) {
                 if (!visibleTiles.contains(runningTilePositionInPyramid)) {
                     boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);

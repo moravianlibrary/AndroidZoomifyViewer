@@ -23,7 +23,7 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
     private final String mCacheKey;
     private final TiledImageView.TileDownloadErrorListener mErrorListener;
     private final TiledImageView.TileDownloadSuccessListener mSuccessListener;
-    private final TaskManager.TaskHandler mRegistryHandler;
+    private final TaskManager.TaskListener mTaskManagerListener;
 
     private OtherIOException otherIoException;
     private TooManyRedirectionsException tooManyRedirectionsException;
@@ -31,20 +31,20 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     /**
      * @param tileImageUrl        Url of tile image (jpeg, tif, png, bmp, ...)
-     * @param errorListener       Tile download result mErrorListener, not null
+     * @param errorListener
      * @param successListener
-     * @param taskManagersHandler
+     * @param taskManagerListener
      */
     public DeliverTileIntoMemoryCacheTask(String tileImageUrl,
                                           String cacheKey,
                                           TiledImageView.TileDownloadSuccessListener successListener,
                                           TiledImageView.TileDownloadErrorListener errorListener,
-                                          TaskManager.TaskHandler taskManagersHandler) {
+                                          TaskManager.TaskListener taskManagerListener) {
         mTileImageUrl = tileImageUrl;
         mCacheKey = cacheKey;
         mSuccessListener = successListener;
         mErrorListener = errorListener;
-        mRegistryHandler = taskManagersHandler;
+        mTaskManagerListener = taskManagerListener;
     }
 
     @Override
@@ -122,8 +122,8 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     @Override
     protected void onPostExecute(Boolean success) {
-        if (mRegistryHandler != null) {
-            mRegistryHandler.onFinished();
+        if (mTaskManagerListener != null) {
+            mTaskManagerListener.onFinished();
         }
         if (success) {
             if (mSuccessListener != null) {
@@ -144,9 +144,8 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     @Override
     protected void onCancelled(Boolean succes) {
-        super.onCancelled();
-        if (mRegistryHandler != null) {
-            mRegistryHandler.onCanceled();
+        if (mTaskManagerListener != null) {
+            mTaskManagerListener.onCanceled();
         }
     }
 

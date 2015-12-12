@@ -8,11 +8,11 @@ import cz.mzk.tiledimageview.images.cache.CacheManager;
 public class InflateTileMemoryCache extends ConcurrentAsyncTask<Void, Void, Void> {
 
     private final int mNewMaxSize;
-    private final TaskManager.TaskHandler mRegistryHandler;
+    private final TaskManager.TaskListener mListener;
 
-    public InflateTileMemoryCache(int mNewMaxSize, TaskManager.TaskHandler registryHandler) {
+    public InflateTileMemoryCache(int mNewMaxSize, TaskManager.TaskListener listener) {
         this.mNewMaxSize = mNewMaxSize;
-        mRegistryHandler = registryHandler;
+        mListener = listener;
     }
 
     @Override
@@ -25,15 +25,15 @@ public class InflateTileMemoryCache extends ConcurrentAsyncTask<Void, Void, Void
 
     @Override
     protected void onPostExecute(Void result) {
-        if (mRegistryHandler != null) {
-            mRegistryHandler.onFinished();
+        if (mListener != null) {
+            mListener.onFinished();
         }
     }
 
     @Override
     protected void onCancelled(Void result) {
-        if (mRegistryHandler != null) {
-            mRegistryHandler.onCanceled();
+        if (mListener != null) {
+            mListener.onCanceled();
         }
     }
 }

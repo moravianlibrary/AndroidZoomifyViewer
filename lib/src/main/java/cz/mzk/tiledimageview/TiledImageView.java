@@ -12,7 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.List;
-import java.util.concurrent.RejectedExecutionException;
 
 import cz.mzk.tiledimageview.dev.DevLoggers;
 import cz.mzk.tiledimageview.dev.DevPoints;
@@ -22,7 +21,7 @@ import cz.mzk.tiledimageview.images.ImageManager;
 import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
 import cz.mzk.tiledimageview.images.cache.CacheManager;
-import cz.mzk.tiledimageview.images.tasks.InitCacheManagerTask;
+import cz.mzk.tiledimageview.images.tasks.TaskManager;
 import cz.mzk.tiledimageview.images.zoomify.ZoomifyImageManager;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
 import cz.mzk.tiledimageview.rectangles.FramingRectangleDrawer;
@@ -112,10 +111,9 @@ public class TiledImageView extends View implements TiledImageViewApi {
             boolean diskCacheEnabled = res.getBoolean(R.bool.tiledimageview_disk_cache_enabled);
             boolean clearDiskCacheOnStart = res.getBoolean(R.bool.tiledimageview_disk_cache_clear_in_initialization);
             long tileDiskCacheBytes = res.getInteger(R.integer.tiledimageview_tile_disk_cache_size_kb) * 1024;
-            InitCacheManagerTask task = new InitCacheManagerTask(context, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes) {
+            TaskManager.enqueueCacheManagerInitialization(context, diskCacheEnabled, clearDiskCacheOnStart, tileDiskCacheBytes, new TaskManager.TaskListener() {
                 @Override
-                protected void onPostExecute(Void aVoid) {
-                    super.onPostExecute(aVoid);
+                public void onFinished(Object... data) {
                     mCacheManagerInitialized = true;
                     if (!mDestroyed) {
                         init(context);
@@ -123,21 +121,12 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 }
 
                 @Override
-                protected void onCancelled() {
-                    super.onCancelled();
+                public void onCanceled() {
                     if (!mDestroyed) {
                         initCache(context);//retrying
                     }
                 }
-            };
-            try {
-                task.executeConcurrentIfPossible();
-            } catch (RejectedExecutionException e) {
-                LOGGER.w("to many threads in execution pool");
-                if (!mDestroyed) {
-                    initCache(context);//retrying
-                }
-            }
+            });
         }
     }
 
@@ -285,7 +274,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     @Override
     public void onDraw(final Canvas canv) {
-        LOGGER.i("onDraw");
+        //LOGGER.i("onDraw");
         // DevLoggers.THREADS.d("ui: " + Thread.currentThread().getPriority());
         // Debug.startMethodTracing("default");
         // long start = System.currentTimeMillis();
@@ -433,7 +422,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
 
     private void drawLayer(Canvas canv, int layer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
-        LOGGER.i("drawLayer " + layer);
+        //LOGGER.i("drawLayer " + layer);
         List<TilePositionInPyramid> visibleTiles = mImageManager.getVisibleTilesForLayer(layer, visibleAreaInImageCoords);
         // cancel fetching of not-visible-now tiles within layer
         mImageManager.cancelFetchingATilesForLayerExeptForThese(layer, visibleTiles);
@@ -454,7 +443,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
             drawLayer(canv, layer - 1, false, visibleAreaInImageCoords);
         }
         //actually draw this layer
-        LOGGER.i("actually drawing layer " + layer);
+        //LOGGER.i("actually drawing layer " + layer);
         for (TilePositionInPyramid visibleTile : visibleTiles) {
             Bitmap bitmap = mImageManager.getTile(visibleTile, new TileDownloadSuccessListener() {
                 @Override

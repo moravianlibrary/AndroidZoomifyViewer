@@ -1,7 +1,7 @@
 package cz.mzk.tiledimageview.images.tasks;
 
 import cz.mzk.tiledimageview.images.cache.CacheManager;
-import cz.mzk.tiledimageview.images.tasks.TaskManager.TaskHandler;
+import cz.mzk.tiledimageview.images.tasks.TaskManager.TaskListener;
 
 /**
  * Created by Martin Řehánek on 10.12.15.
@@ -10,12 +10,12 @@ public class StoreMetadataIntoDiskCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     private final String mKey;
     private final String mMetadata;
-    private final TaskHandler mHandler;
+    private final TaskListener mListener;
 
-    public StoreMetadataIntoDiskCacheTask(String key, String metadata, TaskHandler handler) {
+    public StoreMetadataIntoDiskCacheTask(String key, String metadata, TaskListener listener) {
         mKey = key;
         mMetadata = metadata;
-        mHandler = handler;
+        mListener = listener;
     }
 
     @Override
@@ -29,16 +29,15 @@ public class StoreMetadataIntoDiskCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     @Override
     protected void onPostExecute(Void result) {
-        if (mHandler != null) {
-            mHandler.onFinished();
+        if (mListener != null) {
+            mListener.onFinished();
         }
     }
 
     @Override
-    protected void onCancelled() {
-        super.onCancelled();
-        if (mHandler != null) {
-            mHandler.onCanceled();
+    protected void onCancelled(Void result) {
+        if (mListener != null) {
+            mListener.onCanceled();
         }
     }
 }

@@ -14,13 +14,15 @@ public class InitCacheManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
     private final boolean mDiskCacheEnabled;
     private final boolean mClearDiskCache;
     private final long mTileDiskCacheBytes;
+    private final TaskManager.TaskListener mListener;
 
 
-    public InitCacheManagerTask(Context context, boolean diskCacheEnabled, boolean clearDiskCache, long tileDiskCacheBytes) {
+    public InitCacheManagerTask(Context context, boolean diskCacheEnabled, boolean clearDiskCache, long tileDiskCacheBytes, TaskManager.TaskListener listener) {
         mContext = context;
         mDiskCacheEnabled = diskCacheEnabled;
         mClearDiskCache = clearDiskCache;
         mTileDiskCacheBytes = tileDiskCacheBytes;
+        mListener = listener;
     }
 
     @Override
@@ -33,6 +35,15 @@ public class InitCacheManagerTask extends ConcurrentAsyncTask<Void, Void, Void> 
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
+        if (mListener != null) {
+            mListener.onFinished();
+        }
+    }
+
+    @Override
+    protected void onCancelled(Void result) {
+        if (mListener != null) {
+            mListener.onCanceled();
+        }
     }
 }

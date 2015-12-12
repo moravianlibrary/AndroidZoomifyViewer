@@ -22,9 +22,10 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     private static final Logger LOGGER = new Logger(InitImageManagerTask.class);
 
+    // TODO: 12.12.15 rename
     private final TiledImageView.MetadataInitializationHandler mHandler;
     private final TiledImageView.MetadataInitializationSuccessListener mSuccessListener;
-    private final TaskManager.TaskHandler mRegitryHandler;
+    private final TaskManager.TaskListener mTaskManagerListener;
     private final ImageManager mImgManager;
     private final String mMetadataUrl;
     private final TiledImageProtocol mProtocol;
@@ -34,18 +35,17 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
                                 String metadataUrl,
                                 TiledImageView.MetadataInitializationHandler handler,
                                 TiledImageView.MetadataInitializationSuccessListener successListener,
-                                TaskManager.TaskHandler registryHandler) {
+                                TaskManager.TaskListener taskManagerListener) {
         mImgManager = imgManager;
         mProtocol = protocol;
         mMetadataUrl = metadataUrl;
         mHandler = handler;
         mSuccessListener = successListener;
-        mRegitryHandler = registryHandler;
+        mTaskManagerListener = taskManagerListener;
     }
 
     @Override
     protected Result doInBackground(Void... params) {
-        //LOGGER.v("doInBackground: " + mMetadataUrl);
         if (!isCancelled()) {
             Result result = new Result();
             try {
@@ -75,8 +75,7 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
     }
 
     private Result fetchMetadata(Result result) throws OtherIOException, TooManyRedirectionsException, ImageServerResponseException {
-        LOGGER.v("Fetching metadata: " + mMetadataUrl);
-        // TODO: 12.12.15 obacas tady CacheManager neni inicializovan. Poresit, proc
+        //LOGGER.v("Fetching metadata: " + mMetadataUrl);
         MetadataCache cache = CacheManager.getMetadataCache();
         String key = CacheKeyBuilder.buildKeyFromUrl(mMetadataUrl);
         if (!isCancelled()) {
@@ -85,23 +84,30 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
                 if (fromMemory != null) {
                     result.metadataStr = fromMemory;
                 } else {
-                    // TODO: 12.12.15 check if disk cache available first
-                    boolean inDisk = cache.isItemInDiskCache(key);
-                    if (!isCancelled()) {
-                        if (inDisk) {
-                            String fromDisk = cache.getItemFromDiskCache(key);
-                            if (!isCancelled()) {
-                                cache.storeItemToMemoryCache(key, fromDisk);
-                                result.metadataStr = fromDisk;
+                    if (cache.isDiskCacheEnabled()) {
+                        boolean inDisk = cache.isItemInDiskCache(key);
+                        if (!isCancelled()) {
+                            if (inDisk) {
+                                String fromDisk = cache.getItemFromDiskCache(key);
+                                if (!isCancelled()) {
+                                    cache.storeItemToMemoryCache(key, fromDisk);
+                                    result.metadataStr = fromDisk;
+                                }
+                            } else {
+                                String fromNet = Downloader.downloadMetadata(mMetadataUrl);
+                                if (!isCancelled()) {
+                                    cache.storeItemToMemoryCache(key, fromNet);
+                                    result.storeToCacheDisk = true;
+                                    result.cacheKey = key;
+                                    result.metadataStr = fromNet;
+                                }
                             }
-                        } else {
-                            String fromNet = Downloader.downloadMetadata(mMetadataUrl);
-                            if (!isCancelled()) {
-                                cache.storeItemToMemoryCache(key, fromNet);
-                                result.storeToCacheDisk = true;
-                                result.cacheKey = key;
-                                result.metadataStr = fromNet;
-                            }
+                        }
+                    } else {//disk cache disabled
+                        String fromNet = Downloader.downloadMetadata(mMetadataUrl);
+                        if (!isCancelled()) {
+                            cache.storeItemToMemoryCache(key, fromNet);
+                            result.metadataStr = fromNet;
                         }
                     }
                 }
@@ -112,8 +118,8 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     @Override
     protected void onPostExecute(Result result) {
-        if (mRegitryHandler != null) {
-            mRegitryHandler.onFinished(result.storeToCacheDisk, result.cacheKey, result.metadataStr);
+        if (mTaskManagerListener != null) {
+            mTaskManagerListener.onFinished(result.storeToCacheDisk, result.cacheKey, result.metadataStr);
         }
         if (result.success) {
             if (mSuccessListener != null) {
@@ -146,9 +152,8 @@ public class InitImageManagerTask extends ConcurrentAsyncTask<Void, Void, InitIm
 
     @Override
     protected void onCancelled(Result result) {
-        LOGGER.d("canceled: " + mMetadataUrl);
-        if (mRegitryHandler != null) {
-            mRegitryHandler.onCanceled();
+        if (mTaskManagerListener != null) {
+            mTaskManagerListener.onCanceled();
         }
     }
 
