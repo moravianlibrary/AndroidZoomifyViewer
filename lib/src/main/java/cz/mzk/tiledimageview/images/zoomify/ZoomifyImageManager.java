@@ -466,7 +466,17 @@ public class ZoomifyImageManager implements ImageManager {
     public void cancelFetchingAllTilesForLayersSmallerThan(int layer) {
         for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
             if (runningTilePositionInPyramid.getLayer() < layer) {
-                LOGGER.i("canceling task " + runningTilePositionInPyramid);
+                //LOGGER.i("canceling task " + runningTilePositionInPyramid);
+                boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
+            }
+        }
+    }
+
+    @Override
+    public void cancelFetchingAllTilesForLayersBiggerThan(int layer) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
+            if (runningTilePositionInPyramid.getLayer() > layer) {
+                //LOGGER.i("canceling task " + runningTilePositionInPyramid);
                 boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
             }
         }

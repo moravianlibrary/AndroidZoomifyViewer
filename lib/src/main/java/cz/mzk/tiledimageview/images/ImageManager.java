@@ -28,6 +28,8 @@ public interface ImageManager {
 
     public void cancelFetchingAllTilesForLayersSmallerThan(int layer);
 
+    public void cancelFetchingAllTilesForLayersBiggerThan(int layer);
+
     public void inflateTilesMemoryCache(int newMaxSize);
 
     public void cancelAllTasks();
@@ -76,6 +78,5 @@ public interface ImageManager {
      * @return true if tile was found in memory cache. Subsequent call to getTile() can still return null becuse bitmap could be removed from cache as a result of another thread accessing the cache.
      */
     public boolean tileIsAvailableNow(TilePositionInPyramid tilePositionInPyramid);
-
 
 }
