@@ -63,13 +63,13 @@ public class TaskManager {
         if (mDeliverTileTasks.size() < MAX_TASKS_IN_POOL) {
             if (!mDeliverTileTasks.containsKey(tilePosition)) {
                 //if (true) {
-                LOGGER.i(String.format("enqueuing deliver-tile-into-memory-cache task: %s, (total %d)", tileImageUrl, mDeliverTileTasks.size()));
+                LOGGER.i(String.format("enqueuing deliver-tile-into-memory-cache task: %s, (total %d)", tileImageUrl, mDeliverTileTasks.size() + 1));
                 DeliverTileIntoMemoryCacheTask task = new DeliverTileIntoMemoryCacheTask(tileImageUrl, cacheKey, successListener, errorListener, new TaskListener() {
 
                     @Override
                     public void onFinished(Object... data) {
-                        mDeliverTileTasks.remove(tilePosition);
                         LOGGER.d(String.format("deliver-tile-into-memory-cache task finished: %s", tileImageUrl));
+                        mDeliverTileTasks.remove(tilePosition);
                     }
 
                     @Override
@@ -173,7 +173,7 @@ public class TaskManager {
     public boolean cancel(TilePositionInPyramid tilePositionInPyramid) {
         DeliverTileIntoMemoryCacheTask task = mDeliverTileTasks.get(tilePositionInPyramid);
         if (task != null) {
-            LOGGER.d(String.format("canceling tile-download task for %s", tilePositionInPyramid.toString()));
+            //LOGGER.d(String.format("canceling tile-download task for %s", tilePositionInPyramid.toString()));
             task.cancel(false);
             return true;
         } else {
@@ -187,11 +187,12 @@ public class TaskManager {
     }
 
     public void enqueueTilesMemoryCacheInflation(final int newMaxSize) {
-        if (lastITileMemoryCacheInflatedSize > newMaxSize) {
+        if (lastITileMemoryCacheInflatedSize >= newMaxSize) {
             //ignore
+            //LOGGER.d(String.format("ignoring inflate-tiles-memory-cache task (%d>=%d)", lastITileMemoryCacheInflatedSize, newMaxSize));
         } else {
             if (mInflateTileMemoryCacheTask == null) {
-                //alright, enqueue
+                LOGGER.i(String.format("enqueuing inflate-tiles-memory-cache task (oldSize=%d,newSize=%d)", lastITileMemoryCacheInflatedSize, newMaxSize));
                 InflateTileMemoryCache task = new InflateTileMemoryCache(newMaxSize, new TaskListener() {
                     @Override
                     public void onFinished(Object... data) {

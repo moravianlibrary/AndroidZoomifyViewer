@@ -65,27 +65,18 @@ public class ZoomifyImageManager implements ImageManager {
         mImagePropertiesUrl = mBaseUrl + "ImageProperties.xml";
     }
 
-    private void checkInitialized() {
-        if (mImageMetadata == null) {
-            throw new IllegalStateException("not initialized (" + mBaseUrl + ")");
-        }
-    }
-
     @Override
     public int getImageWidth() {
-        checkInitialized();
         return mImageMetadata.getWidth();
     }
 
     @Override
     public int getImageHeight() {
-        checkInitialized();
         return mImageMetadata.getHeight();
     }
 
     @Override
     public int getTileTypicalSize() {
-        checkInitialized();
         return mImageMetadata.getTileSize();
     }
 
@@ -221,7 +212,6 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private TilePositionInPyramid.TilePositionInLayer calculateTileCoordsFromPointInImageCoords(int layerId, Point pointInMageCoords) {
-        checkInitialized();
         if (layerId < 0 || layerId >= mLayers.size()) {
             throw new IllegalArgumentException("layer out of range: " + layerId);
         }
@@ -281,7 +271,6 @@ public class ZoomifyImageManager implements ImageManager {
      */
     @Override
     public int computeBestLayerId(Rect wholeImageInCanvasCoords) {
-        checkInitialized();
         double dpRatio = 1.0 - mPxRatio;
         if (mPxRatio < 0.0) {
             throw new IllegalArgumentException("px ratio must be >= 0");
@@ -404,7 +393,6 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private TileDimensionsInImage calculateTileDimensionsInImageCoords(TilePositionInPyramid tilePositionInPyramid) {
-        checkInitialized();
         int basicSize = getTilesBasicSizeInImageCoordsForGivenLayer(tilePositionInPyramid.getLayer());
         int width = getTileWidthInImageCoords(tilePositionInPyramid.getLayer(), tilePositionInPyramid.getPositionInLayer().column, basicSize);
         int height = getTileHeightInImageCoords(tilePositionInPyramid.getLayer(), tilePositionInPyramid.getPositionInLayer().row, basicSize);
@@ -442,14 +430,12 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     private double getLayerWidth(int layerId) {
-        checkInitialized();
         double result = mImageMetadata.getWidth() / Utils.pow(2, mLayers.size() - layerId - 1);
         // LOGGER.d( "layer " + layerId + ", width=" + result + " px");
         return result;
     }
 
     private double getLayerHeight(int layerId) {
-        checkInitialized();
         return mImageMetadata.getHeight() / Utils.pow(2, mLayers.size() - layerId - 1);
     }
 
@@ -465,16 +451,23 @@ public class ZoomifyImageManager implements ImageManager {
     }*/
 
     @Override
-    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
-        checkInitialized();
+    public void cancelFetchingTilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
         for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
             if (runningTilePositionInPyramid.getLayer() == layerId) {
                 if (!visibleTiles.contains(runningTilePositionInPyramid)) {
+                    // TODO: 13.12.15 Mozna optimalizace: omezit rezii nasobneho volani. Nevracet nic a posilat seznam tileId
                     boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
-                    // if (wasCanceled) {
-                    // canceled++;
-                    // }
                 }
+            }
+        }
+    }
+
+    @Override
+    public void cancelFetchingAllTilesForLayersSmallerThan(int layer) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
+            if (runningTilePositionInPyramid.getLayer() < layer) {
+                LOGGER.i("canceling task " + runningTilePositionInPyramid);
+                boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
             }
         }
     }

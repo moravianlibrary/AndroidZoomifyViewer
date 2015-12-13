@@ -85,21 +85,23 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     private boolean fetchFromNetAndSave(TileCache tileCache, boolean diskCacheEnabled) {
         Bitmap fromNet = downloadTile(mTileImageUrl);
-        if (!isCancelled()) {
-            if (fromNet != null) {
-                LOGGER.d("fetched from net");
+        if (fromNet != null) {
+            LOGGER.d("fetched from net");
+            //memory
+            if (!isCancelled()) {
+                tileCache.storeItemToMemoryCache(mCacheKey, fromNet);
+                LOGGER.d("bitmap stored into memory cache");
+                return true;
+            }
+            //disk
+            if (!isCancelled()) {
                 if (diskCacheEnabled) {
                     tileCache.storeItemToDiskCache(mCacheKey, fromNet);
                     LOGGER.d("bitmap stored into disk cache");
                 }
-                if (!isCancelled()) {
-                    tileCache.storeItemToMemoryCache(mCacheKey, fromNet);
-                    LOGGER.d("bitmap stored into memory cache");
-                    return true;
-                }
-            } else {
-                LOGGER.d("fetched from net but null");
             }
+        } else {
+            LOGGER.d("fetched from net but null");
         }
         return false;
     }
@@ -122,6 +124,7 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     @Override
     protected void onPostExecute(Boolean success) {
+        //LOGGER.i("finished: " + mTileImageUrl);
         if (mTaskManagerListener != null) {
             mTaskManagerListener.onFinished();
         }
@@ -144,6 +147,7 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
 
     @Override
     protected void onCancelled(Boolean succes) {
+        //LOGGER.i("canceled: " + mTileImageUrl);
         if (mTaskManagerListener != null) {
             mTaskManagerListener.onCanceled();
         }

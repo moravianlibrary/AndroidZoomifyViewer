@@ -24,7 +24,9 @@ public interface ImageManager {
 
     public void initialize(TiledImageView.MetadataInitializationListener listener, MetadataInitializationSuccessListener successListener);
 
-    public void cancelFetchingATilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
+    public void cancelFetchingTilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
+
+    public void cancelFetchingAllTilesForLayersSmallerThan(int layer);
 
     public void inflateTilesMemoryCache(int newMaxSize);
 
