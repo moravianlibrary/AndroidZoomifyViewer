@@ -35,6 +35,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     //STATE
     private boolean mAttachedToWindow = false;
     private boolean mVisible = false;
+    private boolean mLowerQuality = false;
     private boolean mMinZoomCanvasImagePaddingInitialized = false;
 
     //CANVAS
@@ -76,25 +77,22 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private DevTools mDevTools = null;
     private DevPoints mTestPoints = null;
 
+
     public TiledImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         LOGGER.i(buildMethodLog("constructor(Context,AttributeSet)"));
-        //mVisible = getVisibility() == VISIBLE;
-        //initCache(context);
     }
 
     public TiledImageView(Context context) {
         super(context);
         LOGGER.i(buildMethodLog("constructor(Context)"));
-        //mVisible = getVisibility() == VISIBLE;
-        //initCache(context);
     }
 
     private String buildMethodLog(String method) {
-        int instanceId = hashCode();
-        //long threadId = Thread.currentThread().getId();
-        //return String.format("i=%d,t=%d", instanceId, threadId);
-        return String.valueOf(instanceId) + ": " + method;
+        return "";
+        //for testing
+        /*int instanceId = hashCode();
+        return String.valueOf(instanceId) + ": " + method;*/
     }
 
     private void init(Context context) {
@@ -109,15 +107,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mGestureListener = new MyGestureListener(context, this, mDevTools);
         mFramingRectDrawer = new FramingRectangleDrawer(context);
         if (mImageBaseUrl != null && mImageManager == null) {
-            // TODO: 13.12.15
             initImageManager();
-        } else {
-            if (mImageBaseUrl == null) {
-                LOGGER.d(buildMethodLog("init: mImageBaseUrl == null"));
-            } else if (mImageManager != null) {
-                LOGGER.d(buildMethodLog("init: mImageManager != null"));
-                initImageManager();
-            }
         }
     }
 
@@ -194,6 +184,11 @@ public class TiledImageView extends View implements TiledImageViewApi {
     @Override
     public void setTileDownloadErrorListener(TileDownloadErrorListener errorListener) {
         this.mTileDownloadErrorListener = errorListener;
+    }
+
+    @Override
+    public void setLowerQuality(boolean lowerQuality) {
+        mLowerQuality = lowerQuality;
     }
 
 
@@ -281,14 +276,12 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     private void initImageManager() {
         LOGGER.d(buildMethodLog("initImageManager"));
-        // TODO: 13.12.15 nehazed do membra ted
-        mImageManager = new ZoomifyImageManager(mImageBaseUrl, mPxRatio);
-        mImageManager.initialize(mMetadataInitializationListener, new MetadataInitializationSuccessListener() {
+        new ZoomifyImageManager(mImageBaseUrl, mPxRatio).initialize(mMetadataInitializationListener, new MetadataInitializationSuccessListener() {
 
             @Override
             public void onMetadataDownloaded(ImageManager imgManager) {
                 LOGGER.i(buildMethodLog("ImageManager initialized"));
-                if (mImageManager == null || imgManager.getImageBaseUrl().equals(mImageBaseUrl)) {
+                if (mImageManager == null && imgManager.getImageBaseUrl().equals(mImageBaseUrl)) {
                     mImageManager = imgManager;// TODO: 13.12.15
                     if (DEV_MODE) {
                         mTestPoints = new DevPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
@@ -349,22 +342,28 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 mDevTools.fillRectAreaWithColor(mVisibleImageAreaInCanvas, mDevTools.getPaintGreenTrans());
             }
 
-            //if view not visible, only lowest layer will be drawn
-            int bestLayerId = mVisible ? mImageManager.computeBestLayerId(mWholeImageAreaInCanvasCoords) : 0;
+            //determining hihest level to be drawn
+            int bestLayerId;
+            if (!mVisible) {
+                bestLayerId = 0;
+            } else {
+                bestLayerId = mImageManager.computeBestLayerId(mWholeImageAreaInCanvasCoords);
+                if (mLowerQuality && bestLayerId > 1) {
+                    bestLayerId -= 1;
+                }
+            }
+            //cancel fetchnig data for layers no longer needed to be drawn now
             mImageManager.cancelFetchingAllTilesForLayersBiggerThan(bestLayerId);
 
-
-            // Log.d(TestTags.TEST, "best layer: " + bestLayerId);
-
             //draw tiles
-            //if (mVisible) {
-            drawLayer(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
-            //}
+            drawTiles(canv, bestLayerId, true, calculateVisibleAreaInImageCoords());
+
             //draw framing rectangles
             if (mFramingRectDrawer != null) {
                 mFramingRectDrawer.setCanvas(canv);
                 mFramingRectDrawer.draw(getTotalScaleFactor(), getTotalShift());
             }
+
             //draw dev rectangles, points
             if (mDevTools != null) {
                 double totalScaleFactor = getTotalScaleFactor();
@@ -466,18 +465,18 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
 
-    private void drawLayer(Canvas canv, int layer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
-        //LOGGER.i("drawLayer " + layer);
-        List<TilePositionInPyramid> visibleTiles = mImageManager.getVisibleTilesForLayer(layer, visibleAreaInImageCoords);
+    private void drawTiles(Canvas canv, int layer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
+        //LOGGER.i("drawTiles " + layer);
+        List<TilePositionInPyramid> visibleTilesInThisLayer = mImageManager.getVisibleTilesForLayer(layer, visibleAreaInImageCoords);
         // cancel fetching of not-visible-now tiles within layer
-        mImageManager.cancelFetchingTilesForLayerExeptForThese(layer, visibleTiles);
+        mImageManager.cancelFetchingTilesForLayerExeptForThese(layer, visibleTilesInThisLayer);
         if (isIdealLayer) {
             // possibly increase memory cache
-            mImageManager.inflateTilesMemoryCache(visibleTiles.size() * 2);
+            mImageManager.inflateTilesMemoryCache(visibleTilesInThisLayer.size() * 2);
         }
         // check if all visible tiles within layer are available
         boolean allTilesAvailable = true;
-        for (TilePositionInPyramid visibleTile : visibleTiles) {
+        for (TilePositionInPyramid visibleTile : visibleTilesInThisLayer) {
             if (!mImageManager.tileIsAvailableNow(visibleTile)) {
                 allTilesAvailable = false;
                 break;
@@ -485,12 +484,12 @@ public class TiledImageView extends View implements TiledImageViewApi {
         }
         // if not all visible tiles available, draw lower layer with worse resolution first
         if (!allTilesAvailable && layer != 0) {
-            drawLayer(canv, layer - 1, false, visibleAreaInImageCoords);
+            drawTiles(canv, layer - 1, false, visibleAreaInImageCoords);
         }
         //actually draw this layer
         //LOGGER.i("actually drawing layer " + layer);
         boolean allTilesDrawn = true;
-        for (TilePositionInPyramid visibleTile : visibleTiles) {
+        for (TilePositionInPyramid visibleTile : visibleTilesInThisLayer) {
             Bitmap bitmap = mImageManager.getTile(visibleTile, new TileDownloadSuccessListener() {
                 @Override
                 public void onTileDelivered() {
@@ -513,9 +512,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
             invalidate();
         }
 
-        /*if(layer == 0){
-            System.err.println("layer 0");
-        }*/
     }
 
     private void drawTile(Canvas canv, TilePositionInPyramid tileId, Bitmap tileBmp) {
@@ -694,16 +690,22 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
 
-    // TODO: 10.12.15 Jen, pokud je inicializovan. Jinak vratit -1,-1 treba? Nebo vyhodit vyjimku?
-
     @Override
     public int getImageWidth() {
-        return mImageManager.getImageWidth();
+        if (mImageManager != null) {
+            return mImageManager.getImageWidth();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public int getImageHeight() {
-        return mImageManager.getImageHeight();
+        if (mImageManager != null) {
+            return mImageManager.getImageHeight();
+        } else {
+            return 0;
+        }
     }
 
 

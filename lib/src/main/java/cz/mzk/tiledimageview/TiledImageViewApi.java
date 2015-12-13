@@ -37,6 +37,11 @@ public interface TiledImageViewApi {
 
     public void setTileDownloadErrorListener(TileDownloadErrorListener errorListener);
 
+    //STATE
+
+    public void setLowerQuality(boolean lowQuality);
+
+
     //GESTURES
 
     public TiledImageView.SingleTapListener getSingleTapListener();

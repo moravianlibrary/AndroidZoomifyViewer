@@ -23,7 +23,9 @@ import cz.mzk.tiledimageview.images.TiledImageProtocol;
  */
 public class TaskManager {
 
-    public static final int MAX_TASKS_IN_POOL = 40; //for at most 3 TiledImageView instances visible at the same time
+    //hight task pool size will cause taks from other TileImage instances (typically InitImageManagerTask) to wait to long
+    // TODO: 14.12.15 instance ImageManageru se nebude vytvaret cela v tasku, jen samotna inicializace 
+    public static final int MAX_TASKS_IN_POOL = 10;
 
     private static final Logger LOGGER = new Logger(TaskManager.class);
 
