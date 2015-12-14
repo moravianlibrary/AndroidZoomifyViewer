@@ -31,7 +31,7 @@ import cz.mzk.tiledimageview.rectangles.FramingRectangleDrawer;
  * @author Martin Řehánek
  */
 public class TiledImageView extends View implements TiledImageViewApi {
-    public static final boolean DEV_MODE = true;// TODO: 7.12.15 configurable
+    public static final boolean DEV_MODE = false;// TODO: 7.12.15 configurable
     private static final Logger LOGGER = new Logger(TiledImageView.class);
     //STATE
     private boolean mAttachedToWindow = false;
@@ -207,8 +207,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        // TODO: 14.12.15 Tohle se vola z konstruktoru, ale i odsud
-        //poresit treba pres priznak
         initHelpers();
         mAttachedToWindow = true;
         LOGGER.i(buildMethodLog("onAttachedToWindow"));

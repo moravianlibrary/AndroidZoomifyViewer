@@ -14,7 +14,7 @@ import cz.mzk.tiledimageview.Logger;
 public class CacheKeyBuilder {
 
     private static final Logger LOGGER = new Logger(CacheKeyBuilder.class);
-    // TODO: 8.12.15 Profiler a otestovat, jestli ma smysl cachovani
+    //caching seems reasonable - decreseas overall time spent in buildKeyFromUrl (5 % -> 1.5 % for typical use cases) according to profiler. And synchronization doesn't cause much unnecessary blocking.
     private static final boolean CACHE_KEYS = true;
     private static final Object lock = CACHE_KEYS ? new Object() : null;
     private static final char ESCAPE_CHAR = '_';
@@ -55,10 +55,6 @@ public class CacheKeyBuilder {
         return map;
     }
 
-    // TODO: 8.12.15 Tohle trva relativne dlouho. Pri typickem use casu asi 5 % casu, hlavne kvuli vecne se generujicim klicu pro tiles cache
-    // pokud tohle cachovat, tak zase by se to muselo synchronizovat. Krome uzkeho hrdla by mohl hrozit deadlock
-    // zatim to vypada, ze by deadlock nastat nemel.
-    // ale kdyby se jeste escapovaly "http" "ImageProperties.xml", ".jpg" apod. kvuli zkraceni nazvu souboru, tak to mozna budu vhodne
     public static String buildKeyFromUrl(String url) {
         if (CACHE_KEYS) {
             synchronized (lock) {
