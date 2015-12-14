@@ -362,8 +362,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
             mDevTools.setCanvas(canv);
             mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintYellow());
         }
-
-        // TODO: 9.12.15 mImageManager is null, see https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/33
         if (mImageManager != null && mImageManager.isInitialized()) {
             if (mDevTools != null) {
                 mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintBlue());
