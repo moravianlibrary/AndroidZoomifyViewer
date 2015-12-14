@@ -10,9 +10,11 @@ import java.util.concurrent.RejectedExecutionException;
 
 import cz.mzk.tiledimageview.Logger;
 import cz.mzk.tiledimageview.TiledImageView;
-import cz.mzk.tiledimageview.images.ImageManager;
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationListener;
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationSuccessListener;
 import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
+
 
 /**
  * This class registers running AsyncTasks in which tiles for single image are downloaded and saved to cache. Also AsyncTask to initialize image metadata.
@@ -24,22 +26,19 @@ import cz.mzk.tiledimageview.images.TiledImageProtocol;
 public class TaskManager {
 
     //hight task pool size will cause taks from other TileImage instances (typically InitImageManagerTask) to wait to long
-    // TODO: 14.12.15 instance ImageManageru se nebude vytvaret cela v tasku, jen samotna inicializace 
+    // TODO: 14.12.15 instance ImageManageru se nebude vytvaret cela v tasku, jen samotna inicializace
     public static final int MAX_TASKS_IN_POOL = 10;
 
     private static final Logger LOGGER = new Logger(TaskManager.class);
 
-    private final ImageManager mImgManager;
     private final Map<TilePositionInPyramid, DeliverTileIntoMemoryCacheTask> mDeliverTileTasks = new HashMap<>();
 
-    private InitImageManagerTask mInitImageManagerTask;
-    private StoreMetadataIntoDiskCacheTask mStoreMetadataToDiskCacheTask;
+    private DeliverMetadataTask mDeliverMetadataTask;
     private InflateTileMemoryCache mInflateTileMemoryCacheTask;
     private int lastITileMemoryCacheInflatedSize = 0;
 
 
-    public TaskManager(ImageManager imgManager) {
-        this.mImgManager = imgManager;
+    public TaskManager() {
     }
 
 
@@ -56,9 +55,39 @@ public class TaskManager {
     }
 
     @UiThread
-    public void enqueuDeliveringTileIntoMemoryCache(final TilePositionInPyramid tilePosition,
-                                                    final String tileImageUrl,
-                                                    String cacheKey,
+    public void enqueuDeliveringMetadata(TiledImageProtocol protocol, String metadataUrl, String cacheKey,
+                                         MetadataInitializationSuccessListener successListener, MetadataInitializationListener listener) {
+        if (mDeliverMetadataTask == null) {
+            LOGGER.i("enqueuing deliver-metadata task");
+            mDeliverMetadataTask = new DeliverMetadataTask(protocol, metadataUrl, cacheKey, listener, successListener, new TaskListener() {
+
+                @Override
+                public void onFinished(Object... data) {
+                    mDeliverMetadataTask = null;
+                    LOGGER.d("deliver-metadata task finished");
+                }
+
+                @Override
+                public void onCanceled() {
+                    mDeliverMetadataTask = null;
+                    LOGGER.d("deliver-metadata task canceled");
+                }
+            });
+            try {
+                mDeliverMetadataTask.executeConcurrentIfPossible();
+            } catch (RejectedExecutionException e) {
+                LOGGER.w("to many threads in execution pool");
+                mDeliverMetadataTask = null;
+                listener.onCannotExecuteMetadataInitialization(metadataUrl);
+            }
+        } else {
+            LOGGER.d("ignoring deliver-metadata task - already in queue");
+        }
+    }
+
+
+    @UiThread
+    public void enqueuDeliveringTileIntoMemoryCache(final TilePositionInPyramid tilePosition, final String tileImageUrl, String cacheKey,
                                                     TiledImageView.TileDownloadSuccessListener successListener,
                                                     TiledImageView.TileDownloadErrorListener errorListener
     ) {
@@ -95,73 +124,12 @@ public class TaskManager {
         }
     }
 
-    @UiThread
-    public void enqueueMetadataInitialization(TiledImageProtocol protocol, String metadataUrl, TiledImageView.MetadataInitializationListener listener, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        if (mInitImageManagerTask == null) {
-            LOGGER.i("enqueuing metadata-initialization task");
-            mInitImageManagerTask = new InitImageManagerTask(mImgManager, protocol, metadataUrl, listener, successListener, new TaskListener() {
-
-                @Override
-                public void onFinished(Object... data) {
-                    mInitImageManagerTask = null;
-                    LOGGER.d("metadata-initialization task finished");
-                    boolean storeMetadataToDisk = (boolean) data[0];
-                    if (storeMetadataToDisk) {
-                        enqueueMetadataIntoDiskCacheStoreTask((String) data[1], (String) data[2]);
-                    }
-                }
-
-                @Override
-                public void onCanceled() {
-                    mInitImageManagerTask = null;
-                    LOGGER.d("metadata-initialization task canceled");
-                }
-            });
-            try {
-                mInitImageManagerTask.executeConcurrentIfPossible();
-            } catch (RejectedExecutionException e) {
-                LOGGER.w("to many threads in execution pool");
-                mInitImageManagerTask = null;
-                listener.onCannotExecuteMetadataInitialization(metadataUrl);
-            }
-        } else {
-            LOGGER.d("ignoring metadata-initialization task - already in queue");
-        }
-    }
-
-    private void enqueueMetadataIntoDiskCacheStoreTask(String cacheKey, String metadata) {
-        if (mStoreMetadataToDiskCacheTask == null) {
-            LOGGER.i("enqueuing store-metadata-into-disk-cache task");
-            mStoreMetadataToDiskCacheTask = new StoreMetadataIntoDiskCacheTask(cacheKey, metadata, new TaskListener() {
-                @Override
-                public void onFinished(Object... data) {
-                    mStoreMetadataToDiskCacheTask = null;
-                    LOGGER.d("store-metadata-into-disk-cache task finished");
-                }
-
-                @Override
-                public void onCanceled() {
-                    LOGGER.d("store-metadata-into-disk-cache task canceled");
-                    mStoreMetadataToDiskCacheTask = null;
-                }
-            });
-            try {
-                mStoreMetadataToDiskCacheTask.executeConcurrentIfPossible();
-            } catch (RejectedExecutionException e) {
-                LOGGER.w("to many threads in execution pool");
-                mStoreMetadataToDiskCacheTask = null;
-            }
-        }
-    }
 
     @UiThread
     public void cancelAllTasks() {
         LOGGER.d("canceling all tasks");
-        if (mInitImageManagerTask != null) {
-            mInitImageManagerTask.cancel(false);
-        }
-        if (mStoreMetadataToDiskCacheTask != null) {
-            mStoreMetadataToDiskCacheTask.cancel(false);
+        if (mDeliverMetadataTask != null) {
+            mDeliverMetadataTask.cancel(false);
         }
         if (mInflateTileMemoryCacheTask != null) {
             mInflateTileMemoryCacheTask.cancel(false);
@@ -172,7 +140,7 @@ public class TaskManager {
     }
 
     @UiThread
-    public boolean cancel(TilePositionInPyramid tilePositionInPyramid) {
+    public boolean cancelDeliveringTile(TilePositionInPyramid tilePositionInPyramid) {
         DeliverTileIntoMemoryCacheTask task = mDeliverTileTasks.get(tilePositionInPyramid);
         if (task != null) {
             //LOGGER.d(String.format("canceling tile-download task for %s", tilePositionInPyramid.toString()));
@@ -219,7 +187,6 @@ public class TaskManager {
             }
         }
     }
-
 
     public static interface TaskListener {
         @UiThread

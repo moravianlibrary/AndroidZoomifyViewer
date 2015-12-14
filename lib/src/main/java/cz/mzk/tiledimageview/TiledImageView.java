@@ -21,6 +21,7 @@ import cz.mzk.tiledimageview.images.ImageManager;
 import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
 import cz.mzk.tiledimageview.images.cache.CacheManager;
+import cz.mzk.tiledimageview.images.metadata.ImageMetadata;
 import cz.mzk.tiledimageview.images.tasks.TaskManager;
 import cz.mzk.tiledimageview.images.zoomify.ZoomifyImageManager;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
@@ -59,6 +60,8 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
 
     // TILES ACCESS
+    private TiledImageProtocol mtiledImageProtocol;
+    // TODO: 14.12.15 mozna baseUrl a protocol zabalit do objektu
     private String mImageBaseUrl;
     private ImageManager mImageManager;
 
@@ -89,10 +92,12 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     private String buildMethodLog(String method) {
-        return "";
-        //for testing
-        /*int instanceId = hashCode();
-        return String.valueOf(instanceId) + ": " + method;*/
+        if (DEV_MODE) {
+            int instanceId = hashCode();
+            return String.valueOf(instanceId) + ": " + method;
+        } else {
+            return method;
+        }
     }
 
     private void init(Context context) {
@@ -106,8 +111,15 @@ public class TiledImageView extends View implements TiledImageViewApi {
         // TODO: 13.12.15 inicializovat jeste pred taskem inicializujicim CacheManager
         mGestureListener = new MyGestureListener(context, this, mDevTools);
         mFramingRectDrawer = new FramingRectangleDrawer(context);
-        if (mImageBaseUrl != null && mImageManager == null) {
+        if (mImageBaseUrl != null && mImageManager != null) {
             initImageManager();
+        } else {
+            if (mImageBaseUrl == null) {
+                LOGGER.i(buildMethodLog("init: mImageBaseUrl is null"));
+            }
+            if (mImageManager == null) {
+                LOGGER.i(buildMethodLog("init: mImageManager is null"));
+            }
         }
     }
 
@@ -198,6 +210,9 @@ public class TiledImageView extends View implements TiledImageViewApi {
         mAttachedToWindow = true;
         LOGGER.i(buildMethodLog("onAttachedToWindow"));
         mVisible = getVisibility() == VISIBLE;
+        if (mImageBaseUrl != null) {
+            mImageManager = constructImageManager();
+        }
         initCache(getContext());
     }
 
@@ -226,9 +241,9 @@ public class TiledImageView extends View implements TiledImageViewApi {
         super.onVisibilityChanged(changedView, visibility);
         LOGGER.i(buildMethodLog("onVisibilityChanged: " + Utils.visibilityToString(visibility)));
         mVisible = visibility == View.VISIBLE;
-        if (!mVisible && mImageManager != null) {
+        /*if (!mVisible && mImageManager != null) {
             mImageManager.cancelAllTasks();
-        }
+        }*/
         invalidate();
     }
 
@@ -241,9 +256,9 @@ public class TiledImageView extends View implements TiledImageViewApi {
         if (!visible) {
             mVisible = false;
         }
-        if (!mVisible && mImageManager != null) {
+        /*if (!mVisible && mImageManager != null) {
             mImageManager.cancelAllTasks();
-        }
+        }*/
         invalidate();
     }
 
@@ -252,46 +267,67 @@ public class TiledImageView extends View implements TiledImageViewApi {
     public void loadImage(TiledImageProtocol tiledImageProtocol, String baseUrl) {
         //LOGGER.d("loading new image, base url: " + baseUrl);
         LOGGER.d(buildMethodLog("loadImage: " + baseUrl));
-        // TODO: 8.12.15 use tiledImageProtocol when other implementation is available
-        mViewmodeScaleFactorsInitialized = false;
-        mViewmodeShiftInitialized = false;
-        mMinZoomCanvasImagePaddingInitialized = false;
-        mImageBaseUrl = baseUrl;
-        //cancelAllTasks();
-        if (mGestureListener != null) {
-            mGestureListener.reset();
-        }
-        if (CacheManager.isInitialized()) {
-            if (mImageManager == null) {
+        if (mImageBaseUrl == null || !mImageBaseUrl.equals(baseUrl)) {
+            // TODO: 8.12.15 use tiledImageProtocol when other implementation is available
+            mViewmodeScaleFactorsInitialized = false;
+            mViewmodeShiftInitialized = false;
+            mMinZoomCanvasImagePaddingInitialized = false;
+            mImageBaseUrl = baseUrl;
+            mtiledImageProtocol = tiledImageProtocol;
+            if (mGestureListener != null) {
+                mGestureListener.reset();
+            }
+            if (CacheManager.isInitialized()) {
+                if (mImageManager != null) {
+                    mImageManager.cancelAllTasks();
+                }
+                mImageManager = constructImageManager();
                 initImageManager();
             } else {
-                mImageManager.cancelAllTasks();//stary manager
-                mImageManager = null;
-                initImageManager();
+                // TODO: 12.12.15 Inicializuje se imageManager vzdy pozdeji?
             }
-        } else {
-            // TODO: 12.12.15 Inicializuje se imageManager vzdy pozdeji?
+        }
+    }
+
+    private ImageManager constructImageManager() {
+        switch (mtiledImageProtocol) {
+            case ZOOMIFY:
+                return new ZoomifyImageManager(mImageBaseUrl, mPxRatio);
+            default:
+                throw new RuntimeException("unknown protocol " + mtiledImageProtocol.name());
         }
     }
 
     private void initImageManager() {
         LOGGER.d(buildMethodLog("initImageManager"));
-        new ZoomifyImageManager(mImageBaseUrl, mPxRatio).initialize(mMetadataInitializationListener, new MetadataInitializationSuccessListener() {
+        final ImageManager imgManagerUsed = mImageManager;
+        ImageMetadata metadata = mImageManager.getMetadata(new MetadataInitializationSuccessListener() {
 
             @Override
-            public void onMetadataDownloaded(ImageManager imgManager) {
-                LOGGER.i(buildMethodLog("ImageManager initialized"));
-                if (mImageManager == null && imgManager.getImageBaseUrl().equals(mImageBaseUrl)) {
-                    mImageManager = imgManager;// TODO: 13.12.15
-                    if (DEV_MODE) {
-                        mTestPoints = new DevPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
-                    }
-                    invalidate();
+            public void onMetadataFetched(ImageMetadata metadata) {
+                LOGGER.i(buildMethodLog("initImageManager: metadata fetched"));
+                if (imgManagerUsed.equals(mImageManager)) {
+                    initImageManager(metadata);
                 } else {
-                    //nothing, ImageManager for old page was loaded
+                    LOGGER.d(buildMethodLog("initImageManager: ImageManager instance changed, ignoring"));
                 }
             }
-        });
+        }, mMetadataInitializationListener);
+        if (metadata != null) {
+            LOGGER.d(buildMethodLog("initImageManager: metadata!=null"));
+            initImageManager(metadata);
+            mMetadataInitializationListener.onMetadataInitialized();
+        } else {
+            LOGGER.d(buildMethodLog("initImageManager: metadata==null"));
+        }
+    }
+
+    private void initImageManager(ImageMetadata metadata) {
+        LOGGER.d(buildMethodLog("initImageManager (with metadata)"));
+        mImageManager.init(metadata);
+        if (DEV_MODE) {
+            mTestPoints = new DevPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
+        }
     }
 
     @Override
@@ -352,7 +388,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
                     bestLayerId -= 1;
                 }
             }
-            //cancel fetchnig data for layers no longer needed to be drawn now
+            //cancelDeliveringTile fetchnig data for layers no longer needed to be drawn now
             mImageManager.cancelFetchingAllTilesForLayersBiggerThan(bestLayerId);
 
             //draw tiles
@@ -468,7 +504,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private void drawTiles(Canvas canv, int layer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
         //LOGGER.i("drawTiles " + layer);
         List<TilePositionInPyramid> visibleTilesInThisLayer = mImageManager.getVisibleTilesForLayer(layer, visibleAreaInImageCoords);
-        // cancel fetching of not-visible-now tiles within layer
+        // cancelDeliveringTile fetching of not-visible-now tiles within layer
         mImageManager.cancelFetchingTilesForLayerExeptForThese(layer, visibleTilesInThisLayer);
         if (isIdealLayer) {
             // possibly increase memory cache
@@ -505,7 +541,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
         }
         if (allTilesDrawn) {
             if (layer != 0) {
-                // TODO: 13.12.15 cancel loading tiles from lower layers
                 mImageManager.cancelFetchingAllTilesForLayersSmallerThan(layer);
             }
         } else { //make sure it will be redrawn
@@ -692,7 +727,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     @Override
     public int getImageWidth() {
-        if (mImageManager != null) {
+        if (mImageManager != null && mImageManager.isInitialized()) {
             return mImageManager.getImageWidth();
         } else {
             return 0;
@@ -701,7 +736,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
 
     @Override
     public int getImageHeight() {
-        if (mImageManager != null) {
+        if (mImageManager != null && mImageManager.isInitialized()) {
             return mImageManager.getImageHeight();
         } else {
             return 0;
@@ -833,7 +868,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     public interface MetadataInitializationSuccessListener {
-        public void onMetadataDownloaded(ImageManager imgManager);
+        public void onMetadataFetched(ImageMetadata imageManager);
     }
 
 }

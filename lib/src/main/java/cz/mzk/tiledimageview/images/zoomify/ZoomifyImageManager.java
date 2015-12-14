@@ -18,7 +18,10 @@ import cz.mzk.tiledimageview.images.TilePositionInPyramid;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
 import cz.mzk.tiledimageview.images.cache.CacheKeyBuilder;
 import cz.mzk.tiledimageview.images.cache.CacheManager;
+import cz.mzk.tiledimageview.images.cache.MetadataCache;
 import cz.mzk.tiledimageview.images.cache.TileCache;
+import cz.mzk.tiledimageview.images.exceptions.InvalidDataException;
+import cz.mzk.tiledimageview.images.exceptions.OtherIOException;
 import cz.mzk.tiledimageview.images.metadata.ImageMetadata;
 import cz.mzk.tiledimageview.images.tasks.TaskManager;
 
@@ -37,13 +40,14 @@ public class ZoomifyImageManager implements ImageManager {
 
     private static final Logger LOGGER = new Logger(ZoomifyImageManager.class);
 
-    private final TaskManager mTaskManager = new TaskManager(this);
+    private final TaskManager mTaskManager = new TaskManager();
     private final String mBaseUrl;
     private final double mPxRatio;
     private final String mImagePropertiesUrl;
 
     private ImageMetadata mImageMetadata;
     private List<Layer> mLayers;
+    private ImageMetadata mMetadata;
 
 
     /**
@@ -93,8 +97,32 @@ public class ZoomifyImageManager implements ImageManager {
     }
 
     @Override
-    public void initialize(TiledImageView.MetadataInitializationListener listener, TiledImageView.MetadataInitializationSuccessListener successListener) {
-        mTaskManager.enqueueMetadataInitialization(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, listener, successListener);
+    public ImageMetadata getMetadata(TiledImageView.MetadataInitializationSuccessListener successListener, TiledImageView.MetadataInitializationListener listener) {
+        if (mMetadata != null) {
+            return mMetadata;
+        } else {
+            String key = CacheKeyBuilder.buildKeyFromUrl(mImagePropertiesUrl);
+            MetadataCache cache = CacheManager.getMetadataCache();
+            String metadataFromCache = cache.getItemFromMemoryCache(key);
+            if (metadataFromCache != null) {
+                try {
+                    ZoomifyImageMetadata metadata = new ZoomifyMetadataParser().parse(metadataFromCache, mImagePropertiesUrl);
+                    mMetadata = metadata;
+                    return metadata;
+                } catch (InvalidDataException e) {
+                    LOGGER.w("error parsing cached metadata: " + e.getUrl(), e);
+                    mTaskManager.enqueuDeliveringMetadata(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
+                    return null;
+                } catch (OtherIOException e) {
+                    LOGGER.w("error parsing cached metadata: " + e.getUrl(), e);
+                    mTaskManager.enqueuDeliveringMetadata(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
+                    return null;
+                }
+            } else {
+                mTaskManager.enqueuDeliveringMetadata(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
+                return null;
+            }
+        }
     }
 
     @Override
@@ -456,7 +484,7 @@ public class ZoomifyImageManager implements ImageManager {
             if (runningTilePositionInPyramid.getLayer() == layerId) {
                 if (!visibleTiles.contains(runningTilePositionInPyramid)) {
                     // TODO: 13.12.15 Mozna optimalizace: omezit rezii nasobneho volani. Nevracet nic a posilat seznam tileId
-                    boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
+                    boolean wasCanceled = mTaskManager.cancelDeliveringTile(runningTilePositionInPyramid);
                 }
             }
         }
@@ -467,7 +495,7 @@ public class ZoomifyImageManager implements ImageManager {
         for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
             if (runningTilePositionInPyramid.getLayer() < layer) {
                 //LOGGER.i("canceling task " + runningTilePositionInPyramid);
-                boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
+                boolean wasCanceled = mTaskManager.cancelDeliveringTile(runningTilePositionInPyramid);
             }
         }
     }
@@ -477,7 +505,7 @@ public class ZoomifyImageManager implements ImageManager {
         for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
             if (runningTilePositionInPyramid.getLayer() > layer) {
                 //LOGGER.i("canceling task " + runningTilePositionInPyramid);
-                boolean wasCanceled = mTaskManager.cancel(runningTilePositionInPyramid);
+                boolean wasCanceled = mTaskManager.cancelDeliveringTile(runningTilePositionInPyramid);
             }
         }
     }

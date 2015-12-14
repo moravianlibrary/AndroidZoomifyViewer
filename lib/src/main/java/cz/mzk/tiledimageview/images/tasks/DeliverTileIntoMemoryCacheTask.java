@@ -91,7 +91,6 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
             if (!isCancelled()) {
                 tileCache.storeItemToMemoryCache(mCacheKey, fromNet);
                 LOGGER.d("bitmap stored into memory cache");
-                return true;
             }
             //disk
             if (!isCancelled()) {
@@ -99,6 +98,7 @@ public class DeliverTileIntoMemoryCacheTask extends ConcurrentAsyncTask<Void, Vo
                     tileCache.storeItemToDiskCache(mCacheKey, fromNet);
                     LOGGER.d("bitmap stored into disk cache");
                 }
+                return true;
             }
         } else {
             LOGGER.d("fetched from net but null");

@@ -6,7 +6,7 @@ import android.support.annotation.UiThread;
 
 import java.util.List;
 
-import cz.mzk.tiledimageview.TiledImageView;
+import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationListener;
 import cz.mzk.tiledimageview.TiledImageView.MetadataInitializationSuccessListener;
 import cz.mzk.tiledimageview.TiledImageView.TileDownloadErrorListener;
 import cz.mzk.tiledimageview.TiledImageView.TileDownloadSuccessListener;
@@ -18,11 +18,41 @@ import cz.mzk.tiledimageview.images.metadata.ImageMetadata;
 @UiThread
 public interface ImageManager {
 
-    //TASK MANAGEMENT
+    // INITIALIZATION
 
     public void init(ImageMetadata imageMetadata);
 
-    public void initialize(TiledImageView.MetadataInitializationListener listener, MetadataInitializationSuccessListener successListener);
+
+    // METADATA/TILE ACCESS
+
+    /**
+     * Returns metadata if found in member variable or memory cache. Otherwise asyncTask is scheduled to fetch metadata from either disk cache or network.
+     *
+     * @param successListener internal TiledImageView listener
+     * @param listener        client listener
+     * @return
+     */
+    public ImageMetadata getMetadata(MetadataInitializationSuccessListener successListener, MetadataInitializationListener listener);
+
+    /**
+     * @param tilePositionInPyramid
+     * @return true if tile was found in memory cache. Subsequent call to getTile() can still return null becuse bitmap could be removed from cache as a result of another thread accessing the cache.
+     */
+    public boolean tileIsAvailableNow(TilePositionInPyramid tilePositionInPyramid);
+
+    /**
+     * Retuns tile's bitmap if it is found in memory cache. If not, async task to  fetch bitmap from eitger disk cache or network is scheduled.
+     * After this task is finished (and if not canceled) one of sucessListener or errorListener's method is called.
+     *
+     * @param tilePositionInPyramid tile id
+     * @param successListener       internal TiledImageView listener
+     * @param errorListener         client listener
+     * @return
+     */
+    public Bitmap getTile(TilePositionInPyramid tilePositionInPyramid, TileDownloadSuccessListener successListener, TileDownloadErrorListener errorListener);
+
+
+    //CANCELING RUNNING/SCHEDULED TASKS
 
     public void cancelFetchingTilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles);
 
@@ -35,7 +65,7 @@ public interface ImageManager {
     public void cancelAllTasks();
 
 
-    //STATE & IMAGE METADATA
+    //STATE & IMAGE METADATA ACCESS
 
     public boolean isInitialized();
 
@@ -50,7 +80,7 @@ public interface ImageManager {
     public TiledImageProtocol getTiledImageProtocol();
 
 
-    //CORE - computations with tiles
+    //COMPUTATIONS WITH IMAGE METADATA
 
     public int computeBestLayerId(Rect wholeImageInCanvasCoords);
 
@@ -60,23 +90,5 @@ public interface ImageManager {
 
     public String buildTileUrl(TilePositionInPyramid tilePositionInPyramid);
 
-    //TILE ACCCESS
-
-    /**
-     * Retuns tile or null if tile is no longer accessible from memory cache.In this case schedules task to fetch bitmap either from disk or network.
-     * After this task is finished (and if not canceled) one of sucessListener or errorListener's method is called.
-     *
-     * @param tilePositionInPyramid tile id
-     * @param successListener
-     * @param errorListener
-     * @return
-     */
-    public Bitmap getTile(TilePositionInPyramid tilePositionInPyramid, TileDownloadSuccessListener successListener, TileDownloadErrorListener errorListener);
-
-    /**
-     * @param tilePositionInPyramid
-     * @return true if tile was found in memory cache. Subsequent call to getTile() can still return null becuse bitmap could be removed from cache as a result of another thread accessing the cache.
-     */
-    public boolean tileIsAvailableNow(TilePositionInPyramid tilePositionInPyramid);
 
 }
