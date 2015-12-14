@@ -55,8 +55,8 @@ public class TaskManager {
     }
 
     @UiThread
-    public void enqueuDeliveringMetadata(TiledImageProtocol protocol, String metadataUrl, String cacheKey,
-                                         MetadataInitializationSuccessListener successListener, MetadataInitializationListener listener) {
+    public void enqueueMetadataDelivery(TiledImageProtocol protocol, String metadataUrl, String cacheKey,
+                                        MetadataInitializationSuccessListener successListener, MetadataInitializationListener listener) {
         if (mDeliverMetadataTask == null) {
             LOGGER.i("enqueuing deliver-metadata task");
             mDeliverMetadataTask = new DeliverMetadataTask(protocol, metadataUrl, cacheKey, listener, successListener, new TaskListener() {
@@ -87,9 +87,9 @@ public class TaskManager {
 
 
     @UiThread
-    public void enqueuDeliveringTileIntoMemoryCache(final TilePositionInPyramid tilePosition, final String tileImageUrl, String cacheKey,
-                                                    TiledImageView.TileDownloadSuccessListener successListener,
-                                                    TiledImageView.TileDownloadErrorListener errorListener
+    public void enqueueTileDeliveryIntoMemoryCache(final TilePositionInPyramid tilePosition, final String tileImageUrl, String cacheKey,
+                                                   TiledImageView.TileDownloadSuccessListener successListener,
+                                                   TiledImageView.TileDownloadErrorListener errorListener
     ) {
         if (mDeliverTileTasks.size() < MAX_TASKS_IN_POOL) {
             if (!mDeliverTileTasks.containsKey(tilePosition)) {
@@ -140,7 +140,7 @@ public class TaskManager {
     }
 
     @UiThread
-    public boolean cancelDeliveringTile(TilePositionInPyramid tilePositionInPyramid) {
+    public boolean cancelTileDelivery(TilePositionInPyramid tilePositionInPyramid) {
         DeliverTileIntoMemoryCacheTask task = mDeliverTileTasks.get(tilePositionInPyramid);
         if (task != null) {
             //LOGGER.d(String.format("canceling tile-download task for %s", tilePositionInPyramid.toString()));
@@ -152,7 +152,7 @@ public class TaskManager {
     }
 
     @UiThread
-    public Set<TilePositionInPyramid> getAllDeliverTileTaksIds() {
+    public Set<TilePositionInPyramid> getIdsOfAllTileDeliveryTasks() {
         return mDeliverTileTasks.keySet();
     }
 

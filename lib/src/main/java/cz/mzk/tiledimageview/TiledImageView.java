@@ -388,7 +388,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
                     bestLayerId -= 1;
                 }
             }
-            //cancelDeliveringTile fetchnig data for layers no longer needed to be drawn now
+            //cancelTileDelivery fetchnig data for layers no longer needed to be drawn now
             mImageManager.cancelFetchingAllTilesForLayersBiggerThan(bestLayerId);
 
             //draw tiles
@@ -504,7 +504,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private void drawTiles(Canvas canv, int layer, boolean isIdealLayer, Rect visibleAreaInImageCoords) {
         //LOGGER.i("drawTiles " + layer);
         List<TilePositionInPyramid> visibleTilesInThisLayer = mImageManager.getVisibleTilesForLayer(layer, visibleAreaInImageCoords);
-        // cancelDeliveringTile fetching of not-visible-now tiles within layer
+        // cancelTileDelivery fetching of not-visible-now tiles within layer
         mImageManager.cancelFetchingTilesForLayerExeptForThese(layer, visibleTilesInThisLayer);
         if (isIdealLayer) {
             // possibly increase memory cache

@@ -111,15 +111,15 @@ public class ZoomifyImageManager implements ImageManager {
                     return metadata;
                 } catch (InvalidDataException e) {
                     LOGGER.w("error parsing cached metadata: " + e.getUrl(), e);
-                    mTaskManager.enqueuDeliveringMetadata(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
+                    mTaskManager.enqueueMetadataDelivery(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
                     return null;
                 } catch (OtherIOException e) {
                     LOGGER.w("error parsing cached metadata: " + e.getUrl(), e);
-                    mTaskManager.enqueuDeliveringMetadata(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
+                    mTaskManager.enqueueMetadataDelivery(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
                     return null;
                 }
             } else {
-                mTaskManager.enqueuDeliveringMetadata(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
+                mTaskManager.enqueueMetadataDelivery(TiledImageProtocol.ZOOMIFY, mImagePropertiesUrl, key, successListener, listener);
                 return null;
             }
         }
@@ -401,7 +401,7 @@ public class ZoomifyImageManager implements ImageManager {
         if (fromMemoryCache != null) {
             return fromMemoryCache;
         } else {
-            mTaskManager.enqueuDeliveringTileIntoMemoryCache(tilePositionInPyramid, tileUrl, key, successListener, errorListener);
+            mTaskManager.enqueueTileDeliveryIntoMemoryCache(tilePositionInPyramid, tileUrl, key, successListener, errorListener);
             return null;
         }
     }
@@ -475,16 +475,16 @@ public class ZoomifyImageManager implements ImageManager {
    /* @Override
     public void enqueTileDownload(TilePositionInPyramid tilePositionInPyramid, TiledImageView.TileDownloadErrorListener errorListener, TiledImageView.TileDownloadSuccessListener successListener) {
         String tileImageUrl = buildTileUrl(tilePositionInPyramid);
-        mTaskManager.enqueuDeliveringTileIntoMemoryCache(tilePositionInPyramid, tileImageUrl,successListener, errorListener);
+        mTaskManager.enqueueTileDeliveryIntoMemoryCache(tilePositionInPyramid, tileImageUrl,successListener, errorListener);
     }*/
 
     @Override
     public void cancelFetchingTilesForLayerExeptForThese(int layerId, List<TilePositionInPyramid> visibleTiles) {
-        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getIdsOfAllTileDeliveryTasks()) {
             if (runningTilePositionInPyramid.getLayer() == layerId) {
                 if (!visibleTiles.contains(runningTilePositionInPyramid)) {
                     // TODO: 13.12.15 Mozna optimalizace: omezit rezii nasobneho volani. Nevracet nic a posilat seznam tileId
-                    boolean wasCanceled = mTaskManager.cancelDeliveringTile(runningTilePositionInPyramid);
+                    boolean wasCanceled = mTaskManager.cancelTileDelivery(runningTilePositionInPyramid);
                 }
             }
         }
@@ -492,20 +492,20 @@ public class ZoomifyImageManager implements ImageManager {
 
     @Override
     public void cancelFetchingAllTilesForLayersSmallerThan(int layer) {
-        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getIdsOfAllTileDeliveryTasks()) {
             if (runningTilePositionInPyramid.getLayer() < layer) {
                 //LOGGER.i("canceling task " + runningTilePositionInPyramid);
-                boolean wasCanceled = mTaskManager.cancelDeliveringTile(runningTilePositionInPyramid);
+                boolean wasCanceled = mTaskManager.cancelTileDelivery(runningTilePositionInPyramid);
             }
         }
     }
 
     @Override
     public void cancelFetchingAllTilesForLayersBiggerThan(int layer) {
-        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getAllDeliverTileTaksIds()) {
+        for (TilePositionInPyramid runningTilePositionInPyramid : mTaskManager.getIdsOfAllTileDeliveryTasks()) {
             if (runningTilePositionInPyramid.getLayer() > layer) {
                 //LOGGER.i("canceling task " + runningTilePositionInPyramid);
-                boolean wasCanceled = mTaskManager.cancelDeliveringTile(runningTilePositionInPyramid);
+                boolean wasCanceled = mTaskManager.cancelTileDelivery(runningTilePositionInPyramid);
             }
         }
     }
