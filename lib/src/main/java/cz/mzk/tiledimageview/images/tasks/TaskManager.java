@@ -75,7 +75,7 @@ public class TaskManager {
             try {
                 mDeliverMetadataTask.executeConcurrentIfPossible();
             } catch (RejectedExecutionException e) {
-                LOGGER.w("to many threads in execution pool");
+                LOGGER.d("to many threads in execution pool");
                 mDeliverMetadataTask = null;
                 listener.onCannotExecuteMetadataInitialization(metadataUrl);
             }
@@ -119,7 +119,7 @@ public class TaskManager {
                 LOGGER.d(String.format("ignoring tile-download task for '%s' (already in queue)", tileImageUrl));
             }
         } else {
-            LOGGER.w(String.format("ignoring tile-download task for '%s' (queue full - %d items)", tileImageUrl, mDeliverTileTasks.size()));
+            LOGGER.d(String.format("ignoring tile-download task for '%s' (queue full - %d items)", tileImageUrl, mDeliverTileTasks.size()));
         }
     }
 
@@ -178,7 +178,7 @@ public class TaskManager {
                 try {
                     task.executeConcurrentIfPossible();
                 } catch (RejectedExecutionException e) {
-                    LOGGER.w("to many threads in execution pool");
+                    LOGGER.d("to many threads in execution pool");
                     mInflateTileMemoryCacheTask = null;
                 }
             } else {
