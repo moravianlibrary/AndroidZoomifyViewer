@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/action_bar"
@@ -11,76 +11,90 @@
         android:background="?attr/colorPrimary"
         android:elevation="@dimen/action_bar_elevation"
         android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-
-    <!-- <LinearLayout -->
-    <!-- android:layout_width="match_parent" -->
-    <!-- android:layout_height="wrap_content" -->
-    <!-- android:background="#d4c46a" -->
-    <!-- android:gravity="center" -->
-    <!-- android:orientation="vertical" -->
-    <!-- android:padding="10dp"> -->
-
-    <!-- <TextView -->
-    <!-- android:layout_width="wrap_content" -->
-    <!-- android:layout_height="wrap_content" -->
-    <!-- android:text="Examples of data and possible errors" -->
-    <!-- android:textSize="30sp" /> -->
-    <!-- </LinearLayout> -->
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <!-- android:background="#fff2aa" -->
 
+        <!--working-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="4dp">
 
-            <Button
-                android:id="@+id/btnSingleImageWorkingExamples"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Single images (should be all working)" />
+                android:orientation="vertical"
+                android:padding="8dp">
 
-            <Button
-                android:id="@+id/btnImagePropertiesHttpResponseCodes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ImageProperties.xml HTTP response codes" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mostly working"
+                    android:textSize="24sp"/>
 
-            <Button
-                android:id="@+id/btnImagePropertiesRedirectionLoops"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ImageProperties.xml redirection loops" />
+                <Button
+                    android:id="@+id/btnSingleImageWorkingExamples"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Single images"/>
 
-            <Button
-                android:id="@+id/btnImagePropertiesInvalidContent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ImageProperties.xml invalid content" />
+                <Button
+                    android:id="@+id/btnKrameriusMultiplePageExamples"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kramerius (multiple images / document)"/>
 
-            <Button
-                android:id="@+id/btnImagePropertiesOtherErrors"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ImageProperties.xml other errors" />
+                <Button
+                    android:id="@+id/btnSslTest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HTTPS (TLS) test"/>
 
-            <Button
-                android:id="@+id/btnKrameriusMultiplePageExamples"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Kramerius examples (books etc. with multiple pages)" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/btnSslTest"
-                android:layout_width="wrap_content"
+            <!--errors-->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="HTTPS test" />
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Errors"
+                    android:textSize="24sp"/>
+
+                <Button
+                    android:id="@+id/btnImagePropertiesHttpResponseCodes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ImageProperties.xml HTTP response codes"/>
+
+                <Button
+                    android:id="@+id/btnImagePropertiesRedirectionLoops"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ImageProperties.xml redirection loops"/>
+
+                <Button
+                    android:id="@+id/btnImagePropertiesInvalidContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ImageProperties.xml invalid content"/>
+
+                <Button
+                    android:id="@+id/btnImagePropertiesOtherErrors"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ImageProperties.xml other errors"/>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
