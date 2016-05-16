@@ -4,8 +4,9 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -27,19 +28,23 @@ import cz.mzk.tiledimageview.rectangles.FramingRectangle;
 /**
  * @author Martin Řehánek
  */
-public class PageViewerActivity extends FragmentActivity implements EventListener {
+public class PageViewerActivity extends AppCompatActivity implements EventListener {
 
+    public static final String EXTRA_TITLE = "title";
+    public static final String EXTRA_SUBTITLE = "subtitle";
     public static final String EXTRA_PROTOCOL = "protocol";
     public static final String EXTRA_DOMAIN = "domain";
     public static final String EXTRA_TOP_LEVEL_PID = "topLevelPid";
     public static final String EXTRA_PAGE_PIDS = "pagePids";
     private static final String TAG = PageViewerActivity.class.getSimpleName();
+    private String mTitle;
+    private String mSubtitle;
     private String mProtocol;
     private String mDomain;
     private String mTopLevelPid;
     private List<String> mPagePids;
 
-    private View root;
+    private Toolbar mActionBar;
     private View mViewProgressBar;
     private IPageViewerFragment mPageViewerFragment;
     private PageControlsFragment mControlFragment;
@@ -49,7 +54,7 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_page_viewer);
-        root = findViewById(R.id.root);
+        mActionBar = (Toolbar) findViewById(R.id.action_bar);
         mViewProgressBar = findViewById(R.id.viewProgressBar);
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPageViewerFragment = (IPageViewerFragment) fragmentManager.findFragmentById(R.id.fragmentViewer);
@@ -64,6 +69,8 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(EXTRA_TITLE, mTitle);
+        outState.putString(EXTRA_SUBTITLE, mSubtitle);
         outState.putString(EXTRA_PROTOCOL, mProtocol);
         outState.putString(EXTRA_DOMAIN, mDomain);
         outState.putString(EXTRA_TOP_LEVEL_PID, mTopLevelPid);
@@ -77,6 +84,8 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
     private void restoreOrLoadData(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             Log.d(TAG, "restoring data");
+            mTitle = savedInstanceState.getString(EXTRA_TITLE);
+            mSubtitle = savedInstanceState.getString(EXTRA_SUBTITLE);
             mProtocol = savedInstanceState.getString(EXTRA_PROTOCOL);
             mDomain = savedInstanceState.getString(EXTRA_DOMAIN);
             mTopLevelPid = savedInstanceState.getString(EXTRA_TOP_LEVEL_PID);
@@ -102,10 +111,33 @@ public class PageViewerActivity extends FragmentActivity implements EventListene
 
                         }).executeConcurrentIfPossible();
             }
+            initActionBar(mTitle, mSubtitle);
         } else {
             Log.d(TAG, "bundle is null");
         }
     }
+
+    private void initActionBar(String title, String subtitle) {
+        if (mActionBar != null) {
+            setSupportActionBar(mActionBar);
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+            getSupportActionBar().setTitle(title);
+            if (subtitle != null) {
+                getSupportActionBar().setSubtitle(subtitle);
+            }
+            getSupportActionBar().setDisplayUseLogoEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            mActionBar.setNavigationOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        }
+    }
+
 
     private void initPageViewerFragment() {
         Log.d(TAG, "initializing PageViewerFragment");

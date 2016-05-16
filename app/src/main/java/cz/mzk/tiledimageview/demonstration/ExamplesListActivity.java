@@ -15,9 +15,7 @@ public class ExamplesListActivity extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState, String title, String subtitle, ListAdapter adapter) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_examples);
-        // mTitle = (TextView) findViewById(R.id.title);
-        // mTitle.setText("Kramerius multiple page examples");
+        setContentView(R.layout.activity_examples_list);
         mListExamples = (ListView) findViewById(R.id.listExamples);
         mListExamples.setAdapter(adapter);
         // mListExamples.setAdapter(new MyAdapter(this, KrameriusExamplesFactory.getTestTopLevelUrls()));

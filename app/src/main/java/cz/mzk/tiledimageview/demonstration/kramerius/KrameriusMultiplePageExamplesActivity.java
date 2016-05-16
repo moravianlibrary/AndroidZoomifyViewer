@@ -32,13 +32,15 @@ public class KrameriusMultiplePageExamplesActivity extends ExamplesListActivity 
                 KrameriusExamplesFactory.getTestTopLevelUrls()));
     }
 
-    void startFullscreenPagesActivity(String urlStr) {
+    void startFullscreenPagesActivity(String urlStr, String title, String subtitle) {
         try {
             Intent intent = new Intent(this, PageViewerActivity.class);
             KrameriusObjectPersistentUrl url = KrameriusObjectPersistentUrl.valueOf(urlStr);
             intent.putExtra(PageViewerActivity.EXTRA_PROTOCOL, url.getProtocol());
             intent.putExtra(PageViewerActivity.EXTRA_DOMAIN, url.getDomain());
             intent.putExtra(PageViewerActivity.EXTRA_TOP_LEVEL_PID, url.getPid());
+            intent.putExtra(PageViewerActivity.EXTRA_TITLE, title);
+            intent.putExtra(PageViewerActivity.EXTRA_SUBTITLE, subtitle);
             startActivity(intent);
         } catch (ParseException e) {
             Log.e(TAG, "error parsing url", e);
@@ -69,8 +71,11 @@ public class KrameriusMultiplePageExamplesActivity extends ExamplesListActivity 
 
                 @Override
                 public void onClick(View v) {
-                    String url = itemsArrayList.get(position).getUrl();
-                    startFullscreenPagesActivity(url);
+                    MonographExample item = itemsArrayList.get(position);
+                    String url = item.getUrl();
+                    String title = item.getTitle();
+                    String subtitle = item.getSource();
+                    startFullscreenPagesActivity(url, title, subtitle);
                 }
             });
             rowView.setOnLongClickListener(new OnLongClickListener() {
