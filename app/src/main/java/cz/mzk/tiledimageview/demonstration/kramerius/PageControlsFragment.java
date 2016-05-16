@@ -71,7 +71,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         for (ViewMode mode : ViewMode.values()) {
-            adapter.add("mode " + mode.name());
+            adapter.add(mode.name());
         }
         return adapter;
     }

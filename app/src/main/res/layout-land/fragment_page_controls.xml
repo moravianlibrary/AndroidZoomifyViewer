@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:background="#fff2aa"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="5dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:background="#d4c46a"
-        android:padding="15dp"
-        android:text="Controls"
-        android:textSize="30dp"
-        android:textStyle="bold" />
+              android:id="@+id/root"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="#fff2aa"
+              android:gravity="center"
+              android:orientation="vertical"
+              android:padding="5dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/pageCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:text="1/1"
+            android:textSize="25dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -36,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="←"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
 
             <Button
                 android:id="@+id/btnNextPage"
@@ -44,14 +43,9 @@
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="→"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/pageCounter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="25dp" />
 
         <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
         <View
@@ -59,21 +53,22 @@
             android:layout_width="0px"
             android:layout_height="0px"
             android:focusable="true"
-            android:focusableInTouchMode="true" />
+            android:focusableInTouchMode="true"/>
 
         <EditText
             android:id="@+id/editTextSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:enabled="true"
-            android:hint="search"
+            android:hint="@string/hint_search_on_page"
             android:inputType="text"
-            android:singleLine="true" />
+            android:singleLine="true"/>
 
         <Spinner
             android:id="@+id/spinnerViewMode"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
 
