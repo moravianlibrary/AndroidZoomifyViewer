@@ -8,8 +8,8 @@ android {
         applicationId "cz.mzk.tiledimageview.demonstration"
         minSdkVersion 12
         targetSdkVersion 23
-        versionCode 20100
-        versionName "2.1.0"
+        versionCode 20200
+        versionName "2.2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
