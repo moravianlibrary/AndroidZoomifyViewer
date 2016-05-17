@@ -7,11 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -90,9 +90,9 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
             setSupportActionBar(mActionBar);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayUseLogoEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            mActionBar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
-            mActionBar.setNavigationOnClickListener(new OnClickListener() {
+            mActionBar.setNavigationOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
@@ -104,15 +104,17 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
     }
 
     private void createViewModeSpinner() {
-        mViewModeSpinner.setAdapter(new ArrayAdapter<ViewMode>(this, R.layout.menu_item_view_mode, ViewMode.values()));
+        mViewModeSpinner.setAdapter(buildViewmodeSpinnerAdapter());
         mViewModeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                AppConfig.VIEW_MODE = ViewMode.values()[position];
+                ViewMode mode = ViewMode.values()[position];
+                AppConfig.VIEW_MODE = mode;
                 if (mImageView != null) {
                     mImageView.setViewMode(AppConfig.VIEW_MODE);
                     mImageView.loadImage(TiledImageProtocol.ZOOMIFY, mBaseUrl);
+                    mImageView.requestLayout();
                 }
             }
 
@@ -121,6 +123,16 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
                 // nothing
             }
         });
+    }
+
+    private SpinnerAdapter buildViewmodeSpinnerAdapter() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_view_mode);
+        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.item_view_mode_dropdown);
+        for (ViewMode mode : ViewMode.values()) {
+            adapter.add(Utils.toSimplerString(mode));
+        }
+        return adapter;
     }
 
     private void showImage() {

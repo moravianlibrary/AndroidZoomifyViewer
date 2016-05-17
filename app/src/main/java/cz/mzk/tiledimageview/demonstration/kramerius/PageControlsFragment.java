@@ -47,7 +47,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
         mPageCounter = (TextView) mRoot.findViewById(R.id.pageCounter);
         mSpinnerViewMode = (Spinner) mRoot.findViewById(R.id.spinnerViewMode);
         mSpinnerViewMode.setOnItemSelectedListener(this);
-        mSpinnerViewMode.setAdapter(getSpinnerAdapter());
+        mSpinnerViewMode.setAdapter(buildViewmodeSpinnerAdapter());
         mEditTextSearch = (EditText) mRoot.findViewById(R.id.editTextSearch);
         mEditTextSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -68,9 +68,9 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
         return mRoot;
     }
 
-    private SpinnerAdapter getSpinnerAdapter() {
+    private SpinnerAdapter buildViewmodeSpinnerAdapter() {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_view_mode);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.item_view_mode_dropdown);
         for (ViewMode mode : ViewMode.values()) {
             adapter.add(Utils.toSimplerString(mode));
         }

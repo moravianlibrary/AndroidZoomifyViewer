@@ -10,7 +10,7 @@ public class Utils {
     public static String toSimplerString(TiledImageView.ViewMode viewMode) {
         switch (viewMode) {
             case FIT_TO_SCREEN:
-                return "FIT_TO_CONTAINER";
+                return "FIT_IN_CONTAINER";
             case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP:
                 return "FILL_CONTAINER_ALIGN_LEFT_TOP";
             case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER:
@@ -33,4 +33,5 @@ public class Utils {
                 return "";
         }
     }
+
 }

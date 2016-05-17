@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+              android:id="@+id/root"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="center"
+              android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/action_bar"
@@ -15,12 +15,20 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <Spinner
-            android:id="@+id/viewModeSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:padding="5dp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/viewModeSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:padding="4dp"
+                android:popupBackground="@color/white"
+                />
+
+        </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
@@ -39,7 +47,7 @@
             <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:indeterminate="true" />
+                android:indeterminate="true"/>
         </RelativeLayout>
 
         <LinearLayout
@@ -54,27 +62,27 @@
                 android:id="@+id/errorTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="30sp" />
+                android:textSize="30sp"/>
 
             <TextView
                 android:id="@+id/errorDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp" />
+                android:textSize="20sp"/>
 
             <TextView
                 android:id="@+id/errorResourceUrl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/grey_light"
-                android:textSize="15sp" />
+                android:textSize="15sp"/>
         </LinearLayout>
 
         <cz.mzk.tiledimageview.TiledImageView
             android:id="@+id/tiledImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="invisible" />
+            android:visibility="invisible"/>
     </FrameLayout>
 
 </LinearLayout>
