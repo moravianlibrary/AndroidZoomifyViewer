@@ -31,7 +31,6 @@ public class SslTestActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setDisplayUseLogoEnabled(true);
             getSupportActionBar().setTitle("SSL Test");
-            mActionBar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
             mActionBar.setNavigationOnClickListener(new OnClickListener() {
 
                 @Override
