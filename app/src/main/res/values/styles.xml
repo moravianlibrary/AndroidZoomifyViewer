@@ -27,10 +27,11 @@
         <item name="colorPrimary">@color/theme_primary</item>
         <item name="colorPrimaryDark">@color/theme_primary_dark</item>
         <item name="colorAccent">@color/theme_accent</item>
-        <!-- for edittext -->
-        <item name="colorControlNormal">@color/theme_primary</item>
-        <item name="colorControlActivated">@color/theme_primary</item>
-        <item name="colorControlHighlight">@color/theme_primary</item>
+        <!-- for edittext, etc -->
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/theme_accent</item>
+        <item name="colorControlHighlight">@color/theme_primary_light</item>
+
         <!-- <item name="android:windowNoTitle">true</item> -->
         <!-- <item name="windowNoTitle">true</item> -->
         <item name="windowActionBar">false</item>
@@ -39,6 +40,7 @@
 
         <!-- Support library compatibility -->
         <!-- <item name="actionBarStyle">@style/Theme.MyApp.ActionBar</item> -->
+
     </style>
 
     <!-- Application theme. -->

@@ -3,7 +3,7 @@
               android:id="@+id/root"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="#fff2aa"
+              android:background="@color/theme_primary"
               android:gravity="center"
               android:orientation="vertical"
               android:padding="5dp">
@@ -12,15 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        >
 
         <Button
             android:id="@+id/btnPreviousPage"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="false"
             android:text="←"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            />
 
         <TextView
             android:id="@+id/pageCounter"
@@ -28,16 +31,19 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:text="1/1"
+            android:textColor="@color/white"
             android:textSize="25dp"
             />
 
         <Button
             android:id="@+id/btnNextPage"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="false"
             android:text="→"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            />
 
     </LinearLayout>
 
@@ -58,11 +64,15 @@
         android:enabled="true"
         android:hint="@string/hint_search_on_page"
         android:inputType="text"
-        android:singleLine="true"/>
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white_50"
+        />
 
     <Spinner
         android:id="@+id/spinnerViewMode"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"/>
 
 </LinearLayout>

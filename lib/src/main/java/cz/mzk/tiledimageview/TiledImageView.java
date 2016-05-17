@@ -750,7 +750,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         }
     }
 
-
+    //TODO: posibly simplify names, @see cz.mzk.tiledimageview.demonstration.Utils.toSimplerString(ViewMode)
     public enum ViewMode {
         FIT_TO_SCREEN, //
 

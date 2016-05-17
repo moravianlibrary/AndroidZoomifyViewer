@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 import cz.mzk.tiledimageview.demonstration.R;
+import cz.mzk.tiledimageview.demonstration.Utils;
 
 /**
  * @author Martin Řehánek
@@ -68,10 +69,10 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
     }
 
     private SpinnerAdapter getSpinnerAdapter() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_view_mode);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         for (ViewMode mode : ViewMode.values()) {
-            adapter.add(mode.name());
+            adapter.add(Utils.toSimplerString(mode));
         }
         return adapter;
     }

@@ -57,7 +57,7 @@ public class KrameriusExamplesFactory {
                 "Stát československý", "", krameriusMzk));
         result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:36e7c070-4bd3-4bc4-b991-3b66fe16f936",
-                "[Thajský rukopis na palmových listech]", "", krameriusMzk));
+                "Thajský rukopis na palmových listech", "", krameriusMzk));
         result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:b73aff3f-5420-41d5-8adf-e1086492eb80",
                 "Weypis oné žalostné Cesty Gežjsse, Marye, a Jozeffa, do Egipta z Nazaretu : kterak welké Zármutky, Strach, Hlad, Žjžeň, ty tři Swaté Osoby zakusili, a gak welicý Zázrakowé na té Cestě se dáli : Wytažený z Žiwota Krysta Pána, a Panny Marye, a nynj w Pjseň vwedeno",
@@ -74,7 +74,7 @@ public class KrameriusExamplesFactory {
                 krameriusMzk));
         result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:392a9006-1c98-4903-97f4-14212d097c99",
-                "[Administrativ-Karte des Erzherzogthumes Oesterreich ob der Enns]. Blatt 16, Umgebungen von Kirchdorf und Windischgarsten",
+                "Administrativ-Karte des Erzherzogthumes Oesterreich ob der Enns. Blatt 16, Umgebungen von Kirchdorf und Windischgarsten",
                 "", krameriusMzk));
         result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:51ec134e-c700-4125-bfb6-422ebf2cc664",
