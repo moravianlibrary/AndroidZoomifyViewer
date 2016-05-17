@@ -3,25 +3,26 @@
           package="cz.mzk.tiledimageview.demonstration">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!--<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"-->
+    <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" -->
+
 
     <!-- because of https, see http://stackoverflow.com/questions/9475024/httpresponse-using-android-issue-execute-always-causes-exception -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <!-- for profilinig only -->
-    <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
-
+    <!--
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    -->
     <application
-        android:name="cz.mzk.tiledimageview.demonstration.TiledImageViewDemostrationApplication"
+        android:name=".TiledImageViewDemostrationApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-
         <activity
-            android:name="cz.mzk.tiledimageview.demonstration.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -29,21 +30,25 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.FullscreenSingleImageActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesHttpResponseCodeExamplesActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesRedirectionLoopExamplesActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesInvalidContentExamplesActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.ImagePropertiesOtherErrorsExamplesActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.SingleImageWorkingExamplesActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.kramerius.KrameriusMultiplePageExamplesActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.kramerius.PageViewerActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.kramerius.PageMetadataActivity"/>
-        <activity android:name="cz.mzk.tiledimageview.demonstration.ssl.SslTestActivity">
-            <!--<intent-filter>
+        <activity android:name=".FullscreenSingleImageActivity"/>
+        <activity android:name=".ImagePropertiesHttpResponseCodeExamplesActivity"/>
+        <activity android:name=".ImagePropertiesRedirectionLoopExamplesActivity"/>
+        <activity android:name=".ImagePropertiesInvalidContentExamplesActivity"/>
+        <activity android:name=".ImagePropertiesOtherErrorsExamplesActivity"/>
+        <activity android:name=".SingleImageWorkingExamplesActivity"/>
+        <activity android:name=".kramerius.KrameriusMultiplePageExamplesActivity"/>
+        <activity android:name=".kramerius.PageViewerActivity"/>
+        <activity android:name=".kramerius.PageMetadataActivity"/>
+        <activity android:name=".AboutAppActivity"/>
+        <activity android:name=".ssl.SslTestActivity">
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
 
     </application>

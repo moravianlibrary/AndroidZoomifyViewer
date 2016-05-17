@@ -2,9 +2,20 @@
 <resources>
 
     <string name="app_name">TiledImageViewDemonstration</string>
-    <string name="actionbar_title">TiledImageView demonstration</string>
-
+    <string name="tiled_image_view_version">2.1.1</string>
 
     <string name="hint_search_on_page">search on page</string>
+
+    <string name="actionbar_title">TiledImageView demonstration</string>
+    <string name="actionbar_title_about_app">About App</string>
+
+    <!--about app-->
+    <string name="about_app_title">@string/app_name</string>
+    <string name="about_app_paragraph1">This App demonstrates use of TiledImageView library for Android with Zoomify protocol.</string>
+    <string name="about_tiledImageView_version_label">TiledImageView version:</string>
+    <string name="about_app_paragraph2">For more information see project repository on Github:</string>
+    <!--TODO: rename repository on Github-->
+    <string name="about_app_github_link"><a href="https://github.com/moravianlibrary/AndroidZoomifyViewer">https://github.com/moravianlibrary/AndroidZoomifyViewer</a></string>
+
 
 </resources>
