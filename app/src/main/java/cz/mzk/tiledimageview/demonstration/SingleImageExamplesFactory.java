@@ -90,23 +90,25 @@ public class SingleImageExamplesFactory {
 
     public static List<ImageExample> getWorkingExamples() {
         List<ImageExample> result = new ArrayList<>();
-        result.add(new ImageExample("https", "https://docker.mzk.cz/search/zoomify/uuid:c254e63a-82da-11e0-bc9f-0050569d679d/"));
-        result.add(new ImageExample("tiles problem 1", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles/"));
-        result.add(new ImageExample("tiles problem 2", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles2/"));
-        result.add(new ImageExample("tiles problem 3", "http://kramerius.mzk.cz/search/zoomify/uuid:a7ed9c10-4726-4b5b-a5c6-9449bb45c4b7/"));
-        result.add(new ImageExample("tiles problem 4", "http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"));
-        result.add(new ImageExample("tiles problem 5", "http://kramerius.mzk.cz/search/zoomify/uuid:66061a92-8299-4f36-bd23-e119d73a8c7e/"));
+        result.add(new ImageExample("kramerius.mzk.cz", "http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"));
+
         result.add(new ImageExample("mapy.mzk.cz 1", "http://mapy.mzk.cz/AA22/0103/"));
         result.add(new ImageExample("mapy.mzk.cz 2", "http://mapy.mzk.cz/AA22/0104/"));
         result.add(new ImageExample("mapy.mzk.cz 3", "http://mapy.mzk.cz/AA22/0105/"));
-        result.add(new ImageExample("britishpanoramics.com", "http://www.britishpanoramics.com/ZoomifyImage02/"));
+
         result.add(new ImageExample("tricedesigns.com 1", "http://www.tricedesigns.com/panoramas/Pemberton-Park-3/"));
         // erroneous hopefully in data
         result.add(new ImageExample("tricedesigns.com 2", "http://www.tricedesigns.com/panoramas/Pemberton-Park-4/Pemberton-Park-4/"));
         result.add(new ImageExample("tricedesigns.com 3", "http://www.tricedesigns.com/panoramas/office-outside/office-outside/"));
-        result.add(new ImageExample("kramerius.mzk.cz",
-                // "http://kramerius.mzk.cz/search/zoomify/uuid:afdd8ea1-ad6f-474c-9611-152cfd3a14b3/"
-                "http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"));
+
+
+        //result.add(new ImageExample("https", "https://docker.mzk.cz/search/zoomify/uuid:c254e63a-82da-11e0-bc9f-0050569d679d/"));
+        //result.add(new ImageExample("tiles problem 1", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles/"));
+        //result.add(new ImageExample("tiles problem 2", "http://iris.mzk.cz/tiles/example-data-incorrect-tiles2/"));
+        result.add(new ImageExample("tiles problem 3", "http://kramerius.mzk.cz/search/zoomify/uuid:a7ed9c10-4726-4b5b-a5c6-9449bb45c4b7/"));
+        result.add(new ImageExample("tiles problem 4", "http://kramerius.mzk.cz/search/zoomify/uuid:5de8741e-3f83-49f8-b7a6-274e1f49603b/"));
+        result.add(new ImageExample("tiles problem 5", "http://kramerius.mzk.cz/search/zoomify/uuid:66061a92-8299-4f36-bd23-e119d73a8c7e/"));
+        //result.add(new ImageExample("britishpanoramics.com", "http://www.britishpanoramics.com/ZoomifyImage02/"));
         // http://www.fookes.com/ezimager/zoomify/classic/
         result.add(new ImageExample("Gruyère Panorama", "http://www.fookes.com/ezimager/zoomify/104_0486/"));
         result.add(new ImageExample("La Chaudalla, Charmey", "http://www.fookes.com/ezimager/zoomify/109_0977/"));

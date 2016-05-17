@@ -23,12 +23,6 @@ public class KrameriusExamplesFactory {
         ArrayList<MonographExample> result = new ArrayList<MonographExample>();
 
         result.add(new MonographExample(
-                "http://kramerius.mzk.cz/search/handle/uuid:44e2293b-6409-43dc-92af-f661c0369533", "Varujeme!",
-                "white rectangle problem", krameriusMzk));
-        result.add(new MonographExample(
-                "http://krameriusndktest.mzk.cz/search/handle/uuid:0d8192f0-320f-11e2-824c-005056827e51",
-                "Powinnosti manželů, rodičů, hospodářů a poddaných křesťanských", "tiles problem", krameriusNdkMzk));
-        result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:d088d506-97b9-45f1-89e6-b965f90a89e8",
                 "General-Karte des Fürst zu Fürstenbergschen Fideikommissbesitzstandes", "working tiles", krameriusMzk));
         result.add(new MonographExample(
@@ -39,7 +33,7 @@ public class KrameriusExamplesFactory {
                 "Symbiotické zemědělství", "no tiles, no jpegs, just single pdf", krameriusMzk));
         result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:a980edb0-a1e3-11dd-b501-000d606f5dc6",
-                "Mladá fronta (1949)", "no tiles, just jpegs, no rights", krameriusMzk));
+                "Mladá fronta (1949)", "no tiles, just jpegs, no acccess rights", krameriusMzk));
         result.add(new MonographExample(
                 "http://kramerius.mzk.cz/search/handle/uuid:f5a09c95-2fd8-11e0-83a8-0050569d679d", "Máj",
                 "no tiles, just jpegs, working (book)", krameriusMzk));
@@ -83,6 +77,15 @@ public class KrameriusExamplesFactory {
                 "http://kramerius.mzk.cz/search/handle/uuid:e256d5f7-4d86-4324-90f5-4f398b9427c4",
                 "Anti-Alkoran : To gest: Mocnj a nepřemoženj důvodové toho, že Alkorán Turecký z ďábla possel, a to půwodem Aryánů s wědomým proti Duchu Swatému rauhánjm",
                 "", krameriusMzk));
+
+        //possibly problematic
+        result.add(new MonographExample(
+                "http://kramerius.mzk.cz/search/handle/uuid:44e2293b-6409-43dc-92af-f661c0369533", "Varujeme!",
+                "white rectangle problem", krameriusMzk));
+        result.add(new MonographExample(
+                "http://krameriusndktest.mzk.cz/search/handle/uuid:0d8192f0-320f-11e2-824c-005056827e51",
+                "Powinnosti manželů, rodičů, hospodářů a poddaných křesťanských", "tiles problem", krameriusNdkMzk));
+
         // https
         result.add(new MonographExample(
                 "https://docker.mzk.cz/search/handle/uuid:8ffd7a5b-82da-11e0-bc9f-0050569d679d",

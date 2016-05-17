@@ -28,7 +28,7 @@ public class KrameriusMultiplePageExamplesActivity extends ExamplesListActivity 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState, "Kramerius digital library", "multiple page examples", new MyAdapter(this,
+        super.onCreate(savedInstanceState, "Kramerius digital library", "docs with multiple pages (images)", new MyAdapter(this,
                 KrameriusExamplesFactory.getTestTopLevelUrls()));
     }
 
