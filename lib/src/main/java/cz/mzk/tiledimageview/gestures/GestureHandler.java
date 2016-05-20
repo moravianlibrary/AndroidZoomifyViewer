@@ -62,7 +62,7 @@ public class GestureHandler {
             limitedLocalX = limitedGlobalX - totalShift.x;
         }
 
-        if (TiledImageView.DEV_MODE) {
+        if (mDevTools != null) {
             devVisualisePaddingArea(paddingRectCanv);
         }
         return new VectorD(limitedLocalX, limitedLocalY);

@@ -3,6 +3,7 @@ package cz.mzk.tiledimageview;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -31,8 +32,10 @@ import cz.mzk.tiledimageview.rectangles.FramingRectangleDrawer;
  * @author Martin Řehánek
  */
 public class TiledImageView extends View implements TiledImageViewApi {
-    public static final boolean DEV_MODE = false;// TODO: 7.12.15 configurable
+
+    public static final boolean DEV_LOGS = false;
     private static final Logger LOGGER = new Logger(TiledImageView.class);
+
     //STATE
     private boolean mAttachedToWindow = false;
     private boolean mVisible = false;
@@ -58,7 +61,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private double mMaxScaleFactor = -1.0;
 
     //VIEW MODE
-    private ViewMode mViewMode = ViewMode.FIT_TO_SCREEN;
+    private ViewMode mViewMode = ViewMode.FIT_IN_CONTAINER;
 
     // TILES ACCESS
     private TiledImageProtocol mtiledImageProtocol;
@@ -77,29 +80,60 @@ public class TiledImageView extends View implements TiledImageViewApi {
     //FRAMING RECTANGLES
     private FramingRectangleDrawer mFramingRectDrawer;
 
-    //DEV
+    //DEV VISUALISATIONS
+    private boolean mShowDevVisualisations = false;
     private DevTools mDevTools = null;
     private DevPoints mTestPoints = null;
-
 
     public TiledImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         LOGGER.i(buildMethodLog("constructor(Context,AttributeSet)"));
+        processAttrs(context, attrs);
         initHelpers();
         logDeviceScreenCategory();
         logHwAcceleration();
+    }
+
+    private void processAttrs(Context context, AttributeSet attrs) {
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.cz_mzk_tiledimageview_TiledImageView,
+                0, 0);
+        boolean showVisualisations = false;
+        ViewMode viewMode = ViewMode.FIT_IN_CONTAINER;
+        try {
+            mShowDevVisualisations = a.getBoolean(R.styleable.cz_mzk_tiledimageview_TiledImageView_show_dev_visualisations, false);
+            int viewModeId = a.getInt(R.styleable.cz_mzk_tiledimageview_TiledImageView_view_mode, 0);
+            mViewMode = ViewMode.values()[viewModeId];
+        } finally {
+            a.recycle();
+        }
+    }
+
+    public TiledImageView(Context context, boolean showDevVisualisations, ViewMode viewMode) {
+        super(context);
+        LOGGER.i(buildMethodLog("constructor(Context)"));
+        mShowDevVisualisations = showDevVisualisations;
+        mViewMode = viewMode;
+        initHelpers();
+        logDeviceScreenCategory();
+        logHwAcceleration();
+    }
+
+    public TiledImageView(Context context, boolean showDevVisualisations) {
+        this(context, showDevVisualisations, ViewMode.FIT_IN_CONTAINER);
+    }
+
+    public TiledImageView(Context context, ViewMode viewMode) {
+        this(context, false, viewMode);
     }
 
     public TiledImageView(Context context) {
-        super(context);
-        LOGGER.i(buildMethodLog("constructor(Context)"));
-        initHelpers();
-        logDeviceScreenCategory();
-        logHwAcceleration();
+        this(context, false, ViewMode.FIT_IN_CONTAINER);
     }
 
     private String buildMethodLog(String method) {
-        if (DEV_MODE) {
+        if (DEV_LOGS) {
             int instanceId = hashCode();
             return String.valueOf(instanceId) + ": " + method;
         } else {
@@ -220,7 +254,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private void initHelpers() {
         LOGGER.d(buildMethodLog("initHelpers"));
         if (!mHelpersInitialized) {
-            if (DEV_MODE) {
+            if (mShowDevVisualisations) {
                 mDevTools = new DevTools(getContext());
             }
             mGestureListener = new MyGestureListener(getContext(), this, mDevTools);
@@ -342,7 +376,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private void initImageManager(ImageMetadata metadata) {
         LOGGER.d(buildMethodLog("initImageManager (with metadata)"));
         mImageManager.init(metadata);
-        if (DEV_MODE) {
+        if (mShowDevVisualisations) {
             mTestPoints = new DevPoints(mImageManager.getImageWidth(), mImageManager.getImageHeight());
         }
     }
@@ -431,7 +465,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         double scaleFactorFitToScreen = computeScaleFactorFitToScreen(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         double scaleFactorNoFreeSpace = computeScaleFactorNoFreeSpace(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         switch (mViewMode) {
-            case FIT_TO_SCREEN:
+            case FIT_IN_CONTAINER:
                 mInitialScaleFactor = scaleFactorFitToScreen;
                 break;
             default:
@@ -637,34 +671,34 @@ public class TiledImageView extends View implements TiledImageViewApi {
         double yBottom = extraSpaceHeightCanv;
 
         switch (mViewMode) {
-            case FIT_TO_SCREEN:
+            case FIT_IN_CONTAINER:
                 mViewmodeShift = new VectorD(xCenter, yCenter);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP:
+            case FILL_CONTAINER_ALIGN_LEFT_TOP:
                 mViewmodeShift = new VectorD(xLeft, yTop);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER:
+            case FILL_CONTAINER_ALIGN_LEFT_CENTER:
                 mViewmodeShift = new VectorD(xLeft, yCenter);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM:
+            case FILL_CONTAINER_ALIGN_LEFT_BOTTOM:
                 mViewmodeShift = new VectorD(xLeft, yBottom);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP:
+            case FILL_CONTAINER_ALIGN_CENTER_TOP:
                 mViewmodeShift = new VectorD(xCenter, yTop);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER:
+            case FILL_CONTAINER_ALIGN_CENTER_CENTER:
                 mViewmodeShift = new VectorD(xCenter, yCenter);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM:
+            case FILL_CONTAINER_ALIGN_CENTER_BOTTOM:
                 mViewmodeShift = new VectorD(xCenter, yBottom);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP:
+            case FILL_CONTAINER_ALIGN_RIGHT_TOP:
                 mViewmodeShift = new VectorD(xRight, yTop);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER:
+            case FILL_CONTAINER_ALIGN_RIGHT_CENTER:
                 mViewmodeShift = new VectorD(xRight, yCenter);
                 break;
-            case NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM:
+            case FILL_CONTAINER_ALIGN_RIGHT_BOTTOM:
                 mViewmodeShift = new VectorD(xRight, yBottom);
                 break;
         }
@@ -750,21 +784,20 @@ public class TiledImageView extends View implements TiledImageViewApi {
         }
     }
 
-    //TODO: posibly simplify names, @see cz.mzk.tiledimageview.demonstration.Utils.toSimplerString(ViewMode)
     public enum ViewMode {
-        FIT_TO_SCREEN, //
+        FIT_IN_CONTAINER, //
 
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_TOP, //
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_CENTER, //
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_LEFT_VERTICAL_BOTTOM, //
+        FILL_CONTAINER_ALIGN_LEFT_TOP, //
+        FILL_CONTAINER_ALIGN_LEFT_CENTER, //
+        FILL_CONTAINER_ALIGN_LEFT_BOTTOM, //
 
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_TOP, //
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_CENTER, //
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_CENTER_VERTICAL_BOTTOM, //
+        FILL_CONTAINER_ALIGN_CENTER_TOP, //
+        FILL_CONTAINER_ALIGN_CENTER_CENTER, //
+        FILL_CONTAINER_ALIGN_CENTER_BOTTOM, //
 
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_TOP, //
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_CENTER, //
-        NO_FREE_SPACE_ALIGN_HORIZONTAL_RIGHT_VERTICAL_BOTTOM, //
+        FILL_CONTAINER_ALIGN_RIGHT_TOP, //
+        FILL_CONTAINER_ALIGN_RIGHT_CENTER, //
+        FILL_CONTAINER_ALIGN_RIGHT_BOTTOM, //
     }
 
     public interface SingleTapListener {

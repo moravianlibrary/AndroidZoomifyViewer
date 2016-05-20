@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="cz.mzk.tiledimageview.TiledImageView">
+        <attr name="show_dev_visualisations" format="boolean"/>
+        <attr name="view_mode" format="enum">
+            <!--Must match values in cz.mzk.tiledimageviewTiledImageView.ViewMode-->
+            <enum name="fit_in_container" value="0"/>
+            <enum name="fill_container_align_left_top" value="1"/>
+            <enum name="fill_container_align_left_center" value="2"/>
+            <enum name="fill_container_align_left_bottom" value="3"/>
+            <enum name="fill_container_align_center_top" value="4"/>
+            <enum name="fill_container_align_center_center" value="5"/>
+            <enum name="fill_container_align_center_bottom" value="6"/>
+            <enum name="fill_container_align_right_top" value="7"/>
+            <enum name="fill_container_align_right_center" value="8"/>
+            <enum name="fill_container_align_right_bottom" value="9"/>
+        </attr>
+    </declare-styleable>
+
+</resources>

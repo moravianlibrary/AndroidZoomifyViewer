@@ -5,7 +5,7 @@ import android.util.Log;
 /**
  * @author Martin Řehánek
  *         <p/>
- *         Logger that creates log for given level only if {@link TiledImageView#DEV_MODE} is true or
+ *         Logger that creates log for given level only if {@link TiledImageView#DEV_LOGS} is true or
  *         {@link #PRODUCTION_LOG_LEVEL} is smaller or equal to given level.
  */
 @SuppressWarnings("unused")
@@ -35,73 +35,73 @@ public class Logger {
     }
 
     public void d(String msg) {
-        if (PRODUCTION_DEBUG || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_DEBUG || TiledImageView.DEV_LOGS) {
             Log.d(mTag, msg);
         }
     }
 
     public void d(String msg, Throwable e) {
-        if (PRODUCTION_DEBUG || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_DEBUG || TiledImageView.DEV_LOGS) {
             Log.d(mTag, msg, e);
         }
     }
 
     public void e(String msg) {
-        if (PRODUCTION_ERROR || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_ERROR || TiledImageView.DEV_LOGS) {
             Log.e(mTag, msg);
         }
     }
 
     public void e(String msg, Throwable e) {
-        if (PRODUCTION_ERROR || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_ERROR || TiledImageView.DEV_LOGS) {
             Log.e(mTag, msg, e);
         }
     }
 
     public void i(String msg) {
-        if (PRODUCTION_INFO || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_INFO || TiledImageView.DEV_LOGS) {
             Log.i(mTag, msg);
         }
     }
 
     public void i(String msg, Throwable e) {
-        if (PRODUCTION_INFO || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_INFO || TiledImageView.DEV_LOGS) {
             Log.i(mTag, msg, e);
         }
     }
 
     public void v(String msg) {
-        if (PRODUCTION_VERBOSE || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_VERBOSE || TiledImageView.DEV_LOGS) {
             Log.v(mTag, msg);
         }
     }
 
     public void v(String msg, Throwable e) {
-        if (PRODUCTION_VERBOSE || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_VERBOSE || TiledImageView.DEV_LOGS) {
             Log.v(mTag, msg, e);
         }
     }
 
     public void w(String msg) {
-        if (PRODUCTION_WARN || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_WARN || TiledImageView.DEV_LOGS) {
             Log.w(mTag, msg);
         }
     }
 
     public void w(String msg, Throwable e) {
-        if (PRODUCTION_WARN || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_WARN || TiledImageView.DEV_LOGS) {
             Log.w(mTag, msg, e);
         }
     }
 
     public void wtf(String msg) {
-        if (PRODUCTION_ASSERT || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_ASSERT || TiledImageView.DEV_LOGS) {
             Log.wtf(mTag, msg);
         }
     }
 
     public void wtf(String msg, Throwable e) {
-        if (PRODUCTION_ASSERT || TiledImageView.DEV_MODE) {
+        if (PRODUCTION_ASSERT || TiledImageView.DEV_LOGS) {
             Log.wtf(mTag, msg, e);
         }
     }
