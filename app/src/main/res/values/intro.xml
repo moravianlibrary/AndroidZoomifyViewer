@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <color name="intro_title_color">@color/white</color>
+    <dimen name="intro_title_textsize">25sp</dimen>
+
+    <color name="intro_text_color">@color/white</color>
+    <dimen name="intro_text_textsize">20sp</dimen>
+
+
+    <string name="intro_tiles_title">Tiled Image View</string>
+    <string name="intro_tiles_text">Picture is being downloaded dynamically by tiles by protocol Zoomify.</string>
+
+    <string name="intro_tiles_text1">* image in scaled-down versions is cut into tiles</string>
+    <string name="intro_tiles_text2">* right tiles are fetched as needed</string>
+    <string name="intro_tiles_text3">* tile structure is defined by Zoomify</string>
+
+    <string name="intro_btn_try_it">Try it</string>
+</resources>

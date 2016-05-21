@@ -25,6 +25,10 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile "junit:junit:4.12"
@@ -51,4 +55,6 @@ dependencies {
 
     //compile files('libs/jaxen-1.1.6.jar')
     compile "jaxen:jaxen:1.1.4"
+
+    compile "com.github.paolorotolo:appintro:3.4.0"
 }
