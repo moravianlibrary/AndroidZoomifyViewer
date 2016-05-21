@@ -25,7 +25,7 @@ public class IntroActivity extends AppIntro {
         addSlide(fourth_fragment);*/
 
 //        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        IntroTiles fragment = new IntroTiles();
+        IntroTilesFragment fragment = new IntroTilesFragment();
 //        trans.add(fragment, "intro1");
 //        trans.commit();
 

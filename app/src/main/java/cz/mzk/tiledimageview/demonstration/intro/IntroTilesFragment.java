@@ -1,5 +1,6 @@
 package cz.mzk.tiledimageview.demonstration.intro;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -7,12 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import cz.mzk.tiledimageview.demonstration.R;
 
 
-public class IntroTiles extends Fragment implements View.OnClickListener {
+public class IntroTilesFragment extends Fragment implements View.OnClickListener {
 
     private Button mBtnTry;
 
@@ -30,7 +30,7 @@ public class IntroTiles extends Fragment implements View.OnClickListener {
         if (mBtnTry == v) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                Toast.makeText(activity, "TODO: aktivita s fullscreen obrazkem a mrizkou", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(activity, IntroTilesActivity.class));
             }
         }
 
