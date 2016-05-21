@@ -17,5 +17,4 @@
     <!--TODO: rename repository on Github-->
     <string name="about_app_github_link"><a href="https://github.com/moravianlibrary/AndroidZoomifyViewer">https://github.com/moravianlibrary/AndroidZoomifyViewer</a></string>
 
-
 </resources>
