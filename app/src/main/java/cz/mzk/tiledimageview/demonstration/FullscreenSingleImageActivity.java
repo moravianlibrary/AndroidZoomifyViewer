@@ -130,7 +130,7 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.item_view_mode_dropdown);
         for (ViewMode mode : ViewMode.values()) {
-            adapter.add(Utils.toSimplerString(mode));
+            adapter.add(mode.name());
         }
         return adapter;
     }

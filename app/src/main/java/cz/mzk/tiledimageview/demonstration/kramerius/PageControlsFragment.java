@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import cz.mzk.tiledimageview.TiledImageView.ViewMode;
 import cz.mzk.tiledimageview.demonstration.R;
-import cz.mzk.tiledimageview.demonstration.Utils;
 
 /**
  * @author Martin Řehánek
@@ -72,7 +71,7 @@ public class PageControlsFragment extends Fragment implements OnClickListener, O
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.item_view_mode);
         adapter.setDropDownViewResource(R.layout.item_view_mode_dropdown);
         for (ViewMode mode : ViewMode.values()) {
-            adapter.add(Utils.toSimplerString(mode));
+            adapter.add(mode.name());
         }
         return adapter;
     }
