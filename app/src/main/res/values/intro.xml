@@ -8,13 +8,28 @@
     <color name="intro_text_color">@color/white</color>
     <dimen name="intro_text_textsize">20sp</dimen>
 
+    <string name="intro_btn_try_it">Try it</string>
 
+    <!--Tiled Image View-->
     <string name="intro_tiles_title">Tiled Image View</string>
-    <string name="intro_tiles_text">Picture is being downloaded dynamically by tiles by protocol Zoomify.</string>
-
     <string name="intro_tiles_text1">* image in scaled-down versions is cut into tiles</string>
     <string name="intro_tiles_text2">* right tiles are fetched as needed</string>
     <string name="intro_tiles_text3">* tile structure is defined by Zoomify</string>
 
-    <string name="intro_btn_try_it">Try it</string>
+    <dimen name="intro_tiles_thumb_size">224dp</dimen>
+
+    <!--Gestures-->
+
+    <string name="intro_gestures_title">Gestures</string>
+    <string name="intro_gestures_text1">* zoom: pinch/unpinch, double tap</string>
+    <string name="intro_gestures_text2">* image shifting: multitouch scroll, swipe</string>
+    <string name="intro_gestures_text3">* single tap: callback with coordinates</string>
+
+    <!--totally 72*3 + 2*6 = 228-->
+    <!--but padding 2 on each side is why intro_tiles_thumb_size is smaller by 4-->
+    <!--<dimen name="intro_gestures_thumb_size">228dp</dimen>-->
+    <dimen name="intro_gestures_image_size">72dp</dimen>
+    <dimen name="intro_gestures_image_margin">2dp</dimen>
+
+
 </resources>

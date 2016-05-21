@@ -7,12 +7,11 @@
 
     <ImageView
         android:id="@+id/thumbnail"
-        android:layout_width="224dp"
-        android:layout_height="224dp"
+        android:layout_width="@dimen/intro_tiles_thumb_size"
+        android:layout_height="@dimen/intro_tiles_thumb_size"
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
         android:background="@color/white"
-        android:padding="8dp"
         android:scaleType="centerInside"
         android:src="@drawable/pyramid"/>
 

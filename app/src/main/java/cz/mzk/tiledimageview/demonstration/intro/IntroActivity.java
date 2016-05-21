@@ -19,18 +19,8 @@ public class IntroActivity extends AppIntro {
 
         // Add your slide's fragments here.
         // AppIntro will automatically generate the dots indicator and buttons.
-        /*addSlide(first_fragment);
-        addSlide(second_fragment);
-        addSlide(third_fragment);
-        addSlide(fourth_fragment);*/
-
-//        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        IntroTilesFragment fragment = new IntroTilesFragment();
-//        trans.add(fragment, "intro1");
-//        trans.commit();
-
-        addSlide(fragment);
-
+        addSlide(new IntroTilesFragment());
+        addSlide(new IntroGesturesFragment());
 
         // Instead of fragments, you can also use our default slide
         // Just set a title, description, background and image. AppIntro will do the rest.

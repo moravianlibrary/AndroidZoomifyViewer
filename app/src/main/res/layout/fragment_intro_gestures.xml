@@ -1,0 +1,177 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".intro.IntroTilesFragment">
+
+    <!--<ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="224dp"
+        android:layout_height="224dp"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
+        android:background="@color/white"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/pyramid"/>-->
+
+    <TableLayout
+        android:id="@+id/thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+
+
+        >
+
+        <!--android:layout_width="@dimen/intro_gestures_thumb_size"
+android:layout_height="@dimen/intro_gestures_thumb_size"-->
+
+        <!--android:background="@color/red"-->
+
+        <!--72*3 + 2*6 = 228-->
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_pinch"
+                />
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_unpinch"
+                />
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_double_tap"
+                />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_tap"
+                />
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+
+                />
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_two_finger_scroll"
+                />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_scroll"
+                />
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_pan"
+                />
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"
+                android:src="@drawable/gestures_flick"
+                />
+
+        </TableRow>
+
+
+    </TableLayout>
+
+
+    <Button
+        android:id="@+id/btnTry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/thumbnail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp"
+        android:text="@string/intro_btn_try_it"/>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="@string/intro_gestures_title"
+        android:textColor="@color/intro_title_color"
+        android:textSize="@dimen/intro_title_textsize"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:orientation="vertical"
+        android:padding="8dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intro_gestures_text1"
+            android:textColor="@color/intro_text_color"
+            android:textSize="@dimen/intro_text_textsize"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intro_gestures_text2"
+            android:textColor="@color/intro_text_color"
+            android:textSize="@dimen/intro_text_textsize"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intro_gestures_text3"
+            android:textColor="@color/intro_text_color"
+            android:textSize="@dimen/intro_text_textsize"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>
+
+
