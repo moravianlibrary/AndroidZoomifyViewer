@@ -99,8 +99,6 @@ public class TiledImageView extends View implements TiledImageViewApi {
                 attrs,
                 R.styleable.cz_mzk_tiledimageview_TiledImageView,
                 0, 0);
-        boolean showVisualisations = false;
-        ViewMode viewMode = ViewMode.FIT_IN_CONTAINER;
         try {
             mShowDevVisualisations = a.getBoolean(R.styleable.cz_mzk_tiledimageview_TiledImageView_show_dev_visualisations, false);
             int viewModeId = a.getInt(R.styleable.cz_mzk_tiledimageview_TiledImageView_view_mode, 0);
