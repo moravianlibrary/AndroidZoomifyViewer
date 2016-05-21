@@ -31,9 +31,9 @@ dependencies {
     //compile project(path: ':backend', configuration: 'android-endpoints')
 
     //development tiledImageView
-    //compile project(':lib')
+    compile project(':lib')
     //production tiledImageView
-    compile "cz.mzk.tiledimageview:tiled-image-view:2.2.1"
+    //compile "cz.mzk.tiledimageview:tiled-image-view:2.2.1"
 
 
     def android_support_version = '23.4.0'

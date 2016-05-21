@@ -61,7 +61,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     private double mMaxScaleFactor = -1.0;
 
     //VIEW MODE
-    private ViewMode mViewMode = ViewMode.FIT_IN_CONTAINER;
+    private ViewMode mViewMode = ViewMode.FIT_IN_VIEW;
 
     // TILES ACCESS
     private TiledImageProtocol mtiledImageProtocol;
@@ -119,7 +119,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     public TiledImageView(Context context, boolean showDevVisualisations) {
-        this(context, showDevVisualisations, ViewMode.FIT_IN_CONTAINER);
+        this(context, showDevVisualisations, ViewMode.FIT_IN_VIEW);
     }
 
     public TiledImageView(Context context, ViewMode viewMode) {
@@ -127,7 +127,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     public TiledImageView(Context context) {
-        this(context, false, ViewMode.FIT_IN_CONTAINER);
+        this(context, false, ViewMode.FIT_IN_VIEW);
     }
 
     private String buildMethodLog(String method) {
@@ -463,7 +463,7 @@ public class TiledImageView extends View implements TiledImageViewApi {
         double scaleFactorFitToScreen = computeScaleFactorFitToScreen(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         double scaleFactorNoFreeSpace = computeScaleFactorNoFreeSpace(canv.getWidth(), canv.getHeight(), imgWidth, imgHeight);
         switch (mViewMode) {
-            case FIT_IN_CONTAINER:
+            case FIT_IN_VIEW:
                 mInitialScaleFactor = scaleFactorFitToScreen;
                 break;
             default:
@@ -669,34 +669,34 @@ public class TiledImageView extends View implements TiledImageViewApi {
         double yBottom = extraSpaceHeightCanv;
 
         switch (mViewMode) {
-            case FIT_IN_CONTAINER:
+            case FIT_IN_VIEW:
                 mViewmodeShift = new VectorD(xCenter, yCenter);
                 break;
-            case FILL_CONTAINER_ALIGN_LEFT_TOP:
+            case FILL_VIEW_ALIGN_LEFT_TOP:
                 mViewmodeShift = new VectorD(xLeft, yTop);
                 break;
-            case FILL_CONTAINER_ALIGN_LEFT_CENTER:
+            case FILL_VIEW_ALIGN_LEFT_CENTER:
                 mViewmodeShift = new VectorD(xLeft, yCenter);
                 break;
-            case FILL_CONTAINER_ALIGN_LEFT_BOTTOM:
+            case FILL_VIEW_ALIGN_LEFT_BOTTOM:
                 mViewmodeShift = new VectorD(xLeft, yBottom);
                 break;
-            case FILL_CONTAINER_ALIGN_CENTER_TOP:
+            case FILL_VIEW_ALIGN_CENTER_TOP:
                 mViewmodeShift = new VectorD(xCenter, yTop);
                 break;
-            case FILL_CONTAINER_ALIGN_CENTER_CENTER:
+            case FILL_VIEW_ALIGN_CENTER_CENTER:
                 mViewmodeShift = new VectorD(xCenter, yCenter);
                 break;
-            case FILL_CONTAINER_ALIGN_CENTER_BOTTOM:
+            case FILL_VIEW_ALIGN_CENTER_BOTTOM:
                 mViewmodeShift = new VectorD(xCenter, yBottom);
                 break;
-            case FILL_CONTAINER_ALIGN_RIGHT_TOP:
+            case FILL_VIEW_ALIGN_RIGHT_TOP:
                 mViewmodeShift = new VectorD(xRight, yTop);
                 break;
-            case FILL_CONTAINER_ALIGN_RIGHT_CENTER:
+            case FILL_VIEW_ALIGN_RIGHT_CENTER:
                 mViewmodeShift = new VectorD(xRight, yCenter);
                 break;
-            case FILL_CONTAINER_ALIGN_RIGHT_BOTTOM:
+            case FILL_VIEW_ALIGN_RIGHT_BOTTOM:
                 mViewmodeShift = new VectorD(xRight, yBottom);
                 break;
         }
@@ -783,19 +783,19 @@ public class TiledImageView extends View implements TiledImageViewApi {
     }
 
     public enum ViewMode {
-        FIT_IN_CONTAINER, //
+        FIT_IN_VIEW, //
 
-        FILL_CONTAINER_ALIGN_LEFT_TOP, //
-        FILL_CONTAINER_ALIGN_LEFT_CENTER, //
-        FILL_CONTAINER_ALIGN_LEFT_BOTTOM, //
+        FILL_VIEW_ALIGN_LEFT_TOP, //
+        FILL_VIEW_ALIGN_LEFT_CENTER, //
+        FILL_VIEW_ALIGN_LEFT_BOTTOM, //
 
-        FILL_CONTAINER_ALIGN_CENTER_TOP, //
-        FILL_CONTAINER_ALIGN_CENTER_CENTER, //
-        FILL_CONTAINER_ALIGN_CENTER_BOTTOM, //
+        FILL_VIEW_ALIGN_CENTER_TOP, //
+        FILL_VIEW_ALIGN_CENTER_CENTER, //
+        FILL_VIEW_ALIGN_CENTER_BOTTOM, //
 
-        FILL_CONTAINER_ALIGN_RIGHT_TOP, //
-        FILL_CONTAINER_ALIGN_RIGHT_CENTER, //
-        FILL_CONTAINER_ALIGN_RIGHT_BOTTOM, //
+        FILL_VIEW_ALIGN_RIGHT_TOP, //
+        FILL_VIEW_ALIGN_RIGHT_CENTER, //
+        FILL_VIEW_ALIGN_RIGHT_BOTTOM, //
     }
 
     public interface SingleTapListener {

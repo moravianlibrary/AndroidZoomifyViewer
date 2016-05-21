@@ -9,6 +9,6 @@ public class AppConfig {
 
     public static final boolean DEV_MODE_CLEAR_CACHE_ON_STARTUP = false;
     public static boolean DEV_MODE = true;
-    public static ViewMode VIEW_MODE = ViewMode.FIT_IN_CONTAINER;
+    public static ViewMode VIEW_MODE = ViewMode.FIT_IN_VIEW;
 
 }
