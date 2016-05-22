@@ -8,15 +8,16 @@
     <color name="intro_text_color">@color/white</color>
     <dimen name="intro_text_textsize">20sp</dimen>
 
-    <string name="intro_btn_try_it">Try it</string>
+    <string name="intro_btn_try_it">Show me</string>
+    <dimen name="intro_thumb_size">224dp</dimen>
 
     <!--Tiled Image View-->
+
     <string name="intro_tiles_title">Tiled Image View</string>
     <string name="intro_tiles_text1">* image in scaled-down versions is cut into tiles</string>
     <string name="intro_tiles_text2">* right tiles are fetched as needed</string>
     <string name="intro_tiles_text3">* tile structure is defined by Zoomify</string>
 
-    <dimen name="intro_tiles_thumb_size">224dp</dimen>
 
     <!--Gestures-->
 
@@ -31,5 +32,22 @@
     <dimen name="intro_gestures_image_size">72dp</dimen>
     <dimen name="intro_gestures_image_margin">2dp</dimen>
 
+    <!--ViewMode-->
+    <string name="intro_viewmode_title">View Mode</string>
+    <string name="intro_viewmode_text1">* image aspect ratio is unknown in layout creation</string>
+    <string name="intro_viewmode_text2">* ViewMode defines how image will be mapped into the view</string>
+    <string name="intro_viewmode_text3">* TODO</string>
+
+    <!--Rectangles-->
+    <string name="intro_rectangles_title">Rectangles</string>
+    <string name="intro_rectangles_text1">* define rectangle to mark area</string>
+    <string name="intro_rectangles_text2">* digitized text: fulltext results, notes</string>
+    <string name="intro_rectangles_text3">* configurable background color, border width and color</string>
+
+    <!--Caching-->
+    <string name="intro_caching_title">Caching</string>
+    <string name="intro_caching_text1">* caching images (tiles) and metadata</string>
+    <string name="intro_caching_text2">* memory and disk cache</string>
+    <string name="intro_caching_text3">* configurable size, cache shared among all views</string>
 
 </resources>

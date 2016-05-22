@@ -57,7 +57,7 @@ public class IntroGestureActivity extends AppCompatActivity implements TiledImag
 
     @Override
     public void onSingleTap(float x, float y, Rect boundingBox) {
-        String message = String.format("single tap at: [%d,%d]\nbounding box: %s", (int) x, (int) y, boundingBox);
+        String message = String.format("single tap at: [%d,%d], bounding box: %s", (int) x, (int) y, boundingBox);
         Snackbar.make(mContainer, message, Snackbar.LENGTH_LONG)
                 .show();
     }

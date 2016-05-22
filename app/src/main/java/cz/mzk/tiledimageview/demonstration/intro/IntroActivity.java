@@ -1,11 +1,11 @@
 package cz.mzk.tiledimageview.demonstration.intro;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.github.paolorotolo.appintro.AppIntro;
-import com.github.paolorotolo.appintro.AppIntroFragment;
 
+import cz.mzk.tiledimageview.demonstration.MainActivity;
 import cz.mzk.tiledimageview.demonstration.R;
 
 /**
@@ -19,41 +19,37 @@ public class IntroActivity extends AppIntro {
 
         // Add your slide's fragments here.
         // AppIntro will automatically generate the dots indicator and buttons.
-        addSlide(new IntroGesturesFragment());
-        addSlide(new IntroTilesFragment());
 
-
-        // Instead of fragments, you can also use our default slide
-        // Just set a title, description, background and image. AppIntro will do the rest.
-        //addSlide(AppIntroFragment.newInstance(title, description, image, background_colour));
-        addSlide(AppIntroFragment.newInstance("second", "red", R.mipmap.ic_launcher, R.color.red));
-        addSlide(AppIntroFragment.newInstance("third", "green", R.mipmap.ic_launcher, R.color.green));
-        addSlide(AppIntroFragment.newInstance("fourth", "blue", R.mipmap.ic_launcher, R.color.blue));
-
+        addSlide(new IntroTilesFragment());//1
+        addSlide(new IntroGesturesFragment());//2
+        addSlide(new IntroViewmodeFragment());//3
+        addSlide(new IntroRectanglesFragment());//4
+        addSlide(new IntroCachingFragment());//5
 
         // OPTIONAL METHODS
         // Override bar/separator color.
-        setBarColor(Color.parseColor("#3F51B5"));
-        setSeparatorColor(Color.parseColor("#2196F3"));
+        setBarColor(getResources().getColor(R.color.theme_primary));
+        setSeparatorColor(getResources().getColor(R.color.theme_primary_dark));
+        //setSeparatorColor(getResources().getColor(R.color.theme_primary_light));
 
         // Hide Skip/Done button.
-        showSkipButton(false);
-        setProgressButtonEnabled(false);
+        showSkipButton(true);
+        setProgressButtonEnabled(true);
 
         // Turn vibration on and set intensity.
         // NOTE: you will probably need to ask VIBRATE permisssion in Manifest.
-        setVibrate(true);
-        setVibrateIntensity(30);
+        setVibrate(false);
+        //setVibrateIntensity(30);
     }
 
     @Override
     public void onSkipPressed() {
-        // Do something when users tap on Skip button.
+        startActivity(new Intent(this, MainActivity.class));
     }
 
     @Override
     public void onDonePressed() {
-        // Do something when users tap on Done button.
+        startActivity(new Intent(this, MainActivity.class));
     }
 
     @Override

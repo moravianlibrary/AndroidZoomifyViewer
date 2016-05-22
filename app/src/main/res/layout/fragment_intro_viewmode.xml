@@ -13,7 +13,8 @@
         android:adjustViewBounds="true"
         android:background="@color/white"
         android:scaleType="centerInside"
-        android:src="@drawable/pyramid"/>
+        android:src="@drawable/viewmode_thumb"
+        />
 
     <Button
         android:id="@+id/btnTry"
@@ -31,7 +32,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:text="@string/intro_tiles_title"
+        android:text="@string/intro_viewmode_title"
         android:textColor="@color/intro_title_color"
         android:textSize="@dimen/intro_title_textsize"
         />
@@ -47,7 +48,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/intro_tiles_text1"
+            android:text="@string/intro_viewmode_text1"
             android:textColor="@color/intro_text_color"
             android:textSize="@dimen/intro_text_textsize"
             />
@@ -55,7 +56,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/intro_tiles_text2"
+            android:text="@string/intro_viewmode_text2"
             android:textColor="@color/intro_text_color"
             android:textSize="@dimen/intro_text_textsize"
             />
@@ -63,9 +64,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/intro_tiles_text3"
+            android:text="@string/intro_viewmode_text3"
             android:textColor="@color/intro_text_color"
             android:textSize="@dimen/intro_text_textsize"
+            android:visibility="gone"
             />
 
     </LinearLayout>
