@@ -2,9 +2,11 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tiledImageView="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/black"
+    >
 
     <LinearLayout
         android:id="@+id/progressView"
@@ -29,6 +31,6 @@
         android:layout_height="match_parent"
         android:layout_margin="16dp"
         android:visibility="invisible"
-        tiledImageView:show_dev_visualisations="true"
+        tiledImageView:show_dev_visualisations="false"
         tiledImageView:view_mode="fit_in_container"/>
 </FrameLayout>

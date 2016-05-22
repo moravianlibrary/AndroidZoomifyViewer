@@ -60,6 +60,7 @@
         </activity>
 
         <activity android:name=".intro.IntroTilesActivity"/>
+        <activity android:name=".intro.IntroGestureActivity"/>
 
     </application>
 
