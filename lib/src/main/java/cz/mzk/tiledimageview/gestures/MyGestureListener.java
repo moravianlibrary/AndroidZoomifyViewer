@@ -58,7 +58,9 @@ public class MyGestureListener implements OnGestureListener, OnDoubleTapListener
         if (mFlingShiftHandler.getmState() == FlingShiftHandler.State.SHIFTING) {
             mFlingShiftHandler.stopAnimation();
         }
-        mImageViewApi.getSingleTapListener().onSingleTap(e.getX(), e.getY(), mImageViewApi.getVisibleImageAreaInCanvas());
+        if (mImageViewApi.getSingleTapListener() != null) {
+            mImageViewApi.getSingleTapListener().onSingleTap(e.getX(), e.getY(), mImageViewApi.getVisibleImageAreaInCanvas());
+        }
         return false;
     }
 
