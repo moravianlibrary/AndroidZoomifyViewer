@@ -4,6 +4,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="white_50">#50FFFFFF</color>
+
     <color name="red">#ffff0000</color>
     <color name="green">#00FF00</color>
     <color name="blue">#0000FF</color>
@@ -25,5 +26,6 @@
     <color name="framing_rect_border">#3AAFDE</color>
     <color name="framing_rect_filling">#603AAFDE</color>
 
+    <color name="progressbar_background_filter">#90000000</color>
 
 </resources>

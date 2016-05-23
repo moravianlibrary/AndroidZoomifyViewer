@@ -20,9 +20,10 @@ public class IntroActivity extends AppIntro {
         // Add your slide's fragments here.
         // AppIntro will automatically generate the dots indicator and buttons.
 
+        addSlide(new IntroViewmodeFragment());//3
         addSlide(new IntroTilesFragment());//1
         addSlide(new IntroGesturesFragment());//2
-        addSlide(new IntroViewmodeFragment());//3
+
         addSlide(new IntroRectanglesFragment());//4
         addSlide(new IntroCachingFragment());//5
 

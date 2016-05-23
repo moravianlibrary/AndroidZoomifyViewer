@@ -30,7 +30,7 @@ public class IntroViewmodeFragment extends Fragment implements View.OnClickListe
         if (mBtnTry == v) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                //startActivity(new Intent(activity, IntroTilesActivity.class));
+                startActivity(new Intent(activity, IntroViewmodeActivity.class));
             }
         }
 

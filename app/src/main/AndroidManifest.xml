@@ -61,6 +61,7 @@
 
         <activity android:name=".intro.IntroTilesActivity"/>
         <activity android:name=".intro.IntroGestureActivity"/>
+        <activity android:name=".intro.IntroViewmodeActivity"/>
 
     </application>
 
