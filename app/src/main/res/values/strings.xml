@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">TiledImageViewDemonstration</string>
-    <string name="tiled_image_view_version">2.2.1</string>
+    <string name="tiled_image_view_version">2.2.3</string>
 
     <string name="hint_search_on_page">search on page</string>
 
