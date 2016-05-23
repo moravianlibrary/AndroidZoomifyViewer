@@ -1,6 +1,5 @@
 package cz.mzk.tiledimageview.demonstration.intro;
 
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -33,13 +32,6 @@ public class IntroTilesActivity extends AppCompatActivity implements TiledImageV
         mProgressView = findViewById(R.id.progressView);
         mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
         mImageView.setMetadataInitializationListener(this);
-        //temporary solution until https://github.com/moravianlibrary/AndroidZoomifyViewer/issues/34 fixed
-        mImageView.setSingleTapListener(new TiledImageView.SingleTapListener() {
-            @Override
-            public void onSingleTap(float x, float y, Rect boundingBox) {
-                //nothing
-            }
-        });
         showImage();
     }
 
