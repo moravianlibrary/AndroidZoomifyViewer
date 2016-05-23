@@ -105,7 +105,6 @@ public class IntroViewmodeActivityTabFragment extends Fragment implements View.O
     private void initImageView() {
         mImageView.setVisibility(View.INVISIBLE);
         mProgressView.setVisibility(View.VISIBLE);
-        mImageView.loadImage(TiledImageProtocol.ZOOMIFY, mBaseurl);
         mImageView.setMetadataInitializationListener(new TiledImageView.MetadataInitializationListener() {
             @Override
             public void onMetadataInitialized() {
@@ -145,5 +144,6 @@ public class IntroViewmodeActivityTabFragment extends Fragment implements View.O
                 toast("cannot execute metadata initialization");
             }
         });
+        mImageView.loadImage(TiledImageProtocol.ZOOMIFY, mBaseurl);
     }
 }
