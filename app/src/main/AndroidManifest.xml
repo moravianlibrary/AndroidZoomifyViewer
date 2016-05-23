@@ -67,9 +67,8 @@
             android:name=".intro.IntroGestureActivity"
             android:label="@string/intro_gestures_title"
             />
-        <activity android:name=".intro.viewMode.IntroViewmodeActivity"/>
         <activity
-            android:name=".intro.viewMode.IntroViewmodeActivity2"
+            android:name=".intro.viewMode.IntroViewmodeActivity"
             android:label="@string/intro_viewmode_title"
             />
 
