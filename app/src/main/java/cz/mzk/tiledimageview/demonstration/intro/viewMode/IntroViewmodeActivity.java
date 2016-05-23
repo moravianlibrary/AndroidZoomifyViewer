@@ -1,4 +1,4 @@
-package cz.mzk.tiledimageview.demonstration.intro;
+package cz.mzk.tiledimageview.demonstration.intro.viewMode;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

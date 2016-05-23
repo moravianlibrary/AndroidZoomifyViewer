@@ -59,9 +59,19 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".intro.IntroTilesActivity"/>
-        <activity android:name=".intro.IntroGestureActivity"/>
-        <activity android:name=".intro.IntroViewmodeActivity"/>
+        <activity
+            android:name=".intro.IntroTilesActivity"
+            android:label="@string/intro_tiles_title"
+            />
+        <activity
+            android:name=".intro.IntroGestureActivity"
+            android:label="@string/intro_gestures_title"
+            />
+        <activity android:name=".intro.viewMode.IntroViewmodeActivity"/>
+        <activity
+            android:name=".intro.viewMode.IntroViewmodeActivity2"
+            android:label="@string/intro_viewmode_title"
+            />
 
     </application>
 

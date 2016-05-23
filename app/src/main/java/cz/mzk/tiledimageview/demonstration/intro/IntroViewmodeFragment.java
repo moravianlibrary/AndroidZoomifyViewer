@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import cz.mzk.tiledimageview.demonstration.R;
+import cz.mzk.tiledimageview.demonstration.intro.viewMode.IntroViewmodeActivity;
+import cz.mzk.tiledimageview.demonstration.intro.viewMode.IntroViewmodeActivity2;
 
 
 public class IntroViewmodeFragment extends Fragment implements View.OnClickListener {
@@ -30,7 +32,7 @@ public class IntroViewmodeFragment extends Fragment implements View.OnClickListe
         if (mBtnTry == v) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                startActivity(new Intent(activity, IntroViewmodeActivity.class));
+                startActivity(new Intent(activity, IntroViewmodeActivity2.class));
             }
         }
 
