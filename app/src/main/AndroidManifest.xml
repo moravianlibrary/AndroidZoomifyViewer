@@ -77,6 +77,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
         </activity>
+        <activity
+            android:name=".intro.IntroCachingActivity"
+            android:label="@string/intro_caching_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
     </application>
 
 </manifest>
