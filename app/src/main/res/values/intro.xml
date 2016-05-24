@@ -10,6 +10,8 @@
     <dimen name="intro_text_textsize">20sp</dimen>
 
     <string name="intro_btn_try_it">Show me</string>
+    <!--intro_gestures_image_size * 3 + intro_gestures_image_margin * 4 = 72*3 + 2*4 = 224-->
+    <!--but padding 2 on each side is why intro_tiles_thumb_size is smaller by 4-->
     <dimen name="intro_thumb_size">224dp</dimen>
 
     <!--Tiled Image View-->
@@ -27,8 +29,6 @@
     <string name="intro_gestures_text3">* callback for single tap</string>
 
     <!--totally 72*3 + 2*6 = 228-->
-    <!--but padding 2 on each side is why intro_tiles_thumb_size is smaller by 4-->
-    <!--<dimen name="intro_gestures_thumb_size">228dp</dimen>-->
     <dimen name="intro_gestures_image_size">72dp</dimen>
     <dimen name="intro_gestures_image_margin">2dp</dimen>
 

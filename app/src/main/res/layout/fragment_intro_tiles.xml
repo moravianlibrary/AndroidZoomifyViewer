@@ -18,7 +18,7 @@
         android:adjustViewBounds="true"
         android:background="@color/white"
         android:scaleType="centerInside"
-        android:src="@drawable/pyramid"/>
+        android:src="@drawable/thumb_tiles"/>
 
     <Button
         android:id="@+id/btnTry"

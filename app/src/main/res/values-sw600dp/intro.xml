@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--intro_gestures_image_size * 3 + intro_gestures_image_margin * 4 = 100*3 + 4*4 = 252-->
+    <!--but padding 2 on each side is why intro_tiles_thumb_size is smaller by 4-->
+    <dimen name="intro_thumb_size">316dp</dimen>
+
+    <!--totally 100*3 + 4*6 = 210-->
+    <dimen name="intro_gestures_image_size">100dp</dimen>
+    <dimen name="intro_gestures_image_margin">4dp</dimen>
+</resources>

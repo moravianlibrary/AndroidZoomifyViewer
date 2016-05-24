@@ -18,8 +18,7 @@
         android:adjustViewBounds="true"
         android:background="@color/white"
         android:scaleType="centerInside"
-        android:src="@drawable/viewmode_thumb"
-        />
+        android:src="@drawable/thumb_viewmode"/>
 
     <Button
         android:id="@+id/btnTry"

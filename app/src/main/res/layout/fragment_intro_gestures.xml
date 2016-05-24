@@ -10,32 +10,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="cz.mzk.tiledimageview.demonstration.intro.IntroActivity">
 
-    <!--<ImageView
-        android:id="@+id/thumbnail"
-        android:layout_width="224dp"
-        android:layout_height="224dp"
-        android:layout_centerInParent="true"
-        android:adjustViewBounds="true"
-        android:background="@color/white"
-        android:padding="8dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/pyramid"/>-->
-
     <TableLayout
         android:id="@+id/thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-
-
-        >
-
-        <!--android:layout_width="@dimen/intro_gestures_thumb_size"
-android:layout_height="@dimen/intro_gestures_thumb_size"-->
-
-        <!--android:background="@color/red"-->
-
-        <!--72*3 + 2*6 = 228-->
+        android:layout_centerInParent="true">
 
         <TableRow
             android:layout_width="wrap_content"
@@ -45,23 +24,19 @@ android:layout_height="@dimen/intro_gestures_thumb_size"-->
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_pinch"
-                />
+                android:src="@drawable/gestures_pinch"/>
 
             <ImageView
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_unpinch"
-                />
+                android:src="@drawable/gestures_unpinch"/>
 
             <ImageView
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_double_tap"
-                />
-
+                android:src="@drawable/gestures_double_tap"/>
         </TableRow>
 
         <TableRow
@@ -72,23 +47,18 @@ android:layout_height="@dimen/intro_gestures_thumb_size"-->
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_tap"
-                />
+                android:src="@drawable/gestures_tap"/>
+
+            <ImageView
+                android:layout_width="@dimen/intro_gestures_image_size"
+                android:layout_height="@dimen/intro_gestures_image_size"
+                android:layout_margin="@dimen/intro_gestures_image_margin"/>
 
             <ImageView
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-
-                />
-
-            <ImageView
-                android:layout_width="@dimen/intro_gestures_image_size"
-                android:layout_height="@dimen/intro_gestures_image_size"
-                android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_two_finger_scroll"
-                />
-
+                android:src="@drawable/gestures_two_finger_scroll"/>
         </TableRow>
 
         <TableRow
@@ -99,25 +69,20 @@ android:layout_height="@dimen/intro_gestures_thumb_size"-->
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_scroll"
-                />
+                android:src="@drawable/gestures_scroll"/>
 
             <ImageView
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_pan"
-                />
+                android:src="@drawable/gestures_pan"/>
 
             <ImageView
                 android:layout_width="@dimen/intro_gestures_image_size"
                 android:layout_height="@dimen/intro_gestures_image_size"
                 android:layout_margin="@dimen/intro_gestures_image_margin"
-                android:src="@drawable/gestures_flick"
-                />
-
+                android:src="@drawable/gestures_flick"/>
         </TableRow>
-
 
     </TableLayout>
 
