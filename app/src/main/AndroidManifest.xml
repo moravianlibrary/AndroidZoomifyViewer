@@ -24,11 +24,14 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
-            <!-- <intent-filter>
+
+            <!--
+             <intent-filter>
                  <action android:name="android.intent.action.MAIN"/>
 
                  <category android:name="android.intent.category.LAUNCHER"/>
-             </intent-filter>-->
+             </intent-filter>
+            -->
         </activity>
         <activity android:name=".FullscreenSingleImageActivity"/>
         <activity android:name=".ImagePropertiesHttpResponseCodeExamplesActivity"/>
@@ -50,7 +53,6 @@
             </intent-filter>
             -->
         </activity>
-
         <activity android:name=".intro.IntroActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -58,20 +60,23 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".intro.IntroTilesActivity"
-            android:label="@string/intro_tiles_title"
-            />
+            android:label="@string/intro_tiles_title"/>
         <activity
             android:name=".intro.IntroGestureActivity"
-            android:label="@string/intro_gestures_title"
-            />
+            android:label="@string/intro_gestures_title"/>
         <activity
             android:name=".intro.viewMode.IntroViewmodeActivity"
-            android:label="@string/intro_viewmode_title"
-            />
-
+            android:label="@string/intro_viewmode_title"/>
+        <activity
+            android:name=".intro.IntroRectanglesActivity"
+            android:label="@string/intro_rectangles_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
     </application>
 
 </manifest>

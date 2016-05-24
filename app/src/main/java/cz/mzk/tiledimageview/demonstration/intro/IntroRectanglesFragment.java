@@ -1,5 +1,6 @@
 package cz.mzk.tiledimageview.demonstration.intro;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -29,7 +30,7 @@ public class IntroRectanglesFragment extends Fragment implements View.OnClickLis
         if (mBtnTry == v) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                //startActivity(new Intent(activity, IntroTilesActivity.class));
+                startActivity(new Intent(activity, IntroRectanglesActivity.class));
             }
         }
 

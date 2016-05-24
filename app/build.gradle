@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -58,4 +60,20 @@ dependencies {
     compile "jaxen:jaxen:1.1.4"
 
     compile "com.github.paolorotolo:appintro:3.4.0"
+}
+
+/*butterknife*/
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    }
+}
+apply plugin: 'com.neenbedankt.android-apt'
+
+dependencies {
+    compile 'com.jakewharton:butterknife:8.0.1'
+    apt 'com.jakewharton:butterknife-compiler:8.0.1'
 }
