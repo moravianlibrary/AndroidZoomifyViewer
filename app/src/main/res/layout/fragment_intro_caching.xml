@@ -13,6 +13,7 @@
         android:adjustViewBounds="true"
         android:background="@color/white"
         android:scaleType="centerInside"
+        android:src="@drawable/api_thumb"
         />
 
     <Button
