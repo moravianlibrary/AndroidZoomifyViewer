@@ -12,6 +12,8 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cz.mzk.tiledimageview.TiledImageView;
 import cz.mzk.tiledimageview.demonstration.AppConfig;
 import cz.mzk.tiledimageview.demonstration.R;
@@ -23,27 +25,15 @@ import cz.mzk.tiledimageview.images.TiledImageProtocol;
 public class IntroViewmodeActivityTabFragment extends Fragment implements View.OnClickListener {
 
     public static final String EXTRA_BASE_URL = "baseUrl";
+    @BindView(R.id.viewModeSpinner) Spinner mSpinner;
+    @BindView(R.id.progressView) View mProgressView;
+    @BindView(R.id.imageView) TiledImageView mImageView;
     private String mBaseurl;
-
-    private Spinner mSpinner;
-    private View mProgressView;
-    private TiledImageView mImageView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_intro_viewmode_tab, container, false);
-        //  ((TextView) view.findViewById(R.id.text)).setText(mBaseurl);
-
-        mSpinner = (Spinner) view.findViewById(R.id.viewModeSpinner);
-        mProgressView = view.findViewById(R.id.progressView);
-        mProgressView.setOnClickListener(this);
-        mImageView = (TiledImageView) view.findViewById(R.id.imageView);
-
-        /*initViewModeSpinner(mSpinner1, mImageView1, BASE_URL1);
-        initViewModeSpinner(mSpinner2, mImageView2, BASE_URL2);
-        initImageView(mImageView1, mProgressView1, BASE_URL1);
-        initImageView(mImageView2, mProgressView2, BASE_URL2);*/
-
+        ButterKnife.bind(this, view);
         return view;
     }
 

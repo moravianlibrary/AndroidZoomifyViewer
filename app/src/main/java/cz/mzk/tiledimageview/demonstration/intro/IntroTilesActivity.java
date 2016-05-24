@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cz.mzk.tiledimageview.TiledImageView;
 import cz.mzk.tiledimageview.demonstration.R;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
@@ -21,16 +23,14 @@ public class IntroTilesActivity extends AppCompatActivity implements TiledImageV
     //private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/051/015/2619268856_02/";
     private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/051/449/2619269096/";
 
-
-    private TiledImageView mImageView;
-    private View mProgressView;
+    @BindView(R.id.tiledImageView) TiledImageView mImageView;
+    @BindView(R.id.progressView) View mProgressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro_tiles);
-        mProgressView = findViewById(R.id.progressView);
-        mImageView = (TiledImageView) findViewById(R.id.tiledImageView);
+        ButterKnife.bind(this);
         mImageView.setMetadataInitializationListener(this);
         showImage();
     }
