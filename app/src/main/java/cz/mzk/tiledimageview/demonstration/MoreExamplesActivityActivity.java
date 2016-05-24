@@ -17,8 +17,8 @@ import cz.mzk.tiledimageview.demonstration.ssl.SslTestActivity;
 /**
  * @author Martin Řehánek
  */
-public class MainActivity extends AppCompatActivity implements OnClickListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class MoreExamplesActivityActivity extends AppCompatActivity implements OnClickListener {
+    private static final String TAG = MoreExamplesActivityActivity.class.getSimpleName();
 
     private Toolbar mActionBar;
     private Button mBtnSingleImageWorkingExamples;
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_more_examples);
         mActionBar = (Toolbar) findViewById(R.id.action_bar);
         mBtnSingleImageWorkingExamples = (Button) findViewById(R.id.btnSingleImageWorkingExamples);
         mBtnSingleImageWorkingExamples.setOnClickListener(this);
@@ -55,10 +55,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private void initActionBar() {
         if (mActionBar != null) {
             setSupportActionBar(mActionBar);
-            getSupportActionBar().setDisplayShowTitleEnabled(true);
-            getSupportActionBar().setTitle(R.string.actionbar_title);
             getSupportActionBar().setDisplayUseLogoEnabled(false);
             getSupportActionBar().setDisplayShowHomeEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 

@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.github.paolorotolo.appintro.AppIntro;
 
-import cz.mzk.tiledimageview.demonstration.MainActivity;
+import cz.mzk.tiledimageview.demonstration.MoreExamplesActivityActivity;
 import cz.mzk.tiledimageview.demonstration.R;
 
 /**
@@ -25,7 +25,6 @@ public class IntroActivity extends AppIntro {
         addSlide(new IntroRectanglesFragment());//4
         addSlide(new IntroCachingFragment());//5
 
-
         // OPTIONAL METHODS
         // Override bar/separator color.
         setBarColor(getResources().getColor(R.color.theme_primary));
@@ -44,12 +43,12 @@ public class IntroActivity extends AppIntro {
 
     @Override
     public void onSkipPressed() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, MoreExamplesActivityActivity.class));
     }
 
     @Override
     public void onDonePressed() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, MoreExamplesActivityActivity.class));
     }
 
     @Override

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">TiledImageViewDemonstration</string>
+    <string name="app_name">TiledImageView Demo</string>
     <string name="tiled_image_view_version">2.2.3</string>
 
     <string name="hint_search_on_page">search on page</string>
 
-    <string name="actionbar_title">TiledImageView demonstration</string>
+    <string name="actionbar_more_examples">More examples</string>
     <string name="actionbar_title_about_app">About App</string>
 
     <!--about app-->

@@ -2,6 +2,7 @@ package cz.mzk.tiledimageview.demonstration.intro;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,14 +25,12 @@ public class IntroCachingActivity extends AppCompatActivity implements TiledImag
 
     private static final String TAG = IntroCachingActivity.class.getSimpleName();
     private static final String EXTRA_CURRENT_POSITION = "current_position";
-
+    private final List<String> mBaseUrlList = initBaseUrlList();
+    @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.tiledImageView) TiledImageView mImageView;
     @BindView(R.id.btnPreviousPage) Button mBtnPrevious;
     @BindView(R.id.btnNextPage) Button mBtnNext;
     @BindView(R.id.pageCounter) TextView mPageCounter;
-
-    private final List<String> mBaseUrlList = initBaseUrlList();
-
     private int mCurrentPagePosition = 0;
 
 
@@ -40,6 +39,10 @@ public class IntroCachingActivity extends AppCompatActivity implements TiledImag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro_caching);
         ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mBtnPrevious.setOnClickListener(this);
         mBtnNext.setOnClickListener(this);
         mImageView.setMetadataInitializationListener(this);

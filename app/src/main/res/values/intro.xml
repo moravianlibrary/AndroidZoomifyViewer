@@ -3,7 +3,8 @@
 
 
     <color name="intro_title_color">@color/white</color>
-    <dimen name="intro_title_textsize">25sp</dimen>
+    <dimen name="intro_title_textsize">24sp</dimen>
+    <dimen name="intro_title_margin_top">8dp</dimen>
 
     <color name="intro_text_color">@color/white</color>
     <dimen name="intro_text_textsize">20sp</dimen>
@@ -16,21 +17,23 @@
     <string name="intro_tiles_title">Tiled Image View</string>
     <string name="intro_tiles_text1">* image in scaled-down versions is cut into tiles</string>
     <string name="intro_tiles_text2">* right tiles are fetched as needed</string>
-    <string name="intro_tiles_text3">* tile structure is defined by Zoomify</string>
-
+    <string name="intro_tiles_text3">* tile structure defined by Zoomify</string>
 
     <!--Gestures-->
 
     <string name="intro_gestures_title">Gestures</string>
     <string name="intro_gestures_text1">* zoom: pinch/unpinch, double tap</string>
     <string name="intro_gestures_text2">* image shifting: multitouch scroll, swipe</string>
-    <string name="intro_gestures_text3">* single tap: callback with coordinates</string>
+    <string name="intro_gestures_text3">* callback for single tap</string>
 
     <!--totally 72*3 + 2*6 = 228-->
     <!--but padding 2 on each side is why intro_tiles_thumb_size is smaller by 4-->
     <!--<dimen name="intro_gestures_thumb_size">228dp</dimen>-->
     <dimen name="intro_gestures_image_size">72dp</dimen>
     <dimen name="intro_gestures_image_margin">2dp</dimen>
+
+    <dimen name="intro_img_border">2dp</dimen>
+    <color name="intro_img_border">@color/theme_primary_dark</color>
 
     <!--ViewMode-->
     <string name="intro_viewmode_title">View Mode</string>
@@ -41,12 +44,12 @@
     <!--Rectangles-->
     <string name="intro_rectangles_title">Rectangles</string>
     <string name="intro_rectangles_text1">* define rectangle to mark area</string>
-    <string name="intro_rectangles_text2">* highligting text, notes, censor bars</string>
+    <string name="intro_rectangles_text2">* text highlighting, censor bars</string>
     <string name="intro_rectangles_text3">* configurable background color, border width and color</string>
 
     <!--Caching-->
     <string name="intro_caching_title">Caching</string>
-    <string name="intro_caching_text1">* caching images (tiles) and metadata</string>
+    <string name="intro_caching_text1">* caching tiles and metadata</string>
     <string name="intro_caching_text2">* memory and disk cache</string>
     <string name="intro_caching_text3">* configurable size, cache shared among all views</string>
 

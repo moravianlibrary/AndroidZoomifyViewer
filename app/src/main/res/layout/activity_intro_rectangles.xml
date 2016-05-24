@@ -1,62 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    tools:context="cz.mzk.tiledimageview.demonstration.intro.IntroRectanglesActivity"
-    >
+    android:background="@color/white"
+    android:orientation="vertical"
+    tools:context="cz.mzk.tiledimageview.demonstration.intro.IntroRectanglesActivity">
 
-    <RelativeLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        >
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-        <cz.mzk.tiledimageview.TiledImageView
-            android:id="@+id/imageView"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            android:visibility="invisible"
-            app:show_dev_visualisations="false"
-            app:view_mode="fit_in_container"/>
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@color/intro_img_border"
+            android:padding="@dimen/intro_img_border">
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="bottom|end"
-            android:src="@drawable/plus_96"
-            android:visibility="gone"
-            app:elevation="6dp"
-            app:pressedTranslationZ="12dp"
-            app:rippleColor="@color/theme_accent_dark"
-            />
+            <cz.mzk.tiledimageview.TiledImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black"
+                android:visibility="invisible"
+                app:show_dev_visualisations="false"
+                app:view_mode="fit_in_container"/>
+        </LinearLayout>
 
-    </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/progressView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/progressbar_background_filter"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
 
-    <LinearLayout
-        android:id="@+id/progressView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/progressbar_background_filter"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <ProgressBar
-            style="@style/Base.Widget.AppCompat.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            />
-    </LinearLayout>
-</FrameLayout>
+            <ProgressBar
+                style="@style/Base.Widget.AppCompat.ProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

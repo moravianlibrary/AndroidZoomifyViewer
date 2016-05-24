@@ -4,6 +4,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -26,8 +27,9 @@ public class IntroGestureActivity extends AppCompatActivity implements TiledImag
     //private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/051/449/2619269096/";
     private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/050/049/2619270290/";
 
+    @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.container) View mContainer;
-    @BindView(R.id.tiledImageView) TiledImageView mImageView;
+    @BindView(R.id.imageView) TiledImageView mImageView;
     @BindView(R.id.progressView) View mProgressView;
 
     @Override
@@ -35,6 +37,10 @@ public class IntroGestureActivity extends AppCompatActivity implements TiledImag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro_gestures);
         ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mImageView.setMetadataInitializationListener(this);
         mImageView.setSingleTapListener(this);
         showImage();

@@ -1,10 +1,9 @@
 package cz.mzk.tiledimageview.demonstration.intro;
 
-import android.app.Activity;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -19,12 +18,12 @@ import cz.mzk.tiledimageview.demonstration.R;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
 import cz.mzk.tiledimageview.rectangles.FramingRectangle;
 
-public class IntroRectanglesActivity extends Activity implements View.OnClickListener, TiledImageView.MetadataInitializationListener {
+public class IntroRectanglesActivity extends AppCompatActivity implements View.OnClickListener, TiledImageView.MetadataInitializationListener {
 
     private static final String TAG = IntroRectanglesActivity.class.getSimpleName();
     private static final String BASE_URL = "http://kramerius.mzk.cz/search/zoomify/uuid:5673da95-435f-11dd-b505-00145e5790ea/";
 
-    @BindView(R.id.fab) FloatingActionButton mFab;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.imageView) TiledImageView mImageView;
     @BindView(R.id.progressView) View mProgressView;
 
@@ -33,7 +32,10 @@ public class IntroRectanglesActivity extends Activity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro_rectangles);
         ButterKnife.bind(this);
-        mFab.setOnClickListener(this);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mProgressView.setOnClickListener(this);
         mImageView.setMetadataInitializationListener(this);
         showImage();
@@ -41,8 +43,8 @@ public class IntroRectanglesActivity extends Activity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        if (v == mFab) {
-            Snackbar.make(mFab.getRootView(), "TODO:dialog for adding rectangle", Snackbar.LENGTH_SHORT).show();
+        if (v == mProgressView) {
+            //nothing, just block
         }
     }
 

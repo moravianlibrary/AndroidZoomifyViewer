@@ -2,6 +2,7 @@ package cz.mzk.tiledimageview.demonstration.intro;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -23,14 +24,19 @@ public class IntroTilesActivity extends AppCompatActivity implements TiledImageV
     //private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/051/015/2619268856_02/";
     private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/051/449/2619269096/";
 
-    @BindView(R.id.tiledImageView) TiledImageView mImageView;
+    @BindView(R.id.imageView) TiledImageView mImageView;
     @BindView(R.id.progressView) View mProgressView;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro_tiles);
         ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mImageView.setMetadataInitializationListener(this);
         showImage();
     }
@@ -46,6 +52,7 @@ public class IntroTilesActivity extends AppCompatActivity implements TiledImageV
     public void onMetadataInitialized() {
         mProgressView.setVisibility(View.INVISIBLE);
         mImageView.setVisibility(View.VISIBLE);
+        //why?
         mImageView.requestLayout();
     }
 

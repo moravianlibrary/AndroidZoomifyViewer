@@ -27,6 +27,9 @@ public class IntroViewmodeActivity extends AppCompatActivity /*implements View.O
         setContentView(R.layout.activity_intro_viewmode);
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         initTabLayout();
         initViewPager();
     }
