@@ -31,4 +31,11 @@
 
     <color name="progressbar_background_filter">#90000000</color>
 
+
+    <color name="red_50">#50ff0000</color>
+    <color name="green_50">#5000ff00</color>
+    <color name="blue_50">#500000ff</color>
+    <color name="yellow_50">#50FFFF00</color>
+
+
 </resources>

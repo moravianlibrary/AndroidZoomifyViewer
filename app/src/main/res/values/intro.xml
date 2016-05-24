@@ -41,7 +41,7 @@
     <!--Rectangles-->
     <string name="intro_rectangles_title">Rectangles</string>
     <string name="intro_rectangles_text1">* define rectangle to mark area</string>
-    <string name="intro_rectangles_text2">* digitized text: fulltext results, notes</string>
+    <string name="intro_rectangles_text2">* highligting text, notes, censor bars</string>
     <string name="intro_rectangles_text3">* configurable background color, border width and color</string>
 
     <!--Caching-->

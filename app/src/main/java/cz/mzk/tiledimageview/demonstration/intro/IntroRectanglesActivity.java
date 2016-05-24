@@ -1,6 +1,7 @@
 package cz.mzk.tiledimageview.demonstration.intro;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,17 +9,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.mzk.tiledimageview.TiledImageView;
 import cz.mzk.tiledimageview.demonstration.R;
 import cz.mzk.tiledimageview.images.TiledImageProtocol;
+import cz.mzk.tiledimageview.rectangles.FramingRectangle;
 
 public class IntroRectanglesActivity extends Activity implements View.OnClickListener, TiledImageView.MetadataInitializationListener {
 
     private static final String TAG = IntroRectanglesActivity.class.getSimpleName();
-    //TODO: replace with something with text
-    private static final String BASE_URL = "http://imageserver.mzk.cz/mzk03/001/051/449/2619269096/";
+    private static final String BASE_URL = "http://kramerius.mzk.cz/search/zoomify/uuid:5673da95-435f-11dd-b505-00145e5790ea/";
 
     @BindView(R.id.fab) FloatingActionButton mFab;
     @BindView(R.id.imageView) TiledImageView mImageView;
@@ -47,6 +51,22 @@ public class IntroRectanglesActivity extends Activity implements View.OnClickLis
         mImageView.setVisibility(View.INVISIBLE);
         mProgressView.setVisibility(View.VISIBLE);
         mImageView.loadImage(TiledImageProtocol.ZOOMIFY, BASE_URL);
+        mImageView.setFramingRectangles(buildFramingRectangles());
+    }
+
+    private List<FramingRectangle> buildFramingRectangles() {
+        List<FramingRectangle> list = new ArrayList<>();
+        //search result
+        list.add(new FramingRectangle(new Rect(2316, 3010, 3836, 3310), new FramingRectangle.Border(R.color.blue, 1), R.color.blue_50));
+        //censor bars
+        list.add(new FramingRectangle(new Rect(235, 2200, 845, 2380), null, R.color.red));
+        list.add(new FramingRectangle(new Rect(848, 4940, 1500, 5265), null, R.color.red));
+        //highlighting
+        list.add(new FramingRectangle(new Rect(2110, 1445, 2730, 2280), null, R.color.green_50));
+        list.add(new FramingRectangle(new Rect(230, 3163, 848, 3645), null, R.color.yellow_50));
+        //just border
+        list.add(new FramingRectangle(new Rect(3020, 1248, 3804, 2208), new FramingRectangle.Border(R.color.red, 3), null));
+        return list;
     }
 
     @Override
