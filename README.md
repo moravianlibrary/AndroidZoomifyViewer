@@ -137,9 +137,11 @@ Or you can enable all logs in TiledImageView by setting TiledImageView.DEV_MODE 
 ## Demo App
 Module app contains demo android application project, that shows how to use the library. There are some examples of publicly available images in zoomify format as well as possible error situations. 
 
-Module backand contains web project to simulate errors and is deployed in Google AppEngine. But no specific AppEngine APIs are used here so it can be easily deploy into any Servlet container. Example android app uses among other data from backend web app.
+Module backend contains web project to simulate errors and is deployed in Google AppEngine. But no specific AppEngine APIs are used here so it can be easily deploye into any Servlet container. Demo app uses among other data from backend web app.
 
-Demo App is available at Google Play: https://play.google.com/store/apps/details?id=cz.mzk.tiledimageview.demonstration
+<a href="https://play.google.com/store/apps/details?id=cz.mzk.tiledimageview.demonstration"><img height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"/></a>
+
+
 ## HTTPS
 Both Library and Example project can handle https requests. But if you need to access web resources with X.509 certificate, that can't be validated with android pre-installed issuers (for example self-signed or without whole certificate chain packed), you need to add required certificate as a resource and load it in SSL context provider.
 
