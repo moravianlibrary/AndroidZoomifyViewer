@@ -5,7 +5,8 @@
 
     <item
         android:id="@+id/action_about"
-        android:title="About"
-        app:showAsAction="never"/>
+        android:icon="@drawable/about_96"
+        android:title="About App"
+        app:showAsAction="ifRoom"/>
 
 </menu>

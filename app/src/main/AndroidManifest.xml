@@ -95,7 +95,15 @@
         <activity android:name=".kramerius.KrameriusMultiplePageExamplesActivity"/>
         <activity android:name=".kramerius.PageViewerActivity"/>
         <activity android:name=".kramerius.PageMetadataActivity"/>
-        <activity android:name=".AboutAppActivity"/>
+        <activity
+            android:name=".AboutAppActivity"
+            android:label="@string/about_app_actionbar"
+            android:parentActivityName=".MoreExamplesActivityActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.MoreExamplesActivityActivity"/>
+        </activity>
+
         <activity android:name=".ssl.SslTestActivity"/>
 
     </application>

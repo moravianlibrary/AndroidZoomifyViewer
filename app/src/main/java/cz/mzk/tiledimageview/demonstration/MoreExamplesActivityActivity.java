@@ -83,7 +83,7 @@ public class MoreExamplesActivityActivity extends AppCompatActivity implements O
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_main, menu);
+        inflater.inflate(R.menu.more_examples, menu);
         return true;
     }
 

@@ -7,28 +7,30 @@ import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class AboutAppActivity extends AppCompatActivity {
 
-    private Toolbar mActionBar;
-    private TextView mGithubLink;
+    @BindView(R.id.action_bar) Toolbar mActionBar;
+    @BindView(R.id.github_link) TextView mGithubLink;
+    @BindView(R.id.attribution) TextView mAttribution;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about_app);
-        mActionBar = (Toolbar) findViewById(R.id.action_bar);
-        mGithubLink = (TextView) findViewById(R.id.github_link);
-
+        ButterKnife.bind(this);
         initActionBar();
         mGithubLink.setMovementMethod(LinkMovementMethod.getInstance());
-
+        mAttribution.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void initActionBar() {
         if (mActionBar != null) {
             setSupportActionBar(mActionBar);
             getSupportActionBar().setDisplayShowTitleEnabled(true);
-            getSupportActionBar().setTitle(R.string.actionbar_title_about_app);
             getSupportActionBar().setDisplayUseLogoEnabled(false);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
