@@ -1,26 +1,28 @@
-# Android Zoomify Viewer
+# Tiled Image View
 
-This project contains Android view for Zoomify tiles with some usage examples. 
+This project contains Android library for *Tiled Image View* - view that loads image gradually by tiles. And also demo app to demonstrate the library.
+
 Main features are:
- * gradual image quality refinement
- * two level tiles (and ImageProperties.xml) caching - memory and disk
+ * gradual image quality refinement (according to zoom level)
+ * two level caching (tiles and metadata) - memory and disk
  * tiles are downloaded and cached to disk in non-ui threads
  * fluent zooming and swiping
- * Listeners for server errors 
- * working examples of real data
- * examples of errors on mock server
- * library project with view that can be used from xml or code just like ImageView
+ * Listeners for server errors and single-tap gesture 
+ * highligting rectangle areas (for example for fulltext search results, notes, etc. )
+ * view modes (how should image be mapped into container)
+ * server side errors accessible through event handlers
+ * https support
+ * working demo with real data and examples of errors on mock server
  
 ## Requirements
-Minimal SDK version is 9 (Android 2.3) for both library itself and example project.
-Library project needs android-support-v4.jar so that LruCache works in API < 12.
+Minimal SDK version is 12 (Android 3.1.x) for both library itself and demo project.
 Examples App project depends on appcompat-v7 (from SDK 21) in order to enable Fragments, ActionBar/ToolBar in older versions.
 
 ## Adding the library to your app
 ### Android studio / Gradle
 Just add this dependency to your app module's build.gradle:
 ```
-compile 'cz.mzk.androidzoomifyviewer:android-zoomify-viewer:1.0'
+compile 'cz.mzk.tiledimageview:tiled-image-view:2.2.4'
 ```
 ### Eclipse / ADT / Other
 You can either clone this whole repository, which consisted of multiple Eclipse projects. You need to checkout tag 'eclipse'. Eclipse version will no longer be supported though.
@@ -34,39 +36,110 @@ Required permissions:
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
-TiledImageView must be initialized with application context. Best place to do this is in onCreate() method of class extending Application like this:
+You can create the view through layout or constructor. Do not use wrap_content since the images's width and hight is unknown in advance, image can be zoomed and image can be replaced with another one.
+In layout:
 ```
-public class MyApp extends Application {
-
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		TiledImageView.initialize(this);
-	}
-}
-
+<cz.mzk.tiledimageview.TiledImageView
+       xmlns:app="http://schemas.android.com/apk/res-auto"
+       android:id="@+id/tiledImageView"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:background="@color/black"
+       app:show_dev_visualisations="true"
+       app:view_mode="fit_in_view"/>
 ```
-This configures disk cache through resouces. You can disable disk cache or set its size or enable that disk cache is cleared on application startup .
+With constructor:
+```
+new TiledImageView(context);
+new TiledImageView(context, attributeSet);
+new TiledImageView(context, showDevVisualisations);
+new TiledImageView(context, viewMode);
+new TiledImageView(context, showDevVisualisations,viewMode);
+```
+Now you can define image source, change viewMode, add listeners, etc:
+```
+        //Most important method - setting protocol and base url for image. Only zoomify is supported now.
+        //To replace image in view, call this with other url.
+        mImageView.loadImage(TiledImageProtocol.ZOOMIFY, "http://imageserver.mzk.cz/mzk03/001/048/663/2619269773/");
+
+        //You can always change view mode, but It will throw away current zoom level and shift.
+        mImageView.setViewMode(TiledImageView.ViewMode.FILL_VIEW_ALIGN_CENTER_CENTER);
+
+        //You can define rectangles with background color and/or border with width and color to highlight or cover parts of image.
+        mImageView.setFramingRectangles(framingRectangles);
+
+        //Getting width and hight of current image, no matter how it is mapped to view.
+        mImageView.getImageWidth();
+        mImageView.getImageHeight();
+
+        //Listener for single-tap event.
+        mImageView.setSingleTapListener(new TiledImageView.SingleTapListener() {
+            @Override
+            public void onSingleTap(float x, float y, Rect boundingBox) {
+                //if you need to handle single tap. X and Y are coordinates withing view, boundingBox is area of image view that contains acutal image - i.e. at most [0,0] - [view_width,view_height]
+            }
+        });
+
+        //Listener for metadata-initialization events.
+        mImageView.setMetadataInitializationListener(new TiledImageView.MetadataInitializationListener() {
+            @Override
+            public void onMetadataInitialized() {
+                // Ok, metadata loaded, loading tiles from now on.
+            }
+
+            @Override
+            public void onMetadataUnhandableResponseCode(String imageMetadataUrl, int responseCode) {
+                // Use this to handle errors concerning unexpected http response code when downloading the image metadata.
+            }
+
+            @Override
+            public void onMetadataRedirectionLoop(String imageMetadataUrl, int redirections) {
+                // Use this to handle errors concerning redirection loop code when downloading the image metadata.
+            }
+
+            @Override
+            public void onMetadataDataTransferError(String imageMetadataUrl, String errorMessage) {
+                // Use this to handle network/data transfer errors when downloading the image metadata.
+            }
+
+            @Override
+            public void onMetadataInvalidData(String imageMetadataUrl, String errorMessage) {
+                // Use this to handle errors concerning invalid image metadata.
+            }
+
+            @Override
+            public void onCannotExecuteMetadataInitialization(String imageMetadataUrl) {
+                // Use this to handle errors when there is no free space in thread queue to schedule metadata-fetch task.
+                // This might happen if you have to many TiledImageViews at once. Up to 3 TiledImageView instances at once should be fine.
+            }
+        });
+```
+## Cache configuration
+Cache size, whether it is enabled, and if it should be cleared on application startup is defined in resources:
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <bool name="androidzoomifyviewer_disk_cache_enabled">true</bool>
-    <bool name="androidzoomifyviewer_disk_cache_clear_on_startup">false</bool>
-    <integer name="androidzoomifyviewer_tile_disk_cache_size_kb">51200</integer>
+    <bool name="tiledimageview_disk_cache_enabled">true</bool>
+    <bool name="tiledimageview_disk_cache_clear_in_initialization">true</bool>
+    <!--50 MB-->
+    <integer name="tiledimageview_tile_disk_cache_size_kb">51200</integer>
 </resources>
 ```
+Cache is initialized in onAttachedToWindow() method of first TiledImageView used.
 ## Logging and dev mode
 In production, most of logs are not being created at all. Only those in level Log.WARN and higher. 
-If you can edit library's source coude, you can enable more logs even in production by setting cz.mzk.androidzoomifyviewer.Logger.PRODUCTION_LOG_LEVEL to lower level.
+If you can edit library's source coude, you can enable more logs even in production by setting cz.mzk.tiledimageview.Logger.PRODUCTION_LOG_LEVEL to lower level.
 ```
 PRODUCTION_LOG_LEVEL = Log.INFO;
 ```
 Or you can enable all logs in TiledImageView by setting TiledImageView.DEV_MODE to true. This will also enable other developer features like visualization of tiles being drawn.
 
-## Example Application
-Module app contains example android application project, that shows how to use the library. There are some examples of publicly available images in zoomify format as well as possible error situations. 
+## Demo App
+Module app contains demo android application project, that shows how to use the library. There are some examples of publicly available images in zoomify format as well as possible error situations. 
+
 Module backand contains web project to simulate errors and is deployed in Google AppEngine. But no specific AppEngine APIs are used here so it can be easily deploy into any Servlet container. Example android app uses among other data from backend web app.
 
+Demo App is available at Google Play: https://play.google.com/store/apps/details?id=cz.mzk.tiledimageview.demonstration
 ## HTTPS
 Both Library and Example project can handle https requests. But if you need to access web resources with X.509 certificate, that can't be validated with android pre-installed issuers (for example self-signed or without whole certificate chain packed), you need to add required certificate as a resource and load it in SSL context provider.
 
@@ -85,13 +158,4 @@ Or as default factory for all connections with static method:
 ```
 java.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(factory)
 ```
-I'd advice to set default factory because this way even third party network libraries should work with your custom certificates. Best place for this is in onCreate() of class extending Application (see cz.mzk.androidzoomifyviewer.examples.AndroidZoomifyViewerExamplesApp). 
-
-
-
-
-
-
-
-
-
+I'd advice to set default factory because this way even third party network libraries should work with your custom certificates. Best place for this is in onCreate() of class extending Application. See <a href="https://github.com/moravianlibrary/AndroidZoomifyViewer/blob/master/app/src/main/java/cz/mzk/tiledimageview/demonstration/TiledImageViewDemostrationApplication.java">cz.mzk.tiledimageview.demonstration.TiledImageViewDemostrationApplication</a>
