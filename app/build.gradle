@@ -10,8 +10,8 @@ android {
         applicationId "cz.mzk.tiledimageview.demonstration"
         minSdkVersion 12
         targetSdkVersion 23
-        versionCode 30000
-        versionName "3.0.0"
+        versionCode 30001
+        versionName "3.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -39,7 +39,7 @@ dependencies {
     //development tiledImageView
     //compile project(':lib')
     //production tiledImageView
-    compile "cz.mzk.tiledimageview:tiled-image-view:2.2.3"
+    compile "cz.mzk.tiledimageview:tiled-image-view:2.2.4"
 
 
     def android_support_version = '23.4.0'
