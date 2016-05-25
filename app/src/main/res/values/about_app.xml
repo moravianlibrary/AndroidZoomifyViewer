@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="about_app_title_text_size">24sp</dimen>
+    <dimen name="about_app_p_text_size">16sp</dimen>
+
+    <string name="about_app_actionbar">About App</string>
+    <string name="about_app_menu">About App</string>
+    <string name="about_app_title">@string/app_name</string>
+    <string name="about_app_paragraph1">This App demonstrates capabilities of TiledImageView library for Android.</string>
+    <string name="about_tiledImageView_version_label">TiledImageView version:</string>
+    <string name="about_app_paragraph2">For more information see project repository on Github:</string>
+    <!--TODO: rename repository on Github-->
+    <string name="about_app_github_link"><a href="https://github.com/moravianlibrary/AndroidZoomifyViewer">https://github.com/moravianlibrary/AndroidZoomifyViewer</a></string>
+    <string name="about_app_attribution">Icons by <a href="https://icons8.com/">icons8</a>.\nIn <i>Gestures</i> screen following pictures created by GRPH3B18 and licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> were used:\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Double_Tap.png">Gestures Double Tap</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Flick.png">Gestures Flick</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Pan.png">Gestures Pan</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Pinch.png">Gestures Pinch</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Scroll.png">Gestures Scroll</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Tap.png">Gestures Tap</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Two_Finger_Scroll.png">Gestures Two Finger Scroll</a>\n
+<a href="https://commons.wikimedia.org/wiki/File:Gestures_Unpinch.png">Gestures Unpinch</a>\n</string>
+
+</resources>

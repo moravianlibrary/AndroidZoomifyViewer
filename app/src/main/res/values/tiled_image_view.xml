@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="tiledimageview_disk_cache_enabled">true</bool>
-    <bool name="tiledimageview_disk_cache_clear_in_initialization">false</bool>
+    <bool name="tiledimageview_disk_cache_clear_in_initialization">true</bool>
     <!--50 MB-->
     <integer name="tiledimageview_tile_disk_cache_size_kb">51200</integer>
 </resources>

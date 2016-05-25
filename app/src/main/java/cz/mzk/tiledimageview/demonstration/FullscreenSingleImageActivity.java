@@ -142,7 +142,6 @@ public class FullscreenSingleImageActivity extends AppCompatActivity implements 
         mImageView.loadImage(TiledImageProtocol.ZOOMIFY, mBaseUrl);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();

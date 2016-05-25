@@ -4,6 +4,7 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="white_50">#50FFFFFF</color>
+
     <color name="red">#ffff0000</color>
     <color name="green">#00FF00</color>
     <color name="blue">#0000FF</color>
@@ -16,14 +17,25 @@
     <color name="brown_dark">#66401e</color>
 
     <!-- theme -->
-    <color name="theme_primary">#3f51b5</color>
-    <color name="theme_primary_dark">#303f9f</color>
-    <color name="theme_primary_light">#E8EAF6</color>
-    <color name="theme_accent">#f50057</color>
+    <color name="theme_primary">#3f51b5</color> <!--500-->
+    <color name="theme_primary_dark">#303f9f</color> <!--700-->
+    <color name="theme_primary_light">#C5CAE9</color> <!--100-->
+    <color name="theme_accent">#FF4081</color> <!--A200-->
+    <color name="theme_accent_dark">#F50057</color> <!--A400-->
+    <color name="theme_accent_light">#FF80AB</color> <!--A100-->
+
     <color name="fab">@color/theme_accent</color>
 
     <color name="framing_rect_border">#3AAFDE</color>
     <color name="framing_rect_filling">#603AAFDE</color>
+
+    <color name="progressbar_background_filter">#90000000</color>
+
+
+    <color name="red_50">#50ff0000</color>
+    <color name="green_50">#5000ff00</color>
+    <color name="blue_50">#500000ff</color>
+    <color name="yellow_50">#50FFFF00</color>
 
 
 </resources>

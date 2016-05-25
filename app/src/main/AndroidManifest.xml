@@ -21,15 +21,71 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+
+        <!--Intro-->
+
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:name=".intro.IntroActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".intro.IntroTilesActivity"
+            android:label="@string/intro_tiles_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
+        <activity
+            android:name=".intro.IntroGestureActivity"
+            android:label="@string/intro_gestures_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
+        <activity
+            android:name=".intro.viewMode.IntroViewmodeActivity"
+            android:label="@string/intro_viewmode_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
+        <activity
+            android:name=".intro.IntroRectanglesActivity"
+            android:label="@string/intro_rectangles_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
+        <activity
+            android:name=".intro.IntroCachingActivity"
+            android:label="@string/intro_caching_title"
+            android:parentActivityName=".intro.IntroActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
+
+        <!--More examples-->
+
+        <activity
+            android:name=".MoreExamplesActivityActivity"
+            android:label="@string/actionbar_more_examples"
+            android:parentActivityName=".intro.IntroActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.intro.IntroActivity"/>
+        </activity>
+
         <activity android:name=".FullscreenSingleImageActivity"/>
         <activity android:name=".ImagePropertiesHttpResponseCodeExamplesActivity"/>
         <activity android:name=".ImagePropertiesRedirectionLoopExamplesActivity"/>
@@ -39,17 +95,16 @@
         <activity android:name=".kramerius.KrameriusMultiplePageExamplesActivity"/>
         <activity android:name=".kramerius.PageViewerActivity"/>
         <activity android:name=".kramerius.PageMetadataActivity"/>
-        <activity android:name=".AboutAppActivity"/>
-        <activity android:name=".ssl.SslTestActivity">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-            -->
+        <activity
+            android:name=".AboutAppActivity"
+            android:label="@string/about_app_actionbar"
+            android:parentActivityName=".MoreExamplesActivityActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.mzk.tiledimageview.demonstration.MoreExamplesActivityActivity"/>
         </activity>
+
+        <activity android:name=".ssl.SslTestActivity"/>
 
     </application>
 
