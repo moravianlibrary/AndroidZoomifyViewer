@@ -390,11 +390,13 @@ public class TiledImageView extends View implements TiledImageViewApi {
         //LOGGER.i("onDraw");
         if (mDevTools != null) {
             mDevTools.setCanvas(canv);
-            mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintYellow());
+            //distracting in production, reenable for testing only
+            //mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintYellow());
         }
         if (mImageManager != null && mImageManager.isInitialized()) {
             if (mDevTools != null) {
-                mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintBlue());
+                //distracting in production, reenable for testing only
+                // mDevTools.fillWholeCanvasWithColor(mDevTools.getPaintBlue());
             }
             if (!mViewmodeScaleFactorsInitialized) {
                 initViewmodeScaleFactors(canv);
